@@ -20,6 +20,8 @@ that can be added with just a few lines of config file (see [limitations](#limit
 
 🧋 Built with [Bubble Tea framework](https://github.com/charmbracelet/bubbletea)
 
+🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
+
 ## Screenshots
 
 <img src="assets/sc1.png">
