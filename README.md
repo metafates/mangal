@@ -104,7 +104,7 @@ fullscreen = true
 Currently, Mangai can be installed only by building it from source.
 So you will need [go installed](https://go.dev/doc/install) to proceed further
 
-1. `git clone https://github.com/metafates/mangai.git`
+1. `git clone https://github.com/metafates/Mangai.git`
 2. `cd mangai`
 3. `make install` - `make` is used to set version string. If you can't use make (or don't want to?) feel free to just run `go install`.
 
