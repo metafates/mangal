@@ -130,3 +130,7 @@ Some sites that work well
 - https://ww3.mangakakalot.tv
 - https://ww5.manganelo.tv
 - https://mangapoisk.ru
+
+## PS
+
+This is actually my first TUI app _and_ go project, so feel free to point out any issues you find 🙂
