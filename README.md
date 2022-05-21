@@ -122,3 +122,11 @@ Even though most manga sites will work, there exists some limitation to which si
     - Manga page should have a some form of chapters list (not lazy loaded)
     - Each chapter should have a separate page with panels (images)
 - No anti-bot protection 🤖
+
+<br>
+
+Some sites that work well
+- https://manganato.com
+- https://ww3.mangakakalot.tv
+- https://ww5.manganelo.tv
+- https://mangapoisk.ru
