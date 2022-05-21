@@ -20,7 +20,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b.handlePromptState(msg)
 	case progressState:
 		return b.handleProgressState(msg)
-	case exitPrompt:
+	case exitPromptState:
 		return b.handleExitPromptState(msg)
 	}
 

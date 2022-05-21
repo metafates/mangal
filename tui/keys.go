@@ -53,7 +53,7 @@ var stateKeyMap = map[sessionState]keyMap{
 	chaptersSelectState: keyMapFor(chaptersSelectState),
 	promptState:         keyMapFor(promptState),
 	progressState:       keyMapFor(progressState),
-	exitPrompt:          keyMapFor(exitPrompt),
+	exitPromptState:     keyMapFor(exitPromptState),
 }
 
 // keyMapFor returns key map for specific state
@@ -71,12 +71,12 @@ func keyMapFor(state sessionState) keyMap {
 	case mangaSelectState:
 		def.Quit = key.NewBinding(
 			key.WithKeys("ctrl+c", "q"),
-			key.WithHelp("ctrl+c/q", "quit"))
+			key.WithHelp("q", "quit"))
 		addMoveBindings(&def)
 	case chaptersSelectState:
 		def.Quit = key.NewBinding(
 			key.WithKeys("ctrl+c", "q"),
-			key.WithHelp("ctrl+c/q", "quit"))
+			key.WithHelp("q", "quit"))
 		def.SelectAll = key.NewBinding(
 			key.WithKeys("ctrl+a", "*"),
 			key.WithHelp("ctrl+a/*", "select all"))
@@ -87,7 +87,7 @@ func keyMapFor(state sessionState) keyMap {
 		def.Back = nobind
 		def.Confirm = nobind
 		def.Select = nobind
-	case exitPrompt:
+	case exitPromptState:
 		def.Select = nobind
 		def.Quit = key.NewBinding(
 			key.WithKeys("ctrl+c", "q", "enter"),
@@ -100,19 +100,19 @@ func keyMapFor(state sessionState) keyMap {
 func addMoveBindings(k *keyMap) {
 	k.Up = key.NewBinding(
 		key.WithKeys("up", "k"),
-		key.WithHelp("↑/k", "move up"))
+		key.WithHelp("↑/k", "up"))
 
 	k.Down = key.NewBinding(
 		key.WithKeys("down", "j"),
-		key.WithHelp("↓/j", "move down"))
+		key.WithHelp("↓/j", "down"))
 
 	k.Left = key.NewBinding(
 		key.WithKeys("left", "h"),
-		key.WithHelp("←/h", "move left"))
+		key.WithHelp("←/h", "left"))
 
 	k.Right = key.NewBinding(
 		key.WithKeys("right", "l"),
-		key.WithHelp("→/l", "move right"))
+		key.WithHelp("→/l", "right"))
 
 	k.ToStart = key.NewBinding(
 		key.WithKeys("g"),

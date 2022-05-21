@@ -10,10 +10,9 @@
 - [Install / Build](#installation--build)
 - [Limitations](#limitations)
 
-## About 
+## About
 
 ✨ __Mangai__ is a fancy TUI app written in go that scrapes, downloads and packs manga into pdfs
-
 
 ⚙️ The most important feature of Mangai is that it supports user defined scrapers
 that can be added with just a few lines of config file (see [limitations](#limitations))
@@ -105,8 +104,9 @@ Currently, Mangai can be installed only by building it from source.
 So you will need [go installed](https://go.dev/doc/install) to proceed further
 
 1. `git clone https://github.com/metafates/Mangai.git`
-2. `cd mangai`
-3. `make install` - `make` is used to set version string. If you can't use make (or don't want to?) feel free to just run `go install`.
+2. `cd Mangai`
+3. `make install` - `make` is used to set version string. If you can't use make (or don't want to?) feel free to just
+   run `go install`.
 
 That's it!
 If you're not sure where binary is installed run `go list -f '{{.Target}}'` in the project directory
@@ -126,10 +126,22 @@ Even though most manga sites will work, there exists some limitation to which si
 <br>
 
 Some sites that work well
+
 - https://manganato.com
 - https://ww3.mangakakalot.tv
 - https://ww5.manganelo.tv
 - https://mangapoisk.ru
+
+## TODO
+
+- __Add tests__ ⚠️
+- Better error handling
+- Surpass some scraping [limitations](#limitations)
+- Refactor channels management
+- Make prompt look better
+- Add Mangai to package managers (homebrew, scoop, apt, ...)
+- Extend config (add customization, maybe?)
+- Make site for home page (maybe?)
 
 ## PS
 

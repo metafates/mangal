@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/metafates/mangai/config"
+	"github.com/metafates/mangai/shared"
 	"github.com/metafates/mangai/tui"
 )
 
@@ -14,10 +16,17 @@ func Execute(version string, build string) error {
 	flag.Parse()
 
 	if showVersion {
-		fmt.Printf("Mangai version %s build %s\n", version, build)
+		fmt.Printf("%s version %s\nBuild %s\n", shared.Mangai, version, build)
 		return nil
 	}
 
-	program := tea.NewProgram(tui.New(), tea.WithAltScreen())
+	var program *tea.Program
+
+	if config.Get().Fullscreen {
+		program = tea.NewProgram(tui.New(), tea.WithAltScreen())
+	} else {
+		program = tea.NewProgram(tui.New())
+	}
+
 	return program.Start()
 }

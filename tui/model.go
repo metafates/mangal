@@ -24,7 +24,7 @@ const (
 	chaptersSelectState
 	promptState
 	progressState
-	exitPrompt
+	exitPromptState
 )
 
 type Bubble struct {
@@ -54,12 +54,18 @@ type Bubble struct {
 	converting bool
 }
 
+// resize manga and chapters lists
 func (b *Bubble) resize(width, height int) {
 	styleW, styleH := commonStyle.GetFrameSize()
 	b.manga.SetSize(width-styleW, height-styleH)
 	b.chapters.SetSize(width-styleW, height-styleH)
 }
 
+func (b Bubble) stateKeyMap() keyMap {
+	return b.keys[b.state]
+}
+
+// progressInfo used to track manga download progress
 type progressInfo struct {
 	percent float64
 	text    string
@@ -69,12 +75,6 @@ type progressInfo struct {
 func New() Bubble {
 	var k keyMap
 
-	termW, termH, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		termW = 0
-		termH = 0
-	}
-
 	inputModel := textinput.New()
 	inputModel.Focus()
 
@@ -82,9 +82,7 @@ func New() Bubble {
 	spinnerModel.Spinner = spinner.Dot
 	spinnerModel.Style = spinnerStyle
 
-	styleW, styleH := commonStyle.GetFrameSize()
-
-	mangaModel := list.New(nil, list.NewDefaultDelegate(), termW-styleW, termH-styleH)
+	mangaModel := list.New(nil, list.NewDefaultDelegate(), 0, 0)
 	mangaModel.SetFilteringEnabled(false)
 	mangaModel.Title = "Manga"
 	mangaModel.SetSpinner(spinner.MiniDot)
@@ -109,7 +107,7 @@ func New() Bubble {
 		return []key.Binding{k.Select, k.Back}
 	}
 
-	chaptersModel := list.New(nil, list.NewDefaultDelegate(), termW-styleW, termH-styleH)
+	chaptersModel := list.New(nil, list.NewDefaultDelegate(), 0, 0)
 	chaptersModel.SetFilteringEnabled(false)
 	chaptersModel.Title = "Chapters"
 	chaptersModel.SetSpinner(spinner.MiniDot)
@@ -138,7 +136,7 @@ func New() Bubble {
 
 	subProgressModel := progress.New(progress.WithDefaultGradient())
 
-	return Bubble{
+	bubble := Bubble{
 		state:       searchState,
 		input:       inputModel,
 		spinner:     spinnerModel,
@@ -154,4 +152,14 @@ func New() Bubble {
 		tick:        make(chan progressInfo),
 		subTick:     make(chan downloader.ChapterDownloadInfo),
 	}
+
+	termW, termH, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		termW = 0
+		termH = 0
+	}
+
+	bubble.resize(termW, termH)
+
+	return bubble
 }

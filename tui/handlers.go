@@ -1,7 +1,5 @@
 package tui
 
-// TODO: other handlers
-
 import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -48,14 +46,19 @@ func searchMangaAsync(b Bubble) tea.Cmd {
 			src := src
 			go func() {
 				mangas, err := src.Mangas(b.input.Value())
-				if err == nil {
-					found = append(found, mangas...)
-				}
 				goroutinesDone++
 
-				if goroutinesDone == len(b.config.UsedSources) {
-					b.sub <- found
+				defer func() {
+					if goroutinesDone == len(b.config.UsedSources) {
+						b.sub <- found
+					}
+				}()
+
+				if err != nil {
+					return
 				}
+
+				found = append(found, mangas...)
 			}()
 		}
 
@@ -217,7 +220,13 @@ func (b Bubble) handleMangaSelectState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.manga.Select(0)
 			return b, nil
 		case key.Matches(msg, k.Select), key.Matches(msg, k.Confirm):
-			item, ok := b.manga.SelectedItem().(listItem)
+			selected := b.manga.SelectedItem()
+
+			if selected == nil {
+				return b, nil
+			}
+
+			item, ok := selected.(listItem)
 
 			b.prevManga = item.Title()
 
@@ -350,7 +359,7 @@ func (b Bubble) handleProgressState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		info := progressInfo(msg)
 
 		if info.percent == 1 {
-			b.state = exitPrompt
+			b.state = exitPromptState
 			return b, nil
 		}
 
@@ -377,7 +386,7 @@ func (b Bubble) handleProgressState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
-	k := b.keys[exitPrompt]
+	k := b.keys[exitPromptState]
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)

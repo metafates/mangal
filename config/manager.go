@@ -1,32 +1,15 @@
 package config
 
 import (
-	"github.com/metafates/mangai/api/scraper"
 	"github.com/metafates/mangai/shared"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/spf13/afero"
 )
-
-type Config struct {
-	Sources     map[string]scraper.Source
-	Use         []string
-	Path        string
-	Fullscreen  bool
-	UsedSources []*scraper.Source
-}
-
-func (c *Config) setUsedSources() {
-	for _, name := range c.Use {
-		usedSource, found := c.Sources[name]
-		if found {
-			c.UsedSources = append(c.UsedSources, &usedSource)
-		}
-	}
-}
 
 func getPath() (string, error) {
 	configDir, err := os.UserConfigDir()
@@ -35,7 +18,7 @@ func getPath() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(configDir, "mangai", "config.toml"), nil
+	return filepath.Join(configDir, strings.ToLower(shared.Mangai), "config.toml"), nil
 }
 
 func createDefault() Config {

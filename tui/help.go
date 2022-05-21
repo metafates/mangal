@@ -23,7 +23,7 @@ var stateHelpMap = map[sessionState]helpBinds{
 	chaptersSelectState: helpFor(chaptersSelectState),
 	promptState:         helpFor(promptState),
 	progressState:       helpFor(progressState),
-	exitPrompt:          helpFor(exitPrompt),
+	exitPromptState:     helpFor(exitPromptState),
 }
 
 // helpFor returns help binds for specific state.
@@ -37,7 +37,7 @@ func helpFor(state sessionState) helpBinds {
 
 	switch state {
 	case searchState:
-		short = []key.Binding{k.Quit}
+		short = []key.Binding{k.Confirm, k.Quit}
 		full = nil
 
 	case spinnerState:
@@ -64,7 +64,7 @@ func helpFor(state sessionState) helpBinds {
 		short = []key.Binding{k.Quit}
 		full = nil
 
-	case exitPrompt:
+	case exitPromptState:
 		short = []key.Binding{k.Back, k.Quit}
 		full = nil
 	}

@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// Set on compile time
 var (
 	version string
 	build   string

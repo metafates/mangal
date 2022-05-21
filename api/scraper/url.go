@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"io"
 	"log"
 	"net/http"
 	"time"
@@ -36,19 +35,20 @@ func (u URL) Get() (*http.Response, error) {
 	return resp, nil
 }
 
-// getDocument Gets goquery Document from URL
+// document from URL
 func (u URL) document() (*goquery.Document, error) {
 	resp, err := u.Get()
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Fatal("Unexpected error while closing http body")
-		}
-	}(resp.Body)
 
 	if err != nil {
 		return nil, err
 	}
+
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Fatal("Unexpected error while closing http body")
+		}
+	}()
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 
