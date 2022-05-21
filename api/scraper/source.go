@@ -38,6 +38,11 @@ func (s Source) paired(where URL, anchorSelector string, titleSelector string) (
 	anchors, titles := doc.Find(anchorSelector), doc.Find(titleSelector)
 
 	anchors.Each(func(i int, anchor *goquery.Selection) {
+		// It could be that due to the wrong selector there are more anchors than titles
+		if i >= titles.Length() {
+			return
+		}
+
 		// We need to convert node to selection to use Selection.Text() (textContent)
 		// I don't know if there is a better way to do it...
 		title := goquery.Selection{Nodes: []*html.Node{titles.Get(i)}}
