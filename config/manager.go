@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/metafates/mangai/shared"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,35 +20,11 @@ func getPath() (string, error) {
 	return filepath.Join(configDir, strings.ToLower(shared.Mangai), "config.toml"), nil
 }
 
-func createDefault() Config {
-	var conf Config
-
-	tomlString := `
-    use = ['manganelo']
-    path = '.'
-    fullscreen = true
-    [sources]
-        [sources.manganelo]
-        base = 'https://ww5.manganelo.tv'
-        search = 'https://ww5.manganelo.tv/search/%s'
-        manga_anchor = '.search-story-item a.item-title' manga_title = '.search-story-item a.item-title'
-        chapter_anchor = 'li.a-h a.chapter-name'
-        chapter_title = 'li.a-h a.chapter-name'
-        chapter_panels = '.container-chapter-reader img'
-    `
-
-	if _, err := toml.Decode(tomlString, &conf); err != nil {
-		log.Fatal("Unexpected error while loading default config")
-	}
-
-	conf.setUsedSources()
-	return conf
-}
-
 // Get gets config struct. It tries to read file for the first time
 // All other calls are using cached config
 var Get = initConfigSupplier()
 
+// initConfigSupplier returns closure function with cached config
 func initConfigSupplier() func() Config {
 	var cached Config
 	has := false

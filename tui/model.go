@@ -27,6 +27,30 @@ const (
 	exitPromptState
 )
 
+type listItem struct {
+	url    scraper.URL
+	marked bool
+}
+
+func (l listItem) Title() string {
+	if l.marked {
+		return selectedItemStyle.Render("•") + " " + l.url.Info
+	}
+	return l.url.Info
+}
+
+func (l listItem) Description() string {
+	return l.url.Address
+}
+
+func (l listItem) FilterValue() string {
+	return l.url.Info
+}
+
+func (l *listItem) mark() {
+	l.marked = !l.marked
+}
+
 type Bubble struct {
 	input    textinput.Model
 	spinner  spinner.Model

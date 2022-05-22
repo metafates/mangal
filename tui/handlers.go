@@ -11,34 +11,11 @@ import (
 	"sync"
 )
 
-type listItem struct {
-	url    scraper.URL
-	marked bool
-}
-
-func (l listItem) Title() string {
-	if l.marked {
-		return selectedItemStyle.Render("•") + " " + l.url.Info
-	}
-	return l.url.Info
-}
-
-func (l listItem) Description() string {
-	return l.url.Address
-}
-
-func (l listItem) FilterValue() string {
-	return l.url.Info
-}
-
-func (l *listItem) mark() {
-	l.marked = !l.marked
-}
-
 type progressInfoMsg progressInfo
 type subProgressInfoMsg downloader.ChapterDownloadInfo
 type sourceResponseMsg []*scraper.URL
 
+// searchMangaAsync searches for a manga by taking inputted value
 func searchMangaAsync(b Bubble) tea.Cmd {
 	return func() tea.Msg {
 		var (
@@ -67,6 +44,7 @@ func searchMangaAsync(b Bubble) tea.Cmd {
 	}
 }
 
+// getChapterAsync gets chapters of given url of manga
 func getChaptersAsync(sub chan []*scraper.URL, url scraper.URL) tea.Cmd {
 	return func() tea.Msg {
 		chapters, err := url.Source.Chapters(url)
@@ -78,6 +56,7 @@ func getChaptersAsync(sub chan []*scraper.URL, url scraper.URL) tea.Cmd {
 	}
 }
 
+// startDownloaderAsync starts downloading chapters in goroutines
 func startDownloaderAsync(b Bubble) tea.Cmd {
 	return func() tea.Msg {
 		items := b.chapters.Items()
@@ -96,7 +75,7 @@ func startDownloaderAsync(b Bubble) tea.Cmd {
 				text:    prevInfo,
 			}
 
-			// TODO: Add error handling, maybe?
+			// TODO: Add error handling
 			_, _ = downloader.DownloadChapter(b.prevManga, chapter.url, b.panelsChan)
 			count += 1
 			percent = float64(count) / float64(len(b.selected))
