@@ -8,14 +8,17 @@ import (
 	"io"
 	"log"
 	"path/filepath"
+	"sort"
+	"strconv"
+	"sync"
 
 	pdf "github.com/pdfcpu/pdfcpu/pkg/api"
 )
 
 // DownloadTemp downloads file to the OS default temp directory.
 // Returns temp file path and error
-func DownloadTemp(url scraper.URL) (string, error) {
-	out, err := shared.AferoFS.TempFile("", "mangai-temp-panel-*")
+func DownloadTemp(url scraper.URL, prefix string) (string, error) {
+	out, err := shared.AferoFS.TempFile("", prefix+"-mangai-*")
 
 	if err != nil {
 		return "", err
@@ -53,9 +56,8 @@ func pathOf(mangaName string) string {
 }
 
 type ChapterDownloadInfo struct {
-	Panel      string
-	Percent    float64
-	Converting bool
+	PanelsCount     int
+	ConvertingToPdf bool
 }
 
 // DownloadChapter Downloads Chapters and returns its path
@@ -69,8 +71,6 @@ func DownloadChapter(mangaName string, chapter scraper.URL, infoChan chan Chapte
 
 	path := filepath.Join(mangaPath, chapter.Info+".pdf")
 
-	var temps []string
-
 	panels, err := chapter.Source.Panels(chapter)
 
 	if err != nil {
@@ -78,31 +78,41 @@ func DownloadChapter(mangaName string, chapter scraper.URL, infoChan chan Chapte
 	}
 
 	var (
-		percent   float64
-		prevPanel string
+		temps       []string
+		wg          sync.WaitGroup
+		panelsCount = len(panels)
 	)
-	// Download chapter temp images
-	for i, panel := range panels {
-		infoChan <- ChapterDownloadInfo{
-			Panel:      panel.Info,
-			Percent:    percent,
-			Converting: false,
-		}
-		temp, err := DownloadTemp(*panel)
-
-		if err != nil {
-			return "", err
-		}
-
-		temps = append(temps, temp)
-		percent = float64(i) / float64(len(panels)-1)
-		prevPanel = panel.Info
-	}
 
 	infoChan <- ChapterDownloadInfo{
-		Panel:      prevPanel,
-		Percent:    percent,
-		Converting: true,
+		PanelsCount:     panelsCount,
+		ConvertingToPdf: false,
+	}
+
+	wg.Add(panelsCount)
+
+	// Download chapter temp images
+	for i, panel := range panels {
+		if err != nil {
+			return "", nil
+		}
+
+		go func(panel *scraper.URL, index int) {
+			defer wg.Done()
+
+			var temp string
+			temp, err = DownloadTemp(*panel, strconv.Itoa(index))
+
+			temps = append(temps, temp)
+		}(panel, i)
+	}
+
+	wg.Wait()
+
+	sort.Strings(temps)
+
+	infoChan <- ChapterDownloadInfo{
+		PanelsCount:     panelsCount,
+		ConvertingToPdf: true,
 	}
 	// Convert images to pdf
 	err = pdf.ImportImagesFile(temps, path, nil, nil)

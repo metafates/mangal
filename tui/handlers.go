@@ -8,6 +8,7 @@ import (
 	"github.com/metafates/mangai/api/downloader"
 	"github.com/metafates/mangai/api/scraper"
 	"log"
+	"sync"
 )
 
 type listItem struct {
@@ -40,27 +41,27 @@ type sourceResponseMsg []*scraper.URL
 
 func searchMangaAsync(b Bubble) tea.Cmd {
 	return func() tea.Msg {
-		goroutinesDone := 0
-		var found []*scraper.URL
-		for _, src := range b.config.UsedSources {
-			src := src
-			go func() {
-				mangas, err := src.Mangas(b.input.Value())
-				goroutinesDone++
+		var (
+			found []*scraper.URL
+			wg    sync.WaitGroup
+		)
 
-				defer func() {
-					if goroutinesDone == len(b.config.UsedSources) {
-						b.sub <- found
-					}
-				}()
+		wg.Add(len(b.config.UsedSources))
+		for _, src := range b.config.UsedSources {
+			go func(src *scraper.Source) {
+				defer wg.Done()
+				mangas, err := src.Mangas(b.input.Value())
 
 				if err != nil {
 					return
 				}
 
 				found = append(found, mangas...)
-			}()
+			}(src)
 		}
+
+		wg.Wait()
+		b.sub <- found
 
 		return nil
 	}
@@ -96,7 +97,7 @@ func startDownloaderAsync(b Bubble) tea.Cmd {
 			}
 
 			// TODO: Add error handling, maybe?
-			_, _ = downloader.DownloadChapter(b.prevManga, chapter.url, b.subTick)
+			_, _ = downloader.DownloadChapter(b.prevManga, chapter.url, b.panelsChan)
 			count += 1
 			percent = float64(count) / float64(len(b.selected))
 		}
@@ -337,13 +338,19 @@ func (b Bubble) handlePromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return b, tea.Quit
 		case key.Matches(msg, k.Confirm):
 			b.state = progressState
-			return b, tea.Batch(startDownloaderAsync(b), waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.subTick))
+			return b, tea.Batch(startDownloaderAsync(b), b.spinner.Tick, waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.panelsChan))
 		}
 	}
 	return b, nil
 }
 
 func (b Bubble) handleProgressState(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
 	k := b.keys[progressState]
 
 	switch msg := msg.(type) {
@@ -365,24 +372,23 @@ func (b Bubble) handleProgressState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		cmd := b.progress.SetPercent(info.percent)
 		b.prevChapter = info.text
-		return b, tea.Batch(cmd, waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.subTick))
+		return b, tea.Batch(cmd, waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.panelsChan))
 
 	case subProgressInfoMsg:
 		info := downloader.ChapterDownloadInfo(msg)
-		cmd := b.subProgress.SetPercent(info.Percent)
-		b.prevPanel = info.Panel
-		b.converting = info.Converting
-		return b, tea.Batch(cmd, waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.subTick))
+		b.panelsCount = info.PanelsCount
+		b.converting = info.ConvertingToPdf
+		cmds = append(cmds, tea.Batch(waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.panelsChan)))
 
 	case progress.FrameMsg:
-		progressModel, cmd1 := b.progress.Update(msg)
-		subProgressModel, cmd2 := b.subProgress.Update(msg)
+		progressModel, cmd := b.progress.Update(msg)
 		b.progress = progressModel.(progress.Model)
-		b.subProgress = subProgressModel.(progress.Model)
-		return b, tea.Batch(cmd1, cmd2)
+		return b, cmd
 	}
 
-	return b, nil
+	b.spinner, cmd = b.spinner.Update(msg)
+	cmds = append(cmds, cmd)
+	return b, tea.Batch(cmds...)
 }
 
 func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {

@@ -32,8 +32,7 @@ that can be added with just a few lines of config file (see [limitations](#limit
 
 <h3 align="center">Usage example</h4>
 
-[![asciicast](https://asciinema.org/a/Kr4xdcfndSdvQCoWpoBNIyUFH.svg)](https://asciinema.org/a/Kr4xdcfndSdvQCoWpoBNIyUFH)
-<br><br>
+[![asciicast](https://asciinema.org/a/rihXl6l2iBDQe2iteYBqXFyRy.svg)](https://asciinema.org/a/rihXl6l2iBDQe2iteYBqXFyRy)<br><br>
 <h3 align="center">Config example</h3>
 
 Config is located at the OS default config directory.

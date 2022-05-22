@@ -28,27 +28,26 @@ const (
 )
 
 type Bubble struct {
-	input       textinput.Model
-	spinner     spinner.Model
-	manga       list.Model
-	chapters    list.Model
-	prompt      tea.Model
-	progress    progress.Model
-	subProgress progress.Model
-	help        help.Model
+	input    textinput.Model
+	spinner  spinner.Model
+	manga    list.Model
+	chapters list.Model
+	prompt   tea.Model
+	progress progress.Model
+	help     help.Model
 
 	prevManga   string
 	prevChapter string
-	prevPanel   string
+	panelsCount int
 	selected    map[int]interface{}
 
 	keys    map[sessionState]keyMap
 	bubbles map[sessionState]tea.Model
 	config  config.Config
 
-	sub     chan []*scraper.URL
-	tick    chan progressInfo
-	subTick chan downloader.ChapterDownloadInfo
+	sub        chan []*scraper.URL
+	tick       chan progressInfo
+	panelsChan chan downloader.ChapterDownloadInfo
 
 	state      sessionState
 	converting bool
@@ -134,23 +133,20 @@ func New() Bubble {
 
 	progressModel := progress.New(progress.WithDefaultGradient())
 
-	subProgressModel := progress.New(progress.WithDefaultGradient())
-
 	bubble := Bubble{
-		state:       searchState,
-		input:       inputModel,
-		spinner:     spinnerModel,
-		manga:       mangaModel,
-		chapters:    chaptersModel,
-		progress:    progressModel,
-		subProgress: subProgressModel,
-		help:        help.New(),
-		keys:        stateKeyMap,
-		config:      config.Get(),
-		selected:    map[int]interface{}{},
-		sub:         make(chan []*scraper.URL),
-		tick:        make(chan progressInfo),
-		subTick:     make(chan downloader.ChapterDownloadInfo),
+		state:      searchState,
+		input:      inputModel,
+		spinner:    spinnerModel,
+		manga:      mangaModel,
+		chapters:   chaptersModel,
+		progress:   progressModel,
+		help:       help.New(),
+		keys:       stateKeyMap,
+		config:     config.Get(),
+		selected:   map[int]interface{}{},
+		sub:        make(chan []*scraper.URL),
+		tick:       make(chan progressInfo),
+		panelsChan: make(chan downloader.ChapterDownloadInfo),
 	}
 
 	termW, termH, err := term.GetSize(int(os.Stdout.Fd()))
