@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"github.com/metafates/mangai/shared"
+	"strconv"
 )
 
 // plural transforms singular into plural if needed
@@ -12,6 +13,14 @@ func plural(count int, word string) string {
 	}
 
 	return word + "s"
+}
+
+func ifThenElse(condition bool, then interface{}, else_ interface{}) interface{} {
+	if condition {
+		return then
+	}
+
+	return else_
 }
 
 // View renders the UI.
@@ -77,16 +86,14 @@ func renderProgressState(b Bubble) string {
 %s
 
 
-%s
-
-%s
+%s %s
 
 %s`,
 		b.prevManga,
 		b.progress.View(),
 		textSecondaryStyle.Render(b.prevChapter),
-		b.subProgress.View(),
-		textSecondaryStyle.Render(b.prevPanel),
+		b.spinner.View(),
+		ifThenElse(b.converting, "Converting to pdf", "Downloading "+textSecondaryStyle.Render(strconv.Itoa(b.panelsCount))+" panels"),
 		b.help.View(b.stateKeyMap()))
 }
 
