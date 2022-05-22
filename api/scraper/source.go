@@ -22,8 +22,10 @@ type Source struct {
 	ChapterAnchor string `toml:"chapter_anchor"`
 	// ChapterTitle css selector
 	ChapterTitle string `toml:"chapter_title"`
-	// ChapterPanels css selector
-	ChapterPanels string `toml:"chapter_panels"`
+	// ChapterPages css selector
+	ReaderPages string `toml:"reader_pages"`
+
+	cache map[string][]*URL
 }
 
 func (s Source) paired(where URL, anchorSelector string, titleSelector string) ([]*URL, error) {
@@ -65,17 +67,55 @@ func (s Source) paired(where URL, anchorSelector string, titleSelector string) (
 
 // Mangas searches for mangas with given title
 func (s Source) Mangas(title string) ([]*URL, error) {
+	if s.cache == nil {
+		s.cache = make(map[string][]*URL)
+	}
+
+	if val, ok := s.cache[title]; ok {
+		return val, nil
+	}
+
 	search := URL{Address: fmt.Sprintf(s.Search, title), Source: &s}
-	return s.paired(search, s.MangaAnchor, s.MangaTitle)
+	res, err := s.paired(search, s.MangaAnchor, s.MangaTitle)
+
+	if err != nil {
+		return nil, err
+	}
+
+	s.cache[title] = res
+	return res, nil
 }
 
 // Chapters gets chapters of the given manga
 func (s Source) Chapters(manga URL) ([]*URL, error) {
-	return s.paired(manga, s.ChapterAnchor, s.ChapterTitle)
+	if s.cache == nil {
+		s.cache = make(map[string][]*URL)
+	}
+
+	if val, ok := s.cache[manga.Address]; ok {
+		return val, nil
+	}
+
+	res, err := s.paired(manga, s.ChapterAnchor, s.ChapterTitle)
+
+	if err != nil {
+		return nil, err
+	}
+
+	s.cache[manga.Address] = res
+	return res, nil
 }
 
-// Panels gets chapter panels
-func (s Source) Panels(chapter URL) ([]*URL, error) {
+// Pages gets chapter pages
+func (s Source) Pages(chapter URL) ([]*URL, error) {
+	if s.cache == nil {
+		s.cache = make(map[string][]*URL)
+	}
+
+	if val, ok := s.cache[chapter.Address]; ok {
+		return val, nil
+	}
+
 	doc, err := chapter.document()
 
 	if err != nil {
@@ -83,13 +123,13 @@ func (s Source) Panels(chapter URL) ([]*URL, error) {
 	}
 
 	var urls []*URL
-	panels := doc.Find(s.ChapterPanels)
+	pages := doc.Find(s.ReaderPages)
 
-	panels.Each(func(i int, panel *goquery.Selection) {
-		dataSrc, hasDataSrc := panel.Attr("data-src")
+	pages.Each(func(i int, page *goquery.Selection) {
+		dataSrc, hasDataSrc := page.Attr("data-src")
 
 		if !hasDataSrc {
-			src, hasSrc := panel.Attr("src")
+			src, hasSrc := page.Attr("src")
 			if !hasSrc {
 				return
 			}
@@ -101,5 +141,6 @@ func (s Source) Panels(chapter URL) ([]*URL, error) {
 		urls = append(urls, &url)
 	})
 
+	s.cache[chapter.Address] = urls
 	return urls, nil
 }

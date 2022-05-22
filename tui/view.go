@@ -75,10 +75,11 @@ func renderPromptState(b Bubble) string {
 
 	return fmt.Sprintf(`Download %d %s of %s?
 
-%s`, count, plural(count, "chapter"), b.prevManga, b.help.View(b.stateKeyMap()))
+%s`, count, plural(count, "chapter"), titleStyle.Render(b.prevManga), b.help.View(b.stateKeyMap()))
 }
 
 func renderProgressState(b Bubble) string {
+	sub := ifThenElse(b.converting, "Converting to pdf", "Downloading "+strconv.Itoa(b.pagesCount)+" pages").(string)
 	return fmt.Sprintf(`Downloading %s
 
 %s
@@ -89,11 +90,11 @@ func renderProgressState(b Bubble) string {
 %s %s
 
 %s`,
-		b.prevManga,
+		titleStyle.Render(b.prevManga),
 		b.progress.View(),
-		textSecondaryStyle.Render(b.prevChapter),
+		b.prevChapter,
 		b.spinner.View(),
-		ifThenElse(b.converting, "Converting to pdf", "Downloading "+textSecondaryStyle.Render(strconv.Itoa(b.panelsCount))+" panels"),
+		sub,
 		b.help.View(b.stateKeyMap()))
 }
 
@@ -102,5 +103,5 @@ func renderExitPromptState(b Bubble) string {
 
 	return fmt.Sprintf(`%d %s of %s downloaded
 
-%s`, count, plural(count, "chapter"), b.prevManga, b.help.View(b.stateKeyMap()))
+%s`, count, plural(count, "chapter"), titleStyle.Render(b.prevManga), b.help.View(b.stateKeyMap()))
 }

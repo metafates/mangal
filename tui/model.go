@@ -62,16 +62,16 @@ type Bubble struct {
 
 	prevManga   string
 	prevChapter string
-	panelsCount int
+	pagesCount  int
 	selected    map[int]interface{}
 
 	keys    map[sessionState]keyMap
 	bubbles map[sessionState]tea.Model
 	config  config.Config
 
-	sub        chan []*scraper.URL
-	tick       chan progressInfo
-	panelsChan chan downloader.ChapterDownloadInfo
+	sub       chan []*scraper.URL
+	tick      chan progressInfo
+	pagesChan chan downloader.ChapterDownloadInfo
 
 	state      sessionState
 	converting bool
@@ -158,19 +158,19 @@ func New() Bubble {
 	progressModel := progress.New(progress.WithDefaultGradient())
 
 	bubble := Bubble{
-		state:      searchState,
-		input:      inputModel,
-		spinner:    spinnerModel,
-		manga:      mangaModel,
-		chapters:   chaptersModel,
-		progress:   progressModel,
-		help:       help.New(),
-		keys:       stateKeyMap,
-		config:     config.Get(),
-		selected:   map[int]interface{}{},
-		sub:        make(chan []*scraper.URL),
-		tick:       make(chan progressInfo),
-		panelsChan: make(chan downloader.ChapterDownloadInfo),
+		state:     searchState,
+		input:     inputModel,
+		spinner:   spinnerModel,
+		manga:     mangaModel,
+		chapters:  chaptersModel,
+		progress:  progressModel,
+		help:      help.New(),
+		keys:      stateKeyMap,
+		config:    config.Get(),
+		selected:  map[int]interface{}{},
+		sub:       make(chan []*scraper.URL),
+		tick:      make(chan progressInfo),
+		pagesChan: make(chan downloader.ChapterDownloadInfo),
 	}
 
 	termW, termH, err := term.GetSize(int(os.Stdout.Fd()))

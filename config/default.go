@@ -9,6 +9,7 @@ var defaultConfigString = `
     use = ['manganelo']
     path = '.'
     fullscreen = true
+	async_download = true
     [sources]
         [sources.manganelo]
         base = 'https://ww5.manganelo.tv'
@@ -16,7 +17,7 @@ var defaultConfigString = `
         manga_anchor = '.search-story-item a.item-title' manga_title = '.search-story-item a.item-title'
         chapter_anchor = 'li.a-h a.chapter-name'
         chapter_title = 'li.a-h a.chapter-name'
-        chapter_panels = '.container-chapter-reader img'
+        reader_pages = '.container-chapter-reader img'
     `
 
 func createDefault() Config {

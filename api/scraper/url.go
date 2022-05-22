@@ -20,16 +20,23 @@ type URL struct {
 
 // Get http response from url
 func (u URL) Get() (*http.Response, error) {
-	// Set default http timeout to 5 seconds
-	client := http.Client{Timeout: time.Second * 5}
-	resp, err := client.Get(u.Address)
+	client := http.Client{Timeout: time.Second * 10}
+	req, err := http.NewRequest("GET", u.Address, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("User-Agent", getRandomUserAgent())
+
+	resp, err := client.Do(req)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return resp, errors.New(fmt.Sprintf("Cannot get '%s'. Status %d - %s", u.Address, resp.StatusCode, resp.Status))
+		return nil, errors.New(fmt.Sprintf("Cannot get '%s'. Status %d - %s", u.Address, resp.StatusCode, resp.Status))
 	}
 
 	return resp, nil

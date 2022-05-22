@@ -47,32 +47,32 @@ Custom config paths not supported _(yet)_
 _By default (if no config defined) Mangai uses [manganelo](https://ww5.manganelo.tv) as a source_
 
 ```toml
-# Which sources to use for searching.
-# Since searching is done asynchronously it should not affect perfomance
-use = ['manganelo', 'mangapoisk']
+# Which sources to use. You can use several sources in descendant order priority
+use = ['manganelo']
 
 # Default download path
-# It could be relative or absolute 
-# path = '/users/user/manga'
 path = '.'
 
 # Fullscreen mode
 fullscreen = true
 
-# This is where you define new sources for searching
+# Download pages asynchronously
+# Do not turn it off unless you really need it
+# since it will decrease download speed dramatically.
+# You could need it if the site you are using
+# is blocking you for too many requests
+async_download = true
+
+
 [sources]
-    # sources.%name of the source%
     [sources.manganelo]
-    
-    # Base url of the source
+    # Base url
     base = 'https://ww5.manganelo.tv'
 
     # Search endpoint. Put %s where the query should be
     search = 'https://ww5.manganelo.tv/search/%s'
 
     # Selector of entry anchor (<a></a>) on search page
-    # Make this and other selectors as specific as possible
-    # See https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors
     manga_anchor = '.search-story-item a.item-title'
 
     # Selector of entry title on search page
@@ -85,16 +85,7 @@ fullscreen = true
     chapter_title = 'li.a-h a.chapter-name'
 
     # Reader page images selector
-    chapter_panels = '.container-chapter-reader img'
-
-    [sources.mangapoisk]
-    base = 'https://mangapoisk.ru'
-    search = 'https://mangapoisk.ru/search?q=%s'
-    manga_anchor = 'article.card a.px-1'
-    manga_title = 'article.card .entry-title'
-    chapter_anchor = 'li.chapter-item a'
-    chapter_title = 'li.chapter-item span.chapter-title'
-    chapter_panels = 'div.chapter-container .chapter-images img'
+    reader_pages = '.container-chapter-reader img'
 ```
 
 ## Installation / Build
@@ -119,7 +110,7 @@ Even though most manga sites will work, there exists some limitation to which si
 - Navigation layout should follow this model
     - Each manga have a separate page
     - Manga page should have a some form of chapters list (not lazy loaded)
-    - Each chapter should have a separate page with panels (images)
+    - Each chapter should have a separate page with pages (images)
 - No anti-bot protection 🤖
 
 <br>
@@ -129,7 +120,6 @@ Some sites that work well
 - https://manganato.com
 - https://ww3.mangakakalot.tv
 - https://ww5.manganelo.tv
-- https://mangapoisk.ru
 
 ## TODO
 

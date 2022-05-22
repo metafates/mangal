@@ -15,6 +15,14 @@ type progressInfoMsg progressInfo
 type subProgressInfoMsg downloader.ChapterDownloadInfo
 type sourceResponseMsg []*scraper.URL
 
+func prettyTrim(str string, limit int) string {
+	if len(str) > limit {
+		return str[:limit-3] + "..."
+	}
+
+	return str
+}
+
 // searchMangaAsync searches for a manga by taking inputted value
 func searchMangaAsync(b Bubble) tea.Cmd {
 	return func() tea.Msg {
@@ -76,7 +84,7 @@ func startDownloaderAsync(b Bubble) tea.Cmd {
 			}
 
 			// TODO: Add error handling
-			_, _ = downloader.DownloadChapter(b.prevManga, chapter.url, b.panelsChan)
+			_, _ = downloader.DownloadChapter(b.prevManga, chapter.url, b.pagesChan)
 			count += 1
 			percent = float64(count) / float64(len(b.selected))
 		}
@@ -159,6 +167,7 @@ func (b Bubble) handleSpinnerState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case sourceResponseMsg:
 		b.state = mangaSelectState
+		b.manga.Title = "Manga - " + prettyTrim(b.input.Value(), 30)
 		var items []list.Item
 		for _, url := range msg {
 			items = append(items, listItem{url: *url})
@@ -184,6 +193,7 @@ func (b Bubble) handleMangaSelectState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b, nil
 	case sourceResponseMsg:
 		b.state = chaptersSelectState
+		b.chapters.Title = "Chapters - " + prettyTrim(b.prevManga, 30)
 		var items []list.Item
 		for _, url := range msg {
 			items = append(items, listItem{url: *url})
@@ -317,7 +327,7 @@ func (b Bubble) handlePromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return b, tea.Quit
 		case key.Matches(msg, k.Confirm):
 			b.state = progressState
-			return b, tea.Batch(startDownloaderAsync(b), b.spinner.Tick, waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.panelsChan))
+			return b, tea.Batch(startDownloaderAsync(b), b.spinner.Tick, waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.pagesChan))
 		}
 	}
 	return b, nil
@@ -351,13 +361,13 @@ func (b Bubble) handleProgressState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		cmd := b.progress.SetPercent(info.percent)
 		b.prevChapter = info.text
-		return b, tea.Batch(cmd, waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.panelsChan))
+		return b, tea.Batch(cmd, waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.pagesChan))
 
 	case subProgressInfoMsg:
 		info := downloader.ChapterDownloadInfo(msg)
-		b.panelsCount = info.PanelsCount
+		b.pagesCount = info.PagesCount
 		b.converting = info.ConvertingToPdf
-		cmds = append(cmds, tea.Batch(waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.panelsChan)))
+		cmds = append(cmds, tea.Batch(waitForDownloaderResponse(b.tick), waitForDownloaderSubResponse(b.pagesChan)))
 
 	case progress.FrameMsg:
 		progressModel, cmd := b.progress.Update(msg)

@@ -54,7 +54,7 @@ func pathOf(mangaName string) string {
 }
 
 type ChapterDownloadInfo struct {
-	PanelsCount     int
+	PagesCount      int
 	ConvertingToPdf bool
 }
 
@@ -79,49 +79,63 @@ func DownloadChapter(mangaName string, chapter scraper.URL, infoChan chan Chapte
 
 	path := filepath.Join(mangaPath, chapter.Info+".pdf")
 
-	panels, err := chapter.Source.Panels(chapter)
+	pages, err := chapter.Source.Pages(chapter)
 
 	if err != nil {
 		return "", err
 	}
 
 	var (
-		wg          sync.WaitGroup
-		panelsCount = len(panels)
-		temps       = make([]string, panelsCount)
+		wg         sync.WaitGroup
+		pagesCount = len(pages)
+		temps      = make([]string, pagesCount)
 	)
 
 	infoChan <- ChapterDownloadInfo{
-		PanelsCount:     panelsCount,
+		PagesCount:      pagesCount,
 		ConvertingToPdf: false,
 	}
 
-	wg.Add(panelsCount)
+	async := config.Get().AsyncDownload
+
+	if async {
+		wg.Add(pagesCount)
+	}
 
 	// Download chapter temp images
-	for i, panel := range panels {
+	for i, page := range pages {
 		if err != nil {
 			return "", nil
 		}
 
-		go func(panel *scraper.URL, index int) {
-			defer wg.Done()
+		f := func(page *scraper.URL, index int) {
+			if async {
+				defer wg.Done()
+			}
 
 			var temp string
-			temp, err = DownloadTemp(*panel)
+			temp, err = DownloadTemp(*page)
 			if err != nil {
 				// TODO: pass error further
-				log.Fatal("Error while downloading one of panels")
+				log.Fatal("Error while downloading one of pages")
 			}
 
 			temps[index] = temp
-		}(panel, i)
+		}
+
+		if async {
+			go f(page, i)
+		} else {
+			f(page, i)
+		}
 	}
 
-	wg.Wait()
+	if async {
+		wg.Wait()
+	}
 
 	infoChan <- ChapterDownloadInfo{
-		PanelsCount:     panelsCount,
+		PagesCount:      pagesCount,
 		ConvertingToPdf: true,
 	}
 	// Convert images to pdf
