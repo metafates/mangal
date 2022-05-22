@@ -8,8 +8,6 @@ import (
 	"io"
 	"log"
 	"path/filepath"
-	"sort"
-	"strconv"
 	"sync"
 
 	pdf "github.com/pdfcpu/pdfcpu/pkg/api"
@@ -17,8 +15,8 @@ import (
 
 // DownloadTemp downloads file to the OS default temp directory.
 // Returns temp file path and error
-func DownloadTemp(url scraper.URL, prefix string) (string, error) {
-	out, err := shared.AferoFS.TempFile("", prefix+"-mangai-*")
+func DownloadTemp(url scraper.URL) (string, error) {
+	out, err := shared.AferoFS.TempFile("", "mangai-*."+filepath.Ext(url.Address))
 
 	if err != nil {
 		return "", err
@@ -60,6 +58,16 @@ type ChapterDownloadInfo struct {
 	ConvertingToPdf bool
 }
 
+func batchRemove(paths []string) error {
+	for _, path := range paths {
+		err := shared.AferoBackend.Remove(path)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // DownloadChapter Downloads Chapters and returns its path
 func DownloadChapter(mangaName string, chapter scraper.URL, infoChan chan ChapterDownloadInfo) (string, error) {
 	mangaPath := pathOf(mangaName)
@@ -78,9 +86,9 @@ func DownloadChapter(mangaName string, chapter scraper.URL, infoChan chan Chapte
 	}
 
 	var (
-		temps       []string
 		wg          sync.WaitGroup
 		panelsCount = len(panels)
+		temps       = make([]string, panelsCount)
 	)
 
 	infoChan <- ChapterDownloadInfo{
@@ -100,15 +108,17 @@ func DownloadChapter(mangaName string, chapter scraper.URL, infoChan chan Chapte
 			defer wg.Done()
 
 			var temp string
-			temp, err = DownloadTemp(*panel, strconv.Itoa(index))
+			temp, err = DownloadTemp(*panel)
+			if err != nil {
+				// TODO: pass error further
+				log.Fatal("Error while downloading one of panels")
+			}
 
-			temps = append(temps, temp)
+			temps[index] = temp
 		}(panel, i)
 	}
 
 	wg.Wait()
-
-	sort.Strings(temps)
 
 	infoChan <- ChapterDownloadInfo{
 		PanelsCount:     panelsCount,
@@ -122,11 +132,8 @@ func DownloadChapter(mangaName string, chapter scraper.URL, infoChan chan Chapte
 	}
 
 	// Remove temp files
-	for _, temp := range temps {
-		err := shared.AferoBackend.Remove(temp)
-		if err != nil {
-			return "", err
-		}
+	if err = batchRemove(temps); err != nil {
+		return "", err
 	}
 
 	return path, nil
