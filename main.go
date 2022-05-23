@@ -15,7 +15,7 @@ func main() {
 	//UserConfig = GetConfig()
 	UserConfig = &DefaultConfig
 	fmt.Println("Getting manga")
-	manga, err := DefaultScraper.SearchManga("Spy x family")
+	manga, err := DefaultScraper.SearchManga("Berserk")
 
 	if err != nil {
 		log.Fatal(err)
