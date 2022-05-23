@@ -5,6 +5,8 @@ import (
 	"github.com/gocolly/colly"
 	"math/rand"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,16 +20,20 @@ type Scraper struct {
 	PagesCollector    *colly.Collector
 	FilesCollector    *colly.Collector
 
-	Manga    map[string][]*URL
+	// Manga maps search url with manga urls
+	Manga map[string][]*URL
+	// Chapters maps manga url with chapters urls
 	Chapters map[string][]*URL
-	Pages    map[string][]*URL
-	Files    sync.Map
+	// Pages maps chapter url with pages urls
+	Pages map[string][]*URL
+	Files sync.Map
 }
 
 var DefaultScraper = MakeSourceScraper(&DefaultSource)
 
-// MakeSourceScraper returns new scraper with configures collectors
+// MakeSourceScraper returns new scraper with configured collectors
 func MakeSourceScraper(source *Source) *Scraper {
+
 	scraper := Scraper{
 		Source: source,
 
@@ -37,9 +43,18 @@ func MakeSourceScraper(source *Source) *Scraper {
 		Files:    sync.Map{},
 	}
 
-	collector := colly.NewCollector(
-		colly.Async(true),
-		colly.UserAgent(randomUserAgent()))
+	var (
+		collectorOptions []func(*colly.Collector)
+		collector        *colly.Collector
+	)
+
+	collectorOptions = append(collectorOptions, colly.Async(true))
+	defaultCacheDir, err := os.UserCacheDir()
+	if err == nil {
+		collectorOptions = append(collectorOptions, colly.CacheDir(filepath.Join(defaultCacheDir, AppName)))
+	}
+
+	collector = colly.NewCollector(collectorOptions...)
 
 	// Manga collector
 	mangaCollector := collector.Clone()
