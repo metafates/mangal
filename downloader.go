@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	pdfcpu "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/spf13/afero"
 	"log"
@@ -8,6 +9,23 @@ import (
 	"strconv"
 	"sync"
 )
+
+func RemoveIfExists(path string) error {
+	exists, err := Afero.Exists(path)
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		err = Afero.Remove(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 
 // SaveTemp saves file to OS temp dir and returns its path
 // It's a caller responsibility to remove created file
@@ -59,7 +77,7 @@ type DownloadProgress struct {
 	Message string
 }
 
-func DownloadChapter(chapter *URL) (string, error) {
+func DownloadChapter(chapter *URL, progress chan DownloadProgress) (string, error) {
 	mangaTitle := chapter.Relation.Info
 	mangaPath := filepath.Join(UserConfig.Path, mangaTitle)
 
@@ -69,10 +87,14 @@ func DownloadChapter(chapter *URL) (string, error) {
 		return "", nil
 	}
 
-	//progress <- DownloadProgress{
-	//	Stage:   Scraping,
-	//	Message: "Getting pages",
-	//}
+	showProgress := progress != nil
+
+	if showProgress {
+		progress <- DownloadProgress{
+			Stage:   Scraping,
+			Message: "Getting pages",
+		}
+	}
 
 	chapterPath := filepath.Join(mangaPath, chapter.Info+".pdf")
 	pages, err := chapter.Scraper.GetPages(chapter)
@@ -82,10 +104,12 @@ func DownloadChapter(chapter *URL) (string, error) {
 		return "", err
 	}
 
-	//progress <- DownloadProgress{
-	//	Stage:   Downloading,
-	//	Message: fmt.Sprintf("Downloading %d pages", pagesCount),
-	//}
+	if showProgress {
+		progress <- DownloadProgress{
+			Stage:   Downloading,
+			Message: fmt.Sprintf("Downloading %d pages", pagesCount),
+		}
+	}
 
 	var (
 		tempPaths = make([]string, pagesCount)
@@ -119,10 +143,17 @@ func DownloadChapter(chapter *URL) (string, error) {
 
 	defer chapter.Scraper.CleanupFiles()
 
-	//progress <- DownloadProgress{
-	//	Stage:   Converting,
-	//	Message: fmt.Sprintf("Converting %d pages to pdf", pagesCount),
-	//}
+	if showProgress {
+		progress <- DownloadProgress{
+			Stage:   Converting,
+			Message: fmt.Sprintf("Converting %d pages to pdf", pagesCount),
+		}
+	}
+
+	err = RemoveIfExists(chapterPath)
+	if err != nil {
+		return "", err
+	}
 
 	err = pdfcpu.ImportImagesFile(tempPaths, chapterPath, nil, nil)
 
@@ -130,10 +161,12 @@ func DownloadChapter(chapter *URL) (string, error) {
 		return "", err
 	}
 
-	//progress <- DownloadProgress{
-	//	Stage:   Cleanup,
-	//	Message: "Removing temp files",
-	//}
+	if showProgress {
+		progress <- DownloadProgress{
+			Stage:   Cleanup,
+			Message: "Removing temp files",
+		}
+	}
 
 	// Cleanup temp files
 	err = batchRemove(tempPaths)
@@ -142,10 +175,12 @@ func DownloadChapter(chapter *URL) (string, error) {
 		return "", err
 	}
 
-	//progress <- DownloadProgress{
-	//	Stage:   Done,
-	//	Message: fmt.Sprintf("Chapter %s downloaded", chapter.Info),
-	//}
+	if showProgress {
+		progress <- DownloadProgress{
+			Stage:   Done,
+			Message: fmt.Sprintf("Chapter %s downloaded", chapter.Info),
+		}
+	}
 
 	return chapterPath, nil
 }

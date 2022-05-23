@@ -18,9 +18,9 @@ type Scraper struct {
 	PagesCollector    *colly.Collector
 	FilesCollector    *colly.Collector
 
-	Manga    sync.Map
-	Chapters sync.Map
-	Pages    sync.Map
+	Manga    map[string][]*URL
+	Chapters map[string][]*URL
+	Pages    map[string][]*URL
 	Files    sync.Map
 }
 
@@ -31,9 +31,9 @@ func MakeSourceScraper(source *Source) *Scraper {
 	scraper := Scraper{
 		Source: source,
 
-		Manga:    sync.Map{},
-		Chapters: sync.Map{},
-		Pages:    sync.Map{},
+		Manga:    make(map[string][]*URL),
+		Chapters: make(map[string][]*URL),
+		Pages:    make(map[string][]*URL),
 		Files:    sync.Map{},
 	}
 
@@ -41,50 +41,69 @@ func MakeSourceScraper(source *Source) *Scraper {
 		colly.Async(true),
 		colly.UserAgent(randomUserAgent()))
 
-	_ = collector.Limit(&colly.LimitRule{
-		Parallelism: Parallelism,
-		RandomDelay: RandomDelay,
-		DomainGlob:  fmt.Sprintf("*.%s/*", source.Base),
-	})
-
 	// Manga collector
 	mangaCollector := collector.Clone()
+	mangaCollector.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("Referer", "https://www.google.com/")
+		r.Headers.Set("User-Agent", randomUserAgent())
+		r.Headers.Set("accept-language", "en-US")
+		r.Headers.Set("Accept", "text/html")
+	})
 	mangaCollector.OnHTML(source.MangaAnchor, func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		m, _ := scraper.Manga.LoadOrStore(path, []*URL{})
-		m = append(m.([]*URL), &URL{Address: e.Request.AbsoluteURL(link), Scraper: &scraper})
+		scraper.Manga[path] = append(scraper.Manga[path], &URL{Address: e.Request.AbsoluteURL(link), Scraper: &scraper})
 	})
 	mangaCollector.OnHTML(source.MangaTitle, func(e *colly.HTMLElement) {
 		title := strings.TrimSpace(e.Text)
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		m, _ := scraper.Manga.LoadOrStore(path, []*URL{})
-		if e.Index < len(m.([]*URL)) {
-			m.([]*URL)[e.Index].Info = title
+		if e.Index < len(scraper.Manga[path]) {
+			scraper.Manga[path][e.Index].Info = title
 		}
+	})
+
+	_ = mangaCollector.Limit(&colly.LimitRule{
+		Parallelism: Parallelism,
+		RandomDelay: time.Duration(source.RandomDelayMs) * time.Millisecond,
+		DomainGlob:  "*",
 	})
 	// Manga collector END
 
 	// Chapters collector
 	chaptersCollector := collector.Clone()
+	chaptersCollector.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("Referer", "https://www.google.com/")
+		r.Headers.Set("User-Agent", randomUserAgent())
+		r.Headers.Set("accept-language", "en-US")
+		r.Headers.Set("Accept", "text/html")
+	})
 	chaptersCollector.OnHTML(source.ChapterAnchor, func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		c, _ := scraper.Chapters.LoadOrStore(path, []*URL{})
-		c = append(c.([]*URL), &URL{Address: e.Request.AbsoluteURL(link), Scraper: &scraper})
+		scraper.Chapters[path] = append(scraper.Chapters[path], &URL{Address: e.Request.AbsoluteURL(link), Scraper: &scraper})
 	})
 	chaptersCollector.OnHTML(source.ChapterTitle, func(e *colly.HTMLElement) {
 		title := strings.TrimSpace(e.Text)
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		c, _ := scraper.Chapters.LoadOrStore(path, []*URL{})
-		if e.Index < len(c.([]*URL)) {
-			c.([]*URL)[e.Index].Info = title
+		if e.Index < len(scraper.Chapters[path]) {
+			scraper.Chapters[path][e.Index].Info = title
 		}
+	})
+	_ = chaptersCollector.Limit(&colly.LimitRule{
+		Parallelism: Parallelism,
+		RandomDelay: time.Duration(source.RandomDelayMs) * time.Millisecond,
+		DomainGlob:  "*",
 	})
 	// Chapters collector END
 
 	// Pages collector
 	pagesCollector := collector.Clone()
+	pagesCollector.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("Referer", "https://www.google.com/")
+		r.Headers.Set("User-Agent", randomUserAgent())
+		r.Headers.Set("accept-language", "en-US")
+		r.Headers.Set("Accept", "text/html")
+	})
 	pagesCollector.OnHTML(source.ReaderPage, func(e *colly.HTMLElement) {
 		link := e.Attr("src")
 
@@ -95,8 +114,12 @@ func MakeSourceScraper(source *Source) *Scraper {
 		filename := strconv.Itoa(e.Index)
 
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		p, _ := scraper.Pages.LoadOrStore(path, []*URL{})
-		p = append(p.([]*URL), &URL{Address: link, Info: filename, Scraper: &scraper})
+		scraper.Pages[path] = append(scraper.Pages[path], &URL{Address: link, Info: filename, Scraper: &scraper})
+	})
+	_ = pagesCollector.Limit(&colly.LimitRule{
+		Parallelism: Parallelism,
+		RandomDelay: time.Duration(source.RandomDelayMs) * time.Millisecond,
+		DomainGlob:  "*",
 	})
 	// Pages collector END
 
@@ -118,8 +141,8 @@ func MakeSourceScraper(source *Source) *Scraper {
 func (s *Scraper) SearchManga(title string) ([]*URL, error) {
 	address := fmt.Sprintf(s.Source.SearchTemplate, url.QueryEscape(title))
 
-	if urls, ok := s.Manga.Load(address); ok {
-		return urls.([]*URL), nil
+	if urls, ok := s.Manga[address]; ok {
+		return urls, nil
 	}
 
 	err := s.MangaCollector.Visit(address)
@@ -129,13 +152,12 @@ func (s *Scraper) SearchManga(title string) ([]*URL, error) {
 	}
 
 	s.MangaCollector.Wait()
-	m, _ := s.Manga.Load(address)
-	return m.([]*URL), nil
+	return s.Manga[address], nil
 }
 
 func (s *Scraper) GetChapters(manga *URL) ([]*URL, error) {
-	if urls, ok := s.Chapters.Load(manga.Address); ok {
-		return urls.([]*URL), nil
+	if urls, ok := s.Chapters[manga.Address]; ok {
+		return urls, nil
 	}
 
 	err := s.ChaptersCollector.Visit(manga.Address)
@@ -148,17 +170,16 @@ func (s *Scraper) GetChapters(manga *URL) ([]*URL, error) {
 
 	// Add relation to this manga url for each chapter
 	// It shouldn't affect performance since there won't be more than 1000 chapters as worst case
-	chapters, _ := s.Chapters.Load(manga.Address)
-	for _, chapter := range chapters.([]*URL) {
+	for _, chapter := range s.Chapters[manga.Address] {
 		chapter.Relation = manga
 	}
 
-	return chapters.([]*URL), nil
+	return s.Chapters[manga.Address], nil
 }
 
 func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
-	if urls, ok := s.Pages.Load(chapter.Address); ok {
-		return urls.([]*URL), nil
+	if urls, ok := s.Pages[chapter.Address]; ok {
+		return urls, nil
 	}
 
 	err := s.PagesCollector.Visit(chapter.Address)
@@ -168,8 +189,7 @@ func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
 	}
 
 	s.PagesCollector.Wait()
-	p, _ := s.Pages.Load(chapter.Address)
-	return p.([]*URL), nil
+	return s.Pages[chapter.Address], nil
 }
 
 func (s *Scraper) GetFile(file *URL) (*[]byte, error) {

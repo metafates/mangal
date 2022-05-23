@@ -7,10 +7,12 @@ type Source struct {
 	MangaAnchor string `toml:"manga_anchor"`
 	MangaTitle  string `toml:"manga_title"`
 
-	ChapterAnchor string `toml:"chapter_anchor"'`
+	ChapterAnchor string `toml:"chapter_anchor"`
 	ChapterTitle  string `toml:"chapter_title"`
 
 	ReaderPage string `toml:"reader_page"`
+
+	RandomDelayMs int `toml:"random_delay_ms"`
 }
 
 var DefaultSource = Source{
@@ -21,4 +23,5 @@ var DefaultSource = Source{
 	ChapterAnchor:  "li.a-h a.chapter-name",
 	ChapterTitle:   "li.a-h a.chapter-name",
 	ReaderPage:     ".container-chapter-reader img",
+	RandomDelayMs:  200,
 }

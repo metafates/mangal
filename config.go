@@ -4,19 +4,22 @@ import (
 	"github.com/BurntSushi/toml"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Config struct {
-	Scrapers   []*Scraper
-	Fullscreen bool
-	Path       string
+	Scrapers    []*Scraper
+	Fullscreen  bool
+	Path        string
+	RandomDelay time.Duration
 }
 
 type _tempConfig struct {
-	Use        []string
-	Path       string
-	Fullscreen bool
-	Sources    map[string]Source
+	Use         []string
+	Path        string
+	Fullscreen  bool
+	Sources     map[string]Source
+	RandomDelay int `toml:"random_delay_ms"`
 }
 
 func GetConfigPath() (string, error) {
@@ -30,14 +33,36 @@ func GetConfigPath() (string, error) {
 }
 
 var DefaultConfig = Config{
-	Scrapers:   []*Scraper{DefaultScraper},
-	Fullscreen: true,
-	Path:       ".",
+	Scrapers:    []*Scraper{DefaultScraper},
+	Fullscreen:  true,
+	Path:        ".",
+	RandomDelay: 700 * time.Millisecond,
 }
 
 func GetConfig() *Config {
 	// TODO
-	return nil
+	configPath, err := GetConfigPath()
+
+	if err != nil {
+		return &DefaultConfig
+	}
+
+	configExists, err := Afero.Exists(configPath)
+	if err != nil || !configExists {
+		return &DefaultConfig
+	}
+
+	contents, err := Afero.ReadFile(configPath)
+	if err != nil {
+		return &DefaultConfig
+	}
+
+	config, err := ParseConfig(string(contents))
+	if err != nil {
+		return &DefaultConfig
+	}
+
+	return config
 }
 
 func ParseConfig(configString string) (*Config, error) {

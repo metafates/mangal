@@ -5,7 +5,6 @@ import (
 	"log"
 )
 
-// Set on compile time
 var (
 	version    string
 	build      string
@@ -15,12 +14,14 @@ var (
 func main() {
 	//UserConfig = GetConfig()
 	UserConfig = &DefaultConfig
-
-	manga, err := DefaultScraper.SearchManga("Attack on titan")
+	fmt.Println("Getting manga")
+	manga, err := DefaultScraper.SearchManga("Spy x family")
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println("Got Manga, getting chapters")
 
 	m := manga[0]
 	chapters, err := DefaultScraper.GetChapters(m)
@@ -28,11 +29,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	path, err := DownloadChapter(chapters[0])
+	fmt.Println("Got Chapters")
 
-	if err != nil {
-		log.Fatal(err)
+	for _, chapter := range chapters {
+		path, err := DownloadChapter(chapter, nil)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(path)
 	}
 
-	fmt.Println(path)
 }
