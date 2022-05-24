@@ -15,11 +15,10 @@ type Config struct {
 }
 
 type _tempConfig struct {
-	Use         []string
-	Path        string
-	Fullscreen  bool
-	Sources     map[string]Source
-	RandomDelay int `toml:"random_delay_ms"`
+	Use        []string
+	Path       string
+	Fullscreen bool
+	Sources    map[string]Source
 }
 
 func GetConfigPath() (string, error) {
@@ -32,34 +31,44 @@ func GetConfigPath() (string, error) {
 	return filepath.Join(configDir, AppName, "config.toml"), nil
 }
 
-var DefaultConfig = Config{
-	Scrapers:    []*Scraper{DefaultScraper},
-	Fullscreen:  true,
-	Path:        ".",
-	RandomDelay: 700 * time.Millisecond,
+var DefaultConfig = &Config{
+	Scrapers:   []*Scraper{DefaultScraper},
+	Fullscreen: true,
+	Path:       ".",
 }
 
-func GetConfig() *Config {
-	// TODO
-	configPath, err := GetConfigPath()
+var UserConfig *Config
+
+// GetConfig from given path. If path is empty string default config path is used
+func GetConfig(path string) *Config {
+	var (
+		configPath string
+		err        error
+	)
+
+	if path == "" {
+		configPath, err = GetConfigPath()
+	} else {
+		configPath = path
+	}
 
 	if err != nil {
-		return &DefaultConfig
+		return DefaultConfig
 	}
 
 	configExists, err := Afero.Exists(configPath)
 	if err != nil || !configExists {
-		return &DefaultConfig
+		return DefaultConfig
 	}
 
 	contents, err := Afero.ReadFile(configPath)
 	if err != nil {
-		return &DefaultConfig
+		return DefaultConfig
 	}
 
 	config, err := ParseConfig(string(contents))
 	if err != nil {
-		return &DefaultConfig
+		return DefaultConfig
 	}
 
 	return config

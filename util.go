@@ -17,3 +17,7 @@ func Contains[T comparable](slice []T, elem T) bool {
 
 	return false
 }
+
+func BytesToMegabytes(bytes int64) float64 {
+	return float64(bytes) / 1_048_576 // 1024 ^ 2
+}
