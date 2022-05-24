@@ -14,17 +14,9 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   strings.ToLower(AppName),
-	Short: AppName + " is a manga downloader",
-	Long: `A fast and flexible manga downloader built with
-love by metafates.`,
+	Short: AppName + " - Manga Downloader",
+	Long:  `A fast and flexible manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
-		showVersion, _ := cmd.Flags().GetBool("version")
-
-		if showVersion {
-			fmt.Printf("%s version %s\nBuild %s", AppName, version, build)
-			os.Exit(0)
-		}
-
 		config, _ := cmd.Flags().GetString("config")
 		exists, err := Afero.Exists(config)
 
@@ -40,7 +32,7 @@ love by metafates.`,
 
 			UserConfig = GetConfig(config)
 		} else {
-			// TODO: replace it with real config
+			// TODO: replace it with a real config
 			//UserConfig = GetConfig("")
 			UserConfig = DefaultConfig
 		}
@@ -50,6 +42,15 @@ love by metafates.`,
 		if err := program.Start(); err != nil {
 			log.Fatal(err)
 		}
+	},
+}
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Show version",
+	Long:  fmt.Sprintf("Shows %s versions and build date", AppName),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("%s version %s\nBuild %s\n", AppName, version, build)
 	},
 }
 
@@ -104,9 +105,9 @@ var cleanupCmd = &cobra.Command{
 }
 
 func CmdExecute() {
+	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(cleanupCmd)
-	rootCmd.PersistentFlags().StringP("config", "c", "", "path to config file")
-	rootCmd.PersistentFlags().BoolP("version", "v", false, "show version")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "load config from path")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
