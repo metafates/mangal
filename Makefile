@@ -1,4 +1,4 @@
-BINARY=mangai
+BINARY=mangal
 
 VERSION=`git describe --always --long`
 BUILD=`date +%FT%T%z`

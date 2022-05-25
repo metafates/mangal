@@ -1,4 +1,4 @@
-<h1 align="center">Mangai 📖</h1>
+<h1 align="center">Mangal 📖</h1>
 <h3 align="center">A Manga Downloader</h3>
 <p align="center">
     <img src="assets/1.jpg" alt="heh">
@@ -12,9 +12,9 @@
 
 ## About
 
-✨ __Mangai__ is a fancy TUI app written in go that scrapes, downloads and packs manga into pdfs
+✨ __Mangal__ is a fancy TUI app written in go that scrapes, downloads and packs manga into pdfs
 
-⚙️ The most important feature of Mangai is that it supports user defined scrapers
+⚙️ The most important feature of Mangal is that it supports user defined scrapers
 that can be added with just a few lines of config file (see [limitations](#limitations))
 
 🧋 Built with [Bubble Tea framework](https://github.com/charmbracelet/bubbletea)
@@ -27,24 +27,26 @@ that can be added with just a few lines of config file (see [limitations](#limit
 <img src="assets/sc2.png">
 <img src="assets/sc3.png">
 <img src="assets/sc4.png">
+<img src="assets/sc5.png">
 
 ## Examples
 
 <h3 align="center">Usage example</h4>
 
-[![asciicast](https://asciinema.org/a/rihXl6l2iBDQe2iteYBqXFyRy.svg)](https://asciinema.org/a/rihXl6l2iBDQe2iteYBqXFyRy)<br><br>
-<h3 align="center">Config example</h3>
+[![asciicast](https://asciinema.org/a/497193.svg)](https://asciinema.org/a/497193)<h3 align="center">Config example</h3>
 
 Config is located at the OS default config directory.
 
-- __Unix__ - `$XDG_CONFIG_HOME/mangai/config.toml` if `$XDG_CONFIG_HOME` exists, else `$HOME/.config/mangai/config.toml`
-- __Darwin__ (macOS) - `$HOME/Library/Application\ Support/mangai/config.toml`
-- __Windows__ - `%AppData%\mangai\config.toml`
-- __Plan 9__ - `$home/lib/mangai/config.toml`
+- __Unix__ - `$XDG_CONFIG_HOME/mangal/config.toml` if `$XDG_CONFIG_HOME` exists, else `$HOME/.config/mangal/config.toml`
+- __Darwin__ (macOS) - `$HOME/Library/Application\ Support/mangal/config.toml`
+- __Windows__ - `%AppData%\mangal\config.toml`
+- __Plan 9__ - `$home/lib/mangal/config.toml`
 
 Custom config paths not supported _(yet)_
 
-_By default (if no config defined) Mangai uses [manganelo](https://ww5.manganelo.tv) as a source_
+You can load config from custom path by using `--config` flag
+
+`mangal --config /user/configs/config.toml`
 
 ```toml
 # Which sources to use. You can use several sources in descendant order priority
@@ -55,14 +57,6 @@ path = '.'
 
 # Fullscreen mode
 fullscreen = true
-
-# Download pages asynchronously
-# Do not turn it off unless you really need it
-# since it will decrease download speed dramatically.
-# You could need it if the site you are using
-# is blocking you for too many requests
-async_download = true
-
 
 [sources]
     [sources.manganelo]
@@ -85,16 +79,48 @@ async_download = true
     chapter_title = 'li.a-h a.chapter-name'
 
     # Reader page images selector
-    reader_pages = '.container-chapter-reader img'
+    reader_page = '.container-chapter-reader img'
+    
+    # Random delay between requests (in miliseconds)
+    random_delay_ms = 500
+    
+    # Are chapters listed in reversed order on that source?
+    # reversed = from latest to oldest
+    reversed_chapters_order = true
+
+```
+
+<h3 align="center">Commands example</h4>
+
+```
+$ mangal help
+
+A fast and flexible manga downloader
+
+Usage:
+  mangal [flags]
+  mangal [command]
+
+Available Commands:
+  cleanup     Remove cached and temp files
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  version     Show version
+
+Flags:
+  -c, --config string   use config from path
+  -h, --help            help for mangal
+
+Use "mangal [command] --help" for more information about a command.
 ```
 
 ## Installation / Build
 
-Currently, Mangai can be installed only by building it from source.
+Currently, Mangal can be installed only by building it from source.
 So you will need [go installed](https://go.dev/doc/install) to proceed further
 
-1. `git clone https://github.com/metafates/Mangai.git`
-2. `cd Mangai`
+1. `git clone https://github.com/metafates/Mangal.git`
+2. `cd Mangal`
 3. `make install` - `make` is used to set version string. If you can't use make (or don't want to?) feel free to just
    run `go install`.
 
@@ -111,7 +137,6 @@ Even though most manga sites will work, there exists some limitation to which si
     - Each manga have a separate page
     - Manga page should have a some form of chapters list (not lazy loaded)
     - Each chapter should have a separate page with pages (images)
-- No anti-bot protection 🤖
 
 <br>
 
@@ -123,15 +148,6 @@ Some sites that work well
 
 ## TODO
 
-- __Add tests__ ⚠️
+- __Add more tests__ ⚠️
 - Better error handling
-- Surpass some scraping [limitations](#limitations)
-- Refactor channels management
-- Make prompt look better
-- Add Mangai to package managers (homebrew, scoop, apt, ...)
-- Extend config (add customization, maybe?)
-- Make site for home page (maybe?)
-
-## PS
-
-This is actually my first TUI app _and_ go project, so feel free to point out any issues you find 🙂
+- Add Mangal to package managers (homebrew, scoop, apt, ...)
