@@ -27,7 +27,7 @@ var rootCmd = &cobra.Command{
 		if config != "" {
 			config = path.Clean(config)
 			if !exists {
-				log.Fatal(errors.New(fmt.Sprintf("file at path %s doesn't exist", config)))
+				log.Fatal(errors.New(fmt.Sprintf("config at path %s doesn't exist", config)))
 			}
 
 			UserConfig = GetConfig(config)
@@ -107,7 +107,7 @@ var cleanupCmd = &cobra.Command{
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(cleanupCmd)
-	rootCmd.PersistentFlags().StringP("config", "c", "", "load config from path")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "use config from path")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)

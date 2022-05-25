@@ -72,12 +72,21 @@ const (
 	Done
 )
 
-type DownloadProgress struct {
+type ChaptersDownloadProgress struct {
+	Current   *URL
+	Done      bool
+	Failed    int
+	Handled   int
+	Total     int
+	Proceeded int
+}
+
+type ChapterDownloadProgress struct {
 	Stage   DownloaderStage
 	Message string
 }
 
-func DownloadChapter(chapter *URL, progress chan DownloadProgress) (string, error) {
+func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress) (string, error) {
 	mangaTitle := chapter.Relation.Info
 	mangaPath := filepath.Join(UserConfig.Path, mangaTitle)
 
@@ -90,7 +99,7 @@ func DownloadChapter(chapter *URL, progress chan DownloadProgress) (string, erro
 	showProgress := progress != nil
 
 	if showProgress {
-		progress <- DownloadProgress{
+		progress <- ChapterDownloadProgress{
 			Stage:   Scraping,
 			Message: "Getting pages",
 		}
@@ -105,7 +114,7 @@ func DownloadChapter(chapter *URL, progress chan DownloadProgress) (string, erro
 	}
 
 	if showProgress {
-		progress <- DownloadProgress{
+		progress <- ChapterDownloadProgress{
 			Stage:   Downloading,
 			Message: fmt.Sprintf("Downloading %d pages", pagesCount),
 		}
@@ -144,7 +153,7 @@ func DownloadChapter(chapter *URL, progress chan DownloadProgress) (string, erro
 	defer chapter.Scraper.CleanupFiles()
 
 	if showProgress {
-		progress <- DownloadProgress{
+		progress <- ChapterDownloadProgress{
 			Stage:   Converting,
 			Message: fmt.Sprintf("Converting %d pages to pdf", pagesCount),
 		}
@@ -162,7 +171,7 @@ func DownloadChapter(chapter *URL, progress chan DownloadProgress) (string, erro
 	}
 
 	if showProgress {
-		progress <- DownloadProgress{
+		progress <- ChapterDownloadProgress{
 			Stage:   Cleanup,
 			Message: "Removing temp files",
 		}
@@ -176,7 +185,7 @@ func DownloadChapter(chapter *URL, progress chan DownloadProgress) (string, erro
 	}
 
 	if showProgress {
-		progress <- DownloadProgress{
+		progress <- ChapterDownloadProgress{
 			Stage:   Done,
 			Message: fmt.Sprintf("Chapter %s downloaded", chapter.Info),
 		}

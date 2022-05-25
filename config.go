@@ -4,14 +4,12 @@ import (
 	"github.com/BurntSushi/toml"
 	"os"
 	"path/filepath"
-	"time"
 )
 
 type Config struct {
-	Scrapers    []*Scraper
-	Fullscreen  bool
-	Path        string
-	RandomDelay time.Duration
+	Scrapers   []*Scraper
+	Fullscreen bool
+	Path       string
 }
 
 type _tempConfig struct {

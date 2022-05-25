@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
@@ -73,6 +75,11 @@ func (k keyMap) ShortHelp() []key.Binding {
 	return k.shortHelpFor(k.state)
 }
 
+func (k keyMap) FullHelp() [][]key.Binding {
+	// TODO: add full help
+	return [][]key.Binding{k.ShortHelp()}
+}
+
 /*
 Model
 */
@@ -85,7 +92,8 @@ func newBubble(initialState bubbleState) bubble {
 			key.WithKeys("q"),
 			key.WithHelp("q", "quit")),
 		ForceQuit: key.NewBinding(
-			key.WithKeys("ctrl+c", "ctrl+d")),
+			key.WithKeys("ctrl+c", "ctrl+d"),
+			key.WithHelp("ctrl+c", "quit")),
 		Select: key.NewBinding(
 			key.WithKeys(" "),
 			key.WithHelp("space", "select")),
@@ -154,16 +162,19 @@ func newBubble(initialState bubbleState) bubble {
 	chaptersList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(chaptersState) }
 
 	bubble_ := bubble{
-		state:        initialState,
-		keyMap:       keys,
-		input:        input,
-		spinner:      spinner_,
-		mangaList:    mangaList,
-		chaptersList: chaptersList,
-		progress:     progress_,
-		mangaChan:    make(chan []*URL),
-		chaptersChan: make(chan []*URL),
-		progressChan: make(chan DownloadProgress),
+		state:                    initialState,
+		keyMap:                   keys,
+		input:                    input,
+		spinner:                  spinner_,
+		mangaList:                mangaList,
+		chaptersList:             chaptersList,
+		progress:                 progress_,
+		help:                     help.New(),
+		mangaChan:                make(chan []*URL),
+		chaptersChan:             make(chan []*URL),
+		chaptersProgressChan:     make(chan ChaptersDownloadProgress),
+		chapterPagesProgressChan: make(chan ChapterDownloadProgress),
+		selectedChapters:         make(map[int]interface{}),
 	}
 
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
@@ -199,10 +210,14 @@ type bubble struct {
 	mangaList    list.Model
 	chaptersList list.Model
 	progress     progress.Model
+	help         help.Model
 
-	mangaChan    chan []*URL
-	chaptersChan chan []*URL
-	progressChan chan DownloadProgress
+	mangaChan                chan []*URL
+	chaptersChan             chan []*URL
+	chaptersProgressChan     chan ChaptersDownloadProgress
+	chapterPagesProgressChan chan ChapterDownloadProgress
+
+	selectedChapters map[int]interface{}
 }
 
 type listItem struct {
@@ -289,6 +304,7 @@ func (b bubble) waitForMangaSearchCompletion() tea.Cmd {
 }
 
 type chapterGetDoneMsg []*URL
+type chapterDownloadProgressMsg ChapterDownloadProgress
 
 func (b bubble) initChaptersGet(manga *URL) tea.Cmd {
 	return func() tea.Msg {
@@ -307,6 +323,59 @@ func (b bubble) initChaptersGet(manga *URL) tea.Cmd {
 func (b bubble) waitForChaptersGetCompletion() tea.Cmd {
 	return func() tea.Msg {
 		return chapterGetDoneMsg(<-b.chaptersChan)
+	}
+}
+
+func (b bubble) waitForChapterDownloadProgress() tea.Cmd {
+	return func() tea.Msg {
+		return chapterDownloadProgressMsg(<-b.chapterPagesProgressChan)
+	}
+}
+
+type chaptersDownloadProgressMsg ChaptersDownloadProgress
+
+func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
+	return func() tea.Msg {
+		var (
+			failed   int
+			succeded int
+			total    = len(chapters)
+		)
+
+		for i, chapter := range chapters {
+			b.chaptersProgressChan <- ChaptersDownloadProgress{
+				Failed:    failed,
+				Handled:   succeded,
+				Total:     total,
+				Proceeded: Max(i-1, 0),
+				Current:   chapter,
+				Done:      false,
+			}
+
+			_, err := DownloadChapter(chapter, b.chapterPagesProgressChan)
+			if err == nil {
+				succeded++
+			} else {
+				failed++
+			}
+		}
+
+		b.chaptersProgressChan <- ChaptersDownloadProgress{
+			Failed:    failed,
+			Handled:   succeded,
+			Total:     total,
+			Proceeded: total,
+			Current:   nil,
+			Done:      true,
+		}
+
+		return nil
+	}
+}
+
+func (b bubble) waitForChaptersDownloadProgress() tea.Cmd {
+	return func() tea.Msg {
+		return chaptersDownloadProgressMsg(<-b.chaptersProgressChan)
 	}
 }
 
@@ -357,6 +426,7 @@ func (b bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Back):
+			b.mangaList.Select(0)
 			b.setState(searchState)
 			return b, nil
 		case key.Matches(msg, b.keyMap.Confirm), key.Matches(msg, b.keyMap.Select):
@@ -392,13 +462,30 @@ func (b bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Back):
+			// reset selected items
+			b.chaptersList.Select(0)
+			b.selectedChapters = make(map[int]interface{})
+
 			b.setState(mangaState)
 			return b, nil
+		case key.Matches(msg, b.keyMap.Confirm):
+			if len(b.selectedChapters) > 0 {
+				b.setState(confirmPromptState)
+				return b, nil
+			}
+
+			return b, nil
 		case key.Matches(msg, b.keyMap.Select):
-			// TODO: track selected items
 			item := b.chaptersList.SelectedItem().(listItem)
 			index := b.chaptersList.Index()
 			item.Select()
+
+			if item.selected {
+				b.selectedChapters[index] = nil
+			} else {
+				delete(b.selectedChapters, index)
+			}
+
 			cmd = b.chaptersList.SetItem(index, item)
 			return b, cmd
 		case key.Matches(msg, b.keyMap.SelectAll):
@@ -408,6 +495,13 @@ func (b bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for i, item := range items {
 				it := item.(listItem)
 				it.Select()
+
+				if it.selected {
+					b.selectedChapters[i] = nil
+				} else {
+					delete(b.selectedChapters, i)
+				}
+
 				cmds[i] = b.chaptersList.SetItem(i, it)
 			}
 
@@ -420,14 +514,72 @@ func (b bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (b bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, b.keyMap.Quit):
+			return b, tea.Quit
+		case key.Matches(msg, b.keyMap.Back):
+			b.setState(chaptersState)
+			return b, nil
+		case key.Matches(msg, b.keyMap.Confirm):
+			b.setState(downloadingState)
+
+			var chapters []*URL
+
+			items := b.chaptersList.Items()
+
+			for index := range b.selectedChapters {
+				chapters = append(chapters, items[index].(listItem).url)
+			}
+
+			return b, tea.Batch(b.progress.SetPercent(0), b.spinner.Tick, b.initChaptersDownload(chapters), b.waitForChapterDownloadProgress(), b.waitForChaptersDownloadProgress())
+		}
+	}
+
 	return b, nil
 }
 
 func (b bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return b, nil
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case chapterDownloadProgressMsg:
+		b.spinner, cmd = b.spinner.Update(msg)
+		return b, tea.Batch(cmd, b.waitForChapterDownloadProgress(), b.waitForChaptersGetCompletion())
+	case chaptersDownloadProgressMsg:
+		if msg.Done {
+			b.setState(exitPromptState)
+			return b, nil
+		}
+
+		cmd := b.progress.SetPercent(float64(msg.Handled) / float64(msg.Total))
+		return b, tea.Batch(cmd, b.waitForChaptersDownloadProgress(), b.waitForChapterDownloadProgress())
+	case progress.FrameMsg:
+		var p tea.Model
+		// ???? why progress.Update() returns tea.Model and not progress.Model?
+		p, cmd = b.progress.Update(msg)
+		b.progress = p.(progress.Model)
+		return b, cmd
+	}
+
+	b.spinner, cmd = b.spinner.Update(msg)
+	return b, cmd
 }
 
 func (b bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, b.keyMap.Quit):
+			return b, tea.Quit
+		case key.Matches(msg, b.keyMap.Back):
+			b.setState(chaptersState)
+			b.selectedChapters = make(map[int]interface{})
+			return b, nil
+		}
+	}
+
 	return b, nil
 }
 
@@ -482,12 +634,22 @@ func (b bubble) View() string {
 	case chaptersState:
 		view = b.chaptersList.View()
 	case confirmPromptState:
-		view = ""
+		if len(b.selectedChapters) == 0 {
+			log.Fatal("No chapters selected")
+		}
+
+		mangaName := b.chaptersList.Items()[0].(listItem).url.Relation.Info
+		view = fmt.Sprintf("Download %d chapters of %s", len(b.selectedChapters), mangaName)
 	case downloadingState:
-		view = b.progress.View()
+		view = fmt.Sprintf("%s\n\n%s", b.progress.View(), b.spinner.View())
 	case exitPromptState:
 		view = ""
 	}
 
-	return commonStyle.Render(view)
+	// Do not add help bubble at these states, since they already have one
+	if Contains([]bubbleState{mangaState, chaptersState}, b.state) {
+		return commonStyle.Render(view)
+	}
+
+	return commonStyle.Render(fmt.Sprintf("%s\n\n%s", view, b.help.View(b.keyMap)))
 }
