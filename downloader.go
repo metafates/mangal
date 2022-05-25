@@ -76,7 +76,7 @@ type ChaptersDownloadProgress struct {
 	Current   *URL
 	Done      bool
 	Failed    int
-	Handled   int
+	Succeeded int
 	Total     int
 	Proceeded int
 }
