@@ -32,12 +32,16 @@ var rootCmd = &cobra.Command{
 
 			UserConfig = GetConfig(config)
 		} else {
-			// TODO: replace it with a real config
-			//UserConfig = GetConfig("")
-			UserConfig = DefaultConfig
+			UserConfig = GetConfig("")
 		}
 
-		program := tea.NewProgram(newBubble(searchState), IfElse[tea.ProgramOption](UserConfig.Fullscreen, tea.WithAltScreen(), nil))
+		var program *tea.Program
+
+		if UserConfig.Fullscreen {
+			program = tea.NewProgram(newBubble(searchState), tea.WithAltScreen())
+		} else {
+			program = tea.NewProgram(newBubble(searchState))
+		}
 
 		if err := program.Start(); err != nil {
 			log.Fatal(err)

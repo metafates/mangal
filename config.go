@@ -4,6 +4,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Config struct {
@@ -26,7 +27,7 @@ func GetConfigPath() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(configDir, AppName, "config.toml"), nil
+	return filepath.Join(configDir, strings.ToLower(AppName), "config.toml"), nil
 }
 
 var DefaultConfig = &Config{
