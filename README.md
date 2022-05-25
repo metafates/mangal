@@ -23,11 +23,11 @@ that can be added with just a few lines of config file (see [limitations](#limit
 
 ## Screenshots
 
-<img src="assets/sc1.png">
-<img src="assets/sc2.png">
-<img src="assets/sc3.png">
-<img src="assets/sc4.png">
-<img src="assets/sc5.png">
+<img alt="search input" src="assets/sc1.png">
+<img alt="list with found manga" src="assets/sc2.png">
+<img alt="chapters of choosen manga" src="assets/sc3.png">
+<img alt="prompt before downloading" src="assets/sc4.png">
+<img alt="downloading progress bar" src="assets/sc5.png">
 
 ## Examples
 
@@ -42,11 +42,11 @@ Config is located at the OS default config directory.
 - __Windows__ - `%AppData%\mangal\config.toml`
 - __Plan 9__ - `$home/lib/mangal/config.toml`
 
-Custom config paths not supported _(yet)_
-
 You can load config from custom path by using `--config` flag
 
 `mangal --config /user/configs/config.toml`
+
+By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
 
 ```toml
 # Which sources to use. You can use several sources in descendant order priority
