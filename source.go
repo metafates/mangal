@@ -13,15 +13,18 @@ type Source struct {
 	ReaderPage string `toml:"reader_page"`
 
 	RandomDelayMs int `toml:"random_delay_ms"`
+
+	ChaptersReversed bool `toml:"reversed_chapters_order"`
 }
 
 var DefaultSource = Source{
-	Base:           "https://ww5.manganelo.tv",
-	SearchTemplate: "https://ww5.manganelo.tv/search/%s",
-	MangaAnchor:    ".search-story-item a.item-title",
-	MangaTitle:     ".search-story-item a.item-title",
-	ChapterAnchor:  "li.a-h a.chapter-name",
-	ChapterTitle:   "li.a-h a.chapter-name",
-	ReaderPage:     ".container-chapter-reader img",
-	RandomDelayMs:  200,
+	Base:             "https://ww5.manganelo.tv",
+	SearchTemplate:   "https://ww5.manganelo.tv/search/%s",
+	MangaAnchor:      ".search-story-item a.item-title",
+	MangaTitle:       ".search-story-item a.item-title",
+	ChapterAnchor:    "li.a-h a.chapter-name",
+	ChapterTitle:     "li.a-h a.chapter-name",
+	ReaderPage:       ".container-chapter-reader img",
+	RandomDelayMs:    200,
+	ChaptersReversed: true,
 }

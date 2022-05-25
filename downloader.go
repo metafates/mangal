@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/afero"
 	"log"
 	"path/filepath"
-	"strconv"
 	"sync"
 )
 
@@ -75,8 +74,8 @@ const (
 type ChaptersDownloadProgress struct {
 	Current   *URL
 	Done      bool
-	Failed    int
-	Succeeded int
+	Failed    []string
+	Succeeded []string
 	Total     int
 	Proceeded int
 }
@@ -88,9 +87,13 @@ type ChapterDownloadProgress struct {
 
 func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress) (string, error) {
 	mangaTitle := chapter.Relation.Info
-	mangaPath := filepath.Join(UserConfig.Path, mangaTitle)
+	mangaPath, err := filepath.Abs(filepath.Join(UserConfig.Path, mangaTitle))
 
-	err := Afero.MkdirAll(mangaPath, 0700)
+	if err != nil {
+		return "", nil
+	}
+
+	err = Afero.MkdirAll(mangaPath, 0700)
 
 	if err != nil {
 		return "", nil
@@ -105,7 +108,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress) (strin
 		}
 	}
 
-	chapterPath := filepath.Join(mangaPath, chapter.Info+".pdf")
+	chapterPath := filepath.Join(mangaPath, fmt.Sprintf("[%d] %s.pdf", chapter.Index, chapter.Info))
 	pages, err := chapter.Scraper.GetPages(chapter)
 	pagesCount := len(pages)
 
@@ -121,8 +124,9 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress) (strin
 	}
 
 	var (
-		tempPaths = make([]string, pagesCount)
-		wg        sync.WaitGroup
+		tempPaths        = make([]string, pagesCount)
+		wg               sync.WaitGroup
+		errorEncountered bool
 	)
 
 	wg.Add(pagesCount)
@@ -138,19 +142,24 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress) (strin
 			data, err = chapter.Scraper.GetFile(p)
 
 			if err != nil {
-				log.Fatal("Error while downloading page")
+				// TODO: use channel
+				errorEncountered = true
+				//log.Fatalf("Error while downloading page %s", p.Address)
 				return
 			}
 
 			tempPath, err = SaveTemp(data)
-			i, _ := strconv.Atoi(p.Info)
-			tempPaths[i] = tempPath
+			tempPaths[p.Index] = tempPath
 		}(page)
 	}
 
 	wg.Wait()
 
 	defer chapter.Scraper.CleanupFiles()
+
+	if errorEncountered {
+		return "", err
+	}
 
 	if showProgress {
 		progress <- ChapterDownloadProgress{

@@ -10,9 +10,13 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/skratchdot/open-golang/open"
 	"golang.org/x/term"
 	"log"
 	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -21,8 +25,21 @@ Styles
 */
 
 var (
-	commonStyle  = lipgloss.NewStyle().Margin(2, 2)
-	spinnerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	commonStyle           = lipgloss.NewStyle().Margin(2, 2)
+	accentStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	selectedItemMarkStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Bold(true)
+	inputPromptStyle      = accentStyle.Copy().Bold(true)
+	inputTitleStyle       = inputPromptStyle.Copy()
+	successStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
+	failStyle             = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	mangaListTitleStyle   = lipgloss.NewStyle().
+				Background(lipgloss.Color("30")).
+				Foreground(lipgloss.Color("230")).
+				Padding(0, 1)
+	chaptersListTitleStyle = lipgloss.NewStyle().
+				Background(lipgloss.Color("62")).
+				Foreground(lipgloss.Color("230")).
+				Padding(0, 1)
 )
 
 /*
@@ -66,7 +83,8 @@ func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 	case downloadingState:
 		return []key.Binding{k.ForceQuit}
 	case exitPromptState:
-		return []key.Binding{k.Back, k.Quit}
+		k.Confirm.SetHelp("enter", "open")
+		return []key.Binding{k.Back, k.Confirm, k.Quit}
 	}
 
 	return []key.Binding{k.ForceQuit}
@@ -131,10 +149,13 @@ func newBubble(initialState bubbleState) bubble {
 	}
 
 	input := textinput.New()
+	input.Placeholder = "Search Manga..."
+	input.CharLimit = 50
+	input.Prompt = inputPromptStyle.Render("> ")
 
 	spinner_ := spinner.New()
 	spinner_.Spinner = spinner.Dot
-	spinner_.Style = spinnerStyle
+	spinner_.Style = accentStyle
 
 	progress_ := progress.New(progress.WithDefaultGradient())
 
@@ -158,10 +179,13 @@ func newBubble(initialState bubbleState) bubble {
 	mangaList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
 	mangaList.KeyMap = listKeyMap
 	mangaList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(mangaState) }
+	mangaList.Styles.Title = mangaListTitleStyle
+	mangaList.Styles.Spinner = accentStyle
 
 	chaptersList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
 	chaptersList.KeyMap = listKeyMap
 	chaptersList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(chaptersState) }
+	chaptersList.Styles.Title = chaptersListTitleStyle
 
 	bubble_ := bubble{
 		state:                        initialState,
@@ -205,7 +229,8 @@ const (
 )
 
 type bubble struct {
-	state bubbleState
+	state   bubbleState
+	loading bool
 
 	keyMap keyMap
 
@@ -237,7 +262,7 @@ func (l *listItem) Select() {
 }
 func (l listItem) Title() string {
 	if l.selected {
-		return "+ " + l.url.Info
+		return selectedItemMarkStyle.Render("+") + " " + l.url.Info
 	}
 
 	return l.url.Info
@@ -256,7 +281,7 @@ Bubble Init
 */
 
 func (b bubble) Init() tea.Cmd {
-	return nil
+	return textinput.Blink
 }
 
 /*
@@ -344,8 +369,8 @@ type chaptersDownloadProgressMsg ChaptersDownloadProgress
 func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 	return func() tea.Msg {
 		var (
-			failed    int
-			succeeded int
+			failed    []string
+			succeeded []string
 			total     = len(chapters)
 		)
 
@@ -359,11 +384,12 @@ func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 				Done:      false,
 			}
 
-			_, err := DownloadChapter(chapter, b.chapterPagesProgressChan)
+			path, err := DownloadChapter(chapter, b.chapterPagesProgressChan)
 			if err == nil {
-				succeeded++
+				// use path instead of the chapter name since it is used to get manga folder later
+				succeeded = append(succeeded, path)
 			} else {
-				failed++
+				failed = append(failed, chapter.Info)
 			}
 		}
 
@@ -411,7 +437,7 @@ func (b bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case mangaSearchDoneMsg:
 		b.setState(mangaState)
-		b.mangaList.Title = "Manga - " + b.input.Value()
+		b.mangaList.Title = "Manga - " + PrettyTrim(strings.TrimSpace(b.input.Value()), 30)
 
 		var items []list.Item
 		for _, url := range msg {
@@ -431,23 +457,30 @@ func (b bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, b.keyMap.Quit):
-			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Back):
+			b.loading = false
+			b.mangaList.StopSpinner()
 			b.mangaList.Select(0)
 			b.setState(searchState)
+			return b, nil
+		case key.Matches(msg, b.keyMap.Quit):
+			return b, tea.Quit
+		case b.loading:
+			// Do nothing if the chapters are loading
 			return b, nil
 		case key.Matches(msg, b.keyMap.Confirm), key.Matches(msg, b.keyMap.Select):
 			selected := b.mangaList.SelectedItem().(listItem)
 			cmd = b.mangaList.StartSpinner()
+			b.loading = true
 
 			return b, tea.Batch(cmd, b.initChaptersGet(selected.url), b.waitForChaptersGetCompletion())
 		}
 	case chapterGetDoneMsg:
 		b.setState(chaptersState)
+		b.loading = false
 
 		if len(msg) > 0 {
-			b.chaptersList.Title = "Chapters - " + msg[0].Relation.Info
+			b.chaptersList.Title = "Chapters - " + PrettyTrim(msg[0].Relation.Info, 30)
 		} else {
 			b.chaptersList.Title = "Chapters"
 		}
@@ -570,7 +603,7 @@ func (b bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		b.chaptersDownloadProgressInfo = ChaptersDownloadProgress(msg)
 
-		cmd := b.progress.SetPercent(float64(msg.Succeeded) / float64(msg.Total))
+		cmd := b.progress.SetPercent(float64(len(msg.Succeeded)) / float64(msg.Total))
 		return b, tea.Batch(cmd, b.waitForChaptersDownloadProgress(), b.waitForChapterDownloadProgress())
 	case progress.FrameMsg:
 		var p tea.Model
@@ -592,8 +625,11 @@ func (b bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Back):
 			b.setState(chaptersState)
-			b.selectedChapters = make(map[int]interface{})
 			return b, nil
+		case key.Matches(msg, b.keyMap.Confirm):
+			if paths := b.chaptersDownloadProgressInfo.Succeeded; len(paths) > 0 {
+				_ = open.Start(filepath.Dir(paths[0]))
+			}
 		}
 	}
 
@@ -645,7 +681,7 @@ func (b bubble) View() string {
 
 	switch b.state {
 	case searchState:
-		view = fmt.Sprintf(template, AppName, b.input.View())
+		view = fmt.Sprintf(template, inputTitleStyle.Render(AppName), b.input.View())
 	case loadingState:
 		view = fmt.Sprintf(template, b.spinner.View())
 	case mangaState:
@@ -659,14 +695,16 @@ func (b bubble) View() string {
 		}
 
 		mangaName := b.chaptersList.Items()[0].(listItem).url.Relation.Info
-		view = fmt.Sprintf(template, len(b.selectedChapters), mangaName)
+		chaptersToDownload := len(b.selectedChapters)
+		view = fmt.Sprintf(template, accentStyle.Render(strconv.Itoa(chaptersToDownload)), Plural("chapter", chaptersToDownload), accentStyle.Render(PrettyTrim(mangaName, 40)))
 	case downloadingState:
 
 		var header string
 
 		// It shouldn't be nil at this stage but it panics TODO: FIX THIS
 		if b.chaptersDownloadProgressInfo.Current != nil {
-			header = fmt.Sprintf("Downloading %s", b.chaptersDownloadProgressInfo.Current.Info)
+			mangaName := b.chaptersDownloadProgressInfo.Current.Info
+			header = fmt.Sprintf("Downloading %s", PrettyTrim(accentStyle.Render(mangaName), 40))
 		} else {
 			header = "Preparing for download..."
 		}
@@ -674,7 +712,18 @@ func (b bubble) View() string {
 		subheader := b.chapterDownloadProgressInfo.Message
 		view = fmt.Sprintf("%s\n\n%s\n\n%s %s", header, b.progress.View(), b.spinner.View(), subheader)
 	case exitPromptState:
-		view = fmt.Sprintf(template, b.chaptersDownloadProgressInfo.Succeeded, b.chaptersDownloadProgressInfo.Failed)
+		succeeded := b.chaptersDownloadProgressInfo.Succeeded
+		failed := b.chaptersDownloadProgressInfo.Failed
+
+		// for some reason succeded returns (value - 1) TODO: FIX THIS
+		succeededRendered := successStyle.Render(strconv.Itoa(len(succeeded) + 1))
+		failedRendered := failStyle.Render(strconv.Itoa(len(failed)))
+
+		view = fmt.Sprintf(template, succeededRendered, Plural("chapter", len(succeeded)), failedRendered)
+		// show failed chapters
+		for _, chapter := range failed {
+			view += fmt.Sprintf("\n\n %s %s", "Failed", chapter)
+		}
 	}
 
 	// Do not add help bubble at these states, since they already have one
@@ -691,7 +740,7 @@ var viewTemplates = map[bubbleState]string{
 	loadingState:       "%s Searching...",
 	mangaState:         "%s",
 	chaptersState:      "%s",
-	confirmPromptState: "Download %d chapters of %s ?",
+	confirmPromptState: "Download %s %s of %s ?",
 	downloadingState:   "%s\n\n%s\n\n%s %s",
-	exitPromptState:    "Done. %d chapters downloaded, %d failed",
+	exitPromptState:    "Done. %s %s downloaded, %s failed",
 }

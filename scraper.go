@@ -1,13 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gocolly/colly"
 	"math/rand"
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -55,6 +55,8 @@ func MakeSourceScraper(source *Source) *Scraper {
 	}
 
 	collector = colly.NewCollector(collectorOptions...)
+	collector.SetRequestTimeout(20 * time.Second)
+	collector.AllowURLRevisit = true
 
 	// Manga collector
 	mangaCollector := collector.Clone()
@@ -84,7 +86,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 	})
 	// Manga collector END
 
-	// Chapters collector
+	// Paths collector
 	chaptersCollector := collector.Clone()
 	chaptersCollector.OnRequest(func(r *colly.Request) {
 		r.Headers.Set("Referer", "https://www.google.com/")
@@ -92,16 +94,29 @@ func MakeSourceScraper(source *Source) *Scraper {
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 	})
-	chaptersCollector.OnHTML(source.ChapterAnchor, func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		scraper.Chapters[path] = append(scraper.Chapters[path], &URL{Address: e.Request.AbsoluteURL(link), Scraper: &scraper})
-	})
-	chaptersCollector.OnHTML(source.ChapterTitle, func(e *colly.HTMLElement) {
-		title := strings.TrimSpace(e.Text)
-		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		if e.Index < len(scraper.Chapters[path]) {
-			scraper.Chapters[path][e.Index].Info = title
+	chaptersCollector.OnHTML("html", func(html *colly.HTMLElement) {
+		var urls []*URL
+
+		html.ForEach(source.ChapterAnchor, func(_ int, e *colly.HTMLElement) {
+			link := e.Attr("href")
+			path := e.Request.AbsoluteURL(e.Request.URL.Path)
+			u := &URL{Address: e.Request.AbsoluteURL(link), Scraper: &scraper, Index: e.Index}
+			urls = append(urls, u)
+			scraper.Chapters[path] = append(scraper.Chapters[path], u)
+		})
+
+		html.ForEach(source.ChapterTitle, func(i int, e *colly.HTMLElement) {
+			title := strings.TrimSpace(e.Text)
+			path := e.Request.AbsoluteURL(e.Request.URL.Path)
+			if e.Index < len(scraper.Chapters[path]) {
+				scraper.Chapters[path][e.Index].Info = title
+			}
+		})
+
+		// add chapters indexes
+		length := len(urls)
+		for _, u := range urls {
+			u.Index = IfElse(source.ChaptersReversed, length-u.Index, u.Index)
 		}
 	})
 	_ = chaptersCollector.Limit(&colly.LimitRule{
@@ -109,7 +124,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		RandomDelay: time.Duration(source.RandomDelayMs) * time.Millisecond,
 		DomainGlob:  "*",
 	})
-	// Chapters collector END
+	// Paths collector END
 
 	// Pages collector
 	pagesCollector := collector.Clone()
@@ -126,10 +141,8 @@ func MakeSourceScraper(source *Source) *Scraper {
 			link = e.Attr("data-src")
 		}
 
-		filename := strconv.Itoa(e.Index)
-
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		scraper.Pages[path] = append(scraper.Pages[path], &URL{Address: link, Info: filename, Scraper: &scraper})
+		scraper.Pages[path] = append(scraper.Pages[path], &URL{Address: link, Scraper: &scraper, Index: e.Index})
 	})
 	_ = pagesCollector.Limit(&colly.LimitRule{
 		Parallelism: Parallelism,
@@ -154,7 +167,8 @@ func MakeSourceScraper(source *Source) *Scraper {
 }
 
 func (s *Scraper) SearchManga(title string) ([]*URL, error) {
-	address := fmt.Sprintf(s.Source.SearchTemplate, url.QueryEscape(title))
+	// lowercase titles will produce the same results but will be useful for caching
+	address := fmt.Sprintf(s.Source.SearchTemplate, url.QueryEscape(strings.TrimSpace(strings.ToLower(title))))
 
 	if urls, ok := s.Manga[address]; ok {
 		return urls, nil
@@ -222,7 +236,13 @@ func (s *Scraper) GetFile(file *URL) (*[]byte, error) {
 
 	data, _ := s.Files.Load(file.Address)
 
-	return data.(*[]byte), nil
+	bytes, ok := data.(*[]byte)
+
+	if ok {
+		return bytes, nil
+	}
+
+	return nil, errors.New("Couldn't get file at " + file.Address)
 }
 
 func (s *Scraper) CleanupFiles() {
@@ -1106,7 +1126,6 @@ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like 
 Mozilla/5.0 (X11; CrOS armv7l 6946.86.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36
 Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.94 Safari/537.36
 Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0 SeaMonkey/2.35
-http://www.useragentstring.com/Firefox25.0_id_19710.php
 Mozilla/5.0 (Linux; Android 4.4.2; SM-T330NU Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.84 Safari/537.36
 Mozilla/5.0 (iPad; CPU OS 6_0_1 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A8426 Safari/8536.25
 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36

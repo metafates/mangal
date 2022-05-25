@@ -21,7 +21,7 @@ func main() {
 	//	log.Fatal(err)
 	//}
 	//
-	//fmt.Println("Got Chapters")
+	//fmt.Println("Got Paths")
 	//
 	//for _, chapter := range chapters {
 	//	path, err := DownloadChapter(chapter, nil)

@@ -1,4 +1,4 @@
 package main
 
-const AppName = "Mangai"
+const AppName = "Mangal"
 const Parallelism = 100
