@@ -411,6 +411,7 @@ func (b bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case mangaSearchDoneMsg:
 		b.setState(mangaState)
+		b.mangaList.Title = "Manga - " + b.input.Value()
 
 		var items []list.Item
 		for _, url := range msg {
@@ -444,6 +445,12 @@ func (b bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case chapterGetDoneMsg:
 		b.setState(chaptersState)
+
+		if len(msg) > 0 {
+			b.chaptersList.Title = "Chapters - " + msg[0].Relation.Info
+		} else {
+			b.chaptersList.Title = "Chapters"
+		}
 
 		var items []list.Item
 
