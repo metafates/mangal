@@ -154,12 +154,6 @@ Some sites that work well
 - https://ww3.mangakakalot.tv
 - https://ww5.manganelo.tv
 
-## TODO
-
-- __Add more tests__ ⚠️
-- Better error handling for config
-- Add Mangal to package managers (homebrew, scoop, apt, ...)
-
 ---
 
 Manga image taken from [here](https://www.flaticon.com/free-icons/manga)
