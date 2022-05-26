@@ -8,7 +8,8 @@
 - [About](#about)
 - [Screenshots](#screenshots)
 - [Examples](#examples)
-- [Install / Build](#installation--build)
+- [Install](#install)
+- [Build](#build)
 - [Limitations](#limitations)
 
 ## About
@@ -115,13 +116,19 @@ Flags:
 Use "mangal [command] --help" for more information about a command.
 ```
 
-## Installation / Build
+## Install
 
-Currently, Mangal can be installed only by building it from source.
-So you will need [go installed](https://go.dev/doc/install) to proceed further
+You will need [go installed](https://go.dev/doc/install) to install
 
-1. `git clone https://github.com/metafates/Mangal.git`
-2. `cd Mangal`
+Run
+`go install github.com/metafates/mangal@latest`
+
+This will install mangal to the go/bin 
+
+## Build
+
+1. `git clone https://github.com/metafates/mangal.git`
+2. `cd mangal`
 3. `make install` - `make` is used to set version string. If you can't use make (or don't want to?) feel free to just
    run `go install`.
 
