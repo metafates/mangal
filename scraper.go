@@ -37,13 +37,13 @@ type URL struct {
 	Index    int
 }
 
-var DefaultScraper = MakeSourceScraper(&DefaultSource)
+var DefaultScraper = MakeSourceScraper(DefaultSource)
 
 // MakeSourceScraper returns new scraper with configured collectors
-func MakeSourceScraper(source *Source) *Scraper {
+func MakeSourceScraper(source Source) *Scraper {
 
 	scraper := Scraper{
-		Source: source,
+		Source: &source,
 
 		Manga:    make(map[string][]*URL),
 		Chapters: make(map[string][]*URL),

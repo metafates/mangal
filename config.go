@@ -90,7 +90,7 @@ func ParseConfig(configString string) (*Config, error) {
 			continue
 		}
 
-		scraper := MakeSourceScraper(&source)
+		scraper := MakeSourceScraper(source)
 		conf.Scrapers = append(conf.Scrapers, scraper)
 	}
 
