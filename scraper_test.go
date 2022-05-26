@@ -4,26 +4,20 @@ import (
 	"testing"
 )
 
-const testQuery = "Death Note"
-
 func TestMakeSourceScraper(t *testing.T) {
-	source := &DefaultSource
-
-	scraper := MakeSourceScraper(source)
+	scraper := MakeSourceScraper(&DefaultSource)
 
 	if scraper == nil {
 		t.Failed()
 	}
 
-	if scraper.Source == nil || scraper.Source != source {
+	if scraper.Source == nil || scraper.Source != &DefaultSource {
 		t.Failed()
 	}
 }
 
 func TestScraper_SearchManga(t *testing.T) {
-	scraper := MakeSourceScraper(&DefaultSource)
-
-	manga, err := scraper.SearchManga(testQuery)
+	manga, err := DefaultScraper.SearchManga(TestQuery)
 
 	if err != nil {
 		t.Failed()
@@ -38,19 +32,17 @@ func TestScraper_SearchManga(t *testing.T) {
 	}
 
 	for _, m := range manga {
-		if m.Scraper != scraper {
+		if m.Scraper != DefaultScraper {
 			t.Fail()
 		}
 	}
 }
 
 func TestScraper_GetChapters(t *testing.T) {
-	scraper := MakeSourceScraper(&DefaultSource)
-
-	manga, _ := scraper.SearchManga(testQuery)
+	manga, _ := DefaultScraper.SearchManga(TestQuery)
 	anyManga := manga[0]
 
-	chapters, err := scraper.GetChapters(anyManga)
+	chapters, err := DefaultScraper.GetChapters(anyManga)
 
 	if err != nil {
 		t.Failed()
@@ -73,15 +65,13 @@ func TestScraper_GetChapters(t *testing.T) {
 }
 
 func TestScraper_GetPages(t *testing.T) {
-	scraper := MakeSourceScraper(&DefaultSource)
-
-	manga, _ := scraper.SearchManga(testQuery)
+	manga, _ := DefaultScraper.SearchManga(TestQuery)
 	anyManga := manga[0]
 
-	chapters, _ := scraper.GetChapters(anyManga)
+	chapters, _ := DefaultScraper.GetChapters(anyManga)
 	anyChapter := chapters[0]
 
-	pages, err := scraper.GetPages(anyChapter)
+	pages, err := DefaultScraper.GetPages(anyChapter)
 
 	if err != nil {
 		t.Failed()
@@ -103,18 +93,16 @@ func TestScraper_GetPages(t *testing.T) {
 }
 
 func TestScraper_GetFile(t *testing.T) {
-	scraper := MakeSourceScraper(&DefaultSource)
-
-	manga, _ := scraper.SearchManga(testQuery)
+	manga, _ := DefaultScraper.SearchManga(TestQuery)
 	anyManga := manga[0]
 
-	chapters, _ := scraper.GetChapters(anyManga)
+	chapters, _ := DefaultScraper.GetChapters(anyManga)
 	anyChapter := chapters[0]
 
-	pages, _ := scraper.GetPages(anyChapter)
+	pages, _ := DefaultScraper.GetPages(anyChapter)
 	anyPage := pages[0]
 
-	file, err := scraper.GetFile(anyPage)
+	file, err := DefaultScraper.GetFile(anyPage)
 
 	if err != nil || file == nil {
 		t.Failed()

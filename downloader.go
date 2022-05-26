@@ -54,7 +54,7 @@ func SaveTemp(contents *[]byte) (string, error) {
 // batchRemove removes all files from the path list
 func batchRemove(paths []string) error {
 	for _, path := range paths {
-		err := FileSystem.Remove(path)
+		err := Afero.Remove(path)
 		if err != nil {
 			return err
 		}
