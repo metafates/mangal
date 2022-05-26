@@ -596,14 +596,14 @@ func (b bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.chapterDownloadProgressInfo = ChapterDownloadProgress(msg)
 		return b, tea.Batch(cmd, b.waitForChapterDownloadProgress(), b.waitForChaptersGetCompletion())
 	case chaptersDownloadProgressMsg:
+		b.chaptersDownloadProgressInfo = ChaptersDownloadProgress(msg)
+
 		if msg.Done {
 			b.setState(exitPromptState)
 			return b, nil
 		}
 
-		b.chaptersDownloadProgressInfo = ChaptersDownloadProgress(msg)
-
-		cmd := b.progress.SetPercent(float64(len(msg.Succeeded)) / float64(msg.Total))
+		cmd = b.progress.SetPercent(float64(len(msg.Succeeded)) / float64(msg.Total))
 		return b, tea.Batch(cmd, b.waitForChaptersDownloadProgress(), b.waitForChapterDownloadProgress())
 	case progress.FrameMsg:
 		var p tea.Model
@@ -715,14 +715,14 @@ func (b bubble) View() string {
 		succeeded := b.chaptersDownloadProgressInfo.Succeeded
 		failed := b.chaptersDownloadProgressInfo.Failed
 
-		// for some reason succeded returns (value - 1) TODO: FIX THIS
-		succeededRendered := successStyle.Render(strconv.Itoa(len(succeeded) + 1))
+		succeededRendered := successStyle.Render(strconv.Itoa(len(succeeded)))
 		failedRendered := failStyle.Render(strconv.Itoa(len(failed)))
 
 		view = fmt.Sprintf(template, succeededRendered, Plural("chapter", len(succeeded)), failedRendered)
+
 		// show failed chapters
 		for _, chapter := range failed {
-			view += fmt.Sprintf("\n\n %s %s", "Failed", chapter)
+			view += fmt.Sprintf("\n\n%s %s", failStyle.Render("Failed"), chapter)
 		}
 	}
 

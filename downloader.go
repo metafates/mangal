@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	pdfcpu "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/spf13/afero"
@@ -171,6 +172,10 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress) (strin
 	err = RemoveIfExists(chapterPath)
 	if err != nil {
 		return "", err
+	}
+
+	if len(tempPaths) == 0 {
+		return "", errors.New("pages was not downloaded")
 	}
 
 	err = pdfcpu.ImportImagesFile(tempPaths, chapterPath, nil, nil)

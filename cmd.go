@@ -21,7 +21,7 @@ var rootCmd = &cobra.Command{
 		exists, err := Afero.Exists(config)
 
 		if err != nil {
-			log.Fatal(errors.New("can't check if file exists or not"))
+			log.Fatal(errors.New("access to config file denied"))
 		}
 
 		if config != "" {
@@ -32,7 +32,7 @@ var rootCmd = &cobra.Command{
 
 			UserConfig = GetConfig(config)
 		} else {
-			UserConfig = GetConfig("")
+			UserConfig = GetConfig("") // get config from default config path
 		}
 
 		var program *tea.Program
