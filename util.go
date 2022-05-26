@@ -48,3 +48,19 @@ func Max[T constraints.Ordered](a, b T) T {
 
 	return b
 }
+
+// IsUnique tests if given array has only unique elements (e.g. if it's a set)
+func IsUnique[T comparable](arr []T) bool {
+	for i, a := range arr {
+		for j, b := range arr {
+			if i == j {
+				continue
+			}
+
+			if a == b {
+				return false
+			}
+		}
+	}
+	return true
+}

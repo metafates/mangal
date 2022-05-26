@@ -29,6 +29,14 @@ type Scraper struct {
 	Files sync.Map
 }
 
+type URL struct {
+	Relation *URL
+	Scraper  *Scraper
+	Address  string
+	Info     string
+	Index    int
+}
+
 var DefaultScraper = MakeSourceScraper(&DefaultSource)
 
 // MakeSourceScraper returns new scraper with configured collectors
@@ -218,6 +226,13 @@ func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
 	}
 
 	s.PagesCollector.Wait()
+
+	// Add relation to this chapter url for each page
+	// It shouldn't affect performance since there won't be more than ~400 pages as worst case (usually it's 30)
+	for _, page := range s.Pages[chapter.Address] {
+		page.Relation = chapter
+	}
+
 	return s.Pages[chapter.Address], nil
 }
 
