@@ -1,8 +1,9 @@
 <h1 align="center">Mangal 📖</h1>
-<h3 align="center">A Manga Downloader</h3>
 <p align="center">
-    <img src="assets/1.jpg" alt="heh">
+    <img width="200" src="assets/manga.png" alt="heh">
 </p>
+
+<h3 align="center">A Manga Downloader</h3>
 
 - [About](#about)
 - [Screenshots](#screenshots)
