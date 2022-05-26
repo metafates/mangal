@@ -5,7 +5,7 @@ import (
 )
 
 func TestMakeSourceScraper(t *testing.T) {
-	scraper := MakeSourceScraper(&DefaultSource)
+	scraper := MakeSourceScraper(DefaultSource)
 
 	if scraper == nil {
 		t.Failed()
