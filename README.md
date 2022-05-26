@@ -3,7 +3,7 @@
     <img width="200" src="assets/manga.png" alt="heh">
 </p>
 
-<h3 align="center">A Manga Downloader</h3>
+<h3 align="center">Manga Downloader</h3>
 
 - [About](#about)
 - [Screenshots](#screenshots)
@@ -150,5 +150,9 @@ Some sites that work well
 ## TODO
 
 - __Add more tests__ ⚠️
-- Better error handling
+- Better error handling for config
 - Add Mangal to package managers (homebrew, scoop, apt, ...)
+
+---
+
+Manga image taken from [here](https://www.flaticon.com/free-icons/manga)
