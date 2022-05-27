@@ -47,15 +47,15 @@ Key Map
 */
 
 type keyMap struct {
-	state     bubbleState
+	state bubbleState
+
 	Quit      key.Binding
 	ForceQuit key.Binding
-
 	Select    key.Binding
 	SelectAll key.Binding
 	Confirm   key.Binding
-
-	Back key.Binding
+	Open      key.Binding
+	Back      key.Binding
 
 	Up    key.Binding
 	Down  key.Binding
@@ -75,16 +75,15 @@ func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 	case loadingState:
 		return []key.Binding{k.ForceQuit}
 	case mangaState:
-		return []key.Binding{k.Select, k.Back}
+		return []key.Binding{k.Open, k.Select, k.Back}
 	case chaptersState:
-		return []key.Binding{k.Select, k.SelectAll, k.Confirm, k.Back}
+		return []key.Binding{k.Open, k.Select, k.SelectAll, k.Confirm, k.Back}
 	case confirmPromptState:
 		return []key.Binding{k.Confirm, k.Back, k.Quit}
 	case downloadingState:
 		return []key.Binding{k.ForceQuit}
 	case exitPromptState:
-		k.Confirm.SetHelp("enter", "open")
-		return []key.Binding{k.Back, k.Confirm, k.Quit}
+		return []key.Binding{k.Back, k.Open, k.Quit}
 	}
 
 	return []key.Binding{k.ForceQuit}
@@ -118,10 +117,13 @@ func newBubble(initialState bubbleState) bubble {
 			key.WithHelp("space", "select")),
 		SelectAll: key.NewBinding(
 			key.WithKeys("*", "ctrl+a", "tab"),
-			key.WithHelp("tab/*", "select all")),
+			key.WithHelp("tab", "select all")),
 		Confirm: key.NewBinding(
 			key.WithKeys("enter"),
 			key.WithHelp("enter", "confirm")),
+		Open: key.NewBinding(
+			key.WithKeys("o"),
+			key.WithHelp("o", "open")),
 		Back: key.NewBinding(
 			key.WithKeys("esc"),
 			key.WithHelp("esc", "back")),
@@ -465,6 +467,9 @@ func (b bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return b, nil
 		case key.Matches(msg, b.keyMap.Quit):
 			return b, tea.Quit
+		case key.Matches(msg, b.keyMap.Open):
+			item := b.mangaList.SelectedItem().(listItem)
+			_ = open.Start(item.url.Address)
 		case b.loading:
 			// Do nothing if the chapters are loading
 			return b, nil
@@ -515,6 +520,9 @@ func (b bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			b.setState(mangaState)
 			return b, nil
+		case key.Matches(msg, b.keyMap.Open):
+			item := b.chaptersList.SelectedItem().(listItem)
+			_ = open.Start(item.url.Address)
 		case key.Matches(msg, b.keyMap.Confirm):
 			if len(b.selectedChapters) > 0 {
 				b.setState(confirmPromptState)
@@ -626,7 +634,7 @@ func (b bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Back):
 			b.setState(chaptersState)
 			return b, nil
-		case key.Matches(msg, b.keyMap.Confirm):
+		case key.Matches(msg, b.keyMap.Open):
 			if paths := b.chaptersDownloadProgressInfo.Succeeded; len(paths) > 0 {
 				_ = open.Start(filepath.Dir(paths[0]))
 			}
