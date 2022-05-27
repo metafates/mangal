@@ -75,7 +75,7 @@ const (
 type ChaptersDownloadProgress struct {
 	Current   *URL
 	Done      bool
-	Failed    []string
+	Failed    []*URL
 	Succeeded []string
 	Total     int
 	Proceeded int

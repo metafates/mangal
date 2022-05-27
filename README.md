@@ -129,8 +129,7 @@ This will install mangal to the go/bin
 
 1. `git clone https://github.com/metafates/mangal.git`
 2. `cd mangal`
-3. `make install` - `make` is used to set version string. If you can't use make (or don't want to?) feel free to just
-   run `go install`.
+3. `go build` or `go install`
 
 That's it!
 If you're not sure where binary is installed run `go list -f '{{.Target}}'` in the project directory

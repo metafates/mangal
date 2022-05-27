@@ -369,7 +369,7 @@ type chaptersDownloadProgressMsg ChaptersDownloadProgress
 func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 	return func() tea.Msg {
 		var (
-			failed    []string
+			failed    []*URL
 			succeeded []string
 			total     = len(chapters)
 		)
@@ -389,7 +389,7 @@ func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 				// use path instead of the chapter name since it is used to get manga folder later
 				succeeded = append(succeeded, path)
 			} else {
-				failed = append(failed, chapter.Info)
+				failed = append(failed, chapter)
 			}
 		}
 
@@ -722,7 +722,7 @@ func (b bubble) View() string {
 
 		// show failed chapters
 		for _, chapter := range failed {
-			view += fmt.Sprintf("\n\n%s %s", failStyle.Render("Failed"), chapter)
+			view += fmt.Sprintf("\n\n%s %s", failStyle.Render("Failed"), chapter.Info)
 		}
 	}
 

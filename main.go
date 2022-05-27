@@ -1,9 +1,6 @@
 package main
 
-var (
-	version string
-	build   string
-)
+const version = "0.8.0"
 
 func main() {
 	CmdExecute()
