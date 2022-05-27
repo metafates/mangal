@@ -7,8 +7,10 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 )
 
@@ -55,6 +57,30 @@ var versionCmd = &cobra.Command{
 	Long:  fmt.Sprintf("Shows %s versions and build date", AppName),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("%s version %s\n", AppName, version)
+	},
+}
+
+var updateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update " + AppName,
+	Long:  "Fetches new version from github and resinstalls " + AppName,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get mod name
+		bi, ok := debug.ReadBuildInfo()
+		if !ok {
+			log.Fatal(failStyle.Render("Failed to read build info"))
+		}
+
+		modName := bi.Path
+		command := exec.Command("go", "install", modName+"@latest")
+
+		err := command.Start()
+
+		if err != nil {
+			log.Fatal(failStyle.Render("Update failed"))
+		} else {
+			fmt.Println(successStyle.Render("Updated"))
+		}
 	},
 }
 
@@ -119,6 +145,7 @@ var cleanupCmd = &cobra.Command{
 
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(cleanupCmd)
 	rootCmd.PersistentFlags().StringP("config", "c", "", "use config from path")
 

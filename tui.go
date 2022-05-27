@@ -56,6 +56,7 @@ type keyMap struct {
 	Confirm   key.Binding
 	Open      key.Binding
 	Read      key.Binding
+	Retry     key.Binding
 	Back      key.Binding
 
 	Up    key.Binding
@@ -85,7 +86,8 @@ func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 		return []key.Binding{k.ForceQuit}
 	case exitPromptState:
 		k.Open.SetHelp("o", "open folder")
-		return []key.Binding{k.Back, k.Open, k.Quit}
+		k.Retry.SetHelp("r", "redownload failed")
+		return []key.Binding{k.Back, k.Open, k.Retry, k.Quit}
 	}
 
 	return []key.Binding{k.ForceQuit}
@@ -129,6 +131,9 @@ func newBubble(initialState bubbleState) bubble {
 		Read: key.NewBinding(
 			key.WithKeys("r"),
 			key.WithHelp("r", "read")),
+		Retry: key.NewBinding(
+			key.WithKeys("r"),
+			key.WithHelp("r", "retry")),
 		Back: key.NewBinding(
 			key.WithKeys("esc"),
 			key.WithHelp("esc", "back")),
@@ -706,6 +711,13 @@ func (b bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Back):
 			b.setState(chaptersState)
 			return b, nil
+		case key.Matches(msg, b.keyMap.Retry):
+			failed := b.chaptersDownloadProgressInfo.Failed
+
+			if len(failed) > 0 {
+				b.setState(downloadingState)
+				return b, tea.Batch(b.progress.SetPercent(0), b.spinner.Tick, b.initChaptersDownload(failed), b.waitForChaptersDownloadProgress(), b.waitForChapterDownloadProgress())
+			}
 		case key.Matches(msg, b.keyMap.Open):
 			if paths := b.chaptersDownloadProgressInfo.Succeeded; len(paths) > 0 {
 				_ = open.Start(filepath.Dir(paths[0]))
