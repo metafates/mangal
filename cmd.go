@@ -78,7 +78,16 @@ var cleanupCmd = &cobra.Command{
 			for _, tempFile := range tempFiles {
 				name := tempFile.Name()
 				if strings.HasPrefix(name, AppName) || strings.HasPrefix(name, lowerAppName) {
-					err = Afero.Remove(filepath.Join(tempDir, name))
+					p := filepath.Join(tempDir, name)
+
+					if tempFile.IsDir() {
+						b, err := DirSize(p)
+						if err == nil {
+							bytes += b
+						}
+					}
+
+					err = Afero.RemoveAll(p)
 					if err == nil {
 						bytes += tempFile.Size()
 						counter++

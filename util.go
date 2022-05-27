@@ -1,6 +1,9 @@
 package main
 
-import "golang.org/x/exp/constraints"
+import (
+	"golang.org/x/exp/constraints"
+	"os"
+)
 
 func IfElse[T any](condition bool, a, b T) T {
 	if condition {
@@ -63,4 +66,19 @@ func IsUnique[T comparable](arr []T) bool {
 		}
 	}
 	return true
+}
+
+// DirSize gets directory size in bytes
+func DirSize(path string) (int64, error) {
+	var size int64
+	err := Afero.Walk(path, func(_ string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return err
+	})
+	return size, err
 }

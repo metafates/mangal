@@ -55,6 +55,7 @@ type keyMap struct {
 	SelectAll key.Binding
 	Confirm   key.Binding
 	Open      key.Binding
+	Read      key.Binding
 	Back      key.Binding
 
 	Up    key.Binding
@@ -77,12 +78,13 @@ func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 	case mangaState:
 		return []key.Binding{k.Open, k.Select, k.Back}
 	case chaptersState:
-		return []key.Binding{k.Open, k.Select, k.SelectAll, k.Confirm, k.Back}
+		return []key.Binding{k.Open, k.Read, k.Select, k.SelectAll, k.Confirm, k.Back}
 	case confirmPromptState:
 		return []key.Binding{k.Confirm, k.Back, k.Quit}
 	case downloadingState:
 		return []key.Binding{k.ForceQuit}
 	case exitPromptState:
+		k.Open.SetHelp("o", "open folder")
 		return []key.Binding{k.Back, k.Open, k.Quit}
 	}
 
@@ -124,6 +126,9 @@ func newBubble(initialState bubbleState) bubble {
 		Open: key.NewBinding(
 			key.WithKeys("o"),
 			key.WithHelp("o", "open")),
+		Read: key.NewBinding(
+			key.WithKeys("r"),
+			key.WithHelp("r", "read")),
 		Back: key.NewBinding(
 			key.WithKeys("esc"),
 			key.WithHelp("esc", "back")),
@@ -386,7 +391,7 @@ func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 				Done:      false,
 			}
 
-			path, err := DownloadChapter(chapter, b.chapterPagesProgressChan)
+			path, err := DownloadChapter(chapter, b.chapterPagesProgressChan, false)
 			if err == nil {
 				// use path instead of the chapter name since it is used to get manga folder later
 				succeeded = append(succeeded, path)
@@ -411,6 +416,51 @@ func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 func (b bubble) waitForChaptersDownloadProgress() tea.Cmd {
 	return func() tea.Msg {
 		return chaptersDownloadProgressMsg(<-b.chaptersProgressChan)
+	}
+}
+
+type chapterDownloadedToReadMsg ChaptersDownloadProgress
+
+func (b bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
+	return func() tea.Msg {
+		var (
+			failed    []*URL
+			succeeded []string
+		)
+
+		b.chaptersProgressChan <- ChaptersDownloadProgress{
+			Current:   chapter,
+			Done:      false,
+			Failed:    failed,
+			Succeeded: succeeded,
+			Total:     1,
+			Proceeded: 0,
+		}
+
+		path, err := DownloadChapter(chapter, b.chapterPagesProgressChan, true)
+
+		if err != nil {
+			failed = append(failed, chapter)
+		} else {
+			succeeded = append(succeeded, path)
+		}
+
+		b.chaptersProgressChan <- ChaptersDownloadProgress{
+			Current:   nil,
+			Done:      true,
+			Failed:    failed,
+			Succeeded: succeeded,
+			Total:     1,
+			Proceeded: 1,
+		}
+
+		return nil
+	}
+}
+
+func (b bubble) waitForChapterToReadDownloaded() tea.Cmd {
+	return func() tea.Msg {
+		return chapterDownloadedToReadMsg(<-b.chaptersProgressChan)
 	}
 }
 
@@ -523,6 +573,12 @@ func (b bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Open):
 			item := b.chaptersList.SelectedItem().(listItem)
 			_ = open.Start(item.url.Address)
+		case key.Matches(msg, b.keyMap.Read):
+			b.setState(downloadingState)
+
+			chapter := b.chaptersList.SelectedItem().(listItem)
+
+			return b, tea.Batch(b.progress.SetPercent(0), b.spinner.Tick, b.initChapterDownloadToRead(chapter.url), b.waitForChapterToReadDownloaded(), b.waitForChapterDownloadProgress())
 		case key.Matches(msg, b.keyMap.Confirm):
 			if len(b.selectedChapters) > 0 {
 				b.setState(confirmPromptState)
@@ -599,6 +655,22 @@ func (b bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case chapterDownloadedToReadMsg:
+		b.chaptersDownloadProgressInfo = ChaptersDownloadProgress(msg)
+
+		if msg.Done {
+			b.setState(exitPromptState)
+
+			if len(msg.Succeeded) != 0 {
+				_ = open.Start(msg.Succeeded[0])
+			}
+
+			return b, nil
+		}
+
+		cmd = b.progress.SetPercent(float64(len(msg.Succeeded)) / float64(msg.Total))
+
+		return b, tea.Batch(cmd, b.waitForChapterToReadDownloaded(), b.waitForChapterDownloadProgress())
 	case chapterDownloadProgressMsg:
 		b.spinner, cmd = b.spinner.Update(msg)
 		b.chapterDownloadProgressInfo = ChapterDownloadProgress(msg)

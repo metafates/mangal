@@ -6,6 +6,7 @@ import (
 	pdfcpu "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/spf13/afero"
 	"log"
+	"os"
 	"path/filepath"
 	"sync"
 )
@@ -86,9 +87,18 @@ type ChapterDownloadProgress struct {
 	Message string
 }
 
-func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress) (string, error) {
+func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp bool) (string, error) {
 	mangaTitle := chapter.Relation.Info
-	mangaPath, err := filepath.Abs(filepath.Join(UserConfig.Path, mangaTitle))
+	var (
+		mangaPath string
+		err       error
+	)
+
+	if temp {
+		mangaPath, err = filepath.Abs(filepath.Join(os.TempDir(), AppName+"Temp "+mangaTitle))
+	} else {
+		mangaPath, err = filepath.Abs(filepath.Join(UserConfig.Path, mangaTitle))
+	}
 
 	if err != nil {
 		return "", nil
