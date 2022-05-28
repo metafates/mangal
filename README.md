@@ -107,14 +107,14 @@ Available Commands:
   cleanup     Remove cached and temp files
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
+  update      Update Mangal
   version     Show version
 
 Flags:
   -c, --config string   use config from path
   -h, --help            help for mangal
 
-Use "mangal [command] --help" for more information about a command.
-```
+Use "mangal [command] --help" for more information about a command.```
 
 ## Install
 

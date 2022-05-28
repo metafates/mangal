@@ -63,7 +63,7 @@ var versionCmd = &cobra.Command{
 var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update " + AppName,
-	Long:  "Fetches new version from github and resinstalls " + AppName,
+	Long:  "Fetches new version from github and reinstalls it " + AppName,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get mod name
 		bi, ok := debug.ReadBuildInfo()
