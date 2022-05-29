@@ -118,12 +118,15 @@ Use "mangal [command] --help" for more information about a command.```
 
 ## Install
 
-You will need [go installed](https://go.dev/doc/install) to install
+### Homebrew
 
-Run
+```bash
+brew tap metafates/tap
+brew install metafates/tap/mangal
+```
+
+### Go
 `go install github.com/metafates/mangal@latest`
-
-This will install mangal to the go/bin 
 
 ## Build
 
