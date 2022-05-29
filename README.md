@@ -33,9 +33,11 @@ that can be added with just a few lines of config file (see [limitations](#limit
 
 ## Examples
 
-<h3 align="center">Usage example</h4>
+<h3 align="center">Usage example</h3>
 
-[![asciicast](https://asciinema.org/a/497193.svg)](https://asciinema.org/a/497193)<h3 align="center">Config example</h3>
+[![asciicast](https://asciinema.org/a/497193.svg)](https://asciinema.org/a/497193)
+
+<h3 align="center">Config example</h3>
 
 Config is located at the OS default config directory.
 
@@ -92,7 +94,7 @@ fullscreen = true
 
 ```
 
-<h3 align="center">Commands example</h4>
+<h3 align="center">Commands example</h3>
 
 ```
 $ mangal help
@@ -114,7 +116,8 @@ Flags:
   -c, --config string   use config from path
   -h, --help            help for mangal
 
-Use "mangal [command] --help" for more information about a command.```
+Use "mangal [command] --help" for more information about a command.
+```
 
 ## Install
 
