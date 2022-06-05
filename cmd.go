@@ -143,11 +143,37 @@ var cleanupCmd = &cobra.Command{
 	},
 }
 
+var whereCmd = &cobra.Command{
+	Use:   "where",
+	Short: "Show path where config is located",
+	Long:  "Show path where config is located if exists.\nOtherwise show path where it is expected to be",
+	Run: func(cmd *cobra.Command, args []string) {
+		configPath, err := GetConfigPath()
+
+		if err != nil {
+			log.Fatal("Can't get config location, permission denied, probably")
+		}
+
+		exists, err := Afero.Exists(configPath)
+
+		if err != nil {
+			log.Fatalf("Can't understand if config exists or not. It is expected at\n%s\n", configPath)
+		}
+
+		if exists {
+			fmt.Printf("Config exists at\n%s\n", configPath)
+		} else {
+			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", configPath)
+		}
+	},
+}
+
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(cleanupCmd)
-	rootCmd.PersistentFlags().StringP("config", "c", "", "use config from path")
+	rootCmd.AddCommand(whereCmd)
+	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
