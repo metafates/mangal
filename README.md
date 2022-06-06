@@ -6,7 +6,6 @@
 <h3 align="center">Manga Downloader</h3>
 
 - [About](#about)
-- [Screenshots](#screenshots)
 - [Examples](#examples)
 - [Install](#install)
 - [Build](#build)
@@ -22,14 +21,6 @@ that can be added with just a few lines of config file (see [limitations](#limit
 🧋 Built with [Bubble Tea framework](https://github.com/charmbracelet/bubbletea)
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
-
-## Screenshots
-
-<img alt="search input" src="assets/sc1.png">
-<img alt="list with found manga" src="assets/sc2.png">
-<img alt="chapters of choosen manga" src="assets/sc3.png">
-<img alt="prompt before downloading" src="assets/sc4.png">
-<img alt="downloading progress bar" src="assets/sc5.png">
 
 ## Examples
 
