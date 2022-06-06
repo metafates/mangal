@@ -109,8 +109,10 @@ Available Commands:
   cleanup     Remove cached and temp files
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
+  init        Create default config at default path
   update      Update Mangal
   version     Show version
+  where       Show path where config is located
 
 Flags:
   -c, --config string   use config from path
@@ -129,18 +131,17 @@ brew install metafates/tap/mangal
 ```
 
 ### Go
-`go install github.com/metafates/mangal@latest`
+```bash
+go install github.com/metafates/mangal@latest
+```
 
 ## Build
 
-1. `git clone https://github.com/metafates/mangal.git`
-2. `cd mangal`
-3. `go build` or `go install`
-
-That's it!
-If you're not sure where binary is installed run `go list -f '{{.Target}}'` in the project directory
-
-To uninstall run `make uninstall`
+```bash
+git clone https://github.com/metafates/mangal.git
+cd mangal
+go build
+```
 
 ## Limitations
 

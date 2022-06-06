@@ -38,6 +38,48 @@ var DefaultConfig = &Config{
 
 var UserConfig *Config
 
+// DefaultConfigBytes TODO: use it as default config
+var DefaultConfigBytes = []byte(`
+# Which sources to use. You can use several sources in descendant order priority
+use = ['manganelo']
+
+# Default download path
+path = '.'
+
+# Fullscreen mode
+fullscreen = true
+
+[sources]
+    [sources.manganelo]
+    # Base url
+    base = 'https://ww5.manganelo.tv'
+
+    # Search endpoint. Put %s where the query should be
+    search = 'https://ww5.manganelo.tv/search/%s'
+
+    # Selector of entry anchor (<a></a>) on search page
+    manga_anchor = '.search-story-item a.item-title'
+
+    # Selector of entry title on search page
+    manga_title = '.search-story-item a.item-title'
+
+    # Manga chapters anchors selector
+    chapter_anchor = 'li.a-h a.chapter-name'
+
+    # Manga chapters titles selector
+    chapter_title = 'li.a-h a.chapter-name'
+
+    # Reader page images selector
+    reader_page = '.container-chapter-reader img'
+    
+    # Random delay between requests (in miliseconds)
+    random_delay_ms = 500
+    
+    # Are chapters listed in reversed order on that source?
+    # reversed = from latest to oldest
+    reversed_chapters_order = true
+`)
+
 // GetConfig from given path. If path is empty string default config path is used
 func GetConfig(path string) *Config {
 	var (

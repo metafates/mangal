@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -148,6 +149,12 @@ var whereCmd = &cobra.Command{
 	Short: "Show path where config is located",
 	Long:  "Show path where config is located if exists.\nOtherwise show path where it is expected to be",
 	Run: func(cmd *cobra.Command, args []string) {
+		edit, err := cmd.Flags().GetBool("edit")
+
+		if err != nil {
+			log.Fatal("Unexpected error while getting flag")
+		}
+
 		configPath, err := GetConfigPath()
 
 		if err != nil {
@@ -161,9 +168,71 @@ var whereCmd = &cobra.Command{
 		}
 
 		if exists {
+
+			if edit {
+				if err := open.Start(configPath); err != nil {
+					log.Fatal("Can not open the editor")
+				}
+
+				return
+			}
+
 			fmt.Printf("Config exists at\n%s\n", configPath)
 		} else {
 			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", configPath)
+		}
+	},
+}
+
+var initCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Create default config at default path",
+	Long:  "Create default config at default path if it doesn't exist yet",
+	Run: func(cmd *cobra.Command, args []string) {
+		force, err := cmd.Flags().GetBool("force")
+
+		if err != nil {
+			log.Fatal("Unexpected error while getting flag")
+		}
+
+		configPath, err := GetConfigPath()
+
+		if err != nil {
+			log.Fatal("Can't get config location, permission denied, probably")
+		}
+
+		exists, err := Afero.Exists(configPath)
+
+		var createConfig = func() {
+			if err := Afero.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
+				log.Fatal("Error while creating file")
+			} else if file, err := Afero.Create(configPath); err != nil {
+				log.Fatal("Error while creating file")
+			} else if _, err = file.Write(DefaultConfigBytes); err != nil {
+				log.Fatal("Error while writing to file")
+			} else {
+				fmt.Printf("Config created at\n%s\n", configPath)
+			}
+		}
+
+		if err != nil {
+			if force {
+				createConfig()
+				return
+			}
+
+			log.Fatalf("Can't understand if config exists or not. It is expected at\n%s\n", configPath)
+		}
+
+		if exists {
+			if force {
+				createConfig()
+				return
+			}
+
+			log.Fatal("Config file already exists. Use --force to overwrite it")
+		} else {
+			createConfig()
 		}
 	},
 }
@@ -172,7 +241,13 @@ func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(cleanupCmd)
+
+	initCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
+	rootCmd.AddCommand(initCmd)
+
+	whereCmd.Flags().BoolP("edit", "e", false, "open in the editor")
 	rootCmd.AddCommand(whereCmd)
+
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 
 	if err := rootCmd.Execute(); err != nil {
