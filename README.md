@@ -35,7 +35,8 @@ that can be added with just a few lines of config file (see [limitations](#limit
 
 <h3 align="center">Usage example</h3>
 
-[![asciicast](https://asciinema.org/a/497193.svg)](https://asciinema.org/a/497193)
+https://user-images.githubusercontent.com/62389790/172178993-bb40392a-54ba-446d-b0ed-1b962ede7ed2.mp4
+
 
 <h3 align="center">Config example</h3>
 
