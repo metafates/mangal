@@ -6,7 +6,6 @@
 <h3 align="center">Manga Downloader</h3>
 
 - [About](#about)
-- [Quick Start](#quick-start)
 - [Examples](#examples)
 - [Install](#install)
 - [Build](#build)
@@ -22,15 +21,6 @@ that can be added with just a few lines of config file (see [limitations](#limit
 🧋 Built with [Bubble Tea framework](https://github.com/charmbracelet/bubbletea)
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
-
-## Quick Start
-
-```bash
-git clone https://github.com/metafates/mangal.git
-cd mangal
-go install
-mangal
-```
 
 ## Examples
 
