@@ -1,11 +1,12 @@
-<h1 align="center">Mangal 📖</h1>
+<h1 align="center">Mangal</h1>
 <p align="center">
-    <img width="200" src="assets/manga.png" alt="heh">
+    <img width="200" src="assets/manga.png" alt="logo">
 </p>
 
 <h3 align="center">Manga Downloader</h3>
 
 - [About](#about)
+- [Quick Start](#quick-start)
 - [Examples](#examples)
 - [Install](#install)
 - [Build](#build)
@@ -22,6 +23,15 @@ that can be added with just a few lines of config file (see [limitations](#limit
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
 
+## Quick Start
+
+```bash
+git clone https://github.com/metafates/mangal.git
+cd mangal
+go install
+mangal
+```
+
 ## Examples
 
 <h3 align="center">Usage example</h3>
@@ -30,6 +40,9 @@ https://user-images.githubusercontent.com/62389790/172178993-bb40392a-54ba-446d-
 
 
 <h3 align="center">Config example</h3>
+
+> TLDR: Use `mangal where` to show where config should be located
+> and `mangal init` to create default config
 
 Config is located at the OS default config directory.
 
