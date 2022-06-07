@@ -195,6 +195,17 @@ var initCmd = &cobra.Command{
 			log.Fatal("Unexpected error while getting flag")
 		}
 
+		preview, err := cmd.Flags().GetBool("preview")
+
+		if err != nil {
+			log.Fatal("Unexpected error while getting flag")
+		}
+
+		if preview {
+			fmt.Println(string(DefaultConfigBytes))
+			return
+		}
+
 		configPath, err := GetConfigPath()
 
 		if err != nil {
@@ -215,21 +226,16 @@ var initCmd = &cobra.Command{
 			}
 		}
 
-		if err != nil {
-			if force {
-				createConfig()
-				return
-			}
+		if force {
+			createConfig()
+			return
+		}
 
-			log.Fatalf("Can't understand if config exists or not. It is expected at\n%s\n", configPath)
+		if err != nil {
+			log.Fatalf("Can't understand if config exists or not, but it is expected at\n%s\n", configPath)
 		}
 
 		if exists {
-			if force {
-				createConfig()
-				return
-			}
-
 			log.Fatal("Config file already exists. Use --force to overwrite it")
 		} else {
 			createConfig()
@@ -243,6 +249,7 @@ func CmdExecute() {
 	rootCmd.AddCommand(cleanupCmd)
 
 	initCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
+	initCmd.Flags().BoolP("preview", "p", false, "preview default config")
 	rootCmd.AddCommand(initCmd)
 
 	whereCmd.Flags().BoolP("edit", "e", false, "open in the editor")
