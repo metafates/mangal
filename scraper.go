@@ -37,8 +37,6 @@ type URL struct {
 	Index    int
 }
 
-var DefaultScraper = MakeSourceScraper(DefaultSource)
-
 // MakeSourceScraper returns new scraper with configured collectors
 func MakeSourceScraper(source Source) *Scraper {
 

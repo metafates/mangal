@@ -25,20 +25,19 @@ Styles
 */
 
 var (
-	commonStyle           = lipgloss.NewStyle().Margin(2, 2)
-	accentStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	selectedItemMarkStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Bold(true)
-	inputPromptStyle      = accentStyle.Copy().Bold(true)
-	inputTitleStyle       = inputPromptStyle.Copy()
-	successStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
-	failStyle             = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	mangaListTitleStyle   = lipgloss.NewStyle().
-				Background(lipgloss.Color("30")).
-				Foreground(lipgloss.Color("230")).
+	commonStyle         = lipgloss.NewStyle().Margin(2, 2)
+	accentStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	inputPromptStyle    = accentStyle.Copy().Bold(true)
+	inputTitleStyle     = inputPromptStyle.Copy()
+	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
+	failStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	mangaListTitleStyle = lipgloss.NewStyle().
+				Background(lipgloss.Color("#9f86c0")).
+				Foreground(lipgloss.Color("#231942")).
 				Padding(0, 1)
 	chaptersListTitleStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("62")).
-				Foreground(lipgloss.Color("230")).
+				Background(lipgloss.Color("#e0b1cb")).
+				Foreground(lipgloss.Color("#231942")).
 				Padding(0, 1)
 )
 
@@ -93,13 +92,39 @@ func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 	return []key.Binding{k.ForceQuit}
 }
 
+func (k keyMap) fullHelpFor(state bubbleState) []key.Binding {
+	switch state {
+	case searchState:
+		return []key.Binding{k.Confirm, k.ForceQuit}
+	case loadingState:
+		return []key.Binding{k.ForceQuit}
+	case mangaState:
+		k.Open.SetHelp("o", "open manga page")
+		return []key.Binding{k.Open, k.Select, k.Back}
+	case chaptersState:
+		k.Open.SetHelp("o", "open chapter reader page")
+		k.Read.SetHelp("r", "read chapter in default pdf app")
+		k.Confirm.SetHelp("enter", "download selected chapters")
+		return []key.Binding{k.Open, k.Read, k.Select, k.SelectAll, k.Confirm, k.Back}
+	case confirmPromptState:
+		return []key.Binding{k.Confirm, k.Back, k.Quit}
+	case downloadingState:
+		return []key.Binding{k.ForceQuit}
+	case exitPromptState:
+		k.Open.SetHelp("o", "open folder")
+		k.Retry.SetHelp("r", "redownload failed")
+		return []key.Binding{k.Back, k.Open, k.Retry, k.Quit}
+	}
+
+	return []key.Binding{k.ForceQuit}
+}
+
 func (k keyMap) ShortHelp() []key.Binding {
 	return k.shortHelpFor(k.state)
 }
 
 func (k keyMap) FullHelp() [][]key.Binding {
-	// TODO: add full help
-	return [][]key.Binding{k.ShortHelp()}
+	return [][]key.Binding{k.fullHelpFor(k.state)}
 }
 
 /*
@@ -191,13 +216,17 @@ func newBubble(initialState bubbleState) bubble {
 	mangaList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
 	mangaList.KeyMap = listKeyMap
 	mangaList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(mangaState) }
+	mangaList.AdditionalFullHelpKeys = func() []key.Binding { return keys.fullHelpFor(mangaState) }
 	mangaList.Styles.Title = mangaListTitleStyle
 	mangaList.Styles.Spinner = accentStyle
+	mangaList.SetFilteringEnabled(false)
 
 	chaptersList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
 	chaptersList.KeyMap = listKeyMap
 	chaptersList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(chaptersState) }
+	chaptersList.AdditionalFullHelpKeys = func() []key.Binding { return keys.fullHelpFor(chaptersState) }
 	chaptersList.Styles.Title = chaptersListTitleStyle
+	chaptersList.SetFilteringEnabled(false)
 
 	bubble_ := bubble{
 		state:                        initialState,
@@ -274,7 +303,7 @@ func (l *listItem) Select() {
 }
 func (l listItem) Title() string {
 	if l.selected {
-		return selectedItemMarkStyle.Render("+") + " " + l.url.Info
+		return accentStyle.Bold(true).Render("▼") + " " + l.url.Info
 	}
 
 	return l.url.Info

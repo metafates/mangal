@@ -30,20 +30,18 @@ func GetConfigPath() (string, error) {
 	return filepath.Join(configDir, strings.ToLower(AppName), "config.toml"), nil
 }
 
-var DefaultConfig = &Config{
-	Scrapers:   []*Scraper{DefaultScraper},
-	Fullscreen: true,
-	Path:       ".",
+func DefaultConfig() *Config {
+	conf, _ := ParseConfig(string(DefaultConfigBytes))
+	return conf
 }
 
 var UserConfig *Config
 
-// DefaultConfigBytes TODO: use it as default config
 var DefaultConfigBytes = []byte(`
-# Which sources to use. You can use several sources in descendant order priority
+# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Default download path
+# Default download path (relative)
 path = '.'
 
 # Fullscreen mode
@@ -72,11 +70,11 @@ fullscreen = true
     # Reader page images selector
     reader_page = '.container-chapter-reader img'
     
-    # Random delay between requests (in miliseconds)
-    random_delay_ms = 500
+    # Random delay between requests
+    random_delay_ms = 500 # ms
     
     # Are chapters listed in reversed order on that source?
-    # reversed = from latest to oldest
+    # reversed order -> from newest chapter to oldest
     reversed_chapters_order = true
 `)
 
@@ -94,22 +92,22 @@ func GetConfig(path string) *Config {
 	}
 
 	if err != nil {
-		return DefaultConfig
+		return DefaultConfig()
 	}
 
 	configExists, err := Afero.Exists(configPath)
 	if err != nil || !configExists {
-		return DefaultConfig
+		return DefaultConfig()
 	}
 
 	contents, err := Afero.ReadFile(configPath)
 	if err != nil {
-		return DefaultConfig
+		return DefaultConfig()
 	}
 
 	config, err := ParseConfig(string(contents))
 	if err != nil {
-		return DefaultConfig
+		return DefaultConfig()
 	}
 
 	return config

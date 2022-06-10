@@ -140,7 +140,7 @@ var cleanupCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("\U0001F9F9 %d files removed. Cleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
 	},
 }
 
@@ -257,7 +257,5 @@ func CmdExecute() {
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 
-	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
-	}
+	_ = rootCmd.Execute()
 }

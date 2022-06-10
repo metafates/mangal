@@ -4,20 +4,37 @@ import (
 	"testing"
 )
 
+var testDefaultSource = Source{
+	Base:             "https://ww5.manganelo.tv",
+	SearchTemplate:   "https://ww5.manganelo.tv/search/%s",
+	MangaAnchor:      ".search-story-item a.item-title",
+	MangaTitle:       ".search-story-item a.item-title",
+	ChapterAnchor:    "li.a-h a.chapter-name",
+	ChapterTitle:     "li.a-h a.chapter-name",
+	ReaderPage:       ".container-chapter-reader img",
+	RandomDelayMs:    700,
+	ChaptersReversed: true,
+}
+
 func TestMakeSourceScraper(t *testing.T) {
-	scraper := MakeSourceScraper(DefaultSource)
+	scraper := MakeSourceScraper(testDefaultSource)
 
 	if scraper == nil {
 		t.Failed()
 	}
 
-	if scraper.Source == nil || scraper.Source != &DefaultSource {
+	if scraper.Source == nil || scraper.Source != &testDefaultSource {
 		t.Failed()
 	}
 }
 
 func TestScraper_SearchManga(t *testing.T) {
-	manga, err := DefaultScraper.SearchManga(TestQuery)
+	if testing.Short() {
+		t.Skip("skipping this scraper.SearchManga is too expensive")
+	}
+
+	defaultScraper := MakeSourceScraper(testDefaultSource)
+	manga, err := defaultScraper.SearchManga(TestQuery)
 
 	if err != nil {
 		t.Failed()
@@ -32,17 +49,23 @@ func TestScraper_SearchManga(t *testing.T) {
 	}
 
 	for _, m := range manga {
-		if m.Scraper != DefaultScraper {
+		if m.Scraper != defaultScraper {
 			t.Fail()
 		}
 	}
 }
 
 func TestScraper_GetChapters(t *testing.T) {
-	manga, _ := DefaultScraper.SearchManga(TestQuery)
+	if testing.Short() {
+		t.Skip("skipping this scraper.GetChapters is too expensive")
+	}
+
+	defaultScraper := MakeSourceScraper(testDefaultSource)
+
+	manga, _ := defaultScraper.SearchManga(TestQuery)
 	anyManga := manga[0]
 
-	chapters, err := DefaultScraper.GetChapters(anyManga)
+	chapters, err := defaultScraper.GetChapters(anyManga)
 
 	if err != nil {
 		t.Failed()
@@ -65,13 +88,19 @@ func TestScraper_GetChapters(t *testing.T) {
 }
 
 func TestScraper_GetPages(t *testing.T) {
-	manga, _ := DefaultScraper.SearchManga(TestQuery)
+	if testing.Short() {
+		t.Skip("skipping this scraper.GetPages is too expensive")
+	}
+
+	defaultScraper := MakeSourceScraper(testDefaultSource)
+
+	manga, _ := defaultScraper.SearchManga(TestQuery)
 	anyManga := manga[0]
 
-	chapters, _ := DefaultScraper.GetChapters(anyManga)
+	chapters, _ := defaultScraper.GetChapters(anyManga)
 	anyChapter := chapters[0]
 
-	pages, err := DefaultScraper.GetPages(anyChapter)
+	pages, err := defaultScraper.GetPages(anyChapter)
 
 	if err != nil {
 		t.Failed()
@@ -93,16 +122,22 @@ func TestScraper_GetPages(t *testing.T) {
 }
 
 func TestScraper_GetFile(t *testing.T) {
-	manga, _ := DefaultScraper.SearchManga(TestQuery)
+	if testing.Short() {
+		t.Skip("skipping this scaper.GetFile is too expensive")
+	}
+
+	defaultScraper := MakeSourceScraper(testDefaultSource)
+
+	manga, _ := defaultScraper.SearchManga(TestQuery)
 	anyManga := manga[0]
 
-	chapters, _ := DefaultScraper.GetChapters(anyManga)
+	chapters, _ := defaultScraper.GetChapters(anyManga)
 	anyChapter := chapters[0]
 
-	pages, _ := DefaultScraper.GetPages(anyChapter)
+	pages, _ := defaultScraper.GetPages(anyChapter)
 	anyPage := pages[0]
 
-	file, err := DefaultScraper.GetFile(anyPage)
+	file, err := defaultScraper.GetFile(anyPage)
 
 	if err != nil || file == nil {
 		t.Failed()
