@@ -3,7 +3,7 @@
     <img width="200" src="assets/manga.png" alt="logo">
 </p>
 
-<h3 align="center">Manga Downloader</h3>
+<h3 align="center">CLI Manga Downloader</h3>
 
 - [About](#about)
 - [Examples](#examples)
@@ -48,7 +48,7 @@ You can load config from custom path by using `--config` flag
 By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
 
 ```toml
-# Which sources to use. You can use several sources in descendant order priority
+# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
 # Default download path

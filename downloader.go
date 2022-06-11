@@ -87,6 +87,7 @@ type ChapterDownloadProgress struct {
 	Message string
 }
 
+// DownloadChapter downloads chapter from the given url and returns its path
 func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp bool) (string, error) {
 	mangaTitle := chapter.Relation.Info
 	var (
@@ -155,7 +156,6 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 			if err != nil {
 				// TODO: use channel
 				errorEncountered = true
-				//log.Fatalf("Error while downloading page %s", p.Address)
 				return
 			}
 
