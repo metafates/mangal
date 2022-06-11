@@ -7,28 +7,31 @@
 
 - [About](#about)
 - [Examples](#examples)
+- [Config](#config)
+- [Commands](#commands)
 - [Install](#install)
 - [Build](#build)
 - [Limitations](#limitations)
 
 ## About
 
-✨ __Mangal__ is a fancy TUI app written in go that scrapes, downloads and packs manga into pdfs
+✨ __Mangal__ is a fancy TUI app written in Go which scrapes, downloads and packs manga into pdfs
 
 ⚙️ The most important feature of Mangal is that it supports user defined scrapers
-that can be added with just a few lines of config file (see [limitations](#limitations))
+that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
 
-🧋 Built with [Bubble Tea framework](https://github.com/charmbracelet/bubbletea)
+🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate into scripts
+
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
 
 ## Examples
 
-<h3 align="center">TUI usage example</h3>
+### TUI usage example
 
 https://user-images.githubusercontent.com/62389790/172178993-bb40392a-54ba-446d-b0ed-1b962ede7ed2.mp4
 
-<h3 align="center">Inline mode usage example</h3>
+### Inline mode usage example
 
 > For more information about inline mode type `mangal inline --help`
 
@@ -46,7 +49,7 @@ mangal inline --query "death note" --manga 1
 mangal inline --query "death note" --manga 1 --chapter 1
 ```
 
-<h3 align="center">Config example</h3>
+## Config
 
 > TLDR: Use `mangal where` to show where config should be located
 > and `mangal init` to create default config
@@ -101,18 +104,13 @@ fullscreen = true
     random_delay_ms = 500
     
     # Are chapters listed in reversed order on that source?
-    # reversed = from latest to oldest
+    # reversed order -> from newest chapter to oldest
     reversed_chapters_order = true
-
 ```
 
-<h3 align="center">Commands example</h3>
+## Commands
 
 ```
-$ mangal help
-
-A fast and flexible manga downloader
-
 Usage:
   mangal [flags]
   mangal [command]
