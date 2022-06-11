@@ -31,7 +31,7 @@ func RemoveIfExists(path string) error {
 // SaveTemp saves file to OS temp dir and returns its path
 // It's a caller responsibility to remove created file
 func SaveTemp(contents *[]byte) (string, error) {
-	out, err := Afero.TempFile("", AppName+"-*")
+	out, err := Afero.TempFile("", TempPrefix+"*")
 
 	if err != nil {
 		return "", err
@@ -96,19 +96,16 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	)
 
 	if temp {
-		mangaPath, err = filepath.Abs(filepath.Join(os.TempDir(), AppName+"Temp "+mangaTitle))
+		mangaPath = os.TempDir()
 	} else {
 		mangaPath, err = filepath.Abs(filepath.Join(UserConfig.Path, mangaTitle))
-	}
-
-	if err != nil {
-		return "", nil
-	}
-
-	err = Afero.MkdirAll(mangaPath, 0700)
-
-	if err != nil {
-		return "", nil
+		if err != nil {
+			return "", err
+		}
+		err = Afero.MkdirAll(mangaPath, 0700)
+		if err != nil {
+			return "", nil
+		}
 	}
 
 	showProgress := progress != nil
@@ -120,7 +117,12 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		}
 	}
 
-	chapterPath := filepath.Join(mangaPath, fmt.Sprintf("[%d] %s.pdf", chapter.Index, chapter.Info))
+	var chapterPath string
+	if temp {
+		chapterPath = filepath.Join(mangaPath, fmt.Sprintf(TempPrefix+" [%d] %s.pdf", chapter.Index, chapter.Info))
+	} else {
+		chapterPath = filepath.Join(mangaPath, fmt.Sprintf("[%d] %s.pdf", chapter.Index, chapter.Info))
+	}
 	pages, err := chapter.Scraper.GetPages(chapter)
 	pagesCount := len(pages)
 
@@ -179,7 +181,8 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		}
 	}
 
-	err = RemoveIfExists(chapterPath)
+	//err = RemoveIfExists(chapterPath)
+	exists, err := Afero.Exists(chapterPath)
 	if err != nil {
 		return "", err
 	}
@@ -188,7 +191,9 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		return "", errors.New("pages was not downloaded")
 	}
 
-	err = pdfcpu.ImportImagesFile(tempPaths, chapterPath, nil, nil)
+	if !exists {
+		err = pdfcpu.ImportImagesFile(tempPaths, chapterPath, nil, nil)
+	}
 
 	if err != nil {
 		return "", err

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"runtime/debug"
 	"strings"
+	"sync"
 )
 
 var rootCmd = &cobra.Command{
@@ -21,22 +23,7 @@ var rootCmd = &cobra.Command{
 	Long:  `A fast and flexible manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
-		exists, err := Afero.Exists(config)
-
-		if err != nil {
-			log.Fatal(errors.New("access to config file denied"))
-		}
-
-		if config != "" {
-			config = path.Clean(config)
-			if !exists {
-				log.Fatal(errors.New(fmt.Sprintf("config at path %s doesn't exist", config)))
-			}
-
-			UserConfig = GetConfig(config)
-		} else {
-			UserConfig = GetConfig("") // get config from default config path
-		}
+		initConfig(config)
 
 		var program *tea.Program
 
@@ -97,6 +84,8 @@ var cleanupCmd = &cobra.Command{
 			bytes int64
 		)
 
+		leaveCache, _ := cmd.Flags().GetBool("no-cache")
+
 		// Cleanup temp files
 		tempDir := os.TempDir()
 		tempFiles, err := Afero.ReadDir(tempDir)
@@ -105,6 +94,7 @@ var cleanupCmd = &cobra.Command{
 			for _, tempFile := range tempFiles {
 				name := tempFile.Name()
 				if strings.HasPrefix(name, AppName) || strings.HasPrefix(name, lowerAppName) {
+
 					p := filepath.Join(tempDir, name)
 
 					if tempFile.IsDir() {
@@ -123,20 +113,22 @@ var cleanupCmd = &cobra.Command{
 			}
 		}
 
-		// Cleanup cache files
-		cacheDir, err := os.UserCacheDir()
-		if err == nil {
-			scraperCacheDir := filepath.Join(cacheDir, AppName)
-			if exists, err := Afero.Exists(scraperCacheDir); err == nil && exists {
-				files, err := Afero.ReadDir(scraperCacheDir)
-				if err == nil {
-					counter += len(files)
-					for _, f := range files {
-						bytes += f.Size()
+		if !leaveCache {
+			// Cleanup cache files
+			cacheDir, err := os.UserCacheDir()
+			if err == nil {
+				scraperCacheDir := filepath.Join(cacheDir, CachePrefix)
+				if exists, err := Afero.Exists(scraperCacheDir); err == nil && exists {
+					files, err := Afero.ReadDir(scraperCacheDir)
+					if err == nil {
+						counter += len(files)
+						for _, f := range files {
+							bytes += f.Size()
+						}
 					}
-				}
 
-				_ = Afero.RemoveAll(scraperCacheDir)
+					_ = Afero.RemoveAll(scraperCacheDir)
+				}
 			}
 		}
 
@@ -243,9 +235,137 @@ var initCmd = &cobra.Command{
 	},
 }
 
+var inlineCmd = &cobra.Command{
+	Use:   "inline",
+	Short: "Search & Download manga in inline mode",
+	Long: `Search & Download manga in inline mode
+Useful for scripting`,
+	Run: func(cmd *cobra.Command, args []string) {
+		config, _ := cmd.Flags().GetString("config")
+		initConfig(config)
+
+		var (
+			manga []*URL
+			wg    sync.WaitGroup
+		)
+
+		query, _ := cmd.Flags().GetString("query")
+		if query == "" {
+			log.Fatal("Query expected")
+		}
+
+		wg.Add(len(UserConfig.Scrapers))
+
+		for _, scraper := range UserConfig.Scrapers {
+			go func(s *Scraper) {
+				defer wg.Done()
+
+				m, err := s.SearchManga(query)
+
+				if err == nil {
+					manga = append(manga, m...)
+				}
+			}(scraper)
+		}
+
+		wg.Wait()
+
+		showUrls, _ := cmd.Flags().GetBool("urls")
+		asJson, _ := cmd.Flags().GetBool("json")
+		if mangaIdx, _ := cmd.Flags().GetInt("manga"); mangaIdx != -1 {
+			if mangaIdx > len(manga) || mangaIdx <= 0 {
+				log.Fatal("Index out of range")
+			}
+
+			selectedManga := manga[mangaIdx-1]
+
+			chapters, err := selectedManga.Scraper.GetChapters(selectedManga)
+			if err != nil {
+				log.Fatal("Error while getting chapters")
+			}
+
+			if chapterIdx, _ := cmd.Flags().GetInt("chapter"); chapterIdx != -1 {
+
+				selectedChapter, ok := Find(chapters, func(c *URL) bool {
+					return c.Index == chapterIdx
+				})
+
+				if !ok {
+					log.Fatal("Index out of range")
+				}
+
+				asTemp, _ := cmd.Flags().GetBool("temp")
+				chapterPath, err := DownloadChapter(selectedChapter, nil, asTemp)
+				if err != nil {
+					log.Fatal("Error while downloading chapter")
+				}
+
+				fmt.Println(chapterPath)
+				return
+			}
+
+			if asJson {
+				data, err := json.Marshal(chapters)
+				if err != nil {
+					log.Fatal("Could not get data as json")
+				}
+
+				fmt.Println(string(data))
+			} else {
+				for _, c := range chapters {
+					if showUrls {
+						fmt.Printf("[%d] %s %s\n", c.Index, c.Info, c.Address)
+					} else {
+						fmt.Printf("[%d] %s\n", c.Index, c.Info)
+					}
+				}
+			}
+
+		} else {
+			if asJson {
+				data, err := json.Marshal(manga)
+				if err != nil {
+					log.Fatal("Could not get data as json")
+				}
+
+				fmt.Println(string(data))
+			} else {
+				for i, m := range manga {
+					if showUrls {
+						fmt.Printf("[%d] %s %s\n", i+1, m.Info, m.Address)
+					} else {
+						fmt.Printf("[%d] %s\n", i+1, m.Info)
+					}
+				}
+			}
+		}
+	},
+}
+
+func initConfig(config string) {
+	exists, err := Afero.Exists(config)
+
+	if err != nil {
+		log.Fatal(errors.New("access to config file denied"))
+	}
+
+	if config != "" {
+		config = path.Clean(config)
+		if !exists {
+			log.Fatal(errors.New(fmt.Sprintf("config at path %s doesn't exist", config)))
+		}
+
+		UserConfig = GetConfig(config)
+	} else {
+		UserConfig = GetConfig("") // get config from default config path
+	}
+}
+
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(updateCmd)
+
+	cleanupCmd.Flags().BoolP("no-cache", "c", false, "do not remove cache")
 	rootCmd.AddCommand(cleanupCmd)
 
 	initCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
@@ -254,6 +374,15 @@ func CmdExecute() {
 
 	whereCmd.Flags().BoolP("edit", "e", false, "open in the editor")
 	rootCmd.AddCommand(whereCmd)
+
+	inlineCmd.Flags().StringP("config", "c", "", "use config from path")
+	inlineCmd.Flags().Int("manga", -1, "choose manga")
+	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter")
+	inlineCmd.Flags().StringP("query", "q", "", "query to pass")
+	inlineCmd.Flags().BoolP("json", "j", false, "print as json")
+	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
+	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
+	rootCmd.AddCommand(inlineCmd)
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 

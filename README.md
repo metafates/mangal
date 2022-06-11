@@ -24,9 +24,20 @@ that can be added with just a few lines of config file (see [limitations](#limit
 
 ## Examples
 
-<h3 align="center">Usage example</h3>
+<h3 align="center">TUI usage example</h3>
 
 https://user-images.githubusercontent.com/62389790/172178993-bb40392a-54ba-446d-b0ed-1b962ede7ed2.mp4
+
+<h3 align="center">Inline mode usage example</h3>
+
+> For more information about inline mode type `mangal inline --help`
+
+- Search manga
+`mangal inline --query "death note"`
+- Get chapters of first manga in the list
+`mangal inline --query "death note --manga 1"`
+- Download first chapter of the first manga in the list
+`mangal inline --query "death note --manga 1 --chapter 1"`
 
 
 <h3 align="center">Config example</h3>
@@ -105,6 +116,7 @@ Available Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
   init        Create default config at default path
+  inline      Search & Download manga in inline mode
   update      Update Mangal
   version     Show version
   where       Show path where config is located
@@ -113,7 +125,7 @@ Flags:
   -c, --config string   use config from path
   -h, --help            help for mangal
 
-Use "mangal [command] --help" for more information about a command.
+Use "mangal [command] --help" for more information about a command.```
 ```
 
 ## Install

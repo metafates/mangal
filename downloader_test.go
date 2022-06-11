@@ -23,8 +23,8 @@ func TestSaveTemp(t *testing.T) {
 		_ = Afero.Remove(path)
 	}()
 
-	if !strings.HasPrefix(filepath.Base(path), AppName) {
-		t.Error(AppName + " is expected as a temp file prefix")
+	if !strings.HasPrefix(filepath.Base(path), TempPrefix) {
+		t.Error(TempPrefix + " is expected as a temp file prefix")
 	}
 
 	if exists, _ := Afero.Exists(path); !exists {
@@ -86,8 +86,8 @@ func TestDownloadChapter(t *testing.T) {
 		t.Error("Chapter is expected to be downloaded in the temp folder")
 	}
 
-	if !strings.HasPrefix(filepath.Base(filepath.Dir(path)), AppName) {
-		t.Error(AppName + " is expected as a temp manga folder prefix")
+	if !strings.HasPrefix(filepath.Base(path), TempPrefix) {
+		t.Error(TempPrefix + " is expected as a temp chapter prefix")
 	}
 
 	if exists, _ := Afero.Exists(path); !exists {
