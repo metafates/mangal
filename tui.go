@@ -15,6 +15,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -575,6 +576,11 @@ func (b bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		var items []list.Item
+
+		// Sort according to chapter index, in ascending order
+		sort.Slice(msg, func(i, j int) bool {
+			return msg[i].Index < msg[j].Index
+		})
 
 		for _, url := range msg {
 			items = append(items, listItem{url: url})
