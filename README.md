@@ -32,13 +32,19 @@ https://user-images.githubusercontent.com/62389790/172178993-bb40392a-54ba-446d-
 
 > For more information about inline mode type `mangal inline --help`
 
-- Search manga
-`mangal inline --query "death note"`
-- Get chapters of first manga in the list
-`mangal inline --query "death note --manga 1"`
-- Download first chapter of the first manga in the list
-`mangal inline --query "death note --manga 1 --chapter 1"`
+```bash
+# Search manga. Returns a list of found manga
+mangal inline --query "death note"
 
+# Search manga. Returns a JSON list of found manga
+mangal inline --query "death note" --json
+
+# Get chapters of first manga in the list
+mangal inline --query "death note" --manga 1
+
+# Download first chapter of the first manga in the list
+mangal inline --query "death note" --manga 1 --chapter 1
+```
 
 <h3 align="center">Config example</h3>
 
@@ -157,7 +163,7 @@ Even though most manga sites will work, there exists some limitation to which si
 - Navigation layout should follow this model
     - Each manga have a separate page
     - Manga page should have a some form of chapters list (not lazy loaded)
-    - Each chapter should have a separate page with pages (images)
+    - Each chapter should have a separate reader page with images
 
 <br>
 
