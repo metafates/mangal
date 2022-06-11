@@ -130,6 +130,7 @@ func ParseConfig(configString string) (*Config, error) {
 			continue
 		}
 
+		source.Name = sourceName
 		scraper := MakeSourceScraper(source)
 		conf.Scrapers = append(conf.Scrapers, scraper)
 	}

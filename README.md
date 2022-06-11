@@ -7,29 +7,49 @@
 
 - [About](#about)
 - [Examples](#examples)
+- [Config](#config)
+- [Commands](#commands)
 - [Install](#install)
 - [Build](#build)
 - [Limitations](#limitations)
 
 ## About
 
-✨ __Mangal__ is a fancy TUI app written in go that scrapes, downloads and packs manga into pdfs
+✨ __Mangal__ is a fancy TUI app written in Go which scrapes, downloads and packs manga into pdfs
 
 ⚙️ The most important feature of Mangal is that it supports user defined scrapers
-that can be added with just a few lines of config file (see [limitations](#limitations))
+that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
 
-🧋 Built with [Bubble Tea framework](https://github.com/charmbracelet/bubbletea)
+🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate into scripts
+
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
 
 ## Examples
 
-<h3 align="center">Usage example</h3>
+### TUI usage example
 
 https://user-images.githubusercontent.com/62389790/172178993-bb40392a-54ba-446d-b0ed-1b962ede7ed2.mp4
 
+### Inline mode usage example
 
-<h3 align="center">Config example</h3>
+> For more information about inline mode type `mangal inline --help`
+
+```bash
+# Search manga. Returns a list of found manga
+mangal inline --query "death note"
+
+# Search manga. Returns a JSON list of found manga
+mangal inline --query "death note" --json
+
+# Get chapters of first manga in the list
+mangal inline --query "death note" --manga 1
+
+# Download first chapter of the first manga in the list
+mangal inline --query "death note" --manga 1 --chapter 1
+```
+
+## Config
 
 > TLDR: Use `mangal where` to show where config should be located
 > and `mangal init` to create default config
@@ -84,18 +104,13 @@ fullscreen = true
     random_delay_ms = 500
     
     # Are chapters listed in reversed order on that source?
-    # reversed = from latest to oldest
+    # reversed order -> from newest chapter to oldest
     reversed_chapters_order = true
-
 ```
 
-<h3 align="center">Commands example</h3>
+## Commands
 
 ```
-$ mangal help
-
-A fast and flexible manga downloader
-
 Usage:
   mangal [flags]
   mangal [command]
@@ -105,6 +120,7 @@ Available Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
   init        Create default config at default path
+  inline      Search & Download manga in inline mode
   update      Update Mangal
   version     Show version
   where       Show path where config is located
@@ -113,7 +129,7 @@ Flags:
   -c, --config string   use config from path
   -h, --help            help for mangal
 
-Use "mangal [command] --help" for more information about a command.
+Use "mangal [command] --help" for more information about a command.```
 ```
 
 ## Install
@@ -145,7 +161,7 @@ Even though most manga sites will work, there exists some limitation to which si
 - Navigation layout should follow this model
     - Each manga have a separate page
     - Manga page should have a some form of chapters list (not lazy loaded)
-    - Each chapter should have a separate page with pages (images)
+    - Each chapter should have a separate reader page with images
 
 <br>
 

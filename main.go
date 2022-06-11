@@ -1,6 +1,6 @@
 package main
 
-const version = "0.9.9"
+const version = "1.0.0" // release 🎉
 
 func main() {
 	CmdExecute()

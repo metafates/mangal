@@ -82,3 +82,16 @@ func DirSize(path string) (int64, error) {
 	})
 	return size, err
 }
+
+func Find[T any](list []T, f func(T) bool) (T, bool) {
+	var prev *T
+
+	for _, el := range list {
+		prev = &el
+		if f(el) {
+			return el, true
+		}
+	}
+
+	return *prev, false
+}
