@@ -3,6 +3,8 @@ package main
 import "testing"
 
 func TestNewBubble(t *testing.T) {
+	initConfig("")
+
 	bubble := NewBubble(searchState)
 
 	if bubble.state != searchState {
