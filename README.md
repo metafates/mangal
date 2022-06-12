@@ -5,6 +5,17 @@
 
 <h3 align="center">CLI Manga Downloader</h3>
 
+<p align="center">
+  <a href="https://goreportcard.com/report/github.com/metafates/mangal">
+    <img src="https://goreportcard.com/badge/github.com/metafates/mangal">
+  </a>
+
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg">
+  </a>
+</p>
+
+
 - [About](#about)
 - [Examples](#examples)
 - [Config](#config)
@@ -20,7 +31,7 @@
 ⚙️ The most important feature of Mangal is that it supports user defined scrapers
 that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
 
-🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate into scripts
+🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate with scripts
 
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
@@ -71,11 +82,20 @@ By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
 # Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Default download path
+# Default download path (relative)
 path = '.'
 
 # Fullscreen mode
 fullscreen = true
+
+# Input prompt icon
+prompt = "🔍"
+
+# Input placeholder
+placeholder = "What shall we look for?"
+
+# Selected chapter mark
+mark = "▼"
 
 [sources]
     [sources.manganelo]
@@ -100,8 +120,8 @@ fullscreen = true
     # Reader page images selector
     reader_page = '.container-chapter-reader img'
     
-    # Random delay between requests (in miliseconds)
-    random_delay_ms = 500
+    # Random delay between requests
+    random_delay_ms = 500 # ms
     
     # Are chapters listed in reversed order on that source?
     # reversed order -> from newest chapter to oldest

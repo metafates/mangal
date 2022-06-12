@@ -8,16 +8,22 @@ import (
 )
 
 type Config struct {
-	Scrapers   []*Scraper
-	Fullscreen bool
-	Path       string
+	Scrapers    []*Scraper
+	Fullscreen  bool
+	Prompt      string
+	Placeholder string
+	Mark        string
+	Path        string
 }
 
 type _tempConfig struct {
-	Use        []string
-	Path       string
-	Fullscreen bool
-	Sources    map[string]Source
+	Use         []string
+	Path        string
+	Fullscreen  bool
+	Prompt      string
+	Placeholder string
+	Mark        string
+	Sources     map[string]Source
 }
 
 func GetConfigPath() (string, error) {
@@ -46,6 +52,15 @@ path = '.'
 
 # Fullscreen mode
 fullscreen = true
+
+# Input prompt icon
+prompt = "🔍"
+
+# Input placeholder
+placeholder = "What shall we look for?"
+
+# Selected chapter mark
+mark = "▼"
 
 [sources]
     [sources.manganelo]
@@ -124,7 +139,7 @@ func ParseConfig(configString string) (*Config, error) {
 		return nil, err
 	}
 
-	// Handle sources
+	// Convert sources to scrapers
 	for sourceName, source := range tempConf.Sources {
 		if !Contains[string](tempConf.Use, sourceName) {
 			continue
@@ -136,6 +151,9 @@ func ParseConfig(configString string) (*Config, error) {
 	}
 
 	conf.Fullscreen = tempConf.Fullscreen
+	conf.Mark = tempConf.Mark
+	conf.Prompt = tempConf.Prompt
+	conf.Placeholder = tempConf.Placeholder
 	conf.Path = tempConf.Path
 
 	return &conf, err

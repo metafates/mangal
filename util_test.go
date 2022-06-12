@@ -52,3 +52,49 @@ func TestIsUnique(t *testing.T) {
 		}
 	}
 }
+
+func TestFind(t *testing.T) {
+	integers := []int{1, 2, 3, 4, 10, 27, -258925}
+
+	if found, ok := Find(integers, func(i int) bool {
+		return i == 10
+	}); ok {
+		if found != 10 {
+			t.Error("Wrong element was found")
+		}
+	} else {
+		t.Error("Element was not found")
+	}
+
+	if _, ok := Find(integers, func(i int) bool {
+		return i == 0
+	}); ok {
+		t.Error("ok is expected to be false for the non-existing element")
+	}
+
+	type person struct {
+		name string
+		age  int
+	}
+
+	structs := []person{
+		{
+			name: "name 1",
+			age:  100,
+		},
+		{
+			name: "name 2",
+			age:  -1,
+		},
+	}
+
+	if found, ok := Find(structs, func(p person) bool {
+		return p.age < 0
+	}); ok {
+		if found.age != -1 {
+			t.Error("Wrong element was found")
+		}
+	} else {
+		t.Error("Element was not found")
+	}
+}

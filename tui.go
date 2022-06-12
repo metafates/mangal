@@ -132,7 +132,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 Model
 */
 
-func newBubble(initialState bubbleState) bubble {
+func NewBubble(initialState bubbleState) Bubble {
 	keys := keyMap{
 		state: initialState,
 
@@ -187,9 +187,9 @@ func newBubble(initialState bubbleState) bubble {
 	}
 
 	input := textinput.New()
-	input.Placeholder = "Search Manga..."
+	input.Placeholder = UserConfig.Placeholder
 	input.CharLimit = 50
-	input.Prompt = inputPromptStyle.Render("> ")
+	input.Prompt = inputPromptStyle.Render(UserConfig.Prompt + " ")
 
 	spinner_ := spinner.New()
 	spinner_.Spinner = spinner.Dot
@@ -229,7 +229,7 @@ func newBubble(initialState bubbleState) bubble {
 	chaptersList.Styles.Title = chaptersListTitleStyle
 	chaptersList.SetFilteringEnabled(false)
 
-	bubble_ := bubble{
+	bubble_ := Bubble{
 		state:                        initialState,
 		keyMap:                       keys,
 		input:                        input,
@@ -270,7 +270,7 @@ const (
 	exitPromptState
 )
 
-type bubble struct {
+type Bubble struct {
 	state   bubbleState
 	loading bool
 
@@ -304,7 +304,7 @@ func (l *listItem) Select() {
 }
 func (l listItem) Title() string {
 	if l.selected {
-		return accentStyle.Bold(true).Render("▼") + " " + l.url.Info
+		return accentStyle.Bold(true).Render(UserConfig.Mark) + " " + l.url.Info
 	}
 
 	return l.url.Info
@@ -322,7 +322,7 @@ func (l listItem) FilterValue() string {
 Bubble Init
 */
 
-func (b bubble) Init() tea.Cmd {
+func (b Bubble) Init() tea.Cmd {
 	return textinput.Blink
 }
 
@@ -330,20 +330,20 @@ func (b bubble) Init() tea.Cmd {
 Bubble Update
 */
 
-func (b *bubble) resize(width int, height int) {
+func (b *Bubble) resize(width int, height int) {
 	x, y := commonStyle.GetFrameSize()
 	b.mangaList.SetSize(width-x, height-y)
 	b.chaptersList.SetSize(width-x, height-y)
 }
 
-func (b *bubble) setState(state bubbleState) {
+func (b *Bubble) setState(state bubbleState) {
 	b.state = state
 	b.keyMap.state = state
 }
 
 type mangaSearchDoneMsg []*URL
 
-func (b bubble) initMangaSearch(query string) tea.Cmd {
+func (b Bubble) initMangaSearch(query string) tea.Cmd {
 	return func() tea.Msg {
 		var (
 			manga []*URL
@@ -371,7 +371,7 @@ func (b bubble) initMangaSearch(query string) tea.Cmd {
 	}
 }
 
-func (b bubble) waitForMangaSearchCompletion() tea.Cmd {
+func (b Bubble) waitForMangaSearchCompletion() tea.Cmd {
 	return func() tea.Msg {
 		return mangaSearchDoneMsg(<-b.mangaChan)
 	}
@@ -380,7 +380,7 @@ func (b bubble) waitForMangaSearchCompletion() tea.Cmd {
 type chapterGetDoneMsg []*URL
 type chapterDownloadProgressMsg ChapterDownloadProgress
 
-func (b bubble) initChaptersGet(manga *URL) tea.Cmd {
+func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
 	return func() tea.Msg {
 		chapters, err := manga.Scraper.GetChapters(manga)
 
@@ -394,13 +394,13 @@ func (b bubble) initChaptersGet(manga *URL) tea.Cmd {
 	}
 }
 
-func (b bubble) waitForChaptersGetCompletion() tea.Cmd {
+func (b Bubble) waitForChaptersGetCompletion() tea.Cmd {
 	return func() tea.Msg {
 		return chapterGetDoneMsg(<-b.chaptersChan)
 	}
 }
 
-func (b bubble) waitForChapterDownloadProgress() tea.Cmd {
+func (b Bubble) waitForChapterDownloadProgress() tea.Cmd {
 	return func() tea.Msg {
 		return chapterDownloadProgressMsg(<-b.chapterPagesProgressChan)
 	}
@@ -408,7 +408,7 @@ func (b bubble) waitForChapterDownloadProgress() tea.Cmd {
 
 type chaptersDownloadProgressMsg ChaptersDownloadProgress
 
-func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
+func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 	return func() tea.Msg {
 		var (
 			failed    []*URL
@@ -448,7 +448,7 @@ func (b bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 	}
 }
 
-func (b bubble) waitForChaptersDownloadProgress() tea.Cmd {
+func (b Bubble) waitForChaptersDownloadProgress() tea.Cmd {
 	return func() tea.Msg {
 		return chaptersDownloadProgressMsg(<-b.chaptersProgressChan)
 	}
@@ -456,7 +456,7 @@ func (b bubble) waitForChaptersDownloadProgress() tea.Cmd {
 
 type chapterDownloadedToReadMsg ChaptersDownloadProgress
 
-func (b bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
+func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 	return func() tea.Msg {
 		var (
 			failed    []*URL
@@ -493,13 +493,13 @@ func (b bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 	}
 }
 
-func (b bubble) waitForChapterToReadDownloaded() tea.Cmd {
+func (b Bubble) waitForChapterToReadDownloaded() tea.Cmd {
 	return func() tea.Msg {
 		return chapterDownloadedToReadMsg(<-b.chaptersProgressChan)
 	}
 }
 
-func (b bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -507,9 +507,8 @@ func (b bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, b.keyMap.Back):
 			return b, tea.Quit
-		case key.Matches(msg, b.keyMap.Confirm):
+		case key.Matches(msg, b.keyMap.Confirm) && b.input.Value() != "":
 			b.setState(loadingState)
-
 			return b, tea.Batch(b.spinner.Tick, b.initMangaSearch(b.input.Value()), b.waitForMangaSearchCompletion())
 		}
 	}
@@ -518,7 +517,7 @@ func (b bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
-func (b bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -538,7 +537,7 @@ func (b bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
-func (b bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -595,7 +594,7 @@ func (b bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
-func (b bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -619,12 +618,8 @@ func (b bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			chapter := b.chaptersList.SelectedItem().(listItem)
 
 			return b, tea.Batch(b.progress.SetPercent(0), b.spinner.Tick, b.initChapterDownloadToRead(chapter.url), b.waitForChapterToReadDownloaded(), b.waitForChapterDownloadProgress())
-		case key.Matches(msg, b.keyMap.Confirm):
-			if len(b.selectedChapters) > 0 {
-				b.setState(confirmPromptState)
-				return b, nil
-			}
-
+		case key.Matches(msg, b.keyMap.Confirm) && len(b.selectedChapters) > 0:
+			b.setState(confirmPromptState)
 			return b, nil
 		case key.Matches(msg, b.keyMap.Select):
 			item := b.chaptersList.SelectedItem().(listItem)
@@ -664,7 +659,7 @@ func (b bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
-func (b bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -691,7 +686,7 @@ func (b bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, nil
 }
 
-func (b bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -737,7 +732,7 @@ func (b bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
-func (b bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -763,7 +758,7 @@ func (b bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, nil
 }
 
-func (b bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)
@@ -801,7 +796,7 @@ func (b bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 Bubble Render
 */
 
-func (b bubble) View() string {
+func (b Bubble) View() string {
 	var view string
 
 	template := viewTemplates[b.state]
@@ -853,7 +848,7 @@ func (b bubble) View() string {
 		}
 	}
 
-	// Do not add help bubble at these states, since they already have one
+	// Do not add help Bubble at these states, since they already have one
 	if Contains([]bubbleState{mangaState, chaptersState}, b.state) {
 		return commonStyle.Render(view)
 	}

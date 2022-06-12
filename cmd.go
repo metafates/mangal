@@ -28,9 +28,9 @@ var rootCmd = &cobra.Command{
 		var program *tea.Program
 
 		if UserConfig.Fullscreen {
-			program = tea.NewProgram(newBubble(searchState), tea.WithAltScreen())
+			program = tea.NewProgram(NewBubble(searchState), tea.WithAltScreen())
 		} else {
-			program = tea.NewProgram(newBubble(searchState))
+			program = tea.NewProgram(NewBubble(searchState))
 		}
 
 		if err := program.Start(); err != nil {
@@ -372,13 +372,13 @@ func CmdExecute() {
 	initCmd.Flags().BoolP("preview", "p", false, "preview default config")
 	rootCmd.AddCommand(initCmd)
 
-	whereCmd.Flags().BoolP("edit", "e", false, "open in the editor")
+	whereCmd.Flags().BoolP("edit", "e", false, "open in the default editor")
 	rootCmd.AddCommand(whereCmd)
 
 	inlineCmd.Flags().StringP("config", "c", "", "use config from path")
-	inlineCmd.Flags().Int("manga", -1, "choose manga")
-	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter")
-	inlineCmd.Flags().StringP("query", "q", "", "query to pass")
+	inlineCmd.Flags().Int("manga", -1, "choose manga by index")
+	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter by index")
+	inlineCmd.Flags().StringP("query", "q", "", "manga to search")
 	inlineCmd.Flags().BoolP("json", "j", false, "print as json")
 	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
