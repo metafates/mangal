@@ -16,7 +16,7 @@ func TestNewBubble(t *testing.T) {
 	}
 
 	if bubble.chaptersList.FilteringEnabled() {
-		t.Error("Filtered should be disabled for chapters list")
+		t.Error("Filtering should be disabled for chapters list")
 	}
 
 	if bubble.mangaChan == nil {

@@ -228,6 +228,7 @@ func NewBubble(initialState bubbleState) Bubble {
 	chaptersList.AdditionalFullHelpKeys = func() []key.Binding { return keys.fullHelpFor(chaptersState) }
 	chaptersList.Styles.Title = chaptersListTitleStyle
 	chaptersList.SetFilteringEnabled(false)
+	chaptersList.StatusMessageLifetime = Forever
 
 	bubble_ := Bubble{
 		state:                        initialState,
@@ -608,7 +609,8 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.selectedChapters = make(map[int]interface{})
 
 			b.setState(mangaState)
-			return b, nil
+			cmd = b.chaptersList.NewStatusMessage("") // clear status message
+			return b, cmd
 		case key.Matches(msg, b.keyMap.Open):
 			item := b.chaptersList.SelectedItem().(listItem)
 			_ = open.Start(item.url.Address)
@@ -632,8 +634,12 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 				delete(b.selectedChapters, index)
 			}
 
-			cmd = b.chaptersList.SetItem(index, item)
-			return b, cmd
+			cmds := []tea.Cmd{
+				b.chaptersList.SetItem(index, item),
+				b.chaptersList.NewStatusMessage(fmt.Sprintf("%d selected", len(b.selectedChapters))),
+			}
+
+			return b, tea.Batch(cmds...)
 		case key.Matches(msg, b.keyMap.SelectAll):
 			items := b.chaptersList.Items()
 			cmds := make([]tea.Cmd, len(items))
@@ -650,6 +656,8 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				cmds[i] = b.chaptersList.SetItem(i, it)
 			}
+
+			cmds = append(cmds, b.chaptersList.NewStatusMessage(fmt.Sprintf("%d selected", len(b.selectedChapters))))
 
 			return b, tea.Batch(cmds...)
 		}

@@ -141,11 +141,8 @@ var whereCmd = &cobra.Command{
 	Short: "Show path where config is located",
 	Long:  "Show path where config is located if exists.\nOtherwise show path where it is expected to be",
 	Run: func(cmd *cobra.Command, args []string) {
-		edit, err := cmd.Flags().GetBool("edit")
-
-		if err != nil {
-			log.Fatal("Unexpected error while getting flag")
-		}
+		edit, _ := cmd.Flags().GetBool("edit")
+		preview, _ := cmd.Flags().GetBool("preview")
 
 		configPath, err := GetConfigPath()
 
@@ -166,6 +163,14 @@ var whereCmd = &cobra.Command{
 					log.Fatal("Can not open the editor")
 				}
 
+				return
+			} else if preview {
+				file, err := Afero.ReadFile(configPath)
+				if err != nil {
+					log.Fatal("Can not open the file")
+				}
+
+				fmt.Println(string(file))
 				return
 			}
 
@@ -373,15 +378,17 @@ func CmdExecute() {
 	rootCmd.AddCommand(initCmd)
 
 	whereCmd.Flags().BoolP("edit", "e", false, "open in the default editor")
+	whereCmd.Flags().BoolP("preview", "p", false, "preview current config")
 	rootCmd.AddCommand(whereCmd)
 
-	inlineCmd.Flags().StringP("config", "c", "", "use config from path")
 	inlineCmd.Flags().Int("manga", -1, "choose manga by index")
 	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter by index")
 	inlineCmd.Flags().StringP("query", "q", "", "manga to search")
 	inlineCmd.Flags().BoolP("json", "j", false, "print as json")
 	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
+	inlineCmd.Flags().StringP("config", "c", "", "use config from path")
+	inlineCmd.Flags().SortFlags = false
 	rootCmd.AddCommand(inlineCmd)
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
