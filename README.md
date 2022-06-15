@@ -62,8 +62,8 @@ mangal inline --query "death note" --manga 1 --chapter 1
 
 ## Config
 
-> TLDR: Use `mangal where` to show where config should be located
-> and `mangal init` to create default config
+> TLDR: Use `mangal config where` to show where config should be located
+> and `mangal config init` to create default config
 
 Config is located at the OS default config directory.
 
@@ -138,12 +138,10 @@ Usage:
 Available Commands:
   cleanup     Remove cached and temp files
   completion  Generate the autocompletion script for the specified shell
+  config      Config manipulation
   help        Help about any command
-  init        Create default config at default path
   inline      Search & Download manga in inline mode
-  update      Update Mangal
   version     Show version
-  where       Show path where config is located
 
 Flags:
   -c, --config string   use config from path
