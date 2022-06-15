@@ -332,6 +332,13 @@ Bubble Update
 */
 
 func (b *Bubble) resize(width int, height int) {
+	// Set size to minimum for non-fullscreen runtime
+	if !UserConfig.Fullscreen {
+		b.mangaList.SetSize(0, 0)
+		b.chaptersList.SetSize(0, 0)
+		return
+	}
+
 	x, y := commonStyle.GetFrameSize()
 	b.mangaList.SetSize(width-x, height-y)
 	b.chaptersList.SetSize(width-x, height-y)

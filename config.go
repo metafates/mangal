@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/BurntSushi/toml"
 	"os"
 	"path/filepath"
@@ -157,4 +158,17 @@ func ParseConfig(configString string) (*Config, error) {
 	conf.Path = tempConf.Path
 
 	return &conf, err
+}
+
+func ValidateConfig(config *Config) error {
+	for _, scraper := range config.Scrapers {
+		if scraper.Source == nil {
+			return errors.New("internal error: scraper source is nil")
+		}
+		if err := ValidateSource(scraper.Source); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

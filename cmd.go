@@ -58,7 +58,8 @@ var cleanupCmd = &cobra.Command{
 			bytes int64
 		)
 
-		leaveCache, _ := cmd.Flags().GetBool("no-cache")
+		leaveCache, _ := cmd.Flags().GetBool("preserve-cache")
+		verbose, _ := cmd.Flags().GetBool("verbose")
 
 		// Cleanup temp files
 		tempDir := os.TempDir()
@@ -78,6 +79,10 @@ var cleanupCmd = &cobra.Command{
 						}
 					}
 
+					// Print out removed file
+					if verbose {
+						fmt.Println(p)
+					}
 					err = Afero.RemoveAll(p)
 					if err == nil {
 						bytes += tempFile.Size()
@@ -95,12 +100,16 @@ var cleanupCmd = &cobra.Command{
 				if exists, err := Afero.Exists(scraperCacheDir); err == nil && exists {
 					files, err := Afero.ReadDir(scraperCacheDir)
 					if err == nil {
-						counter += len(files)
 						for _, f := range files {
+							counter++
 							bytes += f.Size()
 						}
 					}
 
+					// Print out removed cache folder
+					if verbose {
+						fmt.Printf("%s [%d %s]\n", scraperCacheDir, len(files), Plural("file", len(files)))
+					}
 					_ = Afero.RemoveAll(scraperCacheDir)
 				}
 			}
@@ -358,10 +367,25 @@ var configInitCmd = &cobra.Command{
 	},
 }
 
+var configTestCmd = &cobra.Command{
+	Use:   "test",
+	Short: "Test user config for any errors",
+	Run: func(cmd *cobra.Command, args []string) {
+		initConfig("")
+
+		if err := ValidateConfig(UserConfig); err != nil {
+			log.Fatal(err)
+		} else {
+			fmt.Println("Everything is OK")
+		}
+	},
+}
+
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 
-	cleanupCmd.Flags().BoolP("no-cache", "c", false, "do not remove cache")
+	cleanupCmd.Flags().BoolP("preserve-cache", "c", false, "do not remove cache")
+	cleanupCmd.Flags().BoolP("verbose", "v", false, "print out removed files")
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)
@@ -369,6 +393,7 @@ func CmdExecute() {
 	configCmd.AddCommand(configEditCmd)
 	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
 	configCmd.AddCommand(configInitCmd)
+	configCmd.AddCommand(configTestCmd)
 	rootCmd.AddCommand(configCmd)
 
 	inlineCmd.Flags().Int("manga", -1, "choose manga by index")
