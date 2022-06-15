@@ -9,10 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 	"sync"
 )
@@ -45,30 +43,6 @@ var versionCmd = &cobra.Command{
 	Long:  fmt.Sprintf("Shows %s versions and build date", AppName),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("%s version %s\n", AppName, version)
-	},
-}
-
-var updateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "Update " + AppName,
-	Long:  "Fetches new version from github and reinstalls it " + AppName,
-	Run: func(cmd *cobra.Command, args []string) {
-		// Get mod name
-		bi, ok := debug.ReadBuildInfo()
-		if !ok {
-			log.Fatal(failStyle.Render("Failed to read build info"))
-		}
-
-		modName := bi.Path
-		command := exec.Command("go", "install", modName+"@latest")
-
-		err := command.Start()
-
-		if err != nil {
-			log.Fatal(failStyle.Render("Update failed"))
-		} else {
-			fmt.Println(successStyle.Render("Updated"))
-		}
 	},
 }
 
@@ -133,110 +107,6 @@ var cleanupCmd = &cobra.Command{
 		}
 
 		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
-	},
-}
-
-var whereCmd = &cobra.Command{
-	Use:   "where",
-	Short: "Show path where config is located",
-	Long:  "Show path where config is located if exists.\nOtherwise show path where it is expected to be",
-	Run: func(cmd *cobra.Command, args []string) {
-		edit, _ := cmd.Flags().GetBool("edit")
-		preview, _ := cmd.Flags().GetBool("preview")
-
-		configPath, err := GetConfigPath()
-
-		if err != nil {
-			log.Fatal("Can't get config location, permission denied, probably")
-		}
-
-		exists, err := Afero.Exists(configPath)
-
-		if err != nil {
-			log.Fatalf("Can't understand if config exists or not. It is expected at\n%s\n", configPath)
-		}
-
-		if exists {
-
-			if edit {
-				if err := open.Start(configPath); err != nil {
-					log.Fatal("Can not open the editor")
-				}
-
-				return
-			} else if preview {
-				file, err := Afero.ReadFile(configPath)
-				if err != nil {
-					log.Fatal("Can not open the file")
-				}
-
-				fmt.Println(string(file))
-				return
-			}
-
-			fmt.Printf("Config exists at\n%s\n", configPath)
-		} else {
-			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", configPath)
-		}
-	},
-}
-
-var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Create default config at default path",
-	Long:  "Create default config at default path if it doesn't exist yet",
-	Run: func(cmd *cobra.Command, args []string) {
-		force, err := cmd.Flags().GetBool("force")
-
-		if err != nil {
-			log.Fatal("Unexpected error while getting flag")
-		}
-
-		preview, err := cmd.Flags().GetBool("preview")
-
-		if err != nil {
-			log.Fatal("Unexpected error while getting flag")
-		}
-
-		if preview {
-			fmt.Println(string(DefaultConfigBytes))
-			return
-		}
-
-		configPath, err := GetConfigPath()
-
-		if err != nil {
-			log.Fatal("Can't get config location, permission denied, probably")
-		}
-
-		exists, err := Afero.Exists(configPath)
-
-		var createConfig = func() {
-			if err := Afero.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
-				log.Fatal("Error while creating file")
-			} else if file, err := Afero.Create(configPath); err != nil {
-				log.Fatal("Error while creating file")
-			} else if _, err = file.Write(DefaultConfigBytes); err != nil {
-				log.Fatal("Error while writing to file")
-			} else {
-				fmt.Printf("Config created at\n%s\n", configPath)
-			}
-		}
-
-		if force {
-			createConfig()
-			return
-		}
-
-		if err != nil {
-			log.Fatalf("Can't understand if config exists or not, but it is expected at\n%s\n", configPath)
-		}
-
-		if exists {
-			log.Fatal("Config file already exists. Use --force to overwrite it")
-		} else {
-			createConfig()
-		}
 	},
 }
 
@@ -366,20 +236,140 @@ func initConfig(config string) {
 	}
 }
 
+var configCmd = &cobra.Command{
+	Use:   "config",
+	Short: "Config manipulation",
+	Run: func(cmd *cobra.Command, args []string) {
+		_ = cmd.Help()
+	},
+}
+
+var configWhereCmd = &cobra.Command{
+	Use:   "where",
+	Short: "Show config location",
+	Long:  "Show path where config is located if it exists.\nOtherwise show path where it is expected to be",
+	Run: func(cmd *cobra.Command, args []string) {
+		configPath, err := GetConfigPath()
+
+		if err != nil {
+			log.Fatal("Can't get config location, permission denied, probably")
+		}
+
+		exists, err := Afero.Exists(configPath)
+
+		if err != nil {
+			log.Fatalf("Can't understand if config exists or not. It is expected at\n%s\n", configPath)
+		}
+
+		if exists {
+			fmt.Printf("Config exists at\n%s\n", configPath)
+		} else {
+			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", configPath)
+		}
+	},
+}
+
+var configPreviewCmd = &cobra.Command{
+	Use:   "preview",
+	Short: "Preview current config",
+	Run: func(cmd *cobra.Command, args []string) {
+		configPath, err := GetConfigPath()
+
+		if err != nil {
+			log.Fatal("Permission to config file was denied")
+		}
+
+		exists, err := Afero.Exists(configPath)
+
+		if err != nil {
+			log.Fatalf("Permission to config file was denied")
+		}
+
+		if !exists {
+			log.Fatal("Config doesn't exist")
+		}
+
+		contents, err := Afero.ReadFile(configPath)
+		if err != nil {
+			log.Fatal("Permission to config file was denied")
+		}
+
+		fmt.Println(string(contents))
+	},
+}
+
+var configEditCmd = &cobra.Command{
+	Use:   "edit",
+	Short: "Edit config in the default editor",
+	Run: func(cmd *cobra.Command, args []string) {
+		configPath, err := GetConfigPath()
+
+		if err != nil {
+			log.Fatal("Permission to config file was denied")
+		}
+
+		err = open.Start(configPath)
+		if err != nil {
+			log.Fatal("Can't open editor")
+		}
+	},
+}
+
+var configInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Init default config",
+	Run: func(cmd *cobra.Command, args []string) {
+		force, _ := cmd.Flags().GetBool("force")
+
+		configPath, err := GetConfigPath()
+
+		if err != nil {
+			log.Fatal("Can't get config location, permission denied, probably")
+		}
+
+		exists, err := Afero.Exists(configPath)
+
+		var createConfig = func() {
+			if err := Afero.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
+				log.Fatal("Error while creating file")
+			} else if file, err := Afero.Create(configPath); err != nil {
+				log.Fatal("Error while creating file")
+			} else if _, err = file.Write(DefaultConfigBytes); err != nil {
+				log.Fatal("Error while writing to file")
+			} else {
+				fmt.Printf("Config created at\n%s\n", configPath)
+			}
+		}
+
+		if force {
+			createConfig()
+			return
+		}
+
+		if err != nil {
+			log.Fatalf("Can't understand if config exists or not, but it is expected at\n%s\n", configPath)
+		}
+
+		if exists {
+			log.Fatal("Config file already exists. Use --force to overwrite it")
+		} else {
+			createConfig()
+		}
+	},
+}
+
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(updateCmd)
 
 	cleanupCmd.Flags().BoolP("no-cache", "c", false, "do not remove cache")
 	rootCmd.AddCommand(cleanupCmd)
 
-	initCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
-	initCmd.Flags().BoolP("preview", "p", false, "preview default config")
-	rootCmd.AddCommand(initCmd)
-
-	whereCmd.Flags().BoolP("edit", "e", false, "open in the default editor")
-	whereCmd.Flags().BoolP("preview", "p", false, "preview current config")
-	rootCmd.AddCommand(whereCmd)
+	configCmd.AddCommand(configWhereCmd)
+	configCmd.AddCommand(configPreviewCmd)
+	configCmd.AddCommand(configEditCmd)
+	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
+	configCmd.AddCommand(configInitCmd)
+	rootCmd.AddCommand(configCmd)
 
 	inlineCmd.Flags().Int("manga", -1, "choose manga by index")
 	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter by index")
