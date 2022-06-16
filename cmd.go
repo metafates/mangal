@@ -433,7 +433,7 @@ func CmdExecute() {
 	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter by index")
 	inlineCmd.Flags().StringP("query", "q", "", "manga to search")
 	inlineCmd.Flags().BoolP("json", "j", false, "print as json")
-	inlineCmd.Flags().StringP("format", "f", "", "use custom format")
+	inlineCmd.Flags().StringP("format", "f", "", "use custom format - pdf, cbz, zip, plain")
 	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
 	inlineCmd.Flags().BoolP("read", "r", false, "read chapter")
