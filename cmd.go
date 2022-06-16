@@ -22,6 +22,11 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
+
+		if format, _ := cmd.Flags().GetString("format"); format != "" {
+			UserConfig.Format = FormatType(format)
+		}
+
 		if err := ValidateConfig(UserConfig); err != nil {
 			log.Fatal(err)
 		}
@@ -130,6 +135,10 @@ Useful for scripting`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
+		if format, _ := cmd.Flags().GetString("format"); format != "" {
+			UserConfig.Format = FormatType(format)
+		}
+
 		if err := ValidateConfig(UserConfig); err != nil {
 			log.Fatal(err)
 		}
@@ -424,6 +433,7 @@ func CmdExecute() {
 	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter by index")
 	inlineCmd.Flags().StringP("query", "q", "", "manga to search")
 	inlineCmd.Flags().BoolP("json", "j", false, "print as json")
+	inlineCmd.Flags().StringP("format", "f", "", "use custom format")
 	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
 	inlineCmd.Flags().BoolP("read", "r", false, "read chapter")
@@ -432,6 +442,7 @@ func CmdExecute() {
 	rootCmd.AddCommand(inlineCmd)
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
+	rootCmd.Flags().StringP("format", "f", "", "use custom format")
 
 	_ = rootCmd.Execute()
 }
