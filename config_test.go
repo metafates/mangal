@@ -1,33 +1,32 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestParseConfig(t *testing.T) {
-	var (
-		sourceName    = "manganelo"
-		randomDelayMs = 1337
-		path          = "."
-		fullscreen    = true
-		mangaTitle    = ".search-story-item a.item-title"
-	)
-	configString := fmt.Sprintf(`
-use = ['%s']
-path = "%s"
-fullscreen = %t
+	configString := `
+use = ['manganelo']
+use_custom_pdf_reader = false
+custom_pdf_reader = "zathura"
+download_path = '.'
+fullscreen = true
+prompt = "🔍"
+placeholder = "What shall we look for?"
+mark = "▼"
+title = "Mangal"
 [sources]
-    [sources.%s]
+    [sources.manganelo]
     base = 'https://ww5.manganelo.tv'
     search = 'https://ww5.manganelo.tv/search/%s'
     manga_anchor = '.search-story-item a.item-title'
-    manga_title = '%s'
+    manga_title = '.search-story-item a.item-title'
     chapter_anchor = 'li.a-h a.chapter-name'
     chapter_title = 'li.a-h a.chapter-name'
     reader_page = '.container-chapter-reader img'
-	random_delay_ms = %d
-`, sourceName, path, fullscreen, sourceName, "", mangaTitle, randomDelayMs)
+    random_delay_ms = 500 # ms
+    reversed_chapters_order = true
+`
 
 	config, err := ParseConfig(configString)
 
@@ -36,10 +35,10 @@ fullscreen = %t
 	}
 
 	conditions := []bool{
-		config.Fullscreen == fullscreen,
-		config.Path == path,
-		config.Scrapers[0].Source.RandomDelayMs == randomDelayMs,
-		config.Scrapers[0].Source.MangaTitle == mangaTitle,
+		config.Fullscreen == true,
+		config.Path == ".",
+		config.Scrapers[0].Source.RandomDelayMs == 500,
+		config.Scrapers[0].Source.MangaTitle == ".search-story-item a.item-title",
 	}
 
 	for _, condition := range conditions {
