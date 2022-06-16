@@ -8,8 +8,18 @@ import (
 	"strings"
 )
 
+type FormatType string
+
+const (
+	PDF   FormatType = "pdf"
+	CBZ   FormatType = "cbz"
+	Zip   FormatType = "zip"
+	Plain FormatType = "plain"
+)
+
 type Config struct {
 	Scrapers           []*Scraper
+	Format             FormatType
 	Fullscreen         bool
 	Prompt             string
 	Title              string
@@ -22,6 +32,7 @@ type Config struct {
 
 type _tempConfig struct {
 	Use                []string
+	Format             string
 	Fullscreen         bool
 	Prompt             string
 	Placeholder        string
@@ -52,6 +63,9 @@ var UserConfig *Config
 
 var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
+
+# Available options: pdf, cbz, zip, plain (just images)
+format = "pdf"
 
 # If false, then OS default pdf reader will be used
 use_custom_pdf_reader = false
@@ -169,6 +183,7 @@ func ParseConfig(configString string) (*Config, error) {
 	conf.Placeholder = tempConf.Placeholder
 	conf.Path = tempConf.Path
 	conf.Title = tempConf.Title
+	conf.Format = IfElse(tempConf.Format == "", PDF, FormatType(tempConf.Format))
 
 	conf.UseCustomPdfReader = tempConf.UseCustomPdfReader
 	conf.CustomPdfReader = tempConf.CustomPdfReader
@@ -179,6 +194,10 @@ func ParseConfig(configString string) (*Config, error) {
 func ValidateConfig(config *Config) error {
 	if config.UseCustomPdfReader && config.CustomPdfReader == "" {
 		return errors.New("use_custom_pdf_reader is set to true but reader isn't specified")
+	}
+
+	if !Contains([]FormatType{PDF, CBZ, Plain, Zip}, config.Format) {
+		return errors.New("unknown format " + string(config.Format))
 	}
 
 	for _, scraper := range config.Scrapers {

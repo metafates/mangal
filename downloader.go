@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	pdfcpu "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/spf13/afero"
 	"log"
 	"os"
@@ -122,9 +121,9 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 
 	var chapterPath string
 	if temp {
-		chapterPath = filepath.Join(mangaPath, fmt.Sprintf(TempPrefix+" [%d] %s.pdf", chapter.Index, chapter.Info))
+		chapterPath = filepath.Join(mangaPath, fmt.Sprintf(TempPrefix+" [%d] %s", chapter.Index, chapter.Info))
 	} else {
-		chapterPath = filepath.Join(mangaPath, fmt.Sprintf("[%d] %s.pdf", chapter.Index, chapter.Info))
+		chapterPath = filepath.Join(mangaPath, fmt.Sprintf("[%d] %s", chapter.Index, chapter.Info))
 	}
 	pages, err := chapter.Scraper.GetPages(chapter)
 	pagesCount := len(pages)
@@ -165,7 +164,9 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 			}
 
 			tempPath, err = SaveTemp(data)
-			tempPaths[p.Index] = tempPath
+			fixedTempPath := tempPath + ".jpg"
+			err = Afero.Rename(tempPath, fixedTempPath)
+			tempPaths[p.Index] = fixedTempPath
 		}(page)
 	}
 
@@ -184,7 +185,6 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		}
 	}
 
-	//err = RemoveIfExists(chapterPath)
 	exists, err := Afero.Exists(chapterPath)
 	if err != nil {
 		return "", err
@@ -195,7 +195,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	}
 
 	if !exists {
-		err = pdfcpu.ImportImagesFile(tempPaths, chapterPath, nil, nil)
+		chapterPath, err = Packers[UserConfig.Format](tempPaths, chapterPath)
 	}
 
 	if err != nil {
