@@ -160,7 +160,7 @@ Available Commands:
 
 Flags:
   -c, --config string   use config from path
-  -f, --format string   use custom format
+  -f, --format string   use custom format - pdf, cbz, zip, plain
   -h, --help            help for mangal
 
 Use "mangal [command] --help" for more information about a command.```
