@@ -98,10 +98,13 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	if temp {
 		mangaPath = os.TempDir()
 	} else {
-		mangaPath, err = filepath.Abs(filepath.Join(UserConfig.Path, mangaTitle))
+		absPath, err := filepath.Abs(UserConfig.Path)
+
 		if err != nil {
 			return "", err
 		}
+
+		mangaPath = filepath.Join(absPath, mangaTitle)
 		err = Afero.MkdirAll(mangaPath, 0700)
 		if err != nil {
 			return "", nil

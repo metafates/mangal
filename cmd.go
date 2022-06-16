@@ -22,6 +22,9 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
+		if err := ValidateConfig(UserConfig); err != nil {
+			log.Fatal(err)
+		}
 
 		var program *tea.Program
 
@@ -127,6 +130,9 @@ Useful for scripting`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
+		if err := ValidateConfig(UserConfig); err != nil {
+			log.Fatal(err)
+		}
 
 		var (
 			manga []*URL
@@ -179,9 +185,24 @@ Useful for scripting`,
 				}
 
 				asTemp, _ := cmd.Flags().GetBool("temp")
+				read, _ := cmd.Flags().GetBool("read")
+
+				if read {
+					asTemp = true
+				}
+
 				chapterPath, err := DownloadChapter(selectedChapter, nil, asTemp)
 				if err != nil {
 					log.Fatal("Error while downloading chapter")
+				}
+
+				if read {
+					if UserConfig.UseCustomPdfReader {
+						_ = open.StartWith(chapterPath, UserConfig.CustomPdfReader)
+					} else {
+						_ = open.Start(chapterPath)
+					}
+					return
 				}
 
 				fmt.Println(chapterPath)
@@ -247,7 +268,7 @@ func initConfig(config string) {
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Config manipulation",
+	Short: "Config actions",
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
@@ -371,7 +392,8 @@ var configTestCmd = &cobra.Command{
 	Use:   "test",
 	Short: "Test user config for any errors",
 	Run: func(cmd *cobra.Command, args []string) {
-		initConfig("")
+		config, _ := cmd.Flags().GetString("config")
+		initConfig(config)
 
 		if err := ValidateConfig(UserConfig); err != nil {
 			log.Fatal(err)
@@ -393,6 +415,8 @@ func CmdExecute() {
 	configCmd.AddCommand(configEditCmd)
 	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
 	configCmd.AddCommand(configInitCmd)
+
+	configTestCmd.Flags().StringP("config", "c", "", "use config from path")
 	configCmd.AddCommand(configTestCmd)
 	rootCmd.AddCommand(configCmd)
 
@@ -402,6 +426,7 @@ func CmdExecute() {
 	inlineCmd.Flags().BoolP("json", "j", false, "print as json")
 	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
+	inlineCmd.Flags().BoolP("read", "r", false, "read chapter")
 	inlineCmd.Flags().StringP("config", "c", "", "use config from path")
 	inlineCmd.Flags().SortFlags = false
 	rootCmd.AddCommand(inlineCmd)

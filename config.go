@@ -9,22 +9,28 @@ import (
 )
 
 type Config struct {
-	Scrapers    []*Scraper
-	Fullscreen  bool
-	Prompt      string
-	Placeholder string
-	Mark        string
-	Path        string
+	Scrapers           []*Scraper
+	Fullscreen         bool
+	Prompt             string
+	Title              string
+	Placeholder        string
+	Mark               string
+	UseCustomPdfReader bool
+	CustomPdfReader    string
+	Path               string
 }
 
 type _tempConfig struct {
-	Use         []string
-	Path        string
-	Fullscreen  bool
-	Prompt      string
-	Placeholder string
-	Mark        string
-	Sources     map[string]Source
+	Use                []string
+	Fullscreen         bool
+	Prompt             string
+	Placeholder        string
+	Title              string
+	Mark               string
+	UseCustomPdfReader bool   `toml:"use_custom_pdf_reader"`
+	CustomPdfReader    string `toml:"custom_pdf_reader"`
+	Path               string `toml:"download_path"`
+	Sources            map[string]Source
 }
 
 func GetConfigPath() (string, error) {
@@ -48,8 +54,12 @@ var DefaultConfigBytes = []byte(`
 # Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Default download path (relative)
-path = '.'
+# If false, then OS default pdf reader will be used
+use_custom_pdf_reader = false
+custom_pdf_reader = "zathura"
+
+# Custom download path, can be either relative (to the pwd) or absolute
+download_path = '.'
 
 # Fullscreen mode
 fullscreen = true
@@ -62,6 +72,9 @@ placeholder = "What shall we look for?"
 
 # Selected chapter mark
 mark = "▼"
+
+# Search window title
+title = "Mangal"
 
 [sources]
     [sources.manganelo]
@@ -156,11 +169,19 @@ func ParseConfig(configString string) (*Config, error) {
 	conf.Prompt = tempConf.Prompt
 	conf.Placeholder = tempConf.Placeholder
 	conf.Path = tempConf.Path
+	conf.Title = tempConf.Title
+
+	conf.UseCustomPdfReader = tempConf.UseCustomPdfReader
+	conf.CustomPdfReader = tempConf.CustomPdfReader
 
 	return &conf, err
 }
 
 func ValidateConfig(config *Config) error {
+	if config.UseCustomPdfReader && config.CustomPdfReader == "" {
+		return errors.New("use_custom_pdf_reader is set to true but reader isn't specified")
+	}
+
 	for _, scraper := range config.Scrapers {
 		if scraper.Source == nil {
 			return errors.New("internal error: scraper source is nil")

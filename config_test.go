@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/url"
-	"strings"
 	"testing"
 )
 
@@ -51,41 +49,11 @@ fullscreen = %t
 	}
 }
 
-func testConfig(t *testing.T, config *Config) {
-	t.Helper()
-
-	var isValidURI = func(uri string) bool {
-		_, err := url.ParseRequestURI(strings.Replace(uri, "%s", "", 1))
-		return err == nil
-	}
-
-	conditions := []bool{
-		len(config.Scrapers) > 0,
-		config.Scrapers[0].Source != nil,
-		config.Scrapers[0].Source.Base != "",
-		isValidURI(config.Scrapers[0].Source.Base),
-		config.Scrapers[0].Source.SearchTemplate != "",
-		strings.Contains(config.Scrapers[0].Source.SearchTemplate, "%s"),
-		isValidURI(config.Scrapers[0].Source.SearchTemplate),
-		config.Scrapers[0].Source.MangaTitle != "",
-		config.Scrapers[0].Source.MangaAnchor != "",
-		config.Scrapers[0].Source.ChapterAnchor != "",
-		config.Scrapers[0].Source.ChapterTitle != "",
-		config.Scrapers[0].Source.ReaderPage != "",
-		config.Scrapers[0].Source.RandomDelayMs >= 0,
-	}
-
-	for i, condition := range conditions {
-		if !condition {
-			t.Error(i)
-		}
-	}
-}
-
 func TestGetConfig(t *testing.T) {
 	config := GetConfig("")
-	testConfig(t, config)
-
+	if err := ValidateConfig(config); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestDefaultConfig(t *testing.T) {
@@ -94,5 +62,7 @@ func TestDefaultConfig(t *testing.T) {
 		t.Fatal("Error while parsing default config file")
 	}
 
-	testConfig(t, config)
+	if err := ValidateConfig(config); err != nil {
+		t.Error(err)
+	}
 }

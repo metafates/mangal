@@ -5,14 +5,16 @@ import (
 	"os"
 )
 
-func IfElse[T any](condition bool, a, b T) T {
+// IfElse is a ternary operator equavlient
+func IfElse[T any](condition bool, then, othwerwise T) T {
 	if condition {
-		return a
+		return then
 	}
 
-	return b
+	return othwerwise
 }
 
+// Contains checks if slice contains element
 func Contains[T comparable](slice []T, elem T) bool {
 	for _, el := range slice {
 		if el == elem {
@@ -27,6 +29,7 @@ func BytesToMegabytes(bytes int64) float64 {
 	return float64(bytes) / 1_048_576 // 1024 ^ 2
 }
 
+// PrettyTrim trims string to given size and adds ellipsis to the end
 func PrettyTrim(text string, limit int) string {
 	if len(text)-3 > limit {
 		return text[:limit-3] + "..."
@@ -44,6 +47,7 @@ func Plural(word string, count int) string {
 	return word + "s"
 }
 
+// Max between 2 values
 func Max[T constraints.Ordered](a, b T) T {
 	if a > b {
 		return a
@@ -83,6 +87,7 @@ func DirSize(path string) (int64, error) {
 	return size, err
 }
 
+// Find element in slice by function
 func Find[T any](list []T, f func(T) bool) (T, bool) {
 	var prev *T
 
