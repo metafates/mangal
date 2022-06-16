@@ -100,6 +100,9 @@ placeholder = "What shall we look for?"
 # Selected chapter mark
 mark = "▼"
 
+# Search window title
+title = "Mangal"
+
 [sources]
     [sources.manganelo]
     # Base url

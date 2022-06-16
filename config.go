@@ -50,8 +50,7 @@ func DefaultConfig() *Config {
 
 var UserConfig *Config
 
-var DefaultConfigBytes = []byte(`
-# Which sources to use. You can use several sources, it won't affect perfomance'
+var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
 # If false, then OS default pdf reader will be used
