@@ -8,29 +8,40 @@ import (
 	"strings"
 )
 
+type FormatType string
+
+const (
+	PDF   FormatType = "pdf"
+	CBZ   FormatType = "cbz"
+	Zip   FormatType = "zip"
+	Plain FormatType = "plain"
+)
+
 type Config struct {
-	Scrapers           []*Scraper
-	Fullscreen         bool
-	Prompt             string
-	Title              string
-	Placeholder        string
-	Mark               string
-	UseCustomPdfReader bool
-	CustomPdfReader    string
-	Path               string
+	Scrapers        []*Scraper
+	Format          FormatType
+	Fullscreen      bool
+	Prompt          string
+	Title           string
+	Placeholder     string
+	Mark            string
+	UseCustomReader bool
+	CustomReader    string
+	Path            string
 }
 
 type _tempConfig struct {
-	Use                []string
-	Fullscreen         bool
-	Prompt             string
-	Placeholder        string
-	Title              string
-	Mark               string
-	UseCustomPdfReader bool   `toml:"use_custom_pdf_reader"`
-	CustomPdfReader    string `toml:"custom_pdf_reader"`
-	Path               string `toml:"download_path"`
-	Sources            map[string]Source
+	Use             []string
+	Format          string
+	Fullscreen      bool
+	Prompt          string
+	Placeholder     string
+	Title           string
+	Mark            string
+	UseCustomReader bool   `toml:"use_custom_reader"`
+	CustomReader    string `toml:"custom_reader"`
+	Path            string `toml:"download_path"`
+	Sources         map[string]Source
 }
 
 func GetConfigPath() (string, error) {
@@ -53,9 +64,12 @@ var UserConfig *Config
 var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
+# Available options: pdf, cbz, zip, plain (just images)
+format = "pdf"
+
 # If false, then OS default pdf reader will be used
-use_custom_pdf_reader = false
-custom_pdf_reader = "zathura"
+use_custom_reader = false
+custom_reader = "zathura"
 
 # Custom download path, can be either relative (to the pwd) or absolute
 download_path = '.'
@@ -169,16 +183,21 @@ func ParseConfig(configString string) (*Config, error) {
 	conf.Placeholder = tempConf.Placeholder
 	conf.Path = tempConf.Path
 	conf.Title = tempConf.Title
+	conf.Format = IfElse(tempConf.Format == "", PDF, FormatType(tempConf.Format))
 
-	conf.UseCustomPdfReader = tempConf.UseCustomPdfReader
-	conf.CustomPdfReader = tempConf.CustomPdfReader
+	conf.UseCustomReader = tempConf.UseCustomReader
+	conf.CustomReader = tempConf.CustomReader
 
 	return &conf, err
 }
 
 func ValidateConfig(config *Config) error {
-	if config.UseCustomPdfReader && config.CustomPdfReader == "" {
+	if config.UseCustomReader && config.CustomReader == "" {
 		return errors.New("use_custom_pdf_reader is set to true but reader isn't specified")
+	}
+
+	if !Contains([]FormatType{PDF, CBZ, Plain, Zip}, config.Format) {
+		return errors.New("unknown format " + string(config.Format))
 	}
 
 	for _, scraper := range config.Scrapers {

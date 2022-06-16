@@ -26,7 +26,7 @@
 
 ## About
 
-✨ __Mangal__ is a fancy CLI app written in Go which scrapes, downloads and packs manga into pdfs
+✨ __Mangal__ is a fancy CLI app written in Go which scrapes, downloads and packs manga into different formats
 
 ⚙️ The most important feature of Mangal is that it supports user defined scrapers
 that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
@@ -35,6 +35,12 @@ that can be added with just a few lines of config file (see [config](#config) & 
 
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
+
+Currently Mangal supports these formats
+- PDF
+- CBZ
+- Zip
+- Plain (just images)
 
 ## Examples
 
@@ -81,9 +87,12 @@ By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
 # Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# If false, then OS default pdf reader will be used
-use_custom_pdf_reader = false
-custom_pdf_reader = "zathura"
+# Available options: pdf, cbz, zip, plain (just images)
+format = "pdf"
+
+# If false, then OS default reader will be used
+use_custom_reader = false
+custom_reader = "zathura"
 
 # Custom download path, can be either relative (to the pwd) or absolute
 download_path = '.'
@@ -151,6 +160,7 @@ Available Commands:
 
 Flags:
   -c, --config string   use config from path
+  -f, --format string   use custom format - pdf, cbz, zip, plain
   -h, --help            help for mangal
 
 Use "mangal [command] --help" for more information about a command.```

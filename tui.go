@@ -714,8 +714,8 @@ func (b Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(msg.Succeeded) != 0 {
 				toRead := msg.Succeeded[0]
 
-				if UserConfig.UseCustomPdfReader {
-					_ = open.StartWith(toRead, UserConfig.CustomPdfReader)
+				if UserConfig.UseCustomReader {
+					_ = open.StartWith(toRead, UserConfig.CustomReader)
 				} else {
 					_ = open.Start(toRead)
 				}
