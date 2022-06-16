@@ -3,7 +3,7 @@
     <img width="200" src="assets/manga.png" alt="logo">
 </p>
 
-<h3 align="center">CLI Manga Downloader</h3>
+<h3 align="center">Manga Browser & Downloader</h3>
 
 <p align="center">
   <a href="https://goreportcard.com/report/github.com/metafates/mangal">
@@ -26,7 +26,7 @@
 
 ## About
 
-✨ __Mangal__ is a fancy TUI app written in Go which scrapes, downloads and packs manga into pdfs
+✨ __Mangal__ is a fancy CLI app written in Go which scrapes, downloads and packs manga into pdfs
 
 ⚙️ The most important feature of Mangal is that it supports user defined scrapers
 that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
@@ -70,7 +70,6 @@ Config is located at the OS default config directory.
 - __Unix__ - `$XDG_CONFIG_HOME/mangal/config.toml` if `$XDG_CONFIG_HOME` exists, else `$HOME/.config/mangal/config.toml`
 - __Darwin__ (macOS) - `$HOME/Library/Application\ Support/mangal/config.toml`
 - __Windows__ - `%AppData%\mangal\config.toml`
-- __Plan 9__ - `$home/lib/mangal/config.toml`
 
 You can load config from custom path by using `--config` flag
 
@@ -82,8 +81,12 @@ By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
 # Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Default download path (relative)
-path = '.'
+# If false, then OS default pdf reader will be used
+use_custom_pdf_reader = false
+custom_pdf_reader = "zathura"
+
+# Custom download path, can be either relative (to the pwd) or absolute
+download_path = '.'
 
 # Fullscreen mode
 fullscreen = true
@@ -174,14 +177,14 @@ go build
 
 ## Limitations
 
-Even though most manga sites will work, there exists some limitation to which sites could be added
+Even though many manga sites will work,
+there exists some (serious) limitations to which sites could be added
 
 - Navigation layout should follow this model
     - Each manga have a separate page
     - Manga page should have a some form of chapters list (not lazy loaded)
-    - Each chapter should have a separate reader page with images
+    - Each chapter should have a separate reader page with all images
 
-<br>
 
 Some sites that work well
 
@@ -189,6 +192,10 @@ Some sites that work well
 - https://ww3.mangakakalot.tv
 - https://ww5.manganelo.tv
 
+
+I'm planning to make a more advanced scraper creation system
+to overcome this roadblocks somewhere in the future
+
 ---
 
-Manga image taken from [here](https://www.flaticon.com/free-icons/manga)
+Manga icon taken from [here](https://www.flaticon.com/free-icons/manga)

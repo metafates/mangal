@@ -332,6 +332,13 @@ Bubble Update
 */
 
 func (b *Bubble) resize(width int, height int) {
+	// Set size to minimum for non-fullscreen runtime
+	if !UserConfig.Fullscreen {
+		b.mangaList.SetSize(0, 0)
+		b.chaptersList.SetSize(0, 0)
+		return
+	}
+
 	x, y := commonStyle.GetFrameSize()
 	b.mangaList.SetSize(width-x, height-y)
 	b.chaptersList.SetSize(width-x, height-y)
@@ -705,7 +712,13 @@ func (b Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.setState(exitPromptState)
 
 			if len(msg.Succeeded) != 0 {
-				_ = open.Start(msg.Succeeded[0])
+				toRead := msg.Succeeded[0]
+
+				if UserConfig.UseCustomPdfReader {
+					_ = open.StartWith(toRead, UserConfig.CustomPdfReader)
+				} else {
+					_ = open.Start(toRead)
+				}
 			}
 
 			return b, nil
@@ -811,7 +824,11 @@ func (b Bubble) View() string {
 
 	switch b.state {
 	case searchState:
-		view = fmt.Sprintf(template, inputTitleStyle.Render(AppName), b.input.View())
+		if UserConfig.Title == "" {
+			view = b.input.View()
+		} else {
+			view = fmt.Sprintf(template, inputTitleStyle.Render(UserConfig.Title), b.input.View())
+		}
 	case loadingState:
 		view = fmt.Sprintf(template, b.spinner.View())
 	case mangaState:
