@@ -65,6 +65,7 @@ func TestRemoveIfExists(t *testing.T) {
 }
 
 func TestDownloadChapter(t *testing.T) {
+	initConfig("")
 	if testing.Short() {
 		t.Skip("skipping this DownloadChapter is too expensive")
 	}
