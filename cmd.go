@@ -206,8 +206,8 @@ Useful for scripting`,
 				}
 
 				if read {
-					if UserConfig.UseCustomPdfReader {
-						_ = open.StartWith(chapterPath, UserConfig.CustomPdfReader)
+					if UserConfig.UseCustomReader {
+						_ = open.StartWith(chapterPath, UserConfig.CustomReader)
 					} else {
 						_ = open.Start(chapterPath)
 					}
@@ -442,7 +442,7 @@ func CmdExecute() {
 	rootCmd.AddCommand(inlineCmd)
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
-	rootCmd.Flags().StringP("format", "f", "", "use custom format")
+	rootCmd.Flags().StringP("format", "f", "", "use custom format - pdf, cbz, zip, plain")
 
 	_ = rootCmd.Execute()
 }
