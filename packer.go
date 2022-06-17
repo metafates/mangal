@@ -11,7 +11,21 @@ import (
 
 func PackToPDF(images []string, destination string) (string, error) {
 	destination += ".pdf"
-	return destination, pdfcpu.ImportImagesFile(images, destination, nil, nil)
+
+	// Create parent directory since pdfcpu have some troubles when it doesn't exist
+	if exists, err := Afero.Exists(filepath.Dir(destination)); err != nil {
+		return "", err
+	} else if !exists {
+		if err := Afero.MkdirAll(filepath.Dir(destination), 0777); err != nil {
+			return "", err
+		}
+	}
+
+	if err := pdfcpu.ImportImagesFile(images, destination, nil, nil); err != nil {
+		return "", err
+	}
+
+	return destination, nil
 }
 
 func PackToCBZ(images []string, destination string) (string, error) {
