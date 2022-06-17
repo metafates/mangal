@@ -188,6 +188,9 @@ cd mangal
 go build
 ```
 
+> You can also cross build for windows, linux & macos
+> by running `cross-compile.py`
+
 ## Limitations
 
 Even though many manga sites will work,
