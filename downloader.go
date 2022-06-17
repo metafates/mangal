@@ -181,7 +181,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	if showProgress {
 		progress <- ChapterDownloadProgress{
 			Stage:   Converting,
-			Message: fmt.Sprintf("Converting %d pages to pdf", pagesCount),
+			Message: fmt.Sprintf("Converting %d pages to %s", pagesCount, UserConfig.Format),
 		}
 	}
 

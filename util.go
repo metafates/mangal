@@ -100,3 +100,14 @@ func Find[T any](list []T, f func(T) bool) (T, bool) {
 
 	return *prev, false
 }
+
+// Map applies function to each element of the slice
+func Map[T, G any](list []T, f func(T) G) []G {
+	var mapped = make([]G, len(list))
+
+	for i, el := range list {
+		mapped[i] = f(el)
+	}
+
+	return mapped
+}

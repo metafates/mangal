@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"os"
 	"path/filepath"
@@ -183,6 +184,7 @@ func ParseConfig(configString string) (*Config, error) {
 	conf.Placeholder = tempConf.Placeholder
 	conf.Path = tempConf.Path
 	conf.Title = tempConf.Title
+	// Set default format to pdf
 	conf.Format = IfElse(tempConf.Format == "", PDF, FormatType(tempConf.Format))
 
 	conf.UseCustomReader = tempConf.UseCustomReader
@@ -193,11 +195,16 @@ func ParseConfig(configString string) (*Config, error) {
 
 func ValidateConfig(config *Config) error {
 	if config.UseCustomReader && config.CustomReader == "" {
-		return errors.New("use_custom_pdf_reader is set to true but reader isn't specified")
+		return errors.New("use_custom_reader is set to true but reader isn't specified")
 	}
 
-	if !Contains([]FormatType{PDF, CBZ, Plain, Zip}, config.Format) {
-		return errors.New("unknown format " + string(config.Format))
+	if availableFormats := []FormatType{PDF, CBZ, Plain, Zip}; !Contains(availableFormats, config.Format) {
+		// I don't like this...
+		// TODO: Refactor
+		return errors.New(fmt.Sprintf(`unknown format '%s'
+available formats: %s`, string(config.Format), strings.Join(Map(availableFormats, func(f FormatType) string {
+			return string(f)
+		}), ", ")))
 	}
 
 	for _, scraper := range config.Scrapers {
