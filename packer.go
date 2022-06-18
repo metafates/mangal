@@ -46,6 +46,15 @@ func PackToZip(images []string, destination string, withExtension bool) (string,
 	if withExtension {
 		destination += ".zip"
 	}
+
+	if exists, err := Afero.Exists(filepath.Dir(destination)); err != nil {
+		return "", err
+	} else if !exists {
+		if err := Afero.MkdirAll(filepath.Dir(destination), 0777); err != nil {
+			return "", err
+		}
+	}
+
 	zipFile, err := Afero.Create(destination)
 	if err != nil {
 		return "", err
