@@ -758,6 +758,7 @@ func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, b.keyMap.Quit):
+			RemoveTemp()
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Back):
 			b.setState(chaptersState)

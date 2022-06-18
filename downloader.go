@@ -184,7 +184,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 
 	wg.Wait()
 
-	defer chapter.Scraper.CleanupFiles()
+	defer chapter.Scraper.ResetFiles()
 
 	if errorEncountered {
 		return "", err

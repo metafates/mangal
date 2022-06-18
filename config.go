@@ -29,6 +29,7 @@ type Config struct {
 	UseCustomReader bool
 	CustomReader    string
 	Path            string
+	CacheImages     bool
 }
 
 type _tempConfig struct {
@@ -42,6 +43,7 @@ type _tempConfig struct {
 	UseCustomReader bool   `toml:"use_custom_reader"`
 	CustomReader    string `toml:"custom_reader"`
 	Path            string `toml:"download_path"`
+	CacheImages     bool   `toml:"cache_images"`
 	Sources         map[string]Source
 }
 
@@ -89,6 +91,11 @@ mark = "▼"
 
 # Search window title
 title = "Mangal"
+
+# Add images to cache
+# If set to true mangal could crash when trying to redownload something really quickly
+# Usually happens on slow machines
+cache_images = false
 
 [sources]
     [sources.manganelo]
@@ -167,6 +174,7 @@ func ParseConfig(configString string) (*Config, error) {
 		return nil, err
 	}
 
+	conf.CacheImages = tempConf.CacheImages
 	// Convert sources to scrapers
 	for sourceName, source := range tempConf.Sources {
 		if !Contains[string](tempConf.Use, sourceName) {
@@ -175,6 +183,11 @@ func ParseConfig(configString string) (*Config, error) {
 
 		source.Name = sourceName
 		scraper := MakeSourceScraper(source)
+
+		if !conf.CacheImages {
+			scraper.FilesCollector.CacheDir = ""
+		}
+
 		conf.Scrapers = append(conf.Scrapers, scraper)
 	}
 
@@ -184,7 +197,7 @@ func ParseConfig(configString string) (*Config, error) {
 	conf.Placeholder = tempConf.Placeholder
 	conf.Path = tempConf.Path
 	conf.Title = tempConf.Title
-	// Set default format to pdf
+	// Default format is pdf
 	conf.Format = IfElse(tempConf.Format == "", PDF, FormatType(tempConf.Format))
 
 	conf.UseCustomReader = tempConf.UseCustomReader

@@ -258,7 +258,7 @@ func (s *Scraper) GetFile(file *URL) (*[]byte, error) {
 	return nil, errors.New("Couldn't get file at " + file.Address)
 }
 
-func (s *Scraper) CleanupFiles() {
+func (s *Scraper) ResetFiles() {
 	s.Files = sync.Map{}
 }
 
