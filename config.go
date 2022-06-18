@@ -16,16 +16,21 @@ const (
 	CBZ   FormatType = "cbz"
 	Zip   FormatType = "zip"
 	Plain FormatType = "plain"
+	Epub  FormatType = "epub"
 )
+
+type UI struct {
+	Fullscreen  bool
+	Prompt      string
+	Title       string
+	Placeholder string
+	Mark        string
+}
 
 type Config struct {
 	Scrapers        []*Scraper
 	Format          FormatType
-	Fullscreen      bool
-	Prompt          string
-	Title           string
-	Placeholder     string
-	Mark            string
+	UI              UI
 	UseCustomReader bool
 	CustomReader    string
 	Path            string
@@ -35,11 +40,7 @@ type Config struct {
 type _tempConfig struct {
 	Use             []string
 	Format          string
-	Fullscreen      bool
-	Prompt          string
-	Placeholder     string
-	Title           string
-	Mark            string
+	UI              UI     `toml:"ui"`
 	UseCustomReader bool   `toml:"use_custom_reader"`
 	CustomReader    string `toml:"custom_reader"`
 	Path            string `toml:"download_path"`
@@ -74,9 +75,15 @@ format = "pdf"
 use_custom_reader = false
 custom_reader = "zathura"
 
-# Custom download path, can be either relative (to the pwd) or absolute
+# Custom download path, can be either relative (to the current directory) or absolute
 download_path = '.'
 
+# Add images to cache
+# If set to true mangal could crash when trying to redownload something really quickly
+# Usually happens on slow machines
+cache_images = false
+
+[ui]
 # Fullscreen mode
 fullscreen = true
 
@@ -92,40 +99,35 @@ mark = "▼"
 # Search window title
 title = "Mangal"
 
-# Add images to cache
-# If set to true mangal could crash when trying to redownload something really quickly
-# Usually happens on slow machines
-cache_images = false
-
 [sources]
-    [sources.manganelo]
-    # Base url
-    base = 'https://ww5.manganelo.tv'
+[sources.manganelo]
+# Base url
+base = 'https://ww5.manganelo.tv'
 
-    # Search endpoint. Put %s where the query should be
-    search = 'https://ww5.manganelo.tv/search/%s'
+# Search endpoint. Put %s where the query should be
+search = 'https://ww5.manganelo.tv/search/%s'
 
-    # Selector of entry anchor (<a></a>) on search page
-    manga_anchor = '.search-story-item a.item-title'
+# Selector of entry anchor (<a></a>) on search page
+manga_anchor = '.search-story-item a.item-title'
 
-    # Selector of entry title on search page
-    manga_title = '.search-story-item a.item-title'
+# Selector of entry title on search page
+manga_title = '.search-story-item a.item-title'
 
-    # Manga chapters anchors selector
-    chapter_anchor = 'li.a-h a.chapter-name'
+# Manga chapters anchors selector
+chapter_anchor = 'li.a-h a.chapter-name'
 
-    # Manga chapters titles selector
-    chapter_title = 'li.a-h a.chapter-name'
+# Manga chapters titles selector
+chapter_title = 'li.a-h a.chapter-name'
 
-    # Reader page images selector
-    reader_page = '.container-chapter-reader img'
-    
-    # Random delay between requests
-    random_delay_ms = 500 # ms
-    
-    # Are chapters listed in reversed order on that source?
-    # reversed order -> from newest chapter to oldest
-    reversed_chapters_order = true
+# Reader page images selector
+reader_page = '.container-chapter-reader img'
+
+# Random delay between requests
+random_delay_ms = 500 # ms
+
+# Are chapters listed in reversed order on that source?
+# reversed order -> from newest chapter to oldest
+reversed_chapters_order = true
 `)
 
 // GetConfig from given path. If path is empty string default config path is used
@@ -191,12 +193,13 @@ func ParseConfig(configString string) (*Config, error) {
 		conf.Scrapers = append(conf.Scrapers, scraper)
 	}
 
-	conf.Fullscreen = tempConf.Fullscreen
-	conf.Mark = tempConf.Mark
-	conf.Prompt = tempConf.Prompt
-	conf.Placeholder = tempConf.Placeholder
+	conf.UI = tempConf.UI
+	//conf.Fullscreen = tempConf.Fullscreen
+	//conf.Mark = tempConf.Mark
+	//conf.Prompt = tempConf.Prompt
+	//conf.Placeholder = tempConf.Placeholder
+	//conf.Title = tempConf.Title
 	conf.Path = tempConf.Path
-	conf.Title = tempConf.Title
 	// Default format is pdf
 	conf.Format = IfElse(tempConf.Format == "", PDF, FormatType(tempConf.Format))
 
@@ -211,13 +214,15 @@ func ValidateConfig(config *Config) error {
 		return errors.New("use_custom_reader is set to true but reader isn't specified")
 	}
 
-	if availableFormats := []FormatType{PDF, CBZ, Plain, Zip}; !Contains(availableFormats, config.Format) {
-		// I don't like this...
-		// TODO: Refactor
-		return errors.New(fmt.Sprintf(`unknown format '%s'
-available formats: %s`, string(config.Format), strings.Join(Map(availableFormats, func(f FormatType) string {
-			return string(f)
-		}), ", ")))
+	if !Contains(AvailableFormats, config.Format) {
+		toString := func(f FormatType) string { return string(f) }
+		msg := fmt.Sprintf(
+			`unknown format '%s'
+available formats: %s`,
+			string(config.Format),
+			strings.Join(Map(AvailableFormats, toString), ", "),
+		)
+		return errors.New(msg)
 	}
 
 	for _, scraper := range config.Scrapers {

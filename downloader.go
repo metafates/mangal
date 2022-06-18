@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/bmaupin/go-epub"
 	"github.com/spf13/afero"
 	"log"
 	"os"
@@ -89,7 +90,7 @@ type ChapterDownloadProgress struct {
 }
 
 // DownloadChapter downloads chapter from the given url and returns its path
-func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp bool) (string, error) {
+func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp bool, epub *epub.Epub) (string, error) {
 	mangaTitle := chapter.Relation.Info
 	var (
 		mangaPath string
@@ -195,11 +196,6 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 			Stage:   Converting,
 			Message: fmt.Sprintf("Converting %d pages to %s", pagesCount, UserConfig.Format),
 		}
-	}
-
-	err = RemoveIfExists(chapterPath)
-	if err != nil {
-		return "", err
 	}
 
 	if len(tempPaths) == 0 {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	epub2 "github.com/bmaupin/go-epub"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -187,9 +188,9 @@ func NewBubble(initialState bubbleState) Bubble {
 	}
 
 	input := textinput.New()
-	input.Placeholder = UserConfig.Placeholder
+	input.Placeholder = UserConfig.UI.Placeholder
 	input.CharLimit = 50
-	input.Prompt = inputPromptStyle.Render(UserConfig.Prompt + " ")
+	input.Prompt = inputPromptStyle.Render(UserConfig.UI.Prompt + " ")
 
 	spinner_ := spinner.New()
 	spinner_.Spinner = spinner.Dot
@@ -305,7 +306,7 @@ func (l *listItem) Select() {
 }
 func (l listItem) Title() string {
 	if l.selected {
-		return accentStyle.Bold(true).Render(UserConfig.Mark) + " " + l.url.Info
+		return accentStyle.Bold(true).Render(UserConfig.UI.Mark) + " " + l.url.Info
 	}
 
 	return l.url.Info
@@ -333,7 +334,7 @@ Bubble Update
 
 func (b *Bubble) resize(width int, height int) {
 	// Set size to minimum for non-fullscreen runtime
-	if !UserConfig.Fullscreen {
+	if !UserConfig.UI.Fullscreen {
 		b.mangaList.SetSize(0, 0)
 		b.chaptersList.SetSize(0, 0)
 		return
@@ -422,6 +423,9 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 			failed    []*URL
 			succeeded []string
 			total     = len(chapters)
+			epub      = IfElse(UserConfig.Format == Epub, epub2.NewEpub(chapters[0].Relation.Info), nil)
+			path      string
+			err       error
 		)
 
 		for i, chapter := range chapters {
@@ -434,12 +438,22 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 				Done:      false,
 			}
 
-			path, err := DownloadChapter(chapter, b.chapterPagesProgressChan, false)
+			if epub != nil {
+				path, err = DownloadChapter(chapter, b.chapterPagesProgressChan, false, epub)
+			} else {
+				path, err = DownloadChapter(chapter, b.chapterPagesProgressChan, false, nil)
+			}
 			if err == nil {
 				// use path instead of the chapter name since it is used to get manga folder later
 				succeeded = append(succeeded, path)
 			} else {
 				failed = append(failed, chapter)
+			}
+		}
+
+		if epub != nil {
+			if err := epub.Write(path); err != nil {
+				log.Fatal("Error while making epub")
 			}
 		}
 
@@ -480,7 +494,7 @@ func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 			Proceeded: 0,
 		}
 
-		path, err := DownloadChapter(chapter, b.chapterPagesProgressChan, true)
+		path, err := DownloadChapter(chapter, b.chapterPagesProgressChan, true, nil)
 
 		if err != nil {
 			failed = append(failed, chapter)
@@ -825,10 +839,10 @@ func (b Bubble) View() string {
 
 	switch b.state {
 	case searchState:
-		if UserConfig.Title == "" {
+		if UserConfig.UI.Title == "" {
 			view = b.input.View()
 		} else {
-			view = fmt.Sprintf(template, inputTitleStyle.Render(UserConfig.Title), b.input.View())
+			view = fmt.Sprintf(template, inputTitleStyle.Render(UserConfig.UI.Title), b.input.View())
 		}
 	case loadingState:
 		view = fmt.Sprintf(template, b.spinner.View())

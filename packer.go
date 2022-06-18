@@ -12,6 +12,11 @@ import (
 func PackToPDF(images []string, destination string) (string, error) {
 	destination += ".pdf"
 
+	err := RemoveIfExists(destination)
+	if err != nil {
+		return "", err
+	}
+
 	// Create parent directory since pdfcpu have some troubles when it doesn't exist
 	if exists, err := Afero.Exists(filepath.Dir(destination)); err != nil {
 		return "", err
@@ -28,13 +33,28 @@ func PackToPDF(images []string, destination string) (string, error) {
 	return destination, nil
 }
 
+func PackToEpub(images []string, destination string) (string, error) {
+	// TODO
+
+	parentDir := filepath.Base(filepath.Dir(destination))
+	destination = parentDir + ".epub"
+
+	return "", nil
+}
+
 func PackToCBZ(images []string, destination string) (string, error) {
+
 	zipFile, err := PackToZip(images, destination, false)
 	if err != nil {
 		return "", err
 	}
 
 	cbzFile := zipFile + ".cbz"
+
+	err = RemoveIfExists(cbzFile)
+	if err != nil {
+		return "", err
+	}
 
 	if err := Afero.Rename(zipFile, cbzFile); err != nil {
 		return "", err
@@ -45,6 +65,10 @@ func PackToCBZ(images []string, destination string) (string, error) {
 func PackToZip(images []string, destination string, withExtension bool) (string, error) {
 	if withExtension {
 		destination += ".zip"
+		err := RemoveIfExists(destination)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	if exists, err := Afero.Exists(filepath.Dir(destination)); err != nil {
@@ -141,4 +165,5 @@ var Packers = map[FormatType]func([]string, string) (string, error){
 	Plain: PackToPlain,
 	Zip:   func(f []string, d string) (string, error) { return PackToZip(f, d, true) },
 	CBZ:   PackToCBZ,
+	Epub:  PackToEpub,
 }

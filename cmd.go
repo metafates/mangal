@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	epub2 "github.com/bmaupin/go-epub"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -32,7 +33,7 @@ var rootCmd = &cobra.Command{
 
 		var program *tea.Program
 
-		if UserConfig.Fullscreen {
+		if UserConfig.UI.Fullscreen {
 			program = tea.NewProgram(NewBubble(searchState), tea.WithAltScreen())
 		} else {
 			program = tea.NewProgram(NewBubble(searchState))
@@ -145,9 +146,27 @@ Useful for scripting`,
 					asTemp = true
 				}
 
-				chapterPath, err := DownloadChapter(selectedChapter, nil, asTemp)
-				if err != nil {
-					log.Fatal("Error while downloading chapter")
+				var (
+					chapterPath string
+					err         error
+				)
+				if UserConfig.Format == Epub {
+					epub := epub2.NewEpub(selectedManga.Info)
+					chapterPath, err = DownloadChapter(selectedChapter, nil, asTemp, epub)
+					if err != nil {
+						log.Fatal("Error while downloading chapter")
+					}
+
+					err := epub.Write(chapterPath)
+
+					if err != nil {
+						log.Fatal("Error while downloading chapter")
+					}
+				} else {
+					chapterPath, err = DownloadChapter(selectedChapter, nil, asTemp, nil)
+					if err != nil {
+						log.Fatal("Error while downloading chapter")
+					}
 				}
 
 				if read {
@@ -357,6 +376,18 @@ var configTestCmd = &cobra.Command{
 	},
 }
 
+var formatsCmd = &cobra.Command{
+	Use:   "formats",
+	Short: "Information about available formats",
+	Long:  "Show information about available formats with quick description of each",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("Available formats\n\n")
+		for _, format := range AvailableFormats {
+			fmt.Printf("%s - %s\n", format, FormatsInfo[format])
+		}
+	},
+}
+
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 
@@ -388,6 +419,8 @@ func CmdExecute() {
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 	rootCmd.Flags().StringP("format", "f", "", "use custom format - pdf, cbz, zip, plain")
+
+	rootCmd.AddCommand(formatsCmd)
 
 	_ = rootCmd.Execute()
 }
