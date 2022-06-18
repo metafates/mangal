@@ -112,6 +112,11 @@ mark = "▼"
 # Search window title
 title = "Mangal"
 
+# Add images to cache
+# If set to true mangal could crash when trying to redownload something really quickly
+# Usually happens on slow machines
+cache_images = false
+
 [sources]
     [sources.manganelo]
     # Base url
