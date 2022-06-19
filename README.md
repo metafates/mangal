@@ -50,7 +50,7 @@ Currently Mangal supports these formats
 
 ### TUI usage example
 
-https://user-images.githubusercontent.com/62389790/172178993-bb40392a-54ba-446d-b0ed-1b962ede7ed2.mp4
+https://user-images.githubusercontent.com/62389790/174478298-cbee0141-fd15-4b06-8ede-fcc31d9ba7f6.mov
 
 ### Inline mode usage example
 
