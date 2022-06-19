@@ -68,7 +68,7 @@ var UserConfig *Config
 var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Available options: pdf, cbz, zip, plain (just images)
+# Available options: pdf, epub, cbz, zip, plain (just images)
 format = "pdf"
 
 # If false, then OS default pdf reader will be used
