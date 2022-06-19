@@ -49,7 +49,7 @@ var versionCmd = &cobra.Command{
 	Short: "Show version",
 	Long:  fmt.Sprintf("Shows %s versions and build date", AppName),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", AppName, version)
+		fmt.Printf("%s version %s\n", strings.ToLower(AppName), version)
 	},
 }
 

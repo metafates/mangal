@@ -572,8 +572,10 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Open):
-			item := b.mangaList.SelectedItem().(listItem)
-			_ = open.Start(item.url.Address)
+			if item := b.mangaList.SelectedItem(); item != nil {
+				item := b.mangaList.SelectedItem().(listItem)
+				_ = open.Start(item.url.Address)
+			}
 		case b.loading:
 			// Do nothing if the chapters are loading
 			return b, nil
