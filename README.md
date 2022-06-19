@@ -103,13 +103,19 @@ use = ['manganelo']
 # Available options: pdf, epub, cbz, zip, plain (just images)
 format = "pdf"
 
-# If false, then OS default reader will be used
+# If false, then OS default pdf reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
 
-# Custom download path, can be either relative (to the pwd) or absolute
+# Custom download path, can be either relative (to the current directory) or absolute
 download_path = '.'
 
+# Add images to cache
+# If set to true mangal could crash when trying to redownload something really quickly
+# Usually happens on slow machines
+cache_images = false
+
+[ui]
 # Fullscreen mode
 fullscreen = true
 
@@ -125,40 +131,35 @@ mark = "▼"
 # Search window title
 title = "Mangal"
 
-# Add images to cache
-# If set to true mangal could crash when trying to redownload something really quickly
-# Usually happens on slow machines
-cache_images = false
-
 [sources]
-    [sources.manganelo]
-    # Base url
-    base = 'https://ww5.manganelo.tv'
+[sources.manganelo]
+# Base url
+base = 'https://ww5.manganelo.tv'
 
-    # Search endpoint. Put %s where the query should be
-    search = 'https://ww5.manganelo.tv/search/%s'
+# Search endpoint. Put %s where the query should be
+search = 'https://ww5.manganelo.tv/search/%s'
 
-    # Selector of entry anchor (<a></a>) on search page
-    manga_anchor = '.search-story-item a.item-title'
+# Selector of entry anchor (<a></a>) on search page
+manga_anchor = '.search-story-item a.item-title'
 
-    # Selector of entry title on search page
-    manga_title = '.search-story-item a.item-title'
+# Selector of entry title on search page
+manga_title = '.search-story-item a.item-title'
 
-    # Manga chapters anchors selector
-    chapter_anchor = 'li.a-h a.chapter-name'
+# Manga chapters anchors selector
+chapter_anchor = 'li.a-h a.chapter-name'
 
-    # Manga chapters titles selector
-    chapter_title = 'li.a-h a.chapter-name'
+# Manga chapters titles selector
+chapter_title = 'li.a-h a.chapter-name'
 
-    # Reader page images selector
-    reader_page = '.container-chapter-reader img'
-    
-    # Random delay between requests
-    random_delay_ms = 500 # ms
-    
-    # Are chapters listed in reversed order on that source?
-    # reversed order -> from newest chapter to oldest
-    reversed_chapters_order = true
+# Reader page images selector
+reader_page = '.container-chapter-reader img'
+
+# Random delay between requests
+random_delay_ms = 500 # ms
+
+# Are chapters listed in reversed order on that source?
+# reversed order -> from newest chapter to oldest
+reversed_chapters_order = true
 ```
 </details>
 
