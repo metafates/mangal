@@ -1,6 +1,6 @@
 <h1 align="center">Mangal</h1>
 <p align="center">
-    <img width="200" src="assets/manga.png" alt="logo">
+    <img width="200" src="assets/logo.png" alt="logo">
 </p>
 
 <h3 align="center">Manga Browser & Downloader</h3>
@@ -26,7 +26,7 @@
 
 ## About
 
-✨ __Mangal__ is feature rich, configurable manga browser, reader & downloader
+✨ __Mangal__ is feature rich, configurable manga browser & downloader
 written in Go with support for different formats
 
 ⚙️ One of the most important features of Mangal is that it supports user defined scrapers
@@ -257,4 +257,4 @@ to overcome this roadblocks somewhere in the future
 
 ---
 
-Manga icon taken from [here](https://www.flaticon.com/free-icons/manga)
+Logo taken from [here](https://www.flaticon.com/free-icon/parchment_1391306)

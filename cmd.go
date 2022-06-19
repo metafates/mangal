@@ -344,7 +344,7 @@ var configInitCmd = &cobra.Command{
 			} else if _, err = file.Write(DefaultConfigBytes); err != nil {
 				log.Fatal("Error while writing to file")
 			} else {
-				fmt.Printf("Config created at\n%s\n", configPath)
+				fmt.Printf("Config created at\n%s\n", successStyle.Render(configPath))
 			}
 		}
 
