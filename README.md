@@ -26,9 +26,10 @@
 
 ## About
 
-✨ __Mangal__ is a fancy CLI app written in Go which scrapes, downloads and packs manga into different formats
+✨ __Mangal__ is feature rich, configurable manga browser, reader & downloader
+written in Go with support for different formats
 
-⚙️ The most important feature of Mangal is that it supports user defined scrapers
+⚙️ One of the most important features of Mangal is that it supports user defined scrapers
 that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
 
 🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate with scripts
@@ -74,17 +75,26 @@ mangal inline --query "death note" --manga 1 --chapter 1
 > TLDR: Use `mangal config where` to show where config should be located
 > and `mangal config init` to create default config
 
+
+<details>
+<summary>
 Config is located at the OS default config directory.
+</summary>
 
 - __Unix__ - `$XDG_CONFIG_HOME/mangal/config.toml` if `$XDG_CONFIG_HOME` exists, else `$HOME/.config/mangal/config.toml`
 - __Darwin__ (macOS) - `$HOME/Library/Application\ Support/mangal/config.toml`
 - __Windows__ - `%AppData%\mangal\config.toml`
+</details>
+
 
 You can load config from custom path by using `--config` flag
 
 `mangal --config /user/configs/config.toml`
 
 By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
+
+<details>
+<summary>Click here to show config example</summary>
 
 ```toml
 # Which sources to use. You can use several sources, it won't affect perfomance'
@@ -150,6 +160,7 @@ cache_images = false
     # reversed order -> from newest chapter to oldest
     reversed_chapters_order = true
 ```
+</details>
 
 ## Commands
 
@@ -191,6 +202,14 @@ brew install metafates/tap/mangal
 go install github.com/metafates/mangal@latest
 ```
 
+### Scoop
+> Soon... 😴
+
+### AUR
+> Soon... 😴
+
+
+
 ## Build
 
 ```bash
@@ -201,6 +220,8 @@ go build
 
 > You can also cross build for windows, linux & macos
 > by running `cross-compile.py`
+> 
+> Built binaries will be stored in the `bin` folder
 
 ## Limitations
 
