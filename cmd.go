@@ -49,7 +49,7 @@ var versionCmd = &cobra.Command{
 	Short: "Show version",
 	Long:  fmt.Sprintf("Shows %s versions and build date", AppName),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", strings.ToLower(AppName), version)
+		fmt.Printf("%s version %s\n", accentStyle.Render(strings.ToLower(AppName)), boldStyle.Render(version))
 	},
 }
 
@@ -269,9 +269,9 @@ var configWhereCmd = &cobra.Command{
 		}
 
 		if exists {
-			fmt.Printf("Config exists at\n%s\n", configPath)
+			fmt.Printf("Config exists at\n%s\n", successStyle.Render(configPath))
 		} else {
-			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", configPath)
+			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", successStyle.Render(configPath))
 		}
 	},
 }
@@ -358,7 +358,7 @@ var configInitCmd = &cobra.Command{
 		}
 
 		if exists {
-			log.Fatal("Config file already exists. Use --force to overwrite it")
+			log.Fatalf("Config file already exists. Use %s to overwrite it", accentStyle.Render("--force"))
 		} else {
 			createConfig()
 		}
@@ -375,7 +375,7 @@ var configTestCmd = &cobra.Command{
 		if err := ValidateConfig(UserConfig); err != nil {
 			log.Fatal(err)
 		} else {
-			fmt.Println("Everything is OK")
+			fmt.Println(successStyle.Render("Everything is OK"))
 		}
 	},
 }
@@ -385,9 +385,9 @@ var formatsCmd = &cobra.Command{
 	Short: "Information about available formats",
 	Long:  "Show information about available formats with quick description of each",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Available formats\n\n")
+		fmt.Printf(boldStyle.Render("Available formats") + "\n\n")
 		for _, format := range AvailableFormats {
-			fmt.Printf("%s - %s\n", format, FormatsInfo[format])
+			fmt.Printf("%s - %s\n", accentStyle.Render(string(format)), italicStyle.Render(FormatsInfo[format]))
 		}
 	},
 }

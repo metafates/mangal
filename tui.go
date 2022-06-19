@@ -28,6 +28,8 @@ Styles
 var (
 	commonStyle         = lipgloss.NewStyle().Margin(2, 2)
 	accentStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	boldStyle           = lipgloss.NewStyle().Bold(true)
+	italicStyle         = lipgloss.NewStyle().Italic(true)
 	inputPromptStyle    = accentStyle.Copy().Bold(true)
 	inputTitleStyle     = inputPromptStyle.Copy()
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
