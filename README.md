@@ -191,6 +191,24 @@ Use "mangal [command] --help" for more information about a command.
 
 ## Install
 
+- [Go](#go)
+- [From source](#from-source)
+- [Homebrew](#homebrew)
+- [Scoop](#scoop)
+
+
+### Go
+```bash
+go install github.com/metafates/mangal@latest
+```
+
+### From source
+```bash
+git clone https://github.com/metafates/mangal.git
+cd mangal
+go install
+```
+
 ### Homebrew
 
 ```bash
@@ -198,15 +216,7 @@ brew tap metafates/tap
 brew install metafates/tap/mangal
 ```
 
-### Go
-```bash
-go install github.com/metafates/mangal@latest
-```
-
 ### Scoop
-> Soon... 😴
-
-### AUR
 > Soon... 😴
 
 
