@@ -529,7 +529,11 @@ func (b Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Confirm) && b.input.Value() != "":
 			b.setState(loadingState)
-			return b, tea.Batch(b.spinner.Tick, b.initMangaSearch(b.input.Value()), b.waitForMangaSearchCompletion())
+			return b, tea.Batch(
+				b.spinner.Tick,
+				b.initMangaSearch(b.input.Value()),
+				b.waitForMangaSearchCompletion(),
+			)
 		}
 	}
 
@@ -640,7 +644,13 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			chapter := b.chaptersList.SelectedItem().(listItem)
 
-			return b, tea.Batch(b.progress.SetPercent(0), b.spinner.Tick, b.initChapterDownloadToRead(chapter.url), b.waitForChapterToReadDownloaded(), b.waitForChapterDownloadProgress())
+			return b, tea.Batch(
+				b.progress.SetPercent(0),
+				b.spinner.Tick,
+				b.initChapterDownloadToRead(chapter.url),
+				b.waitForChapterToReadDownloaded(),
+				b.waitForChapterDownloadProgress(),
+			)
 		case key.Matches(msg, b.keyMap.Confirm) && len(b.selectedChapters) > 0:
 			b.setState(confirmPromptState)
 			return b, nil
@@ -708,7 +718,13 @@ func (b Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 				chapters = append(chapters, items[index].(listItem).url)
 			}
 
-			return b, tea.Batch(b.progress.SetPercent(0), b.spinner.Tick, b.initChaptersDownload(chapters), b.waitForChaptersDownloadProgress(), b.waitForChapterDownloadProgress())
+			return b, tea.Batch(
+				b.progress.SetPercent(0),
+				b.spinner.Tick,
+				b.initChaptersDownload(chapters),
+				b.waitForChaptersDownloadProgress(),
+				b.waitForChapterDownloadProgress(),
+			)
 		}
 	}
 
@@ -782,7 +798,13 @@ func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if len(failed) > 0 {
 				b.setState(downloadingState)
-				return b, tea.Batch(b.progress.SetPercent(0), b.spinner.Tick, b.initChaptersDownload(failed), b.waitForChaptersDownloadProgress(), b.waitForChapterDownloadProgress())
+				return b, tea.Batch(
+					b.progress.SetPercent(0),
+					b.spinner.Tick,
+					b.initChaptersDownload(failed),
+					b.waitForChaptersDownloadProgress(),
+					b.waitForChapterDownloadProgress(),
+				)
 			}
 		case key.Matches(msg, b.keyMap.Open):
 			if paths := b.chaptersDownloadProgressInfo.Succeeded; len(paths) > 0 {
@@ -859,7 +881,12 @@ func (b Bubble) View() string {
 
 		mangaName := b.chaptersList.Items()[0].(listItem).url.Relation.Info
 		chaptersToDownload := len(b.selectedChapters)
-		view = fmt.Sprintf(template, accentStyle.Render(strconv.Itoa(chaptersToDownload)), Plural("chapter", chaptersToDownload), accentStyle.Render(PrettyTrim(mangaName, 40)))
+		view = fmt.Sprintf(
+			template,
+			accentStyle.Render(strconv.Itoa(chaptersToDownload)),
+			Plural("chapter", chaptersToDownload),
+			accentStyle.Render(PrettyTrim(mangaName, 40)),
+		)
 	case downloadingState:
 
 		var header string
