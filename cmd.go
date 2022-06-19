@@ -82,7 +82,7 @@ var cleanupCacheCmd = &cobra.Command{
 	Short: "Remove cache files",
 	Long:  "Removes cache files produced by scraper",
 	Run: func(cmd *cobra.Command, args []string) {
-		counter, bytes := RemoveTemp()
+		counter, bytes := RemoveCache()
 		fmt.Printf("%d cache files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
 	},
 }
