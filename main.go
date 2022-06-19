@@ -1,6 +1,6 @@
 package main
 
-const version = "1.4.2"
+const version = "1.5.0"
 
 func main() {
 	CmdExecute()
