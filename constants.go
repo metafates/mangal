@@ -15,5 +15,5 @@ var FormatsInfo = map[FormatType]string{
 	CBZ:   "Comic book archive format. Basically zip but with .cbz extension",
 	Plain: "Just folders with raw .jpg images as chapters",
 	Zip:   "Chapters compressied in zip archives",
-	Epub:  "...",
+	Epub:  "eBook format. Packs multiple chapters into single file",
 }
