@@ -38,9 +38,12 @@ that can be added with just a few lines of config file (see [config](#config) & 
 
 Currently Mangal supports these formats
 - PDF
+- Epub
 - CBZ
 - Zip
 - Plain (just images)
+
+> Type `mangal formats` for more info
 
 ## Examples
 
@@ -87,7 +90,7 @@ By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
 # Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Available options: pdf, cbz, zip, plain (just images)
+# Available options: pdf, epub, cbz, zip, plain (just images)
 format = "pdf"
 
 # If false, then OS default reader will be used
@@ -151,6 +154,8 @@ cache_images = false
 ## Commands
 
 ```
+A fast and flexible manga downloader
+
 Usage:
   mangal [flags]
   mangal [command]
@@ -158,7 +163,8 @@ Usage:
 Available Commands:
   cleanup     Remove cached and temp files
   completion  Generate the autocompletion script for the specified shell
-  config      Config manipulation
+  config      Config actions
+  formats     Information about available formats
   help        Help about any command
   inline      Search & Download manga in inline mode
   version     Show version
@@ -168,7 +174,7 @@ Flags:
   -f, --format string   use custom format - pdf, cbz, zip, plain
   -h, --help            help for mangal
 
-Use "mangal [command] --help" for more information about a command.```
+Use "mangal [command] --help" for more information about a command.
 ```
 
 ## Install

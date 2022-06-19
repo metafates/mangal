@@ -58,17 +58,32 @@ var cleanupCmd = &cobra.Command{
 	Short: "Remove cached and temp files",
 	Long:  "Removes cached files produced by scraper and temp files from downloader",
 	Run: func(cmd *cobra.Command, args []string) {
-		leaveCache, _ := cmd.Flags().GetBool("preserve-cache")
-
 		counter, bytes := RemoveTemp()
-
-		if !leaveCache {
-			c, b := RemoveCache()
-			counter += c
-			bytes += b
-		}
+		c, b := RemoveCache()
+		counter += c
+		bytes += b
 
 		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupTempCmd = &cobra.Command{
+	Use:   "temp",
+	Short: "Remove temp files",
+	Long:  "Removes temp files produced by downloader",
+	Run: func(cmd *cobra.Command, args []string) {
+		counter, bytes := RemoveTemp()
+		fmt.Printf("%d temp files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupCacheCmd = &cobra.Command{
+	Use:   "cache",
+	Short: "Remove cache files",
+	Long:  "Removes cache files produced by scraper",
+	Run: func(cmd *cobra.Command, args []string) {
+		counter, bytes := RemoveTemp()
+		fmt.Printf("%d cache files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
 	},
 }
 
@@ -380,8 +395,8 @@ var formatsCmd = &cobra.Command{
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 
-	cleanupCmd.Flags().BoolP("preserve-cache", "c", false, "do not remove cache")
-	cleanupCmd.Flags().BoolP("verbose", "v", false, "print out removed files")
+	cleanupCmd.AddCommand(cleanupTempCmd)
+	cleanupCmd.AddCommand(cleanupCacheCmd)
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)
