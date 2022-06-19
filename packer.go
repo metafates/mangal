@@ -43,6 +43,7 @@ var EpubFile *epub.Epub
 
 // PackToEpub adds chapter to the epub file
 func PackToEpub(images []string, destination string) (string, error) {
+	coverSet := true
 	mangaTitle := filepath.Base(filepath.Dir(destination))
 	chapterTitle := filepath.Base(destination)
 
@@ -50,6 +51,7 @@ func PackToEpub(images []string, destination string) (string, error) {
 
 	// Initialize epub file
 	if EpubFile == nil {
+		coverSet = false
 		EpubFile = epub.NewEpub(mangaTitle)
 		EpubFile.SetPpd("rtl")
 		if err := RemoveIfExists(destination); err != nil {
@@ -75,6 +77,10 @@ func PackToEpub(images []string, destination string) (string, error) {
 		epubImage, err := EpubFile.AddImage(image, strconv.Itoa(rand.Intn(100000))+filepath.Base(image))
 		if err != nil {
 			return "", err
+		}
+		if !coverSet {
+			EpubFile.SetCover(epubImage, "")
+			coverSet = true
 		}
 		epubImages[i] = epubImage
 	}

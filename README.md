@@ -120,7 +120,7 @@ cache_images = false
 fullscreen = true
 
 # Input prompt icon
-prompt = "🔍"
+prompt = ">"
 
 # Input placeholder
 placeholder = "What shall we look for?"

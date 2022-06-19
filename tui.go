@@ -451,7 +451,7 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 		if EpubFile != nil {
 			EpubFile.SetAuthor(chapters[0].Scraper.Source.Base)
 			if err := EpubFile.Write(path); err != nil {
-				log.Fatal("Error while making epub", err)
+				log.Fatal("Error while making epub. Please, try again")
 			}
 		}
 
