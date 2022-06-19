@@ -2,13 +2,18 @@ package main
 
 import (
 	"archive/zip"
+	"fmt"
+	"github.com/bmaupin/go-epub"
 	pdfcpu "github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/spf13/afero"
 	"io"
+	"math/rand"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
+// PackToPDF packs chapter to .pdf
 func PackToPDF(images []string, destination string) (string, error) {
 	destination += ".pdf"
 
@@ -33,15 +38,64 @@ func PackToPDF(images []string, destination string) (string, error) {
 	return destination, nil
 }
 
+// EpubFile global epub file that is used to save multiple chapters in a single file
+var EpubFile *epub.Epub
+
+// PackToEpub adds chapter to the epub file
 func PackToEpub(images []string, destination string) (string, error) {
-	// TODO
+	mangaTitle := filepath.Base(filepath.Dir(destination))
+	chapterTitle := filepath.Base(destination)
 
-	parentDir := filepath.Base(filepath.Dir(destination))
-	destination = parentDir + ".epub"
+	destination = filepath.Join(filepath.Dir(destination), mangaTitle+".epub")
 
-	return "", nil
+	// Initialize epub file
+	if EpubFile == nil {
+		EpubFile = epub.NewEpub(mangaTitle)
+		EpubFile.SetPpd("rtl")
+		if err := RemoveIfExists(destination); err != nil {
+			return "", err
+		}
+		if err := Afero.MkdirAll(filepath.Dir(destination), 0777); err != nil {
+			return "", err
+		}
+
+		file, err := Afero.Create(destination)
+		if err != nil {
+			return "", err
+		}
+
+		if err = file.Close(); err != nil {
+			return "", err
+		}
+	}
+
+	var epubImages = make([]string, len(images))
+
+	for i, image := range images {
+		epubImage, err := EpubFile.AddImage(image, strconv.Itoa(rand.Intn(100000))+filepath.Base(image))
+		if err != nil {
+			return "", err
+		}
+		epubImages[i] = epubImage
+	}
+
+	imgTags := Map(epubImages, func(pathToImage string) string {
+		return fmt.Sprintf(`
+			<p style="display:block;margin:0;">
+				<img src="%s" style="height:auto;width:auto;"/>
+            </p>
+		`, pathToImage)
+	})
+
+	_, err := EpubFile.AddSection(strings.Join(imgTags, "\n"), chapterTitle, "", "")
+	if err != nil {
+		return "", err
+	}
+
+	return destination, nil
 }
 
+// PackToCBZ packs chapter to .cbz format
 func PackToCBZ(images []string, destination string) (string, error) {
 
 	zipFile, err := PackToZip(images, destination, false)
@@ -62,6 +116,7 @@ func PackToCBZ(images []string, destination string) (string, error) {
 	return cbzFile, nil
 }
 
+// PackToZip packs chapter to .zip format
 func PackToZip(images []string, destination string, withExtension bool) (string, error) {
 	if withExtension {
 		destination += ".zip"
@@ -101,6 +156,7 @@ func PackToZip(images []string, destination string, withExtension bool) (string,
 	return destination, nil
 }
 
+// addFileToZip adds files to zip writer
 func addFileToZip(zipWriter *zip.Writer, filename string, index int) error {
 	file, err := Afero.Open(filename)
 	if err != nil {
@@ -136,6 +192,7 @@ func addFileToZip(zipWriter *zip.Writer, filename string, index int) error {
 	return err
 }
 
+// PackToPlain packs chapter in the plain format
 func PackToPlain(images []string, destination string) (string, error) {
 	err := Afero.MkdirAll(destination, 0700)
 	if err != nil {

@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/bmaupin/go-epub"
 	"github.com/spf13/afero"
 	"log"
 	"os"
@@ -54,17 +53,6 @@ func SaveTemp(contents *[]byte) (string, error) {
 	return out.Name(), nil
 }
 
-// batchRemove removes all files from the path list
-func batchRemove(paths []string) error {
-	for _, path := range paths {
-		err := Afero.Remove(path)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 type DownloaderStage int
 
 const (
@@ -90,7 +78,7 @@ type ChapterDownloadProgress struct {
 }
 
 // DownloadChapter downloads chapter from the given url and returns its path
-func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp bool, epub *epub.Epub) (string, error) {
+func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp bool) (string, error) {
 	mangaTitle := chapter.Relation.Info
 	var (
 		mangaPath string
@@ -214,9 +202,6 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 			Message: "Removing temp files",
 		}
 	}
-
-	// Cleanup temp files
-	err = batchRemove(tempPaths)
 
 	if err != nil {
 		return "", err

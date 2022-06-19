@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	epub2 "github.com/bmaupin/go-epub"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -79,6 +78,7 @@ var inlineCmd = &cobra.Command{
 	Long: `Search & Download manga in inline mode
 Useful for scripting`,
 	Run: func(cmd *cobra.Command, args []string) {
+		defer RemoveTemp()
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
@@ -146,26 +146,15 @@ Useful for scripting`,
 					asTemp = true
 				}
 
-				var (
-					chapterPath string
-					err         error
-				)
-				if UserConfig.Format == Epub {
-					epub := epub2.NewEpub(selectedManga.Info)
-					chapterPath, err = DownloadChapter(selectedChapter, nil, asTemp, epub)
-					if err != nil {
-						log.Fatal("Error while downloading chapter")
-					}
+				chapterPath, err := DownloadChapter(selectedChapter, nil, asTemp)
+				if err != nil {
+					log.Fatal("Error while downloading chapter")
+				}
 
-					err := epub.Write(chapterPath)
-
-					if err != nil {
-						log.Fatal("Error while downloading chapter")
-					}
-				} else {
-					chapterPath, err = DownloadChapter(selectedChapter, nil, asTemp, nil)
-					if err != nil {
-						log.Fatal("Error while downloading chapter")
+				if EpubFile != nil {
+					EpubFile.SetAuthor(selectedManga.Scraper.Source.Base)
+					if err := EpubFile.Write(chapterPath); err != nil {
+						log.Fatal("Error while making epub file")
 					}
 				}
 

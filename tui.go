@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	epub2 "github.com/bmaupin/go-epub"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -423,11 +422,13 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 			failed    []*URL
 			succeeded []string
 			total     = len(chapters)
-			epub      = IfElse(UserConfig.Format == Epub, epub2.NewEpub(chapters[0].Relation.Info), nil)
 			path      string
 			err       error
 		)
 
+		sort.Slice(chapters, func(i int, j int) bool {
+			return chapters[i].Index < chapters[j].Index
+		})
 		for i, chapter := range chapters {
 			b.chaptersProgressChan <- ChaptersDownloadProgress{
 				Failed:    failed,
@@ -438,11 +439,7 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 				Done:      false,
 			}
 
-			if epub != nil {
-				path, err = DownloadChapter(chapter, b.chapterPagesProgressChan, false, epub)
-			} else {
-				path, err = DownloadChapter(chapter, b.chapterPagesProgressChan, false, nil)
-			}
+			path, err = DownloadChapter(chapter, b.chapterPagesProgressChan, false)
 			if err == nil {
 				// use path instead of the chapter name since it is used to get manga folder later
 				succeeded = append(succeeded, path)
@@ -451,9 +448,10 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 			}
 		}
 
-		if epub != nil {
-			if err := epub.Write(path); err != nil {
-				log.Fatal("Error while making epub")
+		if EpubFile != nil {
+			EpubFile.SetAuthor(chapters[0].Scraper.Source.Base)
+			if err := EpubFile.Write(path); err != nil {
+				log.Fatal("Error while making epub", err)
 			}
 		}
 
@@ -494,7 +492,7 @@ func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 			Proceeded: 0,
 		}
 
-		path, err := DownloadChapter(chapter, b.chapterPagesProgressChan, true, nil)
+		path, err := DownloadChapter(chapter, b.chapterPagesProgressChan, true)
 
 		if err != nil {
 			failed = append(failed, chapter)
@@ -801,6 +799,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, b.keyMap.ForceQuit):
+			RemoveTemp()
 			return b, tea.Quit
 		}
 	}
