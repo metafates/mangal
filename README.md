@@ -167,7 +167,7 @@ reversed_chapters_order = true
 ## Commands
 
 ```
-A fast and flexible manga downloader
+The ultimate manga downloader multitool
 
 Usage:
   mangal [flags]
@@ -184,7 +184,7 @@ Available Commands:
 
 Flags:
   -c, --config string   use config from path
-  -f, --format string   use custom format - pdf, cbz, zip, plain
+  -f, --format string   use custom format
   -h, --help            help for mangal
 
 Use "mangal [command] --help" for more information about a command.
