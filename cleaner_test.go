@@ -9,7 +9,7 @@ import (
 )
 
 // generateFiles at the given directory with prefix appended to each file
-func generateFiles(t *testing.T, count int, dir, prefix string, makeFolders bool) ([]string, error) {
+func generateFiles(t *testing.T, count int, dir, prefix string) ([]string, error) {
 	t.Helper()
 
 	var files []string
@@ -20,16 +20,9 @@ func generateFiles(t *testing.T, count int, dir, prefix string, makeFolders bool
 
 	for i := 0; i < count; i++ {
 		path := filepath.Join(dir, prefix+strconv.Itoa(rand.Intn(100000)))
-		if makeFolders {
 
-			if err := Afero.MkdirAll(path, 0777); err != nil {
-				return nil, err
-			}
-		} else {
-
-			if _, err := Afero.Create(path); err != nil {
-				return nil, err
-			}
+		if _, err := Afero.Create(path); err != nil {
+			return nil, err
 		}
 		files = append(files, path)
 	}
@@ -54,7 +47,7 @@ func existAll(t *testing.T, files []string) (bool, error) {
 func TestRemoveTemp(t *testing.T) {
 	const count = 13
 
-	files, err := generateFiles(t, count, os.TempDir(), TempPrefix, false)
+	files, err := generateFiles(t, count, os.TempDir(), TempPrefix)
 	if err != nil {
 		t.Fatal("could not create files for testing")
 	}
@@ -85,11 +78,11 @@ func TestRemoveCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Helper()
+	cacheDir = filepath.Join(cacheDir, CachePrefix)
 
 	const count = 13
 
-	files, err := generateFiles(t, count, filepath.Join(cacheDir, CachePrefix), "", true)
+	files, err := generateFiles(t, count, cacheDir, "")
 	if err != nil {
 		t.Fatal("could not create files for testing", err)
 	}
@@ -100,9 +93,15 @@ func TestRemoveCache(t *testing.T) {
 		t.Fatal("files was not created")
 	}
 
+	countNested, err := os.ReadDir(cacheDir)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	removedCount, _ := RemoveCache()
 
-	if removedCount != count {
+	if removedCount != len(countNested) {
 		t.Error("removed files count does not match expected count")
 	}
 
