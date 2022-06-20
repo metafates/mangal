@@ -16,8 +16,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   strings.ToLower(AppName),
-	Short: AppName + " - Manga Downloader",
-	Long:  `The ultimate manga downloader `,
+	Short: AppName + " - A Manga Downloader",
+	Long:  `The ultimate manga downloader multitool`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
