@@ -194,11 +194,6 @@ func ParseConfig(configString string) (*Config, error) {
 	}
 
 	conf.UI = tempConf.UI
-	//conf.Fullscreen = tempConf.Fullscreen
-	//conf.Mark = tempConf.Mark
-	//conf.Prompt = tempConf.Prompt
-	//conf.Placeholder = tempConf.Placeholder
-	//conf.Title = tempConf.Title
 	conf.Path = tempConf.Path
 	// Default format is pdf
 	conf.Format = IfElse(tempConf.Format == "", PDF, FormatType(tempConf.Format))
@@ -215,12 +210,11 @@ func ValidateConfig(config *Config) error {
 	}
 
 	if !Contains(AvailableFormats, config.Format) {
-		toString := func(f FormatType) string { return string(f) }
 		msg := fmt.Sprintf(
 			`unknown format '%s'
-available formats: %s`,
+type %s to show available formats`,
 			string(config.Format),
-			strings.Join(Map(AvailableFormats, toString), ", "),
+			accentStyle.Render(strings.ToLower(AppName)+" formats"),
 		)
 		return errors.New(msg)
 	}

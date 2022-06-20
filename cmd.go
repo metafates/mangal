@@ -387,7 +387,7 @@ var formatsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf(boldStyle.Render("Available formats") + "\n\n")
 		for _, format := range AvailableFormats {
-			fmt.Printf("%s - %s\n", accentStyle.Render(string(format)), italicStyle.Render(FormatsInfo[format]))
+			fmt.Printf("%s - %s\n", accentStyle.Render(string(format)), FormatsInfo[format])
 		}
 	},
 }
@@ -413,7 +413,7 @@ func CmdExecute() {
 	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter by index")
 	inlineCmd.Flags().StringP("query", "q", "", "manga to search")
 	inlineCmd.Flags().BoolP("json", "j", false, "print as json")
-	inlineCmd.Flags().StringP("format", "f", "", "use custom format - pdf, cbz, zip, plain")
+	inlineCmd.Flags().StringP("format", "f", "", "use custom format")
 	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
 	inlineCmd.Flags().BoolP("read", "r", false, "read chapter")
@@ -422,7 +422,7 @@ func CmdExecute() {
 	rootCmd.AddCommand(inlineCmd)
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
-	rootCmd.Flags().StringP("format", "f", "", "use custom format - pdf, cbz, zip, plain")
+	rootCmd.Flags().StringP("format", "f", "", "use custom format")
 
 	rootCmd.AddCommand(formatsCmd)
 
