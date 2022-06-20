@@ -53,17 +53,6 @@ func SaveTemp(contents *[]byte) (string, error) {
 	return out.Name(), nil
 }
 
-// batchRemove removes all files from the path list
-func batchRemove(paths []string) error {
-	for _, path := range paths {
-		err := Afero.Remove(path)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 type DownloaderStage int
 
 const (
@@ -197,11 +186,6 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		}
 	}
 
-	err = RemoveIfExists(chapterPath)
-	if err != nil {
-		return "", err
-	}
-
 	if len(tempPaths) == 0 {
 		return "", errors.New("pages was not downloaded")
 	}
@@ -218,9 +202,6 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 			Message: "Removing temp files",
 		}
 	}
-
-	// Cleanup temp files
-	err = batchRemove(tempPaths)
 
 	if err != nil {
 		return "", err

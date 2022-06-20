@@ -16,8 +16,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   strings.ToLower(AppName),
-	Short: AppName + " - Manga Downloader",
-	Long:  `A fast and flexible manga downloader`,
+	Short: AppName + " - A Manga Downloader",
+	Long:  `The ultimate manga downloader multitool`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
@@ -32,7 +32,7 @@ var rootCmd = &cobra.Command{
 
 		var program *tea.Program
 
-		if UserConfig.Fullscreen {
+		if UserConfig.UI.Fullscreen {
 			program = tea.NewProgram(NewBubble(searchState), tea.WithAltScreen())
 		} else {
 			program = tea.NewProgram(NewBubble(searchState))
@@ -49,7 +49,7 @@ var versionCmd = &cobra.Command{
 	Short: "Show version",
 	Long:  fmt.Sprintf("Shows %s versions and build date", AppName),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", AppName, version)
+		fmt.Printf("%s version %s\n", accentStyle.Render(strings.ToLower(AppName)), boldStyle.Render(version))
 	},
 }
 
@@ -58,17 +58,32 @@ var cleanupCmd = &cobra.Command{
 	Short: "Remove cached and temp files",
 	Long:  "Removes cached files produced by scraper and temp files from downloader",
 	Run: func(cmd *cobra.Command, args []string) {
-		leaveCache, _ := cmd.Flags().GetBool("preserve-cache")
-
 		counter, bytes := RemoveTemp()
-
-		if !leaveCache {
-			c, b := RemoveCache()
-			counter += c
-			bytes += b
-		}
+		c, b := RemoveCache()
+		counter += c
+		bytes += b
 
 		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupTempCmd = &cobra.Command{
+	Use:   "temp",
+	Short: "Remove temp files",
+	Long:  "Removes temp files produced by downloader",
+	Run: func(cmd *cobra.Command, args []string) {
+		counter, bytes := RemoveTemp()
+		fmt.Printf("%d temp files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupCacheCmd = &cobra.Command{
+	Use:   "cache",
+	Short: "Remove cache files",
+	Long:  "Removes cache files produced by scraper",
+	Run: func(cmd *cobra.Command, args []string) {
+		counter, bytes := RemoveCache()
+		fmt.Printf("%d cache files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
 	},
 }
 
@@ -78,6 +93,13 @@ var inlineCmd = &cobra.Command{
 	Long: `Search & Download manga in inline mode
 Useful for scripting`,
 	Run: func(cmd *cobra.Command, args []string) {
+		asTemp, _ := cmd.Flags().GetBool("temp")
+		defer func() {
+			if !asTemp {
+				RemoveTemp()
+			}
+		}()
+
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
@@ -138,7 +160,6 @@ Useful for scripting`,
 					log.Fatal("Index out of range")
 				}
 
-				asTemp, _ := cmd.Flags().GetBool("temp")
 				read, _ := cmd.Flags().GetBool("read")
 
 				if read {
@@ -148,6 +169,13 @@ Useful for scripting`,
 				chapterPath, err := DownloadChapter(selectedChapter, nil, asTemp)
 				if err != nil {
 					log.Fatal("Error while downloading chapter")
+				}
+
+				if EpubFile != nil {
+					EpubFile.SetAuthor(selectedManga.Scraper.Source.Base)
+					if err := EpubFile.Write(chapterPath); err != nil {
+						log.Fatal("Error while making epub file")
+					}
 				}
 
 				if read {
@@ -246,9 +274,9 @@ var configWhereCmd = &cobra.Command{
 		}
 
 		if exists {
-			fmt.Printf("Config exists at\n%s\n", configPath)
+			fmt.Printf("Config exists at\n%s\n", successStyle.Render(configPath))
 		} else {
-			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", configPath)
+			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", successStyle.Render(configPath))
 		}
 	},
 }
@@ -321,7 +349,7 @@ var configInitCmd = &cobra.Command{
 			} else if _, err = file.Write(DefaultConfigBytes); err != nil {
 				log.Fatal("Error while writing to file")
 			} else {
-				fmt.Printf("Config created at\n%s\n", configPath)
+				fmt.Printf("Config created at\n%s\n", successStyle.Render(configPath))
 			}
 		}
 
@@ -335,7 +363,7 @@ var configInitCmd = &cobra.Command{
 		}
 
 		if exists {
-			log.Fatal("Config file already exists. Use --force to overwrite it")
+			log.Fatalf("Config file already exists. Use %s to overwrite it", accentStyle.Render("--force"))
 		} else {
 			createConfig()
 		}
@@ -352,7 +380,19 @@ var configTestCmd = &cobra.Command{
 		if err := ValidateConfig(UserConfig); err != nil {
 			log.Fatal(err)
 		} else {
-			fmt.Println("Everything is OK")
+			fmt.Println(successStyle.Render("Everything is OK"))
+		}
+	},
+}
+
+var formatsCmd = &cobra.Command{
+	Use:   "formats",
+	Short: "Information about available formats",
+	Long:  "Show information about available formats with quick description of each",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf(boldStyle.Render("Available formats") + "\n\n")
+		for _, format := range AvailableFormats {
+			fmt.Printf("%s - %s\n", accentStyle.Render(string(format)), FormatsInfo[format])
 		}
 	},
 }
@@ -360,8 +400,8 @@ var configTestCmd = &cobra.Command{
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 
-	cleanupCmd.Flags().BoolP("preserve-cache", "c", false, "do not remove cache")
-	cleanupCmd.Flags().BoolP("verbose", "v", false, "print out removed files")
+	cleanupCmd.AddCommand(cleanupTempCmd)
+	cleanupCmd.AddCommand(cleanupCacheCmd)
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)
@@ -378,7 +418,7 @@ func CmdExecute() {
 	inlineCmd.Flags().Int("chapter", -1, "choose and download chapter by index")
 	inlineCmd.Flags().StringP("query", "q", "", "manga to search")
 	inlineCmd.Flags().BoolP("json", "j", false, "print as json")
-	inlineCmd.Flags().StringP("format", "f", "", "use custom format - pdf, cbz, zip, plain")
+	inlineCmd.Flags().StringP("format", "f", "", "use custom format")
 	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
 	inlineCmd.Flags().BoolP("read", "r", false, "read chapter")
@@ -387,7 +427,9 @@ func CmdExecute() {
 	rootCmd.AddCommand(inlineCmd)
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
-	rootCmd.Flags().StringP("format", "f", "", "use custom format - pdf, cbz, zip, plain")
+	rootCmd.Flags().StringP("format", "f", "", "use custom format")
+
+	rootCmd.AddCommand(formatsCmd)
 
 	_ = rootCmd.Execute()
 }

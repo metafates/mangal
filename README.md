@@ -1,6 +1,6 @@
 <h1 align="center">Mangal</h1>
 <p align="center">
-    <img width="200" src="assets/manga.png" alt="logo">
+    <img width="200" src="assets/logo.png" alt="logo">
 </p>
 
 <h3 align="center">Manga Browser & Downloader</h3>
@@ -15,6 +15,7 @@
   </a>
 </p>
 
+https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-8e7d-fbf5bd40920b.mov
 
 - [About](#about)
 - [Examples](#examples)
@@ -26,9 +27,10 @@
 
 ## About
 
-✨ __Mangal__ is a fancy CLI app written in Go which scrapes, downloads and packs manga into different formats
+✨ __Mangal__ is feature rich, configurable manga browser & downloader
+written in Go with support for different formats
 
-⚙️ The most important feature of Mangal is that it supports user defined scrapers
+⚙️ One of the most important features of Mangal is that it supports user defined scrapers
 that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
 
 🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate with scripts
@@ -36,17 +38,20 @@ that can be added with just a few lines of config file (see [config](#config) & 
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
 
-Currently Mangal supports these formats
+Currently, Mangal supports these formats
 - PDF
+- Epub
 - CBZ
 - Zip
 - Plain (just images)
+
+> Type `mangal formats` for more info
 
 ## Examples
 
 ### TUI usage example
 
-https://user-images.githubusercontent.com/62389790/172178993-bb40392a-54ba-446d-b0ed-1b962ede7ed2.mp4
+https://user-images.githubusercontent.com/62389790/174574562-011f9c30-db6f-45a9-9ce2-03973564ace0.mov
 
 ### Inline mode usage example
 
@@ -71,11 +76,17 @@ mangal inline --query "death note" --manga 1 --chapter 1
 > TLDR: Use `mangal config where` to show where config should be located
 > and `mangal config init` to create default config
 
+
+<details>
+<summary>
 Config is located at the OS default config directory.
+</summary>
 
 - __Unix__ - `$XDG_CONFIG_HOME/mangal/config.toml` if `$XDG_CONFIG_HOME` exists, else `$HOME/.config/mangal/config.toml`
 - __Darwin__ (macOS) - `$HOME/Library/Application\ Support/mangal/config.toml`
 - __Windows__ - `%AppData%\mangal\config.toml`
+</details>
+
 
 You can load config from custom path by using `--config` flag
 
@@ -83,25 +94,34 @@ You can load config from custom path by using `--config` flag
 
 By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
 
+<details>
+<summary>Click here to show config example</summary>
+
 ```toml
 # Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Available options: pdf, cbz, zip, plain (just images)
+# Available options: pdf, epub, cbz, zip, plain (just images)
 format = "pdf"
 
-# If false, then OS default reader will be used
+# If false, then OS default pdf reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
 
-# Custom download path, can be either relative (to the pwd) or absolute
+# Custom download path, can be either relative (to the current directory) or absolute
 download_path = '.'
 
+# Add images to cache
+# If set to true mangal could crash when trying to redownload something really quickly
+# Usually happens on slow machines
+cache_images = false
+
+[ui]
 # Fullscreen mode
 fullscreen = true
 
 # Input prompt icon
-prompt = "🔍"
+prompt = ">"
 
 # Input placeholder
 placeholder = "What shall we look for?"
@@ -112,45 +132,43 @@ mark = "▼"
 # Search window title
 title = "Mangal"
 
-# Add images to cache
-# If set to true mangal could crash when trying to redownload something really quickly
-# Usually happens on slow machines
-cache_images = false
-
 [sources]
-    [sources.manganelo]
-    # Base url
-    base = 'https://ww5.manganelo.tv'
+[sources.manganelo]
+# Base url
+base = 'https://ww5.manganelo.tv'
 
-    # Search endpoint. Put %s where the query should be
-    search = 'https://ww5.manganelo.tv/search/%s'
+# Search endpoint. Put %s where the query should be
+search = 'https://ww5.manganelo.tv/search/%s'
 
-    # Selector of entry anchor (<a></a>) on search page
-    manga_anchor = '.search-story-item a.item-title'
+# Selector of entry anchor (<a></a>) on search page
+manga_anchor = '.search-story-item a.item-title'
 
-    # Selector of entry title on search page
-    manga_title = '.search-story-item a.item-title'
+# Selector of entry title on search page
+manga_title = '.search-story-item a.item-title'
 
-    # Manga chapters anchors selector
-    chapter_anchor = 'li.a-h a.chapter-name'
+# Manga chapters anchors selector
+chapter_anchor = 'li.a-h a.chapter-name'
 
-    # Manga chapters titles selector
-    chapter_title = 'li.a-h a.chapter-name'
+# Manga chapters titles selector
+chapter_title = 'li.a-h a.chapter-name'
 
-    # Reader page images selector
-    reader_page = '.container-chapter-reader img'
-    
-    # Random delay between requests
-    random_delay_ms = 500 # ms
-    
-    # Are chapters listed in reversed order on that source?
-    # reversed order -> from newest chapter to oldest
-    reversed_chapters_order = true
+# Reader page images selector
+reader_page = '.container-chapter-reader img'
+
+# Random delay between requests
+random_delay_ms = 500 # ms
+
+# Are chapters listed in reversed order on that source?
+# reversed order -> from newest chapter to oldest
+reversed_chapters_order = true
 ```
+</details>
 
 ## Commands
 
 ```
+The ultimate manga downloader multitool
+
 Usage:
   mangal [flags]
   mangal [command]
@@ -158,20 +176,39 @@ Usage:
 Available Commands:
   cleanup     Remove cached and temp files
   completion  Generate the autocompletion script for the specified shell
-  config      Config manipulation
+  config      Config actions
+  formats     Information about available formats
   help        Help about any command
   inline      Search & Download manga in inline mode
   version     Show version
 
 Flags:
   -c, --config string   use config from path
-  -f, --format string   use custom format - pdf, cbz, zip, plain
+  -f, --format string   use custom format
   -h, --help            help for mangal
 
-Use "mangal [command] --help" for more information about a command.```
+Use "mangal [command] --help" for more information about a command.
 ```
 
 ## Install
+
+- [Go](#go)
+- [From source](#from-source)
+- [Homebrew](#homebrew)
+- [Scoop](#scoop)
+
+
+### Go
+```bash
+go install github.com/metafates/mangal@latest
+```
+
+### From source
+```bash
+git clone https://github.com/metafates/mangal.git
+cd mangal
+go install
+```
 
 ### Homebrew
 
@@ -180,10 +217,10 @@ brew tap metafates/tap
 brew install metafates/tap/mangal
 ```
 
-### Go
-```bash
-go install github.com/metafates/mangal@latest
-```
+### Scoop
+> Soon... 😴
+
+
 
 ## Build
 
@@ -195,6 +232,8 @@ go build
 
 > You can also cross build for windows, linux & macos
 > by running `cross-compile.py`
+> 
+> Built binaries will be stored in the `bin` folder
 
 ## Limitations
 
@@ -219,4 +258,4 @@ to overcome this roadblocks somewhere in the future
 
 ---
 
-Manga icon taken from [here](https://www.flaticon.com/free-icons/manga)
+Logo taken from [here](https://www.flaticon.com/free-icon/parchment_1391306)

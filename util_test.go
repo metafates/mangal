@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestContains(t *testing.T) {
 	items := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
@@ -96,5 +98,23 @@ func TestFind(t *testing.T) {
 		}
 	} else {
 		t.Error("Element was not found")
+	}
+}
+
+func TestMap(t *testing.T) {
+	square := func(n int) int { return n * n }
+	nums := []int{0, 1, 2, 3, 4}
+	squared := Map(nums, square)
+
+	if len(nums) != len(squared) {
+		t.Error("Different lengths")
+	}
+
+	for i, s := range squared {
+		n := nums[i]
+
+		if square(n) != s {
+			t.Error("Invalid value")
+		}
 	}
 }
