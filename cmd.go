@@ -93,7 +93,13 @@ var inlineCmd = &cobra.Command{
 	Long: `Search & Download manga in inline mode
 Useful for scripting`,
 	Run: func(cmd *cobra.Command, args []string) {
-		defer RemoveTemp()
+		asTemp, _ := cmd.Flags().GetBool("temp")
+		defer func() {
+			if !asTemp {
+				RemoveTemp()
+			}
+		}()
+
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
@@ -154,7 +160,6 @@ Useful for scripting`,
 					log.Fatal("Index out of range")
 				}
 
-				asTemp, _ := cmd.Flags().GetBool("temp")
 				read, _ := cmd.Flags().GetBool("read")
 
 				if read {
