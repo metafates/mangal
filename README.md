@@ -15,6 +15,7 @@
   </a>
 </p>
 
+https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-8e7d-fbf5bd40920b.mov
 
 - [About](#about)
 - [Examples](#examples)
@@ -37,7 +38,7 @@ that can be added with just a few lines of config file (see [config](#config) & 
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
 
-Currently Mangal supports these formats
+Currently, Mangal supports these formats
 - PDF
 - Epub
 - CBZ
