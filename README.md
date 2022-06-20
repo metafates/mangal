@@ -17,6 +17,8 @@
 
 https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-8e7d-fbf5bd40920b.mov
 
+## Table of Contents
+
 - [About](#about)
 - [Examples](#examples)
 - [Config](#config)
