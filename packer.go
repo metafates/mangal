@@ -104,12 +104,13 @@ func PackToEpub(images []string, destination string) (string, error) {
 // PackToCBZ packs chapter to .cbz format
 func PackToCBZ(images []string, destination string) (string, error) {
 
-	zipFile, err := PackToZip(images, destination, false)
+	zipFile, err := PackToZip(images, destination)
 	if err != nil {
 		return "", err
 	}
 
-	cbzFile := zipFile + ".cbz"
+	// replace .zip extension with .cbz
+	cbzFile := strings.TrimSuffix(zipFile, filepath.Ext(zipFile)) + ".cbz"
 
 	err = RemoveIfExists(cbzFile)
 	if err != nil {
@@ -123,19 +124,17 @@ func PackToCBZ(images []string, destination string) (string, error) {
 }
 
 // PackToZip packs chapter to .zip format
-func PackToZip(images []string, destination string, withExtension bool) (string, error) {
-	if withExtension {
-		destination += ".zip"
-		err := RemoveIfExists(destination)
-		if err != nil {
-			return "", err
-		}
+func PackToZip(images []string, destination string) (string, error) {
+	destination += ".zip"
+	err := RemoveIfExists(destination)
+	if err != nil {
+		return "", err
 	}
 
 	if exists, err := Afero.Exists(filepath.Dir(destination)); err != nil {
 		return "", err
 	} else if !exists {
-		if err := Afero.MkdirAll(filepath.Dir(destination), 0777); err != nil {
+		if err = Afero.MkdirAll(filepath.Dir(destination), 0777); err != nil {
 			return "", err
 		}
 	}
@@ -226,7 +225,7 @@ func PackToPlain(images []string, destination string) (string, error) {
 var Packers = map[FormatType]func([]string, string) (string, error){
 	PDF:   PackToPDF,
 	Plain: PackToPlain,
-	Zip:   func(f []string, d string) (string, error) { return PackToZip(f, d, true) },
+	Zip:   PackToZip,
 	CBZ:   PackToCBZ,
 	Epub:  PackToEpub,
 }

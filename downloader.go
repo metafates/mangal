@@ -193,6 +193,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	chapterPath, err = Packers[UserConfig.Format](tempPaths, chapterPath)
 
 	if err != nil {
+		log.Fatal(err)
 		return "", err
 	}
 
