@@ -24,6 +24,8 @@ https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-
 - [Config](#config)
 - [Commands](#commands)
 - [Install](#install)
+- [Update](#update)
+- [Uninstall](#uninstall)
 - [Build](#build)
 - [Limitations](#limitations)
 
@@ -36,7 +38,6 @@ written in Go with support for different formats
 that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
 
 🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate with scripts
-
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
 
@@ -66,7 +67,7 @@ mangal inline --query "death note"
 # Search manga. Returns a JSON list of found manga
 mangal inline --query "death note" --json
 
-# Get chapters of first manga in the list
+# Get chapters of the first manga in the list
 mangal inline --query "death note" --manga 1
 
 # Download first chapter of the first manga in the list
@@ -114,7 +115,7 @@ custom_reader = "zathura"
 download_path = '.'
 
 # Add images to cache
-# If set to true mangal could crash when trying to redownload something really quickly
+# If set to true mangal could crash when trying to redownload something quickly
 # Usually happens on slow machines
 cache_images = false
 
@@ -196,14 +197,30 @@ Use "mangal [command] --help" for more information about a command.
 
 - [Go](#go)
 - [From source](#from-source)
-- [Homebrew](#homebrew)
-- [Scoop](#scoop)
+- [MacOS](#macos)
+- [Windows](#windows)
+- [Linux](#linux)
 
 
 ### Go
+
+You will need [Go installed](https://go.dev/doc/install)
+
 ```bash
 go install github.com/metafates/mangal@latest
 ```
+
+#### Update
+
+```bash
+go install github.com/metafates/mangal@latest
+```
+
+#### Uninstall
+
+- Bash / zsh - `rm $(which mangal)`
+- Fish - `rm (which mangal)`
+- Powershell - `rm $(which.exe mangal)`
 
 ### From source
 ```bash
@@ -212,17 +229,22 @@ cd mangal
 go install
 ```
 
-### Homebrew
+### MacOS
+
+Install using [Homebrew](https://brew.sh/)
 
 ```bash
 brew tap metafates/tap
 brew install metafates/tap/mangal
 ```
 
-### Scoop
+### Windows
+
 > Soon... 😴
 
+### Linux
 
+> Soon... 😴
 
 ## Build
 
@@ -233,19 +255,19 @@ go build
 ```
 
 > You can also cross build for windows, linux & macos
-> by running `cross-compile.py`
+> by running `cross-compile.py` (you will need Python 3)
 > 
 > Built binaries will be stored in the `bin` folder
 
 ## Limitations
 
 Even though many manga sites will work,
-there exists some (serious) limitations to which sites could be added
+there exist some (serious) limitations to which sites could be added
 
 - Navigation layout should follow this model
     - Each manga have a separate page
-    - Manga page should have a some form of chapters list (not lazy loaded)
-    - Each chapter should have a separate reader page with all images
+    - Manga page should have some form of chapters list (not lazy loaded)
+    - Each chapter should have a separate reader page with all the images
 
 
 Some sites that work well
