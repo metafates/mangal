@@ -24,6 +24,8 @@ https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-
 - [Config](#config)
 - [Commands](#commands)
 - [Install](#install)
+- [Update](#update)
+- [Uninstall](#uninstall)
 - [Build](#build)
 - [Limitations](#limitations)
 
@@ -236,6 +238,37 @@ go build
 > by running `cross-compile.py`
 > 
 > Built binaries will be stored in the `bin` folder
+
+## Update
+
+### Go
+```bash
+go install github.com/metafates/mangal@latest
+```
+
+## Uninstall
+
+- [Bash/zsh](#bash/zsh)
+- [Powershell](#powershell)
+- [Fish](#fish)
+
+
+### Bash/zsh
+
+```bash
+rm $(which mangal)
+```
+### Powershell
+
+```powershell
+rm $(which.exe mangal)
+```
+
+### Fish
+
+```fish
+rm $(which mangal)
+```
 
 ## Limitations
 
