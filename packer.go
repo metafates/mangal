@@ -31,7 +31,7 @@ func PackToPDF(images []string, destination string) (string, error) {
 		}
 	}
 
-	if err := pdfcpu.ImportImagesFile(images, destination, nil, nil); err != nil {
+	if err = pdfcpu.ImportImagesFile(images, destination, nil, nil); err != nil {
 		return "", err
 	}
 

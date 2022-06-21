@@ -1,23 +1,22 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
 	"log"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
-	"sync"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   strings.ToLower(AppName),
 	Short: AppName + " - A Manga Downloader",
-	Long:  `The ultimate manga downloader multitool`,
+	Long:  `The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
@@ -93,139 +92,40 @@ var inlineCmd = &cobra.Command{
 	Long: `Search & Download manga in inline mode
 Useful for scripting`,
 	Run: func(cmd *cobra.Command, args []string) {
-		asTemp, _ := cmd.Flags().GetBool("temp")
-		defer func() {
-			if !asTemp {
-				RemoveTemp()
-			}
-		}()
-
-		config, _ := cmd.Flags().GetString("config")
-		initConfig(config)
-		if format, _ := cmd.Flags().GetString("format"); format != "" {
-			UserConfig.Format = FormatType(format)
-		}
-
-		if err := ValidateConfig(UserConfig); err != nil {
-			log.Fatal(err)
-		}
-
-		var (
-			manga []*URL
-			wg    sync.WaitGroup
-		)
-
 		query, _ := cmd.Flags().GetString("query")
-		if query == "" {
-			log.Fatal("Query expected")
-		}
-
-		wg.Add(len(UserConfig.Scrapers))
-
-		for _, scraper := range UserConfig.Scrapers {
-			go func(s *Scraper) {
-				defer wg.Done()
-
-				m, err := s.SearchManga(query)
-
-				if err == nil {
-					manga = append(manga, m...)
-				}
-			}(scraper)
-		}
-
-		wg.Wait()
-
-		showUrls, _ := cmd.Flags().GetBool("urls")
+		mangaIdx, _ := cmd.Flags().GetInt("manga")
+		chapterIdx, _ := cmd.Flags().GetInt("chapter")
 		asJson, _ := cmd.Flags().GetBool("json")
-		if mangaIdx, _ := cmd.Flags().GetInt("manga"); mangaIdx != -1 {
-			if mangaIdx > len(manga) || mangaIdx <= 0 {
-				log.Fatal("Index out of range")
-			}
+		format, _ := cmd.Flags().GetString("format")
+		showUrls, _ := cmd.Flags().GetBool("urls")
+		asTemp, _ := cmd.Flags().GetBool("temp")
+		doRead, _ := cmd.Flags().GetBool("read")
+		doOpen, _ := cmd.Flags().GetBool("open")
+		config, _ := cmd.Flags().GetString("config")
 
-			selectedManga := manga[mangaIdx-1]
+		res, err := InlineMode(query, InlineOptions{
+			config:     config,
+			mangaIdx:   mangaIdx,
+			chapterIdx: chapterIdx,
+			asJson:     asJson,
+			format:     FormatType(format),
+			showUrls:   showUrls,
+			asTemp:     asTemp,
+			doRead:     doRead,
+			doOpen:     doOpen,
+		})
 
-			chapters, err := selectedManga.Scraper.GetChapters(selectedManga)
-			if err != nil {
-				log.Fatal("Error while getting chapters")
-			}
-
-			if chapterIdx, _ := cmd.Flags().GetInt("chapter"); chapterIdx != -1 {
-
-				selectedChapter, ok := Find(chapters, func(c *URL) bool {
-					return c.Index == chapterIdx
-				})
-
-				if !ok {
-					log.Fatal("Index out of range")
-				}
-
-				read, _ := cmd.Flags().GetBool("read")
-
-				if read {
-					asTemp = true
-				}
-
-				chapterPath, err := DownloadChapter(selectedChapter, nil, asTemp)
-				if err != nil {
-					log.Fatal("Error while downloading chapter")
-				}
-
-				if EpubFile != nil {
-					EpubFile.SetAuthor(selectedManga.Scraper.Source.Base)
-					if err := EpubFile.Write(chapterPath); err != nil {
-						log.Fatal("Error while making epub file")
-					}
-				}
-
-				if read {
-					if UserConfig.UseCustomReader {
-						_ = open.StartWith(chapterPath, UserConfig.CustomReader)
-					} else {
-						_ = open.Start(chapterPath)
-					}
-					return
-				}
-
-				fmt.Println(chapterPath)
-				return
-			}
-
+		if err != nil {
 			if asJson {
-				data, err := json.Marshal(chapters)
-				if err != nil {
-					log.Fatal("Could not get data as json")
-				}
-
-				fmt.Println(string(data))
+				fmt.Printf(`{error: "%s"}\n`, err)
 			} else {
-				for _, c := range chapters {
-					if showUrls {
-						fmt.Printf("[%d] %s %s\n", c.Index, c.Info, c.Address)
-					} else {
-						fmt.Printf("[%d] %s\n", c.Index, c.Info)
-					}
-				}
+				fmt.Println(err)
 			}
-
-		} else {
-			if asJson {
-				data, err := json.Marshal(manga)
-				if err != nil {
-					log.Fatal("Could not get data as json")
-				}
-
-				fmt.Println(string(data))
-			} else {
-				for i, m := range manga {
-					if showUrls {
-						fmt.Printf("[%d] %s %s\n", i+1, m.Info, m.Address)
-					} else {
-						fmt.Printf("[%d] %s\n", i+1, m.Info)
-					}
-				}
-			}
+		
+			os.Exit(1)
 		}
+
+		fmt.Print(res)
 	},
 }
 
@@ -422,6 +322,7 @@ func CmdExecute() {
 	inlineCmd.Flags().BoolP("urls", "u", false, "show urls")
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
 	inlineCmd.Flags().BoolP("read", "r", false, "read chapter")
+	inlineCmd.Flags().BoolP("open", "o", false, "open url")
 	inlineCmd.Flags().StringP("config", "c", "", "use config from path")
 	inlineCmd.Flags().SortFlags = false
 	rootCmd.AddCommand(inlineCmd)
