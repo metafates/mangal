@@ -20,6 +20,8 @@ type InlineOptions struct {
 	doOpen     bool
 }
 
+// InlineMode provides all functionality of TUI but in inline mode
+// TODO: split into subfunctions
 func InlineMode(query string, options InlineOptions) (string, error) {
 	initConfig(options.config)
 
