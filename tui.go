@@ -29,7 +29,6 @@ var (
 	commonStyle         = lipgloss.NewStyle().Margin(2, 2)
 	accentStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	boldStyle           = lipgloss.NewStyle().Bold(true)
-	italicStyle         = lipgloss.NewStyle().Italic(true)
 	inputPromptStyle    = accentStyle.Copy().Bold(true)
 	inputTitleStyle     = inputPromptStyle.Copy()
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
@@ -102,11 +101,11 @@ func (k keyMap) fullHelpFor(state bubbleState) []key.Binding {
 	case loadingState:
 		return []key.Binding{k.ForceQuit}
 	case mangaState:
-		k.Open.SetHelp("o", "open manga page")
+		k.Open.SetHelp("o", "open manga url")
 		return []key.Binding{k.Open, k.Select, k.Back}
 	case chaptersState:
-		k.Open.SetHelp("o", "open chapter reader page")
-		k.Read.SetHelp("r", "read chapter in default pdf app")
+		k.Read.SetHelp("r", fmt.Sprintf("read chapter in the default %s app", string(UserConfig.Format)))
+		k.Open.SetHelp("o", "open chapter url")
 		k.Confirm.SetHelp("enter", "download selected chapters")
 		return []key.Binding{k.Open, k.Read, k.Select, k.SelectAll, k.Confirm, k.Back}
 	case confirmPromptState:
@@ -394,9 +393,10 @@ func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
 	return func() tea.Msg {
 		chapters, err := manga.Scraper.GetChapters(manga)
 
-		// TODO: Handle it properly
 		if err != nil {
-			log.Fatalf("Can't get chapters for %s\n", manga.Info)
+			// set to empty list if error occured and notify user
+			b.chaptersChan <- make([]*URL, 0)
+			return b.chaptersList.NewStatusMessage("Error occured while fetching chapters")()
 		}
 
 		b.chaptersChan <- chapters
@@ -578,19 +578,21 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Open):
-			if item := b.mangaList.SelectedItem(); item != nil {
-				item := b.mangaList.SelectedItem().(listItem)
+			item, ok := b.mangaList.SelectedItem().(listItem)
+			if ok {
 				_ = open.Start(item.url.Address)
 			}
 		case b.loading:
 			// Do nothing if the chapters are loading
 			return b, nil
 		case key.Matches(msg, b.keyMap.Confirm), key.Matches(msg, b.keyMap.Select):
-			selected := b.mangaList.SelectedItem().(listItem)
-			cmd = b.mangaList.StartSpinner()
-			b.loading = true
+			selected, ok := b.mangaList.SelectedItem().(listItem)
+			if ok {
+				cmd = b.mangaList.StartSpinner()
+				b.loading = true
 
-			return b, tea.Batch(cmd, b.initChaptersGet(selected.url), b.waitForChaptersGetCompletion())
+				return b, tea.Batch(cmd, b.initChaptersGet(selected.url), b.waitForChaptersGetCompletion())
+			}
 		}
 	case chapterGetDoneMsg:
 		b.setState(chaptersState)
@@ -639,40 +641,46 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmd = b.chaptersList.NewStatusMessage("") // clear status message
 			return b, cmd
 		case key.Matches(msg, b.keyMap.Open):
-			item := b.chaptersList.SelectedItem().(listItem)
-			_ = open.Start(item.url.Address)
+			item, ok := b.chaptersList.SelectedItem().(listItem)
+			if ok {
+				_ = open.Start(item.url.Address)
+			}
 		case key.Matches(msg, b.keyMap.Read):
-			b.setState(downloadingState)
+			chapter, ok := b.chaptersList.SelectedItem().(listItem)
 
-			chapter := b.chaptersList.SelectedItem().(listItem)
+			if ok {
+				b.setState(downloadingState)
 
-			return b, tea.Batch(
-				b.progress.SetPercent(0),
-				b.spinner.Tick,
-				b.initChapterDownloadToRead(chapter.url),
-				b.waitForChapterToReadDownloaded(),
-				b.waitForChapterDownloadProgress(),
-			)
+				return b, tea.Batch(
+					b.progress.SetPercent(0),
+					b.spinner.Tick,
+					b.initChapterDownloadToRead(chapter.url),
+					b.waitForChapterToReadDownloaded(),
+					b.waitForChapterDownloadProgress(),
+				)
+			}
 		case key.Matches(msg, b.keyMap.Confirm) && len(b.selectedChapters) > 0:
 			b.setState(confirmPromptState)
 			return b, nil
 		case key.Matches(msg, b.keyMap.Select):
-			item := b.chaptersList.SelectedItem().(listItem)
-			index := b.chaptersList.Index()
-			item.Select()
+			item, ok := b.chaptersList.SelectedItem().(listItem)
+			if ok {
+				index := b.chaptersList.Index()
+				item.Select()
 
-			if item.selected {
-				b.selectedChapters[index] = nil
-			} else {
-				delete(b.selectedChapters, index)
+				if item.selected {
+					b.selectedChapters[index] = nil
+				} else {
+					delete(b.selectedChapters, index)
+				}
+
+				cmds := []tea.Cmd{
+					b.chaptersList.SetItem(index, item),
+					b.chaptersList.NewStatusMessage(fmt.Sprintf("%d selected", len(b.selectedChapters))),
+				}
+
+				return b, tea.Batch(cmds...)
 			}
-
-			cmds := []tea.Cmd{
-				b.chaptersList.SetItem(index, item),
-				b.chaptersList.NewStatusMessage(fmt.Sprintf("%d selected", len(b.selectedChapters))),
-			}
-
-			return b, tea.Batch(cmds...)
 		case key.Matches(msg, b.keyMap.SelectAll):
 			items := b.chaptersList.Items()
 			cmds := make([]tea.Cmd, len(items))
