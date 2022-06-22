@@ -308,7 +308,7 @@ sudo dpkg -r mangal
 ```bash
 git clone https://github.com/metafates/mangal.git
 cd mangal
-go build
+go build -ldflags="-s -w"
 ```
 
 
