@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// FormatType is type of format used for output
 type FormatType string
 
 const (
@@ -48,6 +49,7 @@ type _tempConfig struct {
 	Sources         map[string]Source
 }
 
+// GetConfigPath returns path to config file
 func GetConfigPath() (string, error) {
 	configDir, err := os.UserConfigDir()
 
@@ -58,13 +60,16 @@ func GetConfigPath() (string, error) {
 	return filepath.Join(configDir, strings.ToLower(AppName), "config.toml"), nil
 }
 
+// DefaultConfig maked default config
 func DefaultConfig() *Config {
 	conf, _ := ParseConfig(string(DefaultConfigBytes))
 	return conf
 }
 
+// UserConfig is a global variable that stores user config
 var UserConfig *Config
 
+// DefaultConfigBytes is default config in TOML format
 var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
@@ -130,7 +135,8 @@ random_delay_ms = 500 # ms
 reversed_chapters_order = true
 `)
 
-// GetConfig from given path. If path is empty string default config path is used
+// GetConfig returns user config or default config if it doesn't exist
+// If path is empty string then default config will be returned
 func GetConfig(path string) *Config {
 	var (
 		configPath string
@@ -165,6 +171,7 @@ func GetConfig(path string) *Config {
 	return config
 }
 
+// ParseConfig parses config from given string
 func ParseConfig(configString string) (*Config, error) {
 	var (
 		tempConf _tempConfig
@@ -204,6 +211,7 @@ func ParseConfig(configString string) (*Config, error) {
 	return &conf, err
 }
 
+// ValidateConfig checks if config is valid and returns error if it is not
 func ValidateConfig(config *Config) error {
 	if config.UseCustomReader && config.CustomReader == "" {
 		return errors.New("use_custom_reader is set to true but reader isn't specified")

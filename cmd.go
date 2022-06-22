@@ -121,7 +121,7 @@ Useful for scripting`,
 			} else {
 				fmt.Println(err)
 			}
-		
+
 			os.Exit(1)
 		}
 
@@ -129,6 +129,8 @@ Useful for scripting`,
 	},
 }
 
+// initConfig initializes the config file
+// If the given string is empty, it will use the default config file
 func initConfig(config string) {
 	exists, err := Afero.Exists(config)
 
@@ -297,6 +299,7 @@ var formatsCmd = &cobra.Command{
 	},
 }
 
+// CmdExecute adds all subcommands to the root command and executes it
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
 

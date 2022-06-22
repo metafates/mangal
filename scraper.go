@@ -29,6 +29,7 @@ type Scraper struct {
 	Files sync.Map
 }
 
+// URL represents an url with relation to another url with useful information
 type URL struct {
 	Relation *URL     `json:"-"`
 	Scraper  *Scraper `json:"-"`
@@ -37,7 +38,7 @@ type URL struct {
 	Index    int      `json:"index,omitempty"`
 }
 
-// MakeSourceScraper returns new scraper with configured collectors
+// MakeSourceScraper makes a scraper for a source
 func MakeSourceScraper(source Source) *Scraper {
 
 	scraper := Scraper{
@@ -66,17 +67,23 @@ func MakeSourceScraper(source Source) *Scraper {
 
 	// Manga collector
 	mangaCollector := collector.Clone()
+
+	// Prevent scraper from being blocked
 	mangaCollector.OnRequest(func(r *colly.Request) {
 		r.Headers.Set("Referer", "https://www.google.com/")
 		r.Headers.Set("User-Agent", randomUserAgent())
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 	})
+
+	// Get all manga urls
 	mangaCollector.OnHTML(source.MangaAnchor, func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		scraper.Manga[path] = append(scraper.Manga[path], &URL{Address: e.Request.AbsoluteURL(link), Scraper: &scraper})
 	})
+
+	// Get all manga titles
 	mangaCollector.OnHTML(source.MangaTitle, func(e *colly.HTMLElement) {
 		title := strings.TrimSpace(e.Text)
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
@@ -90,7 +97,6 @@ func MakeSourceScraper(source Source) *Scraper {
 		RandomDelay: time.Duration(source.RandomDelayMs) * time.Millisecond,
 		DomainGlob:  "*",
 	})
-	// Manga collector END
 
 	// Paths collector
 	chaptersCollector := collector.Clone()
@@ -103,6 +109,7 @@ func MakeSourceScraper(source Source) *Scraper {
 	chaptersCollector.OnHTML("html", func(html *colly.HTMLElement) {
 		var urls []*URL
 
+		// Get all chapters urls
 		html.ForEach(source.ChapterAnchor, func(_ int, e *colly.HTMLElement) {
 			link := e.Attr("href")
 			path := e.Request.AbsoluteURL(e.Request.URL.Path)
@@ -111,6 +118,7 @@ func MakeSourceScraper(source Source) *Scraper {
 			scraper.Chapters[path] = append(scraper.Chapters[path], u)
 		})
 
+		// Get all chapter titles
 		html.ForEach(source.ChapterTitle, func(i int, e *colly.HTMLElement) {
 			title := strings.TrimSpace(e.Text)
 			path := e.Request.AbsoluteURL(e.Request.URL.Path)
@@ -119,7 +127,7 @@ func MakeSourceScraper(source Source) *Scraper {
 			}
 		})
 
-		// add chapters indexes
+		// Add chapters indexes
 		length := len(urls)
 		for _, u := range urls {
 			u.Index = IfElse(source.ChaptersReversed, length-u.Index, u.Index)
@@ -130,7 +138,6 @@ func MakeSourceScraper(source Source) *Scraper {
 		RandomDelay: time.Duration(source.RandomDelayMs) * time.Millisecond,
 		DomainGlob:  "*",
 	})
-	// Paths collector END
 
 	// Pages collector
 	pagesCollector := collector.Clone()
@@ -155,14 +162,11 @@ func MakeSourceScraper(source Source) *Scraper {
 		RandomDelay: time.Duration(source.RandomDelayMs) * time.Millisecond,
 		DomainGlob:  "*",
 	})
-	// Pages collector END
 
-	// File collector
 	filesCollector := collector.Clone()
 	filesCollector.OnResponse(func(r *colly.Response) {
 		scraper.Files.Store(r.Request.AbsoluteURL(r.Request.URL.Path), &r.Body)
 	})
-	// File collector END
 
 	scraper.MangaCollector = mangaCollector
 	scraper.ChaptersCollector = chaptersCollector
@@ -172,6 +176,7 @@ func MakeSourceScraper(source Source) *Scraper {
 	return &scraper
 }
 
+// SearchManga searches for manga by name
 func (s *Scraper) SearchManga(title string) ([]*URL, error) {
 	// lowercase titles will produce the same results but will be useful for caching
 	address := fmt.Sprintf(s.Source.SearchTemplate, url.QueryEscape(strings.TrimSpace(strings.ToLower(title))))
@@ -190,6 +195,7 @@ func (s *Scraper) SearchManga(title string) ([]*URL, error) {
 	return s.Manga[address], nil
 }
 
+// GetChapters returns manga chapters for given manga url
 func (s *Scraper) GetChapters(manga *URL) ([]*URL, error) {
 	if urls, ok := s.Chapters[manga.Address]; ok {
 		return urls, nil
@@ -212,6 +218,7 @@ func (s *Scraper) GetChapters(manga *URL) ([]*URL, error) {
 	return s.Chapters[manga.Address], nil
 }
 
+// GetPages returns manga pages for given chapter url
 func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
 	if urls, ok := s.Pages[chapter.Address]; ok {
 		return urls, nil
@@ -234,6 +241,7 @@ func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
 	return s.Pages[chapter.Address], nil
 }
 
+// GetFile returns manga file for given page url
 func (s *Scraper) GetFile(file *URL) (*[]byte, error) {
 	if data, ok := s.Files.Load(file.Address); ok {
 		return data.(*[]byte), nil
@@ -258,17 +266,18 @@ func (s *Scraper) GetFile(file *URL) (*[]byte, error) {
 	return nil, errors.New("Couldn't get file at " + file.Address)
 }
 
+// ResetFiles resets scraper files cache
 func (s *Scraper) ResetFiles() {
 	s.Files = sync.Map{}
 }
 
+// rangomUserAgent returns a random user agent from the userAgents list
 func randomUserAgent() string {
 	rand.Seed(time.Now().UnixNano())
 	return strings.TrimSpace(userAgents[rand.Intn(len(userAgents))])
 }
 
-// USER AGENTS LIST BELOW
-
+// userAgents is a list of user agents to use when scraping
 var userAgents = strings.Split(`
 	Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36
 	Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36

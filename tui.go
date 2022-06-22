@@ -43,10 +43,7 @@ var (
 				Padding(0, 1)
 )
 
-/*
-Key Map
-*/
-
+// keyMap is a map of key bindings for the bubble.
 type keyMap struct {
 	state bubbleState
 
@@ -71,6 +68,7 @@ type keyMap struct {
 	Help key.Binding
 }
 
+// shortHelpFor returns a short list of key bindings for the given state.
 func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 	switch state {
 	case searchState:
@@ -94,6 +92,7 @@ func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 	return []key.Binding{k.ForceQuit}
 }
 
+// fulleHelpFor returns a full list of key bindings for the given state.
 func (k keyMap) fullHelpFor(state bubbleState) []key.Binding {
 	switch state {
 	case searchState:
@@ -121,19 +120,19 @@ func (k keyMap) fullHelpFor(state bubbleState) []key.Binding {
 	return []key.Binding{k.ForceQuit}
 }
 
+// ShortHelp returns a short list of key bindings for the given state.
 func (k keyMap) ShortHelp() []key.Binding {
 	return k.shortHelpFor(k.state)
 }
 
+// FullHelp returns a full list of key bindings for the given state.
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{k.fullHelpFor(k.state)}
 }
 
-/*
-Model
-*/
-
+// NewBubble creates a new bubble.
 func NewBubble(initialState bubbleState) Bubble {
+	// Create key bindings.
 	keys := keyMap{
 		state: initialState,
 
@@ -187,17 +186,21 @@ func NewBubble(initialState bubbleState) Bubble {
 			key.WithHelp("?", "help")),
 	}
 
+	// Create input component
 	input := textinput.New()
 	input.Placeholder = UserConfig.UI.Placeholder
 	input.CharLimit = 50
 	input.Prompt = inputPromptStyle.Render(UserConfig.UI.Prompt + " ")
 
+	// Create spinner component
 	spinner_ := spinner.New()
 	spinner_.Spinner = spinner.Dot
 	spinner_.Style = accentStyle
 
+	// Create progress component
 	progress_ := progress.New(progress.WithDefaultGradient())
 
+	// keymap for list components
 	listKeyMap := list.KeyMap{
 		CursorUp:             keys.Up,
 		CursorDown:           keys.Down,
@@ -215,6 +218,7 @@ func NewBubble(initialState bubbleState) Bubble {
 		ForceQuit:            keys.ForceQuit,
 	}
 
+	// Create manga list component
 	mangaList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
 	mangaList.KeyMap = listKeyMap
 	mangaList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(mangaState) }
@@ -223,6 +227,7 @@ func NewBubble(initialState bubbleState) Bubble {
 	mangaList.Styles.Spinner = accentStyle
 	mangaList.SetFilteringEnabled(false)
 
+	// Create chapters list component
 	chaptersList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
 	chaptersList.KeyMap = listKeyMap
 	chaptersList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(chaptersState) }
@@ -231,6 +236,7 @@ func NewBubble(initialState bubbleState) Bubble {
 	chaptersList.SetFilteringEnabled(false)
 	chaptersList.StatusMessageLifetime = Forever
 
+	// Create new bubble
 	bubble_ := Bubble{
 		state:                        initialState,
 		keyMap:                       keys,
@@ -249,6 +255,7 @@ func NewBubble(initialState bubbleState) Bubble {
 		chaptersDownloadProgressInfo: ChaptersDownloadProgress{},
 	}
 
+	// Set initial terminal size
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		width = 0
@@ -272,6 +279,7 @@ const (
 	exitPromptState
 )
 
+// Bubble is the main component of the application
 type Bubble struct {
 	state   bubbleState
 	loading bool
@@ -296,6 +304,8 @@ type Bubble struct {
 	selectedChapters map[int]interface{}
 }
 
+// listItem is a list item used in the manga and chapters lists
+// It contains the URL of the manga/chapter and the title of the manga/chapter
 type listItem struct {
 	selected bool
 	url      *URL
@@ -320,18 +330,12 @@ func (l listItem) FilterValue() string {
 	return l.url.Info
 }
 
-/*
-Bubble Init
-*/
-
+// Init initializes the bubble
 func (b Bubble) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-/*
-Bubble Update
-*/
-
+// resize the bubble
 func (b *Bubble) resize(width int, height int) {
 	// Set size to minimum for non-fullscreen runtime
 	if !UserConfig.UI.Fullscreen {
@@ -345,6 +349,7 @@ func (b *Bubble) resize(width int, height int) {
 	b.chaptersList.SetSize(width-x, height-y)
 }
 
+// setState sets the state of the bubble
 func (b *Bubble) setState(state bubbleState) {
 	b.state = state
 	b.keyMap.state = state
@@ -352,6 +357,7 @@ func (b *Bubble) setState(state bubbleState) {
 
 type mangaSearchDoneMsg []*URL
 
+// initMangaSearch initializes the manga search
 func (b Bubble) initMangaSearch(query string) tea.Cmd {
 	return func() tea.Msg {
 		var (
@@ -380,6 +386,7 @@ func (b Bubble) initMangaSearch(query string) tea.Cmd {
 	}
 }
 
+// waitForMangaSearchCompletion waits for the manga search to finish
 func (b Bubble) waitForMangaSearchCompletion() tea.Cmd {
 	return func() tea.Msg {
 		return mangaSearchDoneMsg(<-b.mangaChan)
@@ -389,6 +396,7 @@ func (b Bubble) waitForMangaSearchCompletion() tea.Cmd {
 type chapterGetDoneMsg []*URL
 type chapterDownloadProgressMsg ChapterDownloadProgress
 
+// initChaptersGet initializes the chapters get
 func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
 	return func() tea.Msg {
 		chapters, err := manga.Scraper.GetChapters(manga)
@@ -404,12 +412,14 @@ func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
 	}
 }
 
+// waitForChaptersGetCompletion waits for the chapters get to finish
 func (b Bubble) waitForChaptersGetCompletion() tea.Cmd {
 	return func() tea.Msg {
 		return chapterGetDoneMsg(<-b.chaptersChan)
 	}
 }
 
+// waitForChapterDownloadProgress waits for the chapter download progress to finish
 func (b Bubble) waitForChapterDownloadProgress() tea.Cmd {
 	return func() tea.Msg {
 		return chapterDownloadProgressMsg(<-b.chapterPagesProgressChan)
@@ -418,6 +428,7 @@ func (b Bubble) waitForChapterDownloadProgress() tea.Cmd {
 
 type chaptersDownloadProgressMsg ChaptersDownloadProgress
 
+// initChaptersDownload initializes the chapters download
 func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 	return func() tea.Msg {
 		var (
@@ -431,6 +442,8 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 		sort.Slice(chapters, func(i int, j int) bool {
 			return chapters[i].Index < chapters[j].Index
 		})
+
+		// Download chapters
 		for i, chapter := range chapters {
 			b.chaptersProgressChan <- ChaptersDownloadProgress{
 				Failed:    failed,
@@ -450,6 +463,7 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 			}
 		}
 
+		// If epub file was used, create it
 		if EpubFile != nil {
 			EpubFile.SetAuthor(chapters[0].Scraper.Source.Base)
 			if err := EpubFile.Write(path); err != nil {
@@ -470,6 +484,7 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 	}
 }
 
+// waitForChaptersDownloadProgress waits for the chapters download progress to finish
 func (b Bubble) waitForChaptersDownloadProgress() tea.Cmd {
 	return func() tea.Msg {
 		return chaptersDownloadProgressMsg(<-b.chaptersProgressChan)
@@ -478,6 +493,7 @@ func (b Bubble) waitForChaptersDownloadProgress() tea.Cmd {
 
 type chapterDownloadedToReadMsg ChaptersDownloadProgress
 
+// initChapterDownloadedToRead initializes the chapter downloaded to read
 func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 	return func() tea.Msg {
 		var (
@@ -515,12 +531,14 @@ func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 	}
 }
 
+// waitForChapterToReadDownloaded waits for the chapter to read download to finish
 func (b Bubble) waitForChapterToReadDownloaded() tea.Cmd {
 	return func() tea.Msg {
 		return chapterDownloadedToReadMsg(<-b.chaptersProgressChan)
 	}
 }
 
+// handleSearchState handles the search state
 func (b Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -543,6 +561,7 @@ func (b Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
+// handleLoadingState handles the loading state
 func (b Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -563,6 +582,7 @@ func (b Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
+// handleMangaState handles the manga state
 func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -624,6 +644,7 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
+// handleChaptersState handles the chapters state
 func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -708,6 +729,7 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
+// handleConfirmPromptState handles the confirmation prompt state
 func (b Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -741,6 +763,7 @@ func (b Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, nil
 }
 
+// handleDownloadingState handles the downloading state
 func (b Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -793,6 +816,7 @@ func (b Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
+// handleExitPromptState handles the exit prompt state
 func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -826,6 +850,7 @@ func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, nil
 }
 
+// Update handles the Bubble update
 func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -861,10 +886,7 @@ func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, nil
 }
 
-/*
-Bubble Render
-*/
-
+// View handles how the Bubble should be rendered
 func (b Bubble) View() string {
 	var view string
 
@@ -935,6 +957,7 @@ func (b Bubble) View() string {
 	return commonStyle.Render(fmt.Sprintf("%s\n\n%s", view, b.help.View(b.keyMap)))
 }
 
+// viewTemplates is a map of the templates for the different states
 var viewTemplates = map[bubbleState]string{
 	searchState:        "%s\n\n%s",
 	loadingState:       "%s Searching...",
