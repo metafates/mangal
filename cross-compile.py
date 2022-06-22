@@ -67,12 +67,12 @@ def generate_scoop_manifest():
             "32bit": {
                 "hash": sha256(os.path.join("bin", win32bin)),
                 "url": f"{GITHUB}/releases/download/{TAG}/{win32bin}",
-                "bin": [[win32bin, "mangal"]],
+                "bin": [[win32bin, BIN]],
             },
             "64bit": {
                 "hash": sha256(os.path.join("bin", win64bin)),
                 "url": f"{GITHUB}/releases/download/{TAG}/{win64bin}",
-                "bin": [[win64bin, "mangal"]],
+                "bin": [[win64bin, BIN]],
             }
         },
         "checkver": {"url": GITHUB,
