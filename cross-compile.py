@@ -247,6 +247,7 @@ def generate_deb_packages():
         subprocess.check_output(["dpkg-deb", "--version"])
     except subprocess.CalledProcessError:
         print("dpkg-deb is not installed. Please install dpkg-deb to generate a deb package.")
+        print("see https://command-not-found.com/dpkg-deb")
         return
 
     for arch in PLATFORMS["linux"]["arch"]:
@@ -263,6 +264,7 @@ def generate_checksums():
         subprocess.check_output(["shasum", "--version"])
     except subprocess.CalledProcessError:
         print("shasum is not installed. Please install shasum to generate checksums.")
+        print("see https://command-not-found.com/shasum")
         return
 
     # generate shasum for all files in bin folder
@@ -279,7 +281,7 @@ def generate_checksums():
                 continue
 
             checksum = sha256(os.path.join("bin", file))
-            f.write(f"{checksum} {file}\n")
+            f.write(f"{checksum}  {os.path.join('.', file)}\n")
 
 
 def main():
