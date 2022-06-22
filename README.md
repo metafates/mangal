@@ -213,7 +213,7 @@ go install -ldflags="-s -w" github.com/metafates/mangal@latest
 #### Update
 
 ```bash
-go install github.com/metafates/mangal@latest
+go install -ldflags="-s -w" github.com/metafates/mangal@latest
 ```
 
 #### Uninstall
