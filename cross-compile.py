@@ -42,13 +42,10 @@ def sha256(filename):
     :param filename: file name
     :return: SHA256 hash
     """
-    chunks = []
-    with open(filename, "rb") as f:
-        # Read and update hash string value in blocks of 4K
-        for byte_block in iter(lambda: f.read(4096), b""):
-            hashlib.sha256().update(byte_block)
-        chunks.append(hashlib.sha256().hexdigest())
-    return "".join(chunks)
+
+    # call for shasum
+    shasum = subprocess.check_output(["shasum", "-a", "256", filename])
+    return shasum.split()[0].decode("utf-8")
 
 
 def compile_for(goos):
@@ -75,6 +72,7 @@ def compile_for(goos):
 def generate_scoop_manifest():
     """
     Generate Scoop manifest for Scoop
+    Note: No support for Windows ARM yet since scoop doesn't support it
     """
     win32bin = f"{BIN}-windows-386.exe"
     win64bin = f"{BIN}-windows-amd64.exe"
@@ -206,7 +204,6 @@ def generate_deb_package_for(architecture):
     metadata = f"""
 Package: {BIN}
 Version: {VERSION}
-License: {LICENSE}
 Section: utils
 Priority: optional
 Architecture: {metadata_architecture}
@@ -260,6 +257,15 @@ def generate_checksums():
     """
     Generate checksums for all files in bin folder
     """
+
+    # check is shasum is installed
+    try:
+        subprocess.check_output(["shasum", "--version"])
+    except subprocess.CalledProcessError:
+        print("shasum is not installed. Please install shasum to generate checksums.")
+        return
+
+    # generate shasum for all files in bin folder
     with open(os.path.join("bin", "sha256sums.txt"), 'w') as f:
         for file in os.listdir(os.path.join("bin")):
             skip_conditions = [
