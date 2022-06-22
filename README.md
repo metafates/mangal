@@ -222,7 +222,7 @@ To uninstall just delete the binary file
 
 - Bash / zsh - `rm $(which mangal)`
 - Fish - `rm (which mangal)`
-- Powershell - `rm $(which.exe mangal)`
+- Powershell - `rm $(where.exe mangal)`
 
 </details>
 
