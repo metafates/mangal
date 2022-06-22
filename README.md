@@ -195,11 +195,10 @@ Use "mangal [command] --help" for more information about a command.
 
 ## Install
 
-- [Go](#go)
-- [From source](#from-source)
+- [Go (Cross Platform)](#go)
 - [MacOS](#macos)
 - [Windows](#windows)
-- [Linux](#linux)
+- [Debian](#debian)
 
 
 ### Go
@@ -210,6 +209,9 @@ You will need [Go installed](https://go.dev/doc/install)
 go install -ldflags="-s -w" github.com/metafates/mangal@latest
 ```
 
+<details>
+<summary>Update / Uninstall</summary>
+
 #### Update
 
 ```bash
@@ -218,16 +220,13 @@ go install github.com/metafates/mangal@latest
 
 #### Uninstall
 
+To uninstall just delete the binary file
+
 - Bash / zsh - `rm $(which mangal)`
 - Fish - `rm (which mangal)`
 - Powershell - `rm $(which.exe mangal)`
 
-### From source
-```bash
-git clone https://github.com/metafates/mangal.git
-cd mangal
-go install -ldflags="-s -w"
-```
+</details>
 
 ### MacOS
 
@@ -257,6 +256,8 @@ brew uninstall mangal
 
 ### Windows
 
+Install using [Scoop](https://scoop.sh/)
+
 ```powershell
 scoop install https://raw.githubusercontent.com/metafates/scoop-mangal/main/mangal.json
 ```
@@ -275,10 +276,32 @@ scoop update mangal
 ```powershell
 scoop uninstall mangal
 ```
+</details>
 
-### Linux
+### Debian
 
-> Soon... 😴
+To install download the latest .deb file from [GitHub Release](https://github.com/metafates/mangal/releases) page
+
+Then run 
+
+```bash
+sudo dpkg -i [FILE YOU DOWNLOADED].deb
+```
+
+<details>
+<summary>Update & Uninstall</summary>
+
+#### Update
+
+To update you will need to uninstall
+and install from the new .deb file in
+the [GitHub Release](https://github.com/metafates/mangal/releases) page
+
+#### Uninstall
+
+```bash
+sudo dpkg -r mangal
+```
 
 ## Build
 
