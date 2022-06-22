@@ -94,15 +94,18 @@ def generate_scoop_manifest():
                 "bin": [[win64bin, BIN]],
             }
         },
-        "checkver": {"url": GITHUB,
-                     "regex": f"{BIN.title()} ([\\d.]+)",
-                     },
+        # scoop special case
+        # This will try to match the tag with \/releases\/tag\/(?:v|V)?([\d.]+)
+        "checkver": "github",
         "autoupdate": {
+            "hash": {
+                "url": "$url.sha256",
+            },
             "32bit": {
-                "url": f"{GITHUB}/releases/download/{TAG}/{win32bin}"
+                "url": f"{GITHUB}/releases/download/v$version/{win32bin}",
             },
             "64bit": {
-                "url": f"{GITHUB}/releases/download/{TAG}/{win64bin}"
+                "url": f"{GITHUB}/releases/download/v$version/{win64bin}",
             }
         }
     }
@@ -268,23 +271,31 @@ def generate_checksums():
         return
 
     # generate shasum for all files in bin folder
-    with open(os.path.join("bin", "sha256sums.txt"), 'w') as f:
-        for file in os.listdir(os.path.join("bin")):
-            skip_conditions = [
-                file.endswith(".json"),
-                file == "sha256sums.txt",
-                file == "PKGBUILD",
-                file.endswith(".rb")
-            ]
+    for file in os.listdir(os.path.join("bin")):
+        skip_conditions = [
+            file.endswith(".json"),
+            file.endswith(".sha256"),
+            file == "PKGBUILD",
+            file.endswith(".rb")
+        ]
 
-            if any(skip_conditions):
-                continue
+        if any(skip_conditions):
+            continue
 
-            checksum = sha256(os.path.join("bin", file))
-            f.write(f"{checksum}  {os.path.join('.', file)}\n")
+        checksum = sha256(os.path.join("bin", file))
+
+        with open(os.path.join("bin", f"{file}.sha256"), 'w') as f:
+            f.write(f"{checksum}  {os.path.join('.', file)}")
 
 
 def main():
+    # check if user is in the root directory
+
+    # check if user is in the same directory as this script
+    if os.getcwd() != os.path.dirname(os.path.realpath(__file__)):
+        print("Please run this script from the root directory of the project.")
+        return
+
     # delete bin folder if it exists
     if os.path.exists(os.path.join("bin")):
         shutil.rmtree(os.path.join("bin"))
@@ -309,7 +320,7 @@ def main():
     print("Generating Checksums")
     generate_checksums()
 
-    print("Done")
+    print("Done!")
 
 
 if __name__ == "__main__":
