@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Source is a source used to scrape manga
 type Source struct {
 	Name             string
 	Base             string
@@ -20,7 +21,9 @@ type Source struct {
 	ChaptersReversed bool   `toml:"reversed_chapters_order"`
 }
 
+// ValidateSource validates source and returns error if it's invalid
 func ValidateSource(source *Source) error {
+	// Check if given string is a valid URL
 	var isValidURI = func(uri string) bool {
 		_, err := url.ParseRequestURI(strings.Replace(uri, "%s", "", 1))
 		return err == nil
@@ -30,6 +33,8 @@ func ValidateSource(source *Source) error {
 		condition    bool
 		errorMessage string
 	}
+
+	// Tests for source validity
 	tests := []test{
 		{source.Base != "", "base url is missing"},
 		{isValidURI(source.Base), "base url is not a valid url"},
@@ -43,6 +48,7 @@ func ValidateSource(source *Source) error {
 		{source.ReaderPage != "", "reader page selector is empty"},
 	}
 
+	// Run tests
 	for _, t := range tests {
 		if !t.condition {
 			msg := fmt.Sprintf("[%s] %s", source.Name, t.errorMessage)

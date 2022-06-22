@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// RemoveCache removes cache files
 func RemoveCache() (int, int64) {
 	var (
 		// counter of removed files
@@ -17,6 +18,7 @@ func RemoveCache() (int, int64) {
 	// Cleanup cache files
 	cacheDir, err := os.UserCacheDir()
 	if err == nil {
+		// Check if cache dir exists
 		scraperCacheDir := filepath.Join(cacheDir, CachePrefix)
 		if exists, err := Afero.Exists(scraperCacheDir); err == nil && exists {
 			files, err := Afero.ReadDir(scraperCacheDir)
@@ -34,6 +36,7 @@ func RemoveCache() (int, int64) {
 	return counter, bytes
 }
 
+// RemoveTemp removes temp files
 func RemoveTemp() (int, int64) {
 	var (
 		// counter of removed files
@@ -42,14 +45,14 @@ func RemoveTemp() (int, int64) {
 		bytes int64
 	)
 
-	// Cleanup temp files
 	tempDir := os.TempDir()
 	tempFiles, err := Afero.ReadDir(tempDir)
 	if err == nil {
-		lowerAppName := strings.ToLower(AppName)
 		for _, tempFile := range tempFiles {
 			name := tempFile.Name()
-			if strings.HasPrefix(name, AppName) || strings.HasPrefix(name, lowerAppName) {
+
+			// Check if file is temp file
+			if strings.HasPrefix(name, TempPrefix) {
 
 				p := filepath.Join(tempDir, name)
 

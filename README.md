@@ -207,7 +207,7 @@ Use "mangal [command] --help" for more information about a command.
 You will need [Go installed](https://go.dev/doc/install)
 
 ```bash
-go install github.com/metafates/mangal@latest
+go install -ldflags="-s -w" github.com/metafates/mangal@latest
 ```
 
 #### Update
@@ -226,7 +226,7 @@ go install github.com/metafates/mangal@latest
 ```bash
 git clone https://github.com/metafates/mangal.git
 cd mangal
-go install
+go install -ldflags="-s -w"
 ```
 
 ### MacOS
@@ -234,13 +234,47 @@ go install
 Install using [Homebrew](https://brew.sh/)
 
 ```bash
-brew tap metafates/tap
-brew install metafates/tap/mangal
+brew tap metafates/mangal
+brew install mangal
 ```
+
+<details>
+<summary>Update & Uninstall</summary>
+
+#### Update
+
+```bash
+brew upgrade mangal
+```
+
+#### Uninstall
+
+```bash
+brew uninstall mangal
+```
+
+</details>
 
 ### Windows
 
-> Soon... 😴
+```powershell
+scoop install https://raw.githubusercontent.com/metafates/scoop-mangal/main/mangal.json
+```
+
+<details>
+<summary>Update & Uninstall</summary>
+
+#### Update
+
+```powershell
+scoop update mangal
+```
+
+#### Uninstall
+
+```powershell
+scoop uninstall mangal
+```
 
 ### Linux
 
@@ -254,10 +288,12 @@ cd mangal
 go build
 ```
 
+
 > You can also cross build for windows, linux & macos
 > by running `cross-compile.py` (you will need Python 3)
 > 
-> Built binaries will be stored in the `bin` folder
+> Built binaries and generated packages
+> will be stored in the `bin` folder
 
 ## Limitations
 

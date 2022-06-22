@@ -12,6 +12,7 @@ import (
 	"sync"
 )
 
+// RemoveIfExists removes file if it exists
 func RemoveIfExists(path string) error {
 	exists, err := Afero.Exists(path)
 
@@ -85,6 +86,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		err       error
 	)
 
+	// Get future path to manga
 	if temp {
 		mangaPath = os.TempDir()
 	} else {
@@ -107,12 +109,14 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	}
 
 	var chapterPath string
+	// Get future path to chapter
 	if temp {
 		chapterPath = filepath.Join(mangaPath, fmt.Sprintf(TempPrefix+" [%d] %s", chapter.Index, chapter.Info))
 	} else {
 		chapterPath = filepath.Join(mangaPath, fmt.Sprintf("[%d] %s", chapter.Index, chapter.Info))
 	}
 
+	// Replace whitespaces with underscore and colon with unicode colon
 	// Windows is very bad at escaping whitespaces, so have to use this workaround
 	if runtime.GOOS == "windows" {
 		chapterPath = strings.ReplaceAll(chapterPath, " ", "-")
@@ -126,6 +130,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		}
 	}
 
+	// Get chapter contents
 	pages, err := chapter.Scraper.GetPages(chapter)
 	pagesCount := len(pages)
 
@@ -148,6 +153,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 
 	wg.Add(pagesCount)
 
+	// Download pages in parallel
 	for _, page := range pages {
 		go func(p *URL) {
 			defer wg.Done()
@@ -190,9 +196,11 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		return "", errors.New("pages was not downloaded")
 	}
 
+	// Convert pages to desired format
 	chapterPath, err = Packers[UserConfig.Format](tempPaths, chapterPath)
 
 	if err != nil {
+		log.Fatal(err)
 		return "", err
 	}
 
