@@ -303,6 +303,8 @@ the [GitHub Release](https://github.com/metafates/mangal/releases) page
 sudo dpkg -r mangal
 ```
 
+</details>
+
 ## Build
 
 ```bash
@@ -310,6 +312,8 @@ git clone https://github.com/metafates/mangal.git
 cd mangal
 go build
 ```
+
+
 
 
 > You can also cross build for windows, linux & macos
