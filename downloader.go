@@ -123,10 +123,11 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 
 		volumeName := filepath.VolumeName(chapterPath)
 		if strings.Contains(volumeName, ":") {
-			chapterPath = strings.ReplaceAll(chapterPath, ":", "꞉") // Unicode U+A789
-			chapterPath = strings.Replace(chapterPath /* unicode colon */, "꞉" /* ascii colon */, ":", 1)
+			chapterPath = strings.ReplaceAll(chapterPath, ":", "-")
+			// Return to original volume name
+			chapterPath = strings.Replace(chapterPath, "-", ":", 1)
 		} else {
-			chapterPath = strings.ReplaceAll(chapterPath, ":", "꞉") // Unicode U+A789
+			chapterPath = strings.ReplaceAll(chapterPath, ":", "-") // Unicode U+A789
 		}
 	}
 
