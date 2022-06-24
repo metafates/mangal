@@ -38,17 +38,6 @@ type Config struct {
 	CacheImages     bool
 }
 
-type _tempConfig struct {
-	Use             []string
-	Format          string
-	UI              UI     `toml:"ui"`
-	UseCustomReader bool   `toml:"use_custom_reader"`
-	CustomReader    string `toml:"custom_reader"`
-	Path            string `toml:"download_path"`
-	CacheImages     bool   `toml:"cache_images"`
-	Sources         map[string]Source
-}
-
 // GetConfigPath returns path to config file
 func GetConfigPath() (string, error) {
 	configDir, err := os.UserConfigDir()
@@ -57,7 +46,7 @@ func GetConfigPath() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(configDir, strings.ToLower(AppName), "config.toml"), nil
+	return filepath.Join(configDir, strings.ToLower(Mangal), "config.toml"), nil
 }
 
 // DefaultConfig maked default config
@@ -73,7 +62,8 @@ var UserConfig *Config
 var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Available options: pdf, epub, cbz, zip, plain (just images)
+# Available options: ` + strings.Join(Map(AvailableFormats, func(f FormatType) string { return string(f) }), ", ") + `
+# Type "mangal formats" to show more information about formats
 format = "pdf"
 
 # If false, then OS default pdf reader will be used
@@ -102,7 +92,7 @@ placeholder = "What shall we look for?"
 mark = "▼"
 
 # Search window title
-title = "Mangal"
+title = "` + Mangal + `"
 
 [sources]
 [sources.manganelo]
@@ -173,8 +163,19 @@ func GetConfig(path string) *Config {
 
 // ParseConfig parses config from given string
 func ParseConfig(configString string) (*Config, error) {
+	type tempConfig struct {
+		Use             []string
+		Format          string
+		UI              UI     `toml:"ui"`
+		UseCustomReader bool   `toml:"use_custom_reader"`
+		CustomReader    string `toml:"custom_reader"`
+		Path            string `toml:"download_path"`
+		CacheImages     bool   `toml:"cache_images"`
+		Sources         map[string]Source
+	}
+
 	var (
-		tempConf _tempConfig
+		tempConf tempConfig
 		conf     Config
 	)
 	_, err := toml.Decode(configString, &tempConf)
@@ -222,7 +223,7 @@ func ValidateConfig(config *Config) error {
 			`unknown format '%s'
 type %s to show available formats`,
 			string(config.Format),
-			accentStyle.Render(strings.ToLower(AppName)+" formats"),
+			accentStyle.Render(strings.ToLower(Mangal)+" formats"),
 		)
 		return errors.New(msg)
 	}

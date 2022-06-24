@@ -18,9 +18,12 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   strings.ToLower(AppName),
-	Short: AppName + " - A Manga Downloader",
-	Long:  `The ultimate CLI manga downloader`,
+	Use:   strings.ToLower(Mangal),
+	Short: Mangal + " - A Manga Downloader",
+	//Long:  `The ultimate CLI manga downloader`,
+	Long: AsciiArt + `
+
+The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
@@ -50,9 +53,9 @@ var rootCmd = &cobra.Command{
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show version",
-	Long:  fmt.Sprintf("Shows %s versions and build date", AppName),
+	Long:  fmt.Sprintf("Shows %s versions and build date", Mangal),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", accentStyle.Render(strings.ToLower(AppName)), boldStyle.Render(version))
+		fmt.Printf("%s version %s\n", accentStyle.Render(strings.ToLower(Mangal)), boldStyle.Render(version))
 	},
 }
 
@@ -348,9 +351,9 @@ var checkUpdateCmd = &cobra.Command{
 
 		// check if current version is latest
 		if latestVersion == version {
-			fmt.Printf("You are using the latest version of %s\n", AppName)
+			fmt.Printf("You are using the latest version of %s\n", Mangal)
 		} else {
-			fmt.Printf("New version of %s is available: %s\n", AppName, accentStyle.Render(latestVersion))
+			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
 			fmt.Printf("You can download it from %s\n", accentStyle.Render(githubReleaseURL))
 			fmt.Println("Or use your package manager to update")
 		}
