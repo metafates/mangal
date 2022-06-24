@@ -54,7 +54,7 @@ var versionCmd = &cobra.Command{
 	Short: "Show version",
 	Long:  fmt.Sprintf("Shows %s versions and build date", Mangal),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", accentStyle.Render(strings.ToLower(Mangal)), boldStyle.Render(version))
+		fmt.Printf("%s version %s\n", Mangal, accentStyle.Render(version))
 	},
 }
 
