@@ -20,7 +20,6 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   strings.ToLower(Mangal),
 	Short: Mangal + " - A Manga Downloader",
-	//Long:  `The ultimate CLI manga downloader`,
 	Long: AsciiArt + `
 
 The ultimate CLI manga downloader`,

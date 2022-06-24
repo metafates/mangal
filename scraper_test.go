@@ -143,3 +143,37 @@ func TestScraper_GetFile(t *testing.T) {
 		t.Failed()
 	}
 }
+
+func TestScraper_ResetFiles(t *testing.T) {
+	defaultScraper := MakeSourceScraper(testDefaultSource)
+
+	manga, _ := defaultScraper.SearchManga(TestQuery)
+	anyManga := manga[0]
+
+	chapters, _ := defaultScraper.GetChapters(anyManga)
+	anyChapter := chapters[0]
+
+	pages, _ := defaultScraper.GetPages(anyChapter)
+	anyPage := pages[0]
+
+	file, _ := defaultScraper.GetFile(anyPage)
+
+	// check scraper has file
+	f, ok := defaultScraper.Files.Load(anyPage.Address)
+	if !ok {
+		t.Failed()
+	}
+
+	// check file is the same as the one we got from scraper
+	if f != file {
+		t.Failed()
+	}
+
+	defaultScraper.ResetFiles()
+
+	// check scraper has no file
+	_, ok = defaultScraper.Files.Load(anyPage.Address)
+	if ok {
+		t.Failed()
+	}
+}

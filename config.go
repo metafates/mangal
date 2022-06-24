@@ -133,6 +133,7 @@ func GetConfig(path string) *Config {
 		err        error
 	)
 
+	// If path is empty string then default config will be used
 	if path == "" {
 		configPath, err = GetConfigPath()
 	} else {
@@ -143,16 +144,19 @@ func GetConfig(path string) *Config {
 		return DefaultConfig()
 	}
 
+	// If config file doesn't exist then default config will be used
 	configExists, err := Afero.Exists(configPath)
 	if err != nil || !configExists {
 		return DefaultConfig()
 	}
 
+	// Read config file
 	contents, err := Afero.ReadFile(configPath)
 	if err != nil {
 		return DefaultConfig()
 	}
 
+	// Parse config
 	config, err := ParseConfig(string(contents))
 	if err != nil {
 		return DefaultConfig()
@@ -163,6 +167,7 @@ func GetConfig(path string) *Config {
 
 // ParseConfig parses config from given string
 func ParseConfig(configString string) (*Config, error) {
+	// tempConfig is a temporary config that will be used to store parsed config
 	type tempConfig struct {
 		Use             []string
 		Format          string
@@ -185,12 +190,15 @@ func ParseConfig(configString string) (*Config, error) {
 	}
 
 	conf.CacheImages = tempConf.CacheImages
-	// Convert sources to scrapers
+
+	// Convert sources listed in tempConfig to Scrapers
 	for sourceName, source := range tempConf.Sources {
+		// If source is not listed in Use then skip it
 		if !Contains[string](tempConf.Use, sourceName) {
 			continue
 		}
 
+		// Create scraper
 		source.Name = sourceName
 		scraper := MakeSourceScraper(source)
 
@@ -203,6 +211,7 @@ func ParseConfig(configString string) (*Config, error) {
 
 	conf.UI = tempConf.UI
 	conf.Path = tempConf.Path
+
 	// Default format is pdf
 	conf.Format = IfElse(tempConf.Format == "", PDF, FormatType(tempConf.Format))
 
@@ -218,6 +227,7 @@ func ValidateConfig(config *Config) error {
 		return errors.New("use_custom_reader is set to true but reader isn't specified")
 	}
 
+	// Check if format is valid
 	if !Contains(AvailableFormats, config.Format) {
 		msg := fmt.Sprintf(
 			`unknown format '%s'
@@ -228,6 +238,7 @@ type %s to show available formats`,
 		return errors.New(msg)
 	}
 
+	// Check if scrapers are valid
 	for _, scraper := range config.Scrapers {
 		if scraper.Source == nil {
 			return errors.New("internal error: scraper source is nil")
