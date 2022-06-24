@@ -68,7 +68,6 @@ func TempFile(t *testing.T, extension string) string {
 	return filepath.Join(os.TempDir(), f.Name())
 }
 
-// FIXME: this test creates pdf file in the current directory.
 func TestPackToPDF(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping this PackToPDF is too expensive")
@@ -98,7 +97,9 @@ func TestPackToPDF(t *testing.T) {
 	}
 
 	// check if pdf is not empty
-	if _, err := Afero.Stat(out); err != nil {
+	if stat, err := Afero.Stat(out); err != nil {
+		t.Fatal(err)
+	} else if stat.Size() == 0 {
 		t.Error("pdf is empty")
 	}
 
@@ -135,7 +136,9 @@ func TestPackToCBZ(t *testing.T) {
 	}
 
 	// check if cbz is not empty
-	if _, err := Afero.Stat(out); err != nil {
+	if stat, err := Afero.Stat(out); err != nil {
+		t.Fatal(err)
+	} else if stat.Size() == 0 {
 		t.Error("cbz is empty")
 	}
 
@@ -185,7 +188,9 @@ func TestPackToEpub(t *testing.T) {
 	}
 
 	// check if epub is not empty
-	if _, err := Afero.Stat(out); err != nil {
+	if stat, err := Afero.Stat(out); err != nil {
+		t.Fatal(err)
+	} else if stat.Size() == 0 {
 		t.Error("epub is empty")
 	}
 

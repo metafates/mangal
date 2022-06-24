@@ -19,7 +19,7 @@ func TestInlineMode(t *testing.T) {
 		asJson:     false,
 		format:     "pdf",
 		showUrls:   false,
-		asTemp:     false,
+		asTemp:     true,
 		doRead:     false,
 		doOpen:     false,
 	}
