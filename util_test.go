@@ -118,3 +118,37 @@ func TestMap(t *testing.T) {
 		}
 	}
 }
+
+func TestToString(t *testing.T) {
+	if ToString(1) != "1" {
+		t.Error("Invalid value")
+	}
+
+	if ToString(1.0) != "1" {
+		t.Error("Invalid value")
+	}
+
+	if ToString(true) != "true" {
+		t.Error("Invalid value")
+	}
+
+	if ToString(false) != "false" {
+		t.Error("Invalid value")
+	}
+
+	if ToString([]int{1, 2, 3}) != "[1 2 3]" {
+		t.Error("Invalid value")
+	}
+
+	if ToString([]string{"a", "b", "c"}) != "[a b c]" {
+		t.Error("Invalid value")
+	}
+
+	if ToString(map[string]int{"a": 1, "b": 2, "c": 3}) != "map[a:1 b:2 c:3]" {
+		t.Error("Invalid value")
+	}
+
+	if ToString(struct{}{}) != "{}" {
+		t.Error("Invalid value")
+	}
+}

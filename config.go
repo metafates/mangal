@@ -62,7 +62,7 @@ var UserConfig *Config
 var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Available options: ` + strings.Join(Map(AvailableFormats, func(f FormatType) string { return string(f) }), ", ") + `
+# Available options: ` + strings.Join(Map(AvailableFormats, ToString[FormatType]), ", ") + `
 # Type "mangal formats" to show more information about formats
 format = "pdf"
 

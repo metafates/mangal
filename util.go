@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"golang.org/x/exp/constraints"
 	"os"
 )
@@ -121,4 +122,10 @@ func Map[T, G any](list []T, f func(T) G) []G {
 	}
 
 	return mapped
+}
+
+// ToString converts any type to string
+// 	Example: ToString(1) => "1"
+func ToString[T any](v T) string {
+	return fmt.Sprintf("%v", v)
 }
