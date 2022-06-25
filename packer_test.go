@@ -203,6 +203,8 @@ func TestPackToEpub(t *testing.T) {
 	}
 
 	RemoveTemp()
+
+	EpubFile = nil
 }
 
 func TestPackToPlain(t *testing.T) {
