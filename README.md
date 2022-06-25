@@ -102,7 +102,8 @@ By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
 # Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Available options: pdf, epub, cbz, zip, plain (just images)
+# Available options: ` + strings.Join(Map(AvailableFormats, func(f FormatType) string { return string(f) }), ", ") + `
+# Type "mangal formats" to show more information about formats
 format = "pdf"
 
 # If false, then OS default pdf reader will be used
@@ -113,7 +114,7 @@ custom_reader = "zathura"
 download_path = '.'
 
 # Add images to cache
-# If set to true mangal could crash when trying to redownload something quickly
+# If set to true mangal could crash when trying to redownload something really quickly
 # Usually happens on slow machines
 cache_images = false
 
@@ -131,15 +132,18 @@ placeholder = "What shall we look for?"
 mark = "▼"
 
 # Search window title
-title = "Mangal"
+title = "` + Mangal + `"
 
 [sources]
 [sources.manganelo]
 # Base url
-base = 'https://ww5.manganelo.tv'
+base = 'https://m.manganelo.com'
+
+# Chapters Base url
+chapters_base = 'https://chap.manganelo.com/'
 
 # Search endpoint. Put %s where the query should be
-search = 'https://ww5.manganelo.tv/search/%s'
+search = 'https://m.manganelo.com/search/story/%s'
 
 # Selector of entry anchor (<a></a>) on search page
 manga_anchor = '.search-story-item a.item-title'
@@ -162,26 +166,28 @@ random_delay_ms = 500 # ms
 # Are chapters listed in reversed order on that source?
 # reversed order -> from newest chapter to oldest
 reversed_chapters_order = true
+
+# With what character should the whitespace in query be replaced?
+whitespace_escape = "_"
 ```
 </details>
 
 ## Commands
 
 ```
-The ultimate manga downloader multitool
-
 Usage:
   mangal [flags]
   mangal [command]
 
 Available Commands:
-  cleanup     Remove cached and temp files
-  completion  Generate the autocompletion script for the specified shell
-  config      Config actions
-  formats     Information about available formats
-  help        Help about any command
-  inline      Search & Download manga in inline mode
-  version     Show version
+  check-update Check if new version is available
+  cleanup      Remove cached and temp files
+  completion   Generate the autocompletion script for the specified shell
+  config       Config actions
+  formats      Information about available formats
+  help         Help about any command
+  inline       Search & Download manga in inline mode
+  version      Show version
 
 Flags:
   -c, --config string   use config from path

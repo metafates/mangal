@@ -164,6 +164,12 @@ func MakeSourceScraper(source Source) *Scraper {
 	})
 
 	filesCollector := collector.Clone()
+	filesCollector.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("Referer", source.ChaptersBase)
+		r.Headers.Set("User-Agent", randomUserAgent())
+		r.Headers.Set("accept-language", "en-US")
+		r.Headers.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+	})
 	filesCollector.OnResponse(func(r *colly.Response) {
 		scraper.Files.Store(r.Request.AbsoluteURL(r.Request.URL.Path), &r.Body)
 	})
@@ -179,7 +185,8 @@ func MakeSourceScraper(source Source) *Scraper {
 // SearchManga searches for manga by name
 func (s *Scraper) SearchManga(title string) ([]*URL, error) {
 	// lowercase titles will produce the same results but will be useful for caching
-	address := fmt.Sprintf(s.Source.SearchTemplate, url.QueryEscape(strings.TrimSpace(strings.ToLower(title))))
+	query := strings.ReplaceAll(title, " ", s.Source.WhitespaceEscape)
+	address := fmt.Sprintf(s.Source.SearchTemplate, url.QueryEscape(strings.TrimSpace(strings.ToLower(query))))
 
 	if urls, ok := s.Manga[address]; ok {
 		return urls, nil
