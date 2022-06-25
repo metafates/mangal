@@ -53,9 +53,11 @@ Currently, Mangal supports these formats
 
 If something is not working try the following:
 - Check if you have the latest version of Mangal by running `mangal check-update`
-- Run `mangal doctor`. If you got any errors try updating your config by running `mangal config init --force`. Note, that **this will overwrite your current config**)
+- Run `mangal doctor`. If you got any errors, try updating your config by running `mangal config init --force`.
+Note, that **this will overwrite your current config**
 
-If you still have problems, please [open an issue](https://github.com/metafates/mangal/issues) 🤖
+If you still have problems,
+please [open an issue](https://github.com/metafates/mangal/issues/new?assignees=&labels=bug&template=bug_report.md&title=) 🙏
 
 ## Examples
 
