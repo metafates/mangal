@@ -48,8 +48,6 @@ body:
       options:
         - label: "I'm using the latest version of Mangal"
           required: true
-        - label: "I've followed the steps described in the 'Fixing Errors' section in README"
-          required: true
   - type: markdown
     attributes:
       value: |
