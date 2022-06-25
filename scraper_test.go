@@ -5,15 +5,17 @@ import (
 )
 
 var testDefaultSource = Source{
-	Base:             "https://ww5.manganelo.tv",
-	SearchTemplate:   "https://ww5.manganelo.tv/search/%s",
+	Base:             "https://m.manganelo.com",
+	ChaptersBase:     "https://chap.manganelo.com/",
+	SearchTemplate:   "https://m.manganelo.com/search/story/%s",
 	MangaAnchor:      ".search-story-item a.item-title",
 	MangaTitle:       ".search-story-item a.item-title",
 	ChapterAnchor:    "li.a-h a.chapter-name",
 	ChapterTitle:     "li.a-h a.chapter-name",
 	ReaderPage:       ".container-chapter-reader img",
-	RandomDelayMs:    700,
+	RandomDelayMs:    500,
 	ChaptersReversed: true,
+	WhitespaceEscape: "_",
 }
 
 func TestMakeSourceScraper(t *testing.T) {
