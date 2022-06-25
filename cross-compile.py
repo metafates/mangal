@@ -1,10 +1,9 @@
-import hashlib
 import json
 import os
 import shutil
 import subprocess
 
-VERSION = "1.5.1"
+VERSION = "1.5.2"
 TAG = f"v{VERSION}"
 DESCRIPTION = "The ultimate CLI manga downloader"
 GITHUB = "https://github.com/metafates/mangal"
