@@ -101,14 +101,17 @@ def generate_scoop_manifest():
         # This will try to match the tag with \/releases\/tag\/(?:v|V)?([\d.]+)
         "checkver": "github",
         "autoupdate": {
-            "hash": {
-                "url": "$url.sha256",
-            },
             "32bit": {
                 "url": f"{GITHUB}/releases/download/v$version/{win32bin}",
+                "hash": {
+                    "url": f"{GITHUB}/releases/download/v$version/{win32bin}.sha256",
+                },
             },
             "64bit": {
                 "url": f"{GITHUB}/releases/download/v$version/{win64bin}",
+                "hash": {
+                    "url": f"{GITHUB}/releases/download/v$version/{win64bin}.sha256",
+                },
             }
         }
     }
