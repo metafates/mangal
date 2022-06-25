@@ -93,7 +93,7 @@ You can load config from custom path by using `--config` flag
 
 `mangal --config /user/configs/config.toml`
 
-By default, Mangal uses [manganelo](https://ww5.manganelo.tv) as a source
+By default, Mangal uses [manganelo](https://m.manganelo.com/www) as a source
 
 <details>
 <summary>Click here to show config example</summary>
