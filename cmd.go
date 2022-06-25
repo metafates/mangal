@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -138,7 +139,7 @@ func initConfig(config string) {
 	if config != "" {
 		// check if config is a TOML file
 		if filepath.Ext(config) != ".toml" {
-			log.Fatal("Config file must be a TOML file")
+			log.Fatal("config file must be a TOML file")
 		}
 
 		// check if config file exists
@@ -377,6 +378,120 @@ var checkUpdateCmd = &cobra.Command{
 	},
 }
 
+var doctorCmd = &cobra.Command{
+	Use:   "doctor",
+	Short: "Check if mangal is properly configured",
+	Long: `Check if mangal is properly configured.
+It checks if config file is valid and used sources are available`,
+	Run: func(cmd *cobra.Command, args []string) {
+		var (
+			ok = func() {
+				fmt.Print(successStyle.Render("OK"))
+				fmt.Println()
+			}
+
+			fail = func() {
+				fmt.Print(failStyle.Render("Fail"))
+				fmt.Println()
+			}
+		)
+
+		fmt.Print("Checking config... ")
+		UserConfig = GetConfig("")
+
+		err := ValidateConfig(UserConfig)
+		if err != nil {
+			fail()
+			fmt.Printf("Config error: %s\n", err)
+			os.Exit(1)
+		}
+
+		ok()
+
+		var sourceNotAvailable = func(source *Source) {
+			fail()
+			fmt.Printf("Source %s is not available\n", source.Name)
+			os.Exit(1)
+		}
+
+		scanner := bufio.NewScanner(os.Stdin)
+
+		// check if scraper sources are online
+		for _, scraper := range UserConfig.Scrapers {
+			source := scraper.Source
+
+			// read line from stdin
+			fmt.Printf("Please, enter a manga title to test %s: ", source.Name)
+			scanner.Scan()
+
+			if scanner.Err() != nil {
+				fail()
+				fmt.Printf("Error while reading from stdin: %s\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Printf("Checking source %s... ", source.Name)
+			resp, err := http.Get(source.Base)
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			_ = resp.Body.Close()
+
+			// check if response is 200
+			if resp.StatusCode != 200 {
+				sourceNotAvailable(source)
+			}
+
+			// try to get any manga page using scraper
+			manga, err := scraper.SearchManga(scanner.Text())
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			// check if manga is not empty
+			if len(manga) == 0 {
+				sourceNotAvailable(source)
+			}
+
+			// get chapters for first manga
+			chapters, err := scraper.GetChapters(manga[0])
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			// check if chapters is not empty
+			if len(chapters) == 0 {
+				sourceNotAvailable(source)
+			}
+
+			// get pages for first chapter
+			pages, err := scraper.GetPages(chapters[0])
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			// check if pages is not empty
+			if len(pages) == 0 {
+				sourceNotAvailable(source)
+			}
+
+			// try to download first page
+			image, err := scraper.GetFile(pages[0])
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			// check if images is not empty
+			if len(*image) == 0 {
+				sourceNotAvailable(source)
+			}
+
+			ok()
+		}
+	},
+}
+
 // CmdExecute adds all subcommands to the root command and executes it
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
@@ -411,6 +526,7 @@ func CmdExecute() {
 
 	rootCmd.AddCommand(formatsCmd)
 	rootCmd.AddCommand(checkUpdateCmd)
+	rootCmd.AddCommand(doctorCmd)
 
 	_ = rootCmd.Execute()
 }

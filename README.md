@@ -20,6 +20,7 @@ https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-
 ## Table of Contents
 
 - [About](#about)
+- [Fixing Errors](#fixing-errors)
 - [Examples](#examples)
 - [Config](#config)
 - [Commands](#commands)
@@ -47,6 +48,14 @@ Currently, Mangal supports these formats
 - Plain (just images)
 
 > Type `mangal formats` for more info
+
+## Fixing Errors
+
+If something is not working try the following:
+- Check if you have the latest version of Mangal by running `mangal check-update`
+- Run `mangal doctor`. If you got any errors try updating your config by running `mangal config init --force`. Note, that **this will overwrite your current config**)
+
+If you still have problems, please [open an issue](https://github.com/metafates/mangal/issues) 🤖
 
 ## Examples
 
