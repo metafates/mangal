@@ -97,10 +97,13 @@ title = "` + Mangal + `"
 [sources]
 [sources.manganelo]
 # Base url
-base = 'https://ww5.manganelo.tv'
+base = 'https://m.manganelo.com'
+
+# Chapters Base url
+chapters_base = 'https://chap.manganelo.com/'
 
 # Search endpoint. Put %s where the query should be
-search = 'https://ww5.manganelo.tv/search/%s'
+search = 'https://m.manganelo.com/search/story/%s'
 
 # Selector of entry anchor (<a></a>) on search page
 manga_anchor = '.search-story-item a.item-title'
@@ -123,6 +126,9 @@ random_delay_ms = 500 # ms
 # Are chapters listed in reversed order on that source?
 # reversed order -> from newest chapter to oldest
 reversed_chapters_order = true
+
+# With what character should the whitespace in query be replaced?
+whitespace_escape = "_"
 `)
 
 // GetConfig returns user config or default config if it doesn't exist

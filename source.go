@@ -11,6 +11,7 @@ import (
 type Source struct {
 	Name             string
 	Base             string
+	ChaptersBase     string `toml:"chapters_base"`
 	SearchTemplate   string `toml:"search"`
 	MangaAnchor      string `toml:"manga_anchor"`
 	MangaTitle       string `toml:"manga_title"`
@@ -19,6 +20,7 @@ type Source struct {
 	ReaderPage       string `toml:"reader_page"`
 	RandomDelayMs    int    `toml:"random_delay_ms"`
 	ChaptersReversed bool   `toml:"reversed_chapters_order"`
+	WhitespaceEscape string `toml:"whitespace_escape"`
 }
 
 // ValidateSource validates source and returns error if it's invalid
