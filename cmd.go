@@ -32,10 +32,6 @@ The ultimate CLI manga downloader`,
 			UserConfig.Format = FormatType(format)
 		}
 
-		if err := ValidateConfig(UserConfig); err != nil {
-			log.Fatal(err)
-		}
-
 		var program *tea.Program
 
 		if UserConfig.UI.Fullscreen {
@@ -139,13 +135,20 @@ Useful for scripting`,
 // initConfig initializes the config file
 // If the given string is empty, it will use the default config file
 func initConfig(config string) {
-	exists, err := Afero.Exists(config)
-
-	if err != nil {
-		log.Fatal(errors.New("access to config file denied"))
-	}
-
 	if config != "" {
+		// check if config is a TOML file
+		if filepath.Ext(config) != ".toml" {
+			log.Fatal("Config file must be a TOML file")
+		}
+
+		// check if config file exists
+		exists, err := Afero.Exists(config)
+
+		if err != nil {
+			log.Fatal(errors.New("access to config file denied"))
+		}
+
+		// if config file doesn't exist raise error
 		config = path.Clean(config)
 		if !exists {
 			log.Fatal(errors.New(fmt.Sprintf("config at path %s doesn't exist", config)))
@@ -153,7 +156,15 @@ func initConfig(config string) {
 
 		UserConfig = GetConfig(config)
 	} else {
-		UserConfig = GetConfig("") // get config from default config path
+		// if config path is empty, use default config file
+		UserConfig = GetConfig("")
+	}
+
+	// check if config file is valid
+	err := ValidateConfig(UserConfig)
+
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -193,6 +204,7 @@ var configWhereCmd = &cobra.Command{
 var configPreviewCmd = &cobra.Command{
 	Use:   "preview",
 	Short: "Preview current config",
+	Long:  "Preview current config.\nIt will use `bat` to preview the config file if possible",
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath, err := GetConfigPath()
 
@@ -203,7 +215,7 @@ var configPreviewCmd = &cobra.Command{
 		exists, err := Afero.Exists(configPath)
 
 		if err != nil {
-			log.Fatalf("Permission to config file was denied")
+			log.Fatal("Permission to config file was denied")
 		}
 
 		if !exists {
@@ -214,6 +226,16 @@ var configPreviewCmd = &cobra.Command{
 		_, err = exec.LookPath("bat")
 		if err == nil {
 			cmd := exec.Command("bat", "-l", "toml", configPath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err = cmd.Run()
+			return
+		}
+
+		// check if less command is installed
+		_, err = exec.LookPath("less")
+		if err == nil {
+			cmd := exec.Command("less", configPath)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			err = cmd.Run()
@@ -287,21 +309,6 @@ var configInitCmd = &cobra.Command{
 			log.Fatalf("Config file already exists. Use %s to overwrite it", accentStyle.Render("--force"))
 		} else {
 			createConfig()
-		}
-	},
-}
-
-var configTestCmd = &cobra.Command{
-	Use:   "test",
-	Short: "Test user config for any errors",
-	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := cmd.Flags().GetString("config")
-		initConfig(config)
-
-		if err := ValidateConfig(UserConfig); err != nil {
-			log.Fatal(err)
-		} else {
-			fmt.Println(successStyle.Render("Everything is OK"))
 		}
 	},
 }
@@ -384,8 +391,6 @@ func CmdExecute() {
 	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
 	configCmd.AddCommand(configInitCmd)
 
-	configTestCmd.Flags().StringP("config", "c", "", "use config from path")
-	configCmd.AddCommand(configTestCmd)
 	rootCmd.AddCommand(configCmd)
 
 	inlineCmd.Flags().Int("manga", -1, "choose manga by index")

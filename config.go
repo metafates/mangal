@@ -229,6 +229,12 @@ func ParseConfig(configString []byte) (*Config, error) {
 
 // ValidateConfig checks if config is valid and returns error if it is not
 func ValidateConfig(config *Config) error {
+	// check if any source is used
+	if len(config.Scrapers) == 0 {
+		return errors.New("no manga sources listed")
+	}
+
+	// check if custom reader is properly configured
 	if config.UseCustomReader && config.CustomReader == "" {
 		return errors.New("use_custom_reader is set to true but reader isn't specified")
 	}
