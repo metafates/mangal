@@ -102,7 +102,6 @@ By default, Mangal uses [manganelo](https://m.manganelo.com/www) as a source
 # Which sources to use. You can use several sources, it won't affect perfomance'
 use = ['manganelo']
 
-# Available options: ` + strings.Join(Map(AvailableFormats, func(f FormatType) string { return string(f) }), ", ") + `
 # Type "mangal formats" to show more information about formats
 format = "pdf"
 
