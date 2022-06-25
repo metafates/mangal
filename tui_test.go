@@ -38,4 +38,8 @@ func TestNewBubble(t *testing.T) {
 	if !bubble.input.Focused() {
 		t.Error("Input should be focused")
 	}
+
+	if bubble.input.Value() != "" {
+		t.Error("Input should be empty")
+	}
 }

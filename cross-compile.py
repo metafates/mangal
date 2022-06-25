@@ -32,6 +32,10 @@ PLATFORMS = {
     "darwin": {
         "arch": ["arm64", "amd64"],
         "ext": ""
+    },
+    "android": {
+        "arch": ["arm64"],
+        "ext": ""
     }
 }
 

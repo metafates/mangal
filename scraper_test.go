@@ -5,15 +5,17 @@ import (
 )
 
 var testDefaultSource = Source{
-	Base:             "https://ww5.manganelo.tv",
-	SearchTemplate:   "https://ww5.manganelo.tv/search/%s",
+	Base:             "https://m.manganelo.com",
+	ChaptersBase:     "https://chap.manganelo.com/",
+	SearchTemplate:   "https://m.manganelo.com/search/story/%s",
 	MangaAnchor:      ".search-story-item a.item-title",
 	MangaTitle:       ".search-story-item a.item-title",
 	ChapterAnchor:    "li.a-h a.chapter-name",
 	ChapterTitle:     "li.a-h a.chapter-name",
 	ReaderPage:       ".container-chapter-reader img",
-	RandomDelayMs:    700,
+	RandomDelayMs:    500,
 	ChaptersReversed: true,
+	WhitespaceEscape: "_",
 }
 
 func TestMakeSourceScraper(t *testing.T) {
@@ -140,6 +142,40 @@ func TestScraper_GetFile(t *testing.T) {
 	file, err := defaultScraper.GetFile(anyPage)
 
 	if err != nil || file == nil {
+		t.Failed()
+	}
+}
+
+func TestScraper_ResetFiles(t *testing.T) {
+	defaultScraper := MakeSourceScraper(testDefaultSource)
+
+	manga, _ := defaultScraper.SearchManga(TestQuery)
+	anyManga := manga[0]
+
+	chapters, _ := defaultScraper.GetChapters(anyManga)
+	anyChapter := chapters[0]
+
+	pages, _ := defaultScraper.GetPages(anyChapter)
+	anyPage := pages[0]
+
+	file, _ := defaultScraper.GetFile(anyPage)
+
+	// check scraper has file
+	f, ok := defaultScraper.Files.Load(anyPage.Address)
+	if !ok {
+		t.Failed()
+	}
+
+	// check file is the same as the one we got from scraper
+	if f != file {
+		t.Failed()
+	}
+
+	defaultScraper.ResetFiles()
+
+	// check scraper has no file
+	_, ok = defaultScraper.Files.Load(anyPage.Address)
+	if ok {
 		t.Failed()
 	}
 }

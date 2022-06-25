@@ -3,20 +3,26 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   strings.ToLower(AppName),
-	Short: AppName + " - A Manga Downloader",
-	Long:  `The ultimate CLI manga downloader`,
+	Use:   strings.ToLower(Mangal),
+	Short: Mangal + " - A Manga Downloader",
+	Long: AsciiArt + `
+
+The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
@@ -46,9 +52,9 @@ var rootCmd = &cobra.Command{
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show version",
-	Long:  fmt.Sprintf("Shows %s versions and build date", AppName),
+	Long:  fmt.Sprintf("Shows %s versions and build date", Mangal),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", accentStyle.Render(strings.ToLower(AppName)), boldStyle.Render(version))
+		fmt.Printf("%s version %s\n", Mangal, accentStyle.Render(version))
 	},
 }
 
@@ -215,6 +221,7 @@ var configPreviewCmd = &cobra.Command{
 var configEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Edit config in the default editor",
+	Long:  "Edit config in the default editor.\nIf config doesn't exist, it will be created",
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath, err := GetConfigPath()
 
@@ -232,6 +239,7 @@ var configEditCmd = &cobra.Command{
 var configInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init default config",
+	Long:  "Init default config at the default location.\nIf the config already exists, it will not be overwritten",
 	Run: func(cmd *cobra.Command, args []string) {
 		force, _ := cmd.Flags().GetBool("force")
 
@@ -299,6 +307,58 @@ var formatsCmd = &cobra.Command{
 	},
 }
 
+var checkUpdateCmd = &cobra.Command{
+	Use:   "check-update",
+	Short: "Check if new version is available",
+	Long:  "Fethces latest version of the program from github and compares it with current version",
+	Run: func(cmd *cobra.Command, args []string) {
+		const githubReleaseURL = "https://github.com/metafates/mangal/releases"
+
+		resp, err := http.Get(githubReleaseURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer func(Body io.ReadCloser) {
+			_ = Body.Close()
+		}(resp.Body)
+
+		doc, err := goquery.NewDocumentFromReader(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var latestVersion string
+
+		// compile regex for tag
+		re := regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
+
+		// get latest release tag
+		doc.Find("a > div > span").Each(func(_ int, s *goquery.Selection) {
+			var tag = strings.TrimSpace(s.Text())
+
+			// check if latestVersion matches tag regex and set it if it does (only if it is not set yet)
+			if re.MatchString(tag) && latestVersion == "" {
+				// remove "v" from tag
+				latestVersion = strings.TrimPrefix(tag, "v")
+			}
+		})
+
+		if latestVersion == "" {
+			log.Fatalf("Can't find latest version\nYou can visit %s to check for updates", githubReleaseURL)
+		}
+
+		// check if current version is latest
+		if latestVersion == version {
+			fmt.Printf("You are using the latest version of %s\n", Mangal)
+		} else {
+			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
+			fmt.Printf("You can download it from %s\n", accentStyle.Render(githubReleaseURL))
+			fmt.Println("Or use your package manager to update")
+		}
+	},
+}
+
 // CmdExecute adds all subcommands to the root command and executes it
 func CmdExecute() {
 	rootCmd.AddCommand(versionCmd)
@@ -334,6 +394,7 @@ func CmdExecute() {
 	rootCmd.Flags().StringP("format", "f", "", "use custom format")
 
 	rootCmd.AddCommand(formatsCmd)
+	rootCmd.AddCommand(checkUpdateCmd)
 
 	_ = rootCmd.Execute()
 }

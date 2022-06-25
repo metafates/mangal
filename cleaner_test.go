@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -45,6 +46,8 @@ func existAll(t *testing.T, files []string) (bool, error) {
 }
 
 func TestRemoveTemp(t *testing.T) {
+	RemoveTemp()
+
 	const count = 13
 
 	files, err := generateFiles(t, count, os.TempDir(), TempPrefix)
@@ -61,6 +64,7 @@ func TestRemoveTemp(t *testing.T) {
 	removedCount, _ := RemoveTemp()
 
 	if removedCount != count {
+		fmt.Println(removedCount, count)
 		t.Error("removed files count does not match expected count")
 	}
 
@@ -72,6 +76,8 @@ func TestRemoveTemp(t *testing.T) {
 }
 
 func TestRemoveCache(t *testing.T) {
+	RemoveCache()
+
 	cacheDir, err := os.UserCacheDir()
 
 	if err != nil {
