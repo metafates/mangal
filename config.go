@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/BurntSushi/toml"
+	"github.com/pelletier/go-toml/v2"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,9 +49,9 @@ func GetConfigPath() (string, error) {
 	return filepath.Join(configDir, strings.ToLower(Mangal), "config.toml"), nil
 }
 
-// DefaultConfig maked default config
+// DefaultConfig makes default config
 func DefaultConfig() *Config {
-	conf, _ := ParseConfig(string(DefaultConfigBytes))
+	conf, _ := ParseConfig(DefaultConfigBytes)
 	return conf
 }
 
@@ -66,7 +66,7 @@ use = ['manganelo']
 # Type "mangal formats" to show more information about formats
 format = "pdf"
 
-# If false, then OS default pdf reader will be used
+# If false, then OS default reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
 
@@ -163,7 +163,7 @@ func GetConfig(path string) *Config {
 	}
 
 	// Parse config
-	config, err := ParseConfig(string(contents))
+	config, err := ParseConfig(contents)
 	if err != nil {
 		return DefaultConfig()
 	}
@@ -172,7 +172,7 @@ func GetConfig(path string) *Config {
 }
 
 // ParseConfig parses config from given string
-func ParseConfig(configString string) (*Config, error) {
+func ParseConfig(configString []byte) (*Config, error) {
 	// tempConfig is a temporary config that will be used to store parsed config
 	type tempConfig struct {
 		Use             []string
@@ -189,7 +189,7 @@ func ParseConfig(configString string) (*Config, error) {
 		tempConf tempConfig
 		conf     Config
 	)
-	_, err := toml.Decode(configString, &tempConf)
+	err := toml.Unmarshal(configString, &tempConf)
 
 	if err != nil {
 		return nil, err

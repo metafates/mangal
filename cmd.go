@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -207,6 +208,16 @@ var configPreviewCmd = &cobra.Command{
 
 		if !exists {
 			log.Fatal("Config doesn't exist")
+		}
+
+		// check if bat command is installed
+		_, err = exec.LookPath("bat")
+		if err == nil {
+			cmd := exec.Command("bat", "-l", "toml", configPath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err = cmd.Run()
+			return
 		}
 
 		contents, err := Afero.ReadFile(configPath)
