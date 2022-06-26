@@ -66,10 +66,9 @@ func DefaultConfig() *Config {
 var UserConfig *Config
 
 // DefaultConfigBytes is default config in TOML format
-var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
+var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance
 use = ['manganelo']
 
-# Available options: ` + strings.Join(Map(AvailableFormats, ToString[FormatType]), ", ") + `
 # Type "mangal formats" to show more information about formats
 format = "pdf"
 
@@ -82,12 +81,11 @@ download_path = '.'
 
 # How chapters should be named when downloaded
 # Use %d to specify chapter number and %s to specify chapter title
-# If you want to pad zeros to chapter number for natural sorting (e.g. 0001, 0123) use %0d
+# If you want to pad chpater number with zeros for natural sorting (e.g. 0001, 0123) use %0d
 chapter_name_template = "[%0d] %s"
 
-
 # Add images to cache
-# If set to true mangal could crash when trying to redownload something really quickly
+# If set to true mangal could crash when trying to redownload something quickly
 # Usually happens on slow machines
 cache_images = false
 
@@ -110,10 +108,10 @@ mark_downloaded = false
 # Use %d to specify chapter number and %s to specify chapter title
 chapter_name_template = "[%d] %s"
 
-# Fullscreen mode
+# Fullscreen mode 
 fullscreen = true
 
-# Input prompt icon
+# Input prompt symbol
 prompt = ">"
 
 # Input placeholder
@@ -123,7 +121,7 @@ placeholder = "What shall we look for?"
 mark = "▼"
 
 # Search window title
-title = "` + Mangal + `"
+title = "Mangal"
 
 [sources]
 [sources.manganelo]
