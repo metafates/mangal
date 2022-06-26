@@ -51,13 +51,10 @@ Currently, Mangal supports these formats
 
 ## Fixing Errors
 
-If something is not working try the following:
-- Check if you have the latest version of Mangal by running `mangal check-update`
-- Run `mangal doctor`. If you got any errors, try updating your config by running `mangal config init --force`.
-Note, that **this will overwrite your current config**
+If something is not working run `mangal doctor` and follow instructions
 
 If you still have problems,
-please [open an issue](https://github.com/metafates/mangal/issues/new?assignees=&labels=bug&template=bug_report.md&title=) 🙏
+please [open an issue](https://github.com/metafates/mangal/issues/new?assignees=metafates&labels=bug&template=bug_report.yaml) 🙏
 
 ## Examples
 
@@ -190,14 +187,15 @@ Usage:
   mangal [command]
 
 Available Commands:
-  check-update Check if new version is available
-  cleanup      Remove cached and temp files
-  completion   Generate the autocompletion script for the specified shell
-  config       Config actions
-  formats      Information about available formats
-  help         Help about any command
-  inline       Search & Download manga in inline mode
-  version      Show version
+  cleanup     Remove cached and temp files
+  completion  Generate the autocompletion script for the specified shell
+  config      Config actions
+  doctor      Run this in case of any errors
+  formats     Information about available formats
+  help        Help about any command
+  inline      Search & Download manga in inline mode
+  latest      Check if latest version of Mangal is used
+  version     Show version
 
 Flags:
   -c, --config string   use config from path
