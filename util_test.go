@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"testing"
 )
 
@@ -150,5 +151,29 @@ func TestToString(t *testing.T) {
 
 	if ToString(struct{}{}) != "{}" {
 		t.Error("Invalid value")
+	}
+}
+
+func TestFetchLatestVersion(t *testing.T) {
+	version, err := FetchLatestVersion()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if version == "" {
+		t.Error("Invalid version")
+	}
+
+	// make version regex
+	versionRegex := regexp.MustCompile("^\\d+\\.\\d+\\.\\d+$")
+
+	// check if version matches version regex
+	if !versionRegex.MatchString(version) {
+		t.Error("Invalid version")
+	}
+
+	// check if version is greater than 0.0.0
+	if version < "0.0.0" {
+		t.Error("Invalid version")
 	}
 }
