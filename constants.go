@@ -42,3 +42,9 @@ const AsciiArt = "                                _\n" +
 	"/ /\\/\\ \\ (_| | | | | (_| | (_| | |\n" +
 	"\\/    \\/\\__,_|_| |_|\\__, |\\__,_|_|\n" +
 	"                    |___/         "
+
+// Will be set during build
+var (
+	AnilistClientSecret string
+	AnilistClientID     string
+)

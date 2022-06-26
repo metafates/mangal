@@ -134,6 +134,7 @@ func ToString[T any](v T) string {
 }
 
 // FetchLatestVersion fetches the latest version tag of the app from the GitHub releases
+// 	Example: FetchLatestVersion() => "1.0.0"
 func FetchLatestVersion() (string, error) {
 	resp, err := http.Get("https://api.github.com/repos/metafates/mangal/releases/latest")
 	if err != nil {
