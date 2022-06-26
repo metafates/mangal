@@ -80,6 +80,9 @@ download_path = '.'
 cache_images = false
 
 [anilist]
+# Enable Anilist integration
+enabled = false
+
 # Anilist client ID
 id = ""
 
@@ -192,8 +195,9 @@ func ParseConfig(configString []byte) (*Config, error) {
 		CacheImages     bool   `toml:"cache_images"`
 		Sources         map[string]Source
 		Anilist         struct {
-			ID     string `toml:"id"`
-			Secret string `toml:"secret"`
+			Enabled bool   `toml:"enabled"`
+			ID      string `toml:"id"`
+			Secret  string `toml:"secret"`
 		}
 	}
 
@@ -236,7 +240,8 @@ func ParseConfig(configString []byte) (*Config, error) {
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
 
-	if id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret; id != "" && secret != "" {
+	if tempConf.Anilist.Enabled {
+		id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret
 		conf.Anilist, err = NewAnilistClient(id, secret)
 
 		if err != nil {
@@ -252,6 +257,13 @@ func ValidateConfig(config *Config) error {
 	// check if any source is used
 	if len(config.Scrapers) == 0 {
 		return errors.New("no manga sources listed")
+	}
+
+	// check if anilist is properly configured
+	if config.Anilist != nil {
+		if config.Anilist.ID == "" || config.Anilist.Secret == "" {
+			return errors.New("anilist is enabled but id or secret is not set")
+		}
 	}
 
 	// check if custom reader is properly configured

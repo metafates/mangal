@@ -33,6 +33,7 @@ type AnilistClient struct {
 	Preferences *AnilistPreferences `json:"preferences"`
 }
 
+// NewAnilistClient creates a new client for anilist integration
 func NewAnilistClient(id, secret string) (*AnilistClient, error) {
 	client := &AnilistClient{
 		Preferences: &AnilistPreferences{},
@@ -49,6 +50,12 @@ func NewAnilistClient(id, secret string) (*AnilistClient, error) {
 	return client, nil
 }
 
+// AuthURL returns the URL for the Anilist authorization page
+func (a *AnilistClient) AuthURL() string {
+	return "https://anilist.co/api/v2/oauth/authorize?client_id=" + a.ID + "&response_type=code&redirect_uri=https://anilist.co/api/v2/oauth/pin"
+}
+
+// IsExpired returns true if the token is expired
 func (a *AnilistClient) IsExpired() bool {
 	if a.Preferences.Token.ExpiresAt == 0 {
 		return true
@@ -119,6 +126,7 @@ func (a *AnilistClient) Login(code string) error {
 	return nil
 }
 
+// SavePreferences saves the preferences to the file
 func (a *AnilistClient) SavePreferences() error {
 	// get preferences file location
 	configDir, err := os.UserConfigDir()
@@ -175,6 +183,7 @@ func (a *AnilistClient) SavePreferences() error {
 	return nil
 }
 
+// LoadPreferences loads the preferences from the file
 func (a *AnilistClient) LoadPreferences() error {
 	// get cache dir
 	cacheDir, err := os.UserCacheDir()
@@ -206,6 +215,7 @@ func (a *AnilistClient) LoadPreferences() error {
 	return nil
 }
 
+// SearchManga searches for a manga
 func (a *AnilistClient) SearchManga(manga string) ([]*AnilistURL, error) {
 	// query to search for manga
 	query := `
@@ -281,6 +291,7 @@ func (a *AnilistClient) SearchManga(manga string) ([]*AnilistURL, error) {
 	return urls, nil
 }
 
+// ToAnilistURL will find manga on anilist similar to the given title
 func (a *AnilistClient) ToAnilistURL(manga *URL) *AnilistURL {
 	// search for manga
 	urls, err := a.SearchManga(manga.Info)
@@ -305,6 +316,7 @@ func (a *AnilistClient) ToAnilistURL(manga *URL) *AnilistURL {
 	return closest
 }
 
+// MarkChapter marks a chapter as read
 func (a *AnilistClient) MarkChapter(manga *AnilistURL, chapter int) error {
 	// query to mark chapter
 	query := `
