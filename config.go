@@ -32,6 +32,7 @@ type Config struct {
 	Scrapers        []*Scraper
 	Format          FormatType
 	UI              UI
+	Anilist         *AnilistClient
 	UseCustomReader bool
 	CustomReader    string
 	Path            string
@@ -77,6 +78,13 @@ download_path = '.'
 # If set to true mangal could crash when trying to redownload something really quickly
 # Usually happens on slow machines
 cache_images = false
+
+[anilist]
+# Anilist client ID
+id = ""
+
+# Anilist client secret
+secret = ""
 
 [ui]
 # Fullscreen mode
@@ -183,6 +191,10 @@ func ParseConfig(configString []byte) (*Config, error) {
 		Path            string `toml:"download_path"`
 		CacheImages     bool   `toml:"cache_images"`
 		Sources         map[string]Source
+		Anilist         struct {
+			ID     string `toml:"id"`
+			Secret string `toml:"secret"`
+		}
 	}
 
 	var (
@@ -223,6 +235,14 @@ func ParseConfig(configString []byte) (*Config, error) {
 
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
+
+	if id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret; id != "" && secret != "" {
+		conf.Anilist, err = NewAnilistClient(id, secret)
+
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return &conf, err
 }

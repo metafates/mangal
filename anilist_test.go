@@ -85,3 +85,33 @@ func TestAnilistClient_SavePreferences(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestAnilistClient_ToAnilistURL(t *testing.T) {
+	// sample anilist client
+	anilistClient, err := NewAnilistClient("", "")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// search manga with default scraper
+	conf := GetConfig("")
+	manga, err := conf.Scrapers[0].SearchManga(TestQuery)
+
+	if err != nil {
+		return
+	}
+
+	// create url
+	url := anilistClient.ToAnilistURL(manga[0])
+
+	// check for error
+	if err != nil {
+		t.Error(err)
+	}
+
+	// check for url
+	if url == nil {
+		t.Error("url was not created")
+	}
+}
