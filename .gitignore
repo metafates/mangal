@@ -9,6 +9,8 @@
 bin
 mangal
 
+.env
+
 __pycache__
 
 # Test binary, built with `go test -c`

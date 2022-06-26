@@ -212,6 +212,7 @@ Use "mangal [command] --help" for more information about a command.
 - [MacOS](#macos)
 - [Windows](#windows)
 - [Debian](#debian)
+- [Docker](#docker)
 
 
 ### Go
@@ -317,6 +318,18 @@ sudo dpkg -r mangal
 ```
 
 </details>
+
+### Docker
+
+Docker image is available at [Docker Hub](https://hub.docker.com/repository/docker/metafates/mangal)
+
+You can run it by using
+
+```bash
+docker run --rm -ti -v $(PWD)/downloads:/config mangal
+```
+
+This will create downloads directory in the current directory and will download manga to it
 
 ## Build
 
