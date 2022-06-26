@@ -114,7 +114,7 @@ use = ['manganelo']
 # Type "mangal formats" to show more information about formats
 format = "pdf"
 
-# If false, then OS default pdf reader will be used
+# If false, then OS default reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
 
@@ -126,7 +126,24 @@ download_path = '.'
 # Usually happens on slow machines
 cache_images = false
 
+[anilist]
+# Enable Anilist integration (BETA)
+# See https://github.com/metafates/mangal/wiki/Anilist-Integration for more information
+enabled = false
+
+# Anilist client ID
+id = ""
+
+# Anilist client secret
+secret = ""
+
+# Will mark downloaded chapters as read on Anilist
+mark_downloaded = false
+
 [ui]
+# If true, then chapters will be enumerated
+enumerate_chapters = true
+
 # Fullscreen mode
 fullscreen = true
 
@@ -320,6 +337,8 @@ sudo dpkg -r mangal
 </details>
 
 ### Docker
+
+> Thanks to @ArabCoders
 
 Docker image is available at [Docker Hub](https://hub.docker.com/repository/docker/metafates/mangal)
 
