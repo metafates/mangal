@@ -350,7 +350,7 @@ var latestCmd = &cobra.Command{
 
 var doctorCmd = &cobra.Command{
 	Use:   "doctor",
-	Short: fmt.Sprintf("Check if %s is properly configured", Mangal),
+	Short: "Run this in case of any errors",
 	Long: `Check if ` + Mangal + ` is properly configured.
 It checks if config file is valid and used sources are available`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -396,6 +396,8 @@ It checks if config file is valid and used sources are available`,
 		var sourceNotAvailable = func(source *Source) {
 			fail()
 			fmt.Printf("Source %s is not available\n", source.Name)
+			fmt.Printf("Try to reinitialize your config with %s\n", accentStyle.Render("mangal config init --force"))
+			fmt.Println("Note, that this will overwrite your current config")
 			os.Exit(1)
 		}
 
