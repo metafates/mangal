@@ -175,15 +175,22 @@ func initAnilist() {
 
 	// check if anilist is enabled and token is experied
 	if UserConfig.Anilist.Enabled && UserConfig.Anilist.Client.IsExpired() {
-		fmt.Println(
-			"Anilist token is expired, please open this link to get a new token: ",
-			accentStyle.Render(UserConfig.Anilist.Client.AuthURL()),
-		)
+		fmt.Println("You are seeing this because you have enabled Anilist integration")
+		fmt.Println()
+		fmt.Printf("Anilist token is expired, press %s to open anilist page with a new token\n", accentStyle.Render("enter"))
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		fmt.Println("Opening Anilist page...")
+		err := open.Run(UserConfig.Anilist.Client.AuthURL())
+
+		if err != nil {
+			fmt.Println("Something went wrong, please copy the url below manually")
+			fmt.Println(accentStyle.Render(UserConfig.Anilist.Client.AuthURL()))
+		}
 
 		// wait for user to input token
+		fmt.Println()
 		fmt.Print("Enter token: ")
-
-		scanner := bufio.NewScanner(os.Stdin)
 
 		if scanner.Scan() {
 			token := scanner.Text()
