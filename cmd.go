@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
@@ -66,6 +67,67 @@ var cleanupCmd = &cobra.Command{
 		bytes += b
 
 		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupAnilistCmd = &cobra.Command{
+	Use:   "anilist",
+	Short: "Remove Anilist cache",
+	Run: func(cmd *cobra.Command, args []string) {
+		// get config dir
+		configDir, err := os.UserConfigDir()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// get config file
+		configFile := filepath.Join(configDir, Mangal, "anilist.json")
+
+		// check if config file exists
+		exists, err := Afero.Exists(configFile)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// if config file doesn't exist exit
+		if !exists {
+			fmt.Println("Anilist file doesn't exist so nothing to clean up")
+			return
+		}
+
+		// decode json
+		config, err := Afero.ReadFile(configFile)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var preferences AnilistPreferences
+		err = json.Unmarshal(config, &preferences)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		preferences.Connections = make(map[string]*AnilistURL)
+
+		// encode json
+		encoded, err := json.Marshal(preferences)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// write json to file
+		err = Afero.WriteFile(configFile, encoded, 0777)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Anilist cache removed")
 	},
 }
 
@@ -521,6 +583,7 @@ func init() {
 
 	cleanupCmd.AddCommand(cleanupTempCmd)
 	cleanupCmd.AddCommand(cleanupCacheCmd)
+	cleanupCmd.AddCommand(cleanupAnilistCmd)
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)
