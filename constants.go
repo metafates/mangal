@@ -2,6 +2,9 @@ package main
 
 import "time"
 
+// Version is the current version of the program.
+const Version = "1.6.0"
+
 // Mangal is a name of application
 // I keep it in a constant to avoid typos
 const Mangal = "Mangal"
