@@ -21,11 +21,12 @@ const (
 )
 
 type UI struct {
-	Fullscreen  bool
-	Prompt      string
-	Title       string
-	Placeholder string
-	Mark        string
+	Fullscreen        bool
+	Prompt            string
+	Title             string
+	Placeholder       string
+	Mark              string
+	EnumerateChapters bool `toml:"enumerate_chapters"`
 }
 
 type Config struct {
@@ -80,7 +81,8 @@ download_path = '.'
 cache_images = false
 
 [anilist]
-# Enable Anilist integration
+# Enable Anilist integration (BETA)
+# Will mark chapters as read on Anilist when you read them using Mangal
 enabled = false
 
 # Anilist client ID
@@ -89,7 +91,13 @@ id = ""
 # Anilist client secret
 secret = ""
 
+# Will mark downloaded chapters as read on Anilist
+mark_downloaded = false
+
 [ui]
+# If true, then chapters will be enumerated
+enumerate_chapters = true
+
 # Fullscreen mode
 fullscreen = true
 

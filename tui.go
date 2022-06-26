@@ -315,11 +315,22 @@ func (l *listItem) Select() {
 	l.selected = !l.selected
 }
 func (l listItem) Title() string {
+	var title string
+
 	if l.selected {
-		return accentStyle.Bold(true).Render(UserConfig.UI.Mark) + " " + l.url.Info
+		title = accentStyle.Bold(true).Render(UserConfig.UI.Mark) + " " + l.url.Info
+	} else {
+		title = l.url.Info
 	}
 
-	return l.url.Info
+	// if user set enumeration to false or if it's a manga
+	if !UserConfig.UI.EnumerateChapters || l.url.Relation == nil {
+		return title
+	}
+
+	index := l.url.Index
+
+	return fmt.Sprintf("[%d] %s", index, title)
 }
 
 func (l listItem) Description() string {
@@ -405,6 +416,11 @@ func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
 			// set to empty list if error occured and notify user
 			b.chaptersChan <- make([]*URL, 0)
 			return b.chaptersList.NewStatusMessage("Error occured while fetching chapters")()
+		}
+
+		if UserConfig.Anilist != nil {
+			// cache result
+			UserConfig.Anilist.ToAnilistURL(manga)
 		}
 
 		b.chaptersChan <- chapters
@@ -518,11 +534,9 @@ func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 		if err != nil {
 			failed = append(failed, chapter)
 		} else {
-			anilistURL := UserConfig.Anilist.ToAnilistURL(chapter.Relation)
-
 			// Mark chapter as read
 			go func() {
-				_ = UserConfig.Anilist.MarkChapter(anilistURL, chapter.Index)
+				_ = UserConfig.Anilist.MarkChapter(chapter.Relation, chapter.Index)
 			}()
 
 			succeeded = append(succeeded, path)
@@ -627,9 +641,14 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case chapterGetDoneMsg:
 		b.setState(chaptersState)
 		b.loading = false
+		var anilistManga *AnilistURL
 
 		if len(msg) > 0 {
-			b.chaptersList.Title = "Chapters - " + PrettyTrim(msg[0].Relation.Info, 30)
+			manga := msg[0].Relation
+			if UserConfig.Anilist != nil {
+				anilistManga = UserConfig.Anilist.ToAnilistURL(manga)
+			}
+			b.chaptersList.Title = "Chapters - " + PrettyTrim(manga.Info, 30)
 		} else {
 			b.chaptersList.Title = "Chapters"
 		}
@@ -645,7 +664,12 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			items = append(items, listItem{url: url})
 		}
 
-		cmd = b.chaptersList.SetItems(items)
+		var cmds []tea.Cmd
+
+		cmds = append(cmds, b.chaptersList.SetItems(items))
+		if anilistManga != nil {
+			cmds = append(cmds, b.chaptersList.NewStatusMessage("AL: "+PrettyTrim(anilistManga.Title, 25)))
+		}
 		b.mangaList.StopSpinner()
 		return b, cmd
 	}
@@ -669,7 +693,6 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.selectedChapters = make(map[int]interface{})
 
 			b.setState(mangaState)
-			cmd = b.chaptersList.NewStatusMessage("") // clear status message
 			return b, cmd
 		case key.Matches(msg, b.keyMap.Open):
 			item, ok := b.chaptersList.SelectedItem().(listItem)
@@ -707,7 +730,6 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				cmds := []tea.Cmd{
 					b.chaptersList.SetItem(index, item),
-					b.chaptersList.NewStatusMessage(fmt.Sprintf("%d selected", len(b.selectedChapters))),
 				}
 
 				return b, tea.Batch(cmds...)
@@ -728,8 +750,6 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				cmds[i] = b.chaptersList.SetItem(i, it)
 			}
-
-			cmds = append(cmds, b.chaptersList.NewStatusMessage(fmt.Sprintf("%d selected", len(b.selectedChapters))))
 
 			return b, tea.Batch(cmds...)
 		}

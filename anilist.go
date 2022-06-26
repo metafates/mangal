@@ -31,15 +31,19 @@ type AnilistPreferences struct {
 type AnilistClient struct {
 	ID          string
 	Secret      string
+	cached      map[string]*AnilistURL
 	Preferences *AnilistPreferences `json:"preferences"`
 }
 
 // NewAnilistClient creates a new client for anilist integration
 func NewAnilistClient(id, secret string) (*AnilistClient, error) {
 	client := &AnilistClient{
-		Preferences: &AnilistPreferences{},
-		ID:          id,
-		Secret:      secret,
+		Preferences: &AnilistPreferences{
+			Connections: make(map[string]*AnilistURL),
+		},
+		ID:     id,
+		Secret: secret,
+		cached: make(map[string]*AnilistURL),
 	}
 
 	err := client.LoadPreferences()
@@ -286,7 +290,7 @@ func (a *AnilistClient) SearchManga(manga string) ([]*AnilistURL, error) {
 		urls[i] = &AnilistURL{
 			ID:      media.ID,
 			Address: "https://anilist.co/manga/" + ToString(media.ID),
-			Title:   media.Title.Romaji,
+			Title:   IfElse(media.Title.English != "", media.Title.English, media.Title.Romaji),
 		}
 	}
 
@@ -294,7 +298,12 @@ func (a *AnilistClient) SearchManga(manga string) ([]*AnilistURL, error) {
 }
 
 // ToAnilistURL will find manga on anilist similar to the given title
+// It will cache the results
 func (a *AnilistClient) ToAnilistURL(manga *URL) *AnilistURL {
+	if cached, ok := a.cached[manga.Address]; ok {
+		return cached
+	}
+
 	// search for manga
 	urls, err := a.SearchManga(manga.Info)
 	if err != nil {
@@ -315,11 +324,27 @@ func (a *AnilistClient) ToAnilistURL(manga *URL) *AnilistURL {
 		}
 	}
 
+	// cache result
+	a.cached[manga.Address] = closest
+
 	return closest
 }
 
 // MarkChapter marks a chapter as read
-func (a *AnilistClient) MarkChapter(manga *AnilistURL, chapter int) error {
+func (a *AnilistClient) MarkChapter(manga *URL, chapter int) error {
+	var anilistManga *AnilistURL
+
+	if connection, ok := a.Preferences.Connections[manga.Address]; ok {
+		anilistManga = connection
+	} else {
+		anilistManga = a.ToAnilistURL(manga)
+		if anilistManga == nil {
+			return errors.New("manga not found")
+		}
+		a.Preferences.Connections[manga.Address] = anilistManga
+		_ = a.SavePreferences()
+	}
+
 	// query to mark chapter
 	query := `
 		mutation ($id: Int, $progress: Int) {
@@ -333,7 +358,7 @@ func (a *AnilistClient) MarkChapter(manga *AnilistURL, chapter int) error {
 	body := map[string]interface{}{
 		"query": query,
 		"variables": map[string]interface{}{
-			"id":       manga.ID,
+			"id":       anilistManga.ID,
 			"progress": chapter,
 		},
 	}
@@ -372,7 +397,7 @@ func (a *AnilistClient) MarkChapter(manga *AnilistURL, chapter int) error {
 		} `json:"data"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return err
 	}
 
