@@ -17,7 +17,7 @@ func TestInlineMode(t *testing.T) {
 		mangaIdx:   -1,
 		chapterIdx: -1,
 		asJson:     false,
-		format:     "pdf",
+		format:     PDF,
 		showUrls:   false,
 		asTemp:     true,
 		doRead:     false,

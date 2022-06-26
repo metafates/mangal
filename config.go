@@ -206,7 +206,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 
 		// Create scraper
 		source.Name = sourceName
-		scraper := MakeSourceScraper(source)
+		scraper := MakeSourceScraper(&source)
 
 		if !conf.CacheImages {
 			scraper.FilesCollector.CacheDir = ""

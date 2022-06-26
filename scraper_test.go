@@ -4,19 +4,7 @@ import (
 	"testing"
 )
 
-var testDefaultSource = Source{
-	Base:             "https://m.manganelo.com",
-	ChaptersBase:     "https://chap.manganelo.com/",
-	SearchTemplate:   "https://m.manganelo.com/search/story/%s",
-	MangaAnchor:      ".search-story-item a.item-title",
-	MangaTitle:       ".search-story-item a.item-title",
-	ChapterAnchor:    "li.a-h a.chapter-name",
-	ChapterTitle:     "li.a-h a.chapter-name",
-	ReaderPage:       ".container-chapter-reader img",
-	RandomDelayMs:    500,
-	ChaptersReversed: true,
-	WhitespaceEscape: "_",
-}
+var testDefaultSource = GetConfig("").Scrapers[0].Source
 
 func TestMakeSourceScraper(t *testing.T) {
 	scraper := MakeSourceScraper(testDefaultSource)
@@ -25,7 +13,7 @@ func TestMakeSourceScraper(t *testing.T) {
 		t.Failed()
 	}
 
-	if scraper.Source == nil || scraper.Source != &testDefaultSource {
+	if scraper.Source == nil || scraper.Source != testDefaultSource {
 		t.Failed()
 	}
 }

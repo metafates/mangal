@@ -39,10 +39,10 @@ type URL struct {
 }
 
 // MakeSourceScraper makes a scraper for a source
-func MakeSourceScraper(source Source) *Scraper {
+func MakeSourceScraper(source *Source) *Scraper {
 
 	scraper := Scraper{
-		Source: &source,
+		Source: source,
 
 		Manga:    make(map[string][]*URL),
 		Chapters: make(map[string][]*URL),
