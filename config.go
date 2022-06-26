@@ -21,12 +21,12 @@ const (
 )
 
 type UI struct {
-	Fullscreen        bool
-	Prompt            string
-	Title             string
-	Placeholder       string
-	Mark              string
-	EnumerateChapters bool `toml:"enumerate_chapters"`
+	Fullscreen          bool
+	Prompt              string
+	Title               string
+	Placeholder         string
+	Mark                string
+	ChapterNameTemplate string `toml:"chapter_name_template"`
 }
 
 type Config struct {
@@ -38,10 +38,11 @@ type Config struct {
 		Enabled        bool
 		MarkDownloaded bool
 	}
-	UseCustomReader bool
-	CustomReader    string
-	Path            string
-	CacheImages     bool
+	UseCustomReader     bool
+	CustomReader        string
+	Path                string
+	CacheImages         bool
+	ChapterNameTemplate string
 }
 
 // GetConfigPath returns path to config file
@@ -79,6 +80,10 @@ custom_reader = "zathura"
 # Custom download path, can be either relative (to the current directory) or absolute
 download_path = '.'
 
+# How chapters should be named when downloaded
+# Use %d to specify chapter number and %s to specify chapter title
+chapter_name_template = "[%d] %s"
+
 # Add images to cache
 # If set to true mangal could crash when trying to redownload something really quickly
 # Usually happens on slow machines
@@ -99,8 +104,9 @@ secret = ""
 mark_downloaded = false
 
 [ui]
-# If true, then chapters will be enumerated
-enumerate_chapters = true
+# How to display chapters in TUI mode
+# Use %d to specify chapter number and %s to specify chapter title
+chapter_name_template = "[%d] %s"
 
 # Fullscreen mode
 fullscreen = true
@@ -198,15 +204,16 @@ func GetConfig(path string) *Config {
 func ParseConfig(configString []byte) (*Config, error) {
 	// tempConfig is a temporary config that will be used to store parsed config
 	type tempConfig struct {
-		Use             []string
-		Format          string
-		UI              UI     `toml:"ui"`
-		UseCustomReader bool   `toml:"use_custom_reader"`
-		CustomReader    string `toml:"custom_reader"`
-		Path            string `toml:"download_path"`
-		CacheImages     bool   `toml:"cache_images"`
-		Sources         map[string]Source
-		Anilist         struct {
+		Use                 []string
+		Format              string
+		UI                  UI     `toml:"ui"`
+		UseCustomReader     bool   `toml:"use_custom_reader"`
+		CustomReader        string `toml:"custom_reader"`
+		Path                string `toml:"download_path"`
+		CacheImages         bool   `toml:"cache_images"`
+		Sources             map[string]Source
+		ChapterNameTemplate string `toml:"chapter_name_template"`
+		Anilist             struct {
 			Enabled        bool   `toml:"enabled"`
 			ID             string `toml:"id"`
 			Secret         string `toml:"secret"`
@@ -244,7 +251,12 @@ func ParseConfig(configString []byte) (*Config, error) {
 		conf.Scrapers = append(conf.Scrapers, scraper)
 	}
 
+	if tempConf.UI.ChapterNameTemplate == "" {
+		tempConf.UI.ChapterNameTemplate = "[%d] %s"
+	}
+
 	conf.UI = tempConf.UI
+
 	conf.Path = tempConf.Path
 
 	// Default format is pdf
@@ -252,6 +264,12 @@ func ParseConfig(configString []byte) (*Config, error) {
 
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
+
+	if template := tempConf.ChapterNameTemplate; template != "" {
+		conf.ChapterNameTemplate = template
+	} else {
+		conf.ChapterNameTemplate = "[%d] %s"
+	}
 
 	if tempConf.Anilist.Enabled {
 		id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret
@@ -273,6 +291,26 @@ func ValidateConfig(config *Config) error {
 	// check if any source is used
 	if len(config.Scrapers) == 0 {
 		return errors.New("no manga sources listed")
+	}
+
+	// check if chapter name template is valid
+	// chapter name template should contain %d or %s placeholder
+	chapterNameTemplateValidaor := func(template string) error {
+		if !strings.Contains(template, "%d") &&
+			!strings.Contains(template, "%s") {
+			return errors.New("chapter name template should contain %d or %s placeholder")
+		}
+		return nil
+	}
+
+	err := chapterNameTemplateValidaor(config.ChapterNameTemplate)
+	if err != nil {
+		return err
+	}
+
+	err = chapterNameTemplateValidaor(config.UI.ChapterNameTemplate)
+	if err != nil {
+		return err
 	}
 
 	// check if anilist is properly configured

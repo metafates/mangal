@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
+	"strings"
 )
 
 // IfElse is a ternary operator equavlient
@@ -154,4 +156,26 @@ func FetchLatestVersion() (string, error) {
 
 	// remove the v from the tag name
 	return release.TagName[1:], nil
+}
+
+// SanitizePath will remove all invalid characters from a path
+func SanitizePath(path string) string {
+	const forbiddenChars = `\\/<>:"|?*`
+
+	// remove all forbidden characters using regex
+	path = regexp.MustCompile(`[`+forbiddenChars+`]`).ReplaceAllString(path, "")
+
+	// replace all spaces with underscores
+	path = strings.ReplaceAll(path, " ", "_")
+
+	// remove all double underscores
+	path = regexp.MustCompile(`__+`).ReplaceAllString(path, "_")
+
+	// remove all leading and trailing underscores
+	path = regexp.MustCompile(`^_+|_+$`).ReplaceAllString(path, "")
+
+	// remove all leading and trailing dots
+	path = regexp.MustCompile(`^\.+|\.+$`).ReplaceAllString(path, "")
+
+	return path
 }

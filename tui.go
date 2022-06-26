@@ -323,14 +323,18 @@ func (l listItem) Title() string {
 		title = l.url.Info
 	}
 
-	// if user set enumeration to false or if it's a manga
-	if !UserConfig.UI.EnumerateChapters || l.url.Relation == nil {
+	// If it's a manga
+	if l.url.Relation == nil {
 		return title
 	}
 
 	index := l.url.Index
 
-	return fmt.Sprintf("[%d] %s", index, title)
+	// replace according to the name template
+	template := strings.ReplaceAll(UserConfig.UI.ChapterNameTemplate, "%d", strconv.Itoa(index))
+	template = strings.ReplaceAll(template, "%s", title)
+
+	return template
 }
 
 func (l listItem) Description() string {
