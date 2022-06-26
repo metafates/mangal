@@ -80,7 +80,7 @@ type ChapterDownloadProgress struct {
 
 // DownloadChapter downloads chapter from the given url and returns its path
 func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp bool) (string, error) {
-	mangaTitle := SanitizePath(chapter.Relation.Info)
+	mangaTitle := SanitizeFilename(chapter.Relation.Info)
 	var (
 		mangaPath string
 		err       error
@@ -112,7 +112,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	var chapterName string
 	chapterName = strings.ReplaceAll(UserConfig.ChapterNameTemplate, "%d", strconv.Itoa(chapter.Index))
 	chapterName = strings.ReplaceAll(chapterName, "%s", chapter.Info)
-	chapterName = SanitizePath(chapterName)
+	chapterName = SanitizeFilename(chapterName)
 
 	// Get future path to chapter
 	var chapterPath string

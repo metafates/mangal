@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
 )
 
 // IfElse is a ternary operator equavlient
@@ -158,24 +157,22 @@ func FetchLatestVersion() (string, error) {
 	return release.TagName[1:], nil
 }
 
-// SanitizePath will remove all invalid characters from a path
-func SanitizePath(path string) string {
-	const forbiddenChars = `\\/<>:"|?*`
+// SanitizeFilename will remove all invalid characters from a path.
+func SanitizeFilename(filename string) string {
 
-	// remove all forbidden characters using regex
-	path = regexp.MustCompile(`[`+forbiddenChars+`]`).ReplaceAllString(path, "")
+	const forbiddenChars = `\\/<>:"|?* `
 
-	// replace all spaces with underscores
-	path = strings.ReplaceAll(path, " ", "_")
+	// replace all forbidden characters with underscore using regex
+	filename = regexp.MustCompile(`[`+forbiddenChars+`]`).ReplaceAllString(filename, "_")
 
 	// remove all double underscores
-	path = regexp.MustCompile(`__+`).ReplaceAllString(path, "_")
+	filename = regexp.MustCompile(`__+`).ReplaceAllString(filename, "_")
 
 	// remove all leading and trailing underscores
-	path = regexp.MustCompile(`^_+|_+$`).ReplaceAllString(path, "")
+	filename = regexp.MustCompile(`^_+|_+$`).ReplaceAllString(filename, "")
 
 	// remove all leading and trailing dots
-	path = regexp.MustCompile(`^\.+|\.+$`).ReplaceAllString(path, "")
+	filename = regexp.MustCompile(`^\.+|\.+$`).ReplaceAllString(filename, "")
 
-	return path
+	return filename
 }

@@ -177,3 +177,61 @@ func TestFetchLatestVersion(t *testing.T) {
 		t.Error("Invalid version")
 	}
 }
+
+func TestSanitizeFilename(t *testing.T) {
+
+	// test with valid filename
+	if SanitizeFilename("test.txt") != "test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test/test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test\\test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test:test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test*test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test?test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test|test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test<test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test>test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with invalid filename
+	if SanitizeFilename("test?test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+
+	// test with whitespace
+	if SanitizeFilename("test test.txt") != "test_test.txt" {
+		t.Error("Invalid filename")
+	}
+}
