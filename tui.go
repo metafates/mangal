@@ -34,13 +34,13 @@ var (
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
 	failStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	mangaListTitleStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#9f86c0")).
-				Foreground(lipgloss.Color("#231942")).
-				Padding(0, 1)
+		Background(lipgloss.Color("#9f86c0")).
+		Foreground(lipgloss.Color("#231942")).
+		Padding(0, 1)
 	chaptersListTitleStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#e0b1cb")).
-				Foreground(lipgloss.Color("#231942")).
-				Padding(0, 1)
+		Background(lipgloss.Color("#e0b1cb")).
+		Foreground(lipgloss.Color("#231942")).
+		Padding(0, 1)
 )
 
 // keyMap is a map of key bindings for the bubble.
@@ -418,9 +418,9 @@ func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
 			return b.chaptersList.NewStatusMessage("Error occured while fetching chapters")()
 		}
 
-		if UserConfig.Anilist != nil {
+		if UserConfig.Anilist.Enabled {
 			// cache result
-			UserConfig.Anilist.ToAnilistURL(manga)
+			UserConfig.Anilist.Client.ToAnilistURL(manga)
 		}
 
 		b.chaptersChan <- chapters
@@ -472,6 +472,10 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 
 			path, err = DownloadChapter(chapter, b.chapterPagesProgressChan, false)
 			if err == nil {
+				if UserConfig.Anilist.MarkDownloaded {
+					_ = UserConfig.Anilist.Client.MarkChapter(chapter.Relation, chapter.Index)
+				}
+
 				// use path instead of the chapter name since it is used to get manga folder later
 				succeeded = append(succeeded, path)
 			} else {
@@ -535,9 +539,11 @@ func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 			failed = append(failed, chapter)
 		} else {
 			// Mark chapter as read
-			go func() {
-				_ = UserConfig.Anilist.MarkChapter(chapter.Relation, chapter.Index)
-			}()
+			if UserConfig.Anilist.Enabled {
+				go func() {
+					_ = UserConfig.Anilist.Client.MarkChapter(chapter.Relation, chapter.Index)
+				}()
+			}
 
 			succeeded = append(succeeded, path)
 		}
@@ -645,8 +651,8 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if len(msg) > 0 {
 			manga := msg[0].Relation
-			if UserConfig.Anilist != nil {
-				anilistManga = UserConfig.Anilist.ToAnilistURL(manga)
+			if UserConfig.Anilist.Enabled {
+				anilistManga = UserConfig.Anilist.Client.ToAnilistURL(manga)
 			}
 			b.chaptersList.Title = "Chapters - " + PrettyTrim(manga.Info, 30)
 		} else {

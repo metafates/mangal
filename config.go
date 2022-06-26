@@ -30,10 +30,14 @@ type UI struct {
 }
 
 type Config struct {
-	Scrapers        []*Scraper
-	Format          FormatType
-	UI              UI
-	Anilist         *AnilistClient
+	Scrapers []*Scraper
+	Format   FormatType
+	UI       UI
+	Anilist  struct {
+		Client         *AnilistClient
+		Enabled        bool
+		MarkDownloaded bool
+	}
 	UseCustomReader bool
 	CustomReader    string
 	Path            string
@@ -203,9 +207,10 @@ func ParseConfig(configString []byte) (*Config, error) {
 		CacheImages     bool   `toml:"cache_images"`
 		Sources         map[string]Source
 		Anilist         struct {
-			Enabled bool   `toml:"enabled"`
-			ID      string `toml:"id"`
-			Secret  string `toml:"secret"`
+			Enabled        bool   `toml:"enabled"`
+			ID             string `toml:"id"`
+			Secret         string `toml:"secret"`
+			MarkDownloaded bool   `toml:"mark_downloaded"`
 		}
 	}
 
@@ -250,11 +255,14 @@ func ParseConfig(configString []byte) (*Config, error) {
 
 	if tempConf.Anilist.Enabled {
 		id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret
-		conf.Anilist, err = NewAnilistClient(id, secret)
+		conf.Anilist.Client, err = NewAnilistClient(id, secret)
 
 		if err != nil {
 			return nil, err
 		}
+
+		conf.Anilist.Enabled = true
+		conf.Anilist.MarkDownloaded = tempConf.Anilist.MarkDownloaded
 	}
 
 	return &conf, err
@@ -268,8 +276,8 @@ func ValidateConfig(config *Config) error {
 	}
 
 	// check if anilist is properly configured
-	if config.Anilist != nil {
-		if config.Anilist.ID == "" || config.Anilist.Secret == "" {
+	if config.Anilist.Enabled {
+		if config.Anilist.Client.ID == "" || config.Anilist.Client.Secret == "" {
 			return errors.New("anilist is enabled but id or secret is not set")
 		}
 	}

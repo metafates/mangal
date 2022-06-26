@@ -167,10 +167,10 @@ func initConfig(config string) {
 	}
 
 	// check if anilist is enabled and token is experied
-	if UserConfig.Anilist != nil && UserConfig.Anilist.IsExpired() {
+	if UserConfig.Anilist.Enabled && UserConfig.Anilist.Client.IsExpired() {
 		fmt.Println(
 			"Anilist token is expired, please open this link to get a new token: ",
-			accentStyle.Render(UserConfig.Anilist.AuthURL()),
+			accentStyle.Render(UserConfig.Anilist.Client.AuthURL()),
 		)
 
 		// wait for user to input token
@@ -180,7 +180,7 @@ func initConfig(config string) {
 
 		if scanner.Scan() {
 			token := scanner.Text()
-			if err := UserConfig.Anilist.Login(token); err != nil {
+			if err := UserConfig.Anilist.Client.Login(token); err != nil {
 				log.Fatal("could not login to Anilist. Are you using the correct token?")
 			}
 		} else {
