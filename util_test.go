@@ -235,3 +235,22 @@ func TestSanitizeFilename(t *testing.T) {
 		t.Error("Invalid filename")
 	}
 }
+
+func TestPadZeros(t *testing.T) {
+	if PadZeros(1, 2) != "01" {
+		t.Error("Invalid value")
+	}
+
+	if PadZeros(10, 2) != "10" {
+		t.Error("Invalid value")
+	}
+
+	if PadZeros(10, 10) != "0000000010" {
+		t.Error("Invalid value")
+	}
+
+	if PadZeros(100, 2) != "100" {
+		t.Error("Invalid value")
+	}
+
+}

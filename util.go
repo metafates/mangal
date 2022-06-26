@@ -176,3 +176,8 @@ func SanitizeFilename(filename string) string {
 
 	return filename
 }
+
+// PadZeros pads a number with zeros to a certain length
+func PadZeros(n int, width int) string {
+	return fmt.Sprintf("%0*d", width, n)
+}

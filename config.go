@@ -82,7 +82,9 @@ download_path = '.'
 
 # How chapters should be named when downloaded
 # Use %d to specify chapter number and %s to specify chapter title
-chapter_name_template = "[%d] %s"
+# If you want to pad zeros to chapter number for natural sorting (e.g. 0001, 0123) use %0d
+chapter_name_template = "[%0d] %s"
+
 
 # Add images to cache
 # If set to true mangal could crash when trying to redownload something really quickly
@@ -268,7 +270,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 	if template := tempConf.ChapterNameTemplate; template != "" {
 		conf.ChapterNameTemplate = template
 	} else {
-		conf.ChapterNameTemplate = "[%d] %s"
+		conf.ChapterNameTemplate = "[%0d] %s"
 	}
 
 	if tempConf.Anilist.Enabled {
