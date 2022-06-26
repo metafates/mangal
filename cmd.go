@@ -25,8 +25,14 @@ var rootCmd = &cobra.Command{
 The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
+		incognito, _ := cmd.Flags().GetBool("incognito")
 		initConfig(config)
-		initAnilist()
+
+		if !incognito {
+			initAnilist()
+		} else {
+			UserConfig.Anilist.Enabled = false
+		}
 
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
 			UserConfig.Format = FormatType(format)
@@ -609,6 +615,7 @@ func init() {
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 	rootCmd.Flags().StringP("format", "f", "", "use custom format")
+	rootCmd.Flags().BoolP("incognito", "i", false, "will not sync with anilist even if enabled")
 
 	rootCmd.AddCommand(formatsCmd)
 	rootCmd.AddCommand(latestCmd)
