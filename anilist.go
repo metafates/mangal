@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -57,11 +58,12 @@ func (a *AnilistClient) AuthURL() string {
 
 // IsExpired returns true if the token is expired
 func (a *AnilistClient) IsExpired() bool {
+	// shortcut when token is not set
 	if a.Preferences.Token.ExpiresAt == 0 {
 		return true
 	}
 
-	return time.Now().Unix() > a.Preferences.Token.ExpiresAt
+	return time.Now().UnixNano() > a.Preferences.Token.ExpiresAt
 }
 
 // Login to Anilist
@@ -116,7 +118,7 @@ func (a *AnilistClient) Login(code string) error {
 
 	// set token that would expire in 1 hour
 	a.Preferences.Token.JWT = response.AccessToken
-	a.Preferences.Token.ExpiresAt = time.Now().Unix() + 3600
+	a.Preferences.Token.ExpiresAt = time.Now().UnixNano() + int64(time.Hour)
 
 	// save preferences
 	if err = a.SavePreferences(); err != nil {
@@ -135,7 +137,7 @@ func (a *AnilistClient) SavePreferences() error {
 	}
 
 	// get anilist file
-	anilistFile := filepath.Join(configDir, Mangal, "anilist.json")
+	anilistFile := filepath.Join(configDir, strings.ToLower(Mangal), "anilist.json")
 
 	// check if file exists
 	if exists, err := Afero.Exists(anilistFile); err != nil {
@@ -186,13 +188,13 @@ func (a *AnilistClient) SavePreferences() error {
 // LoadPreferences loads the preferences from the file
 func (a *AnilistClient) LoadPreferences() error {
 	// get cache dir
-	cacheDir, err := os.UserCacheDir()
+	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return err
 	}
 
 	// get anilist file
-	anilistFile := filepath.Join(cacheDir, Mangal, "anilist.json")
+	anilistFile := filepath.Join(configDir, strings.ToLower(Mangal), "anilist.json")
 
 	// check if file exists
 	if exists, err := Afero.Exists(anilistFile); err != nil {

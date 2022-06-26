@@ -165,6 +165,28 @@ func initConfig(config string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// check if anilist is enabled and token is experied
+	if UserConfig.Anilist != nil && UserConfig.Anilist.IsExpired() {
+		fmt.Println(
+			"Anilist token is expired, please open this link to get a new token: ",
+			accentStyle.Render(UserConfig.Anilist.AuthURL()),
+		)
+
+		// wait for user to input token
+		fmt.Print("Enter token: ")
+
+		scanner := bufio.NewScanner(os.Stdin)
+
+		if scanner.Scan() {
+			token := scanner.Text()
+			if err := UserConfig.Anilist.Login(token); err != nil {
+				log.Fatal("could not login to Anilist. Are you using the correct token?")
+			}
+		} else {
+			log.Fatal("could not read token")
+		}
+	}
 }
 
 var configCmd = &cobra.Command{
