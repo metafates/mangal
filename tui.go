@@ -331,7 +331,8 @@ func (l listItem) Title() string {
 	index := l.url.Index
 
 	// replace according to the name template
-	template := strings.ReplaceAll(UserConfig.UI.ChapterNameTemplate, "%d", strconv.Itoa(index))
+	template := strings.ReplaceAll(UserConfig.UI.ChapterNameTemplate, "%0d", PadZeros(index, 4))
+	template = strings.ReplaceAll(template, "%d", strconv.Itoa(index))
 	template = strings.ReplaceAll(template, "%s", title)
 
 	return template
