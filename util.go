@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"golang.org/x/exp/constraints"
+	"io"
+	"net/http"
 	"os"
 )
 
@@ -128,4 +131,26 @@ func Map[T, G any](list []T, f func(T) G) []G {
 // 	Example: ToString(1) => "1"
 func ToString[T any](v T) string {
 	return fmt.Sprintf("%v", v)
+}
+
+// FetchLatestVersion fetches the latest version tag of the app from the GitHub releases
+func FetchLatestVersion() (string, error) {
+	resp, err := http.Get("https://api.github.com/repos/metafates/mangal/releases/latest")
+	if err != nil {
+		return "", err
+	}
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
+
+	var release struct {
+		TagName string `json:"tag_name"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return "", err
+	}
+
+	// remove the v from the tag name
+	return release.TagName[1:], nil
 }

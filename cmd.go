@@ -4,18 +4,15 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
@@ -327,44 +324,16 @@ var formatsCmd = &cobra.Command{
 	},
 }
 
-var checkUpdateCmd = &cobra.Command{
-	Use:   "check-update",
-	Short: "Check if new version is available",
+var latestCmd = &cobra.Command{
+	Use:   "latest",
+	Short: fmt.Sprintf("Check if latest version of %s is used", Mangal),
 	Long:  "Fethces latest version of the program from github and compares it with current version",
 	Run: func(cmd *cobra.Command, args []string) {
-		const githubReleaseURL = "https://github.com/metafates/mangal/releases"
+		const githubReleaseURL = "https://github.com/metafates/mangal/releases/latest"
 
-		resp, err := http.Get(githubReleaseURL)
-		if err != nil {
-			log.Fatal(err)
-		}
+		latestVersion, err := FetchLatestVersion()
 
-		defer func(Body io.ReadCloser) {
-			_ = Body.Close()
-		}(resp.Body)
-
-		doc, err := goquery.NewDocumentFromReader(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		var latestVersion string
-
-		// compile regex for tag
-		re := regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
-
-		// get latest release tag
-		doc.Find("a > div > span").Each(func(_ int, s *goquery.Selection) {
-			var tag = strings.TrimSpace(s.Text())
-
-			// check if latestVersion matches tag regex and set it if it does (only if it is not set yet)
-			if re.MatchString(tag) && latestVersion == "" {
-				// remove "v" from tag
-				latestVersion = strings.TrimPrefix(tag, "v")
-			}
-		})
-
-		if latestVersion == "" {
+		if err != nil || latestVersion == "" {
 			log.Fatalf("Can't find latest version\nYou can visit %s to check for updates", githubReleaseURL)
 		}
 
@@ -381,8 +350,8 @@ var checkUpdateCmd = &cobra.Command{
 
 var doctorCmd = &cobra.Command{
 	Use:   "doctor",
-	Short: "Check if mangal is properly configured",
-	Long: `Check if mangal is properly configured.
+	Short: fmt.Sprintf("Check if %s is properly configured", Mangal),
+	Long: `Check if ` + Mangal + ` is properly configured.
 It checks if config file is valid and used sources are available`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
@@ -397,10 +366,25 @@ It checks if config file is valid and used sources are available`,
 			}
 		)
 
+		fmt.Print("Checking if latest version is used... ")
+		latestVersion, err := FetchLatestVersion()
+		if err != nil {
+			fail()
+			fmt.Printf("Can't find latest version\nRun %s to get more information\n", accentStyle.Render("mangal latest"))
+			os.Exit(1)
+		} else if latestVersion != version {
+			fail()
+			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
+			fmt.Printf("Run %s to get more information\n", accentStyle.Render("mangal latest"))
+			os.Exit(1)
+		} else {
+			ok()
+		}
+
 		fmt.Print("Checking config... ")
 		UserConfig = GetConfig("")
 
-		err := ValidateConfig(UserConfig)
+		err = ValidateConfig(UserConfig)
 		if err != nil {
 			fail()
 			fmt.Printf("Config error: %s\n", err)
@@ -526,7 +510,7 @@ func CmdExecute() {
 	rootCmd.Flags().StringP("format", "f", "", "use custom format")
 
 	rootCmd.AddCommand(formatsCmd)
-	rootCmd.AddCommand(checkUpdateCmd)
+	rootCmd.AddCommand(latestCmd)
 	rootCmd.AddCommand(doctorCmd)
 
 	_ = rootCmd.Execute()
