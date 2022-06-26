@@ -25,6 +25,7 @@ The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
+		initAnilist()
 
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
 			UserConfig.Format = FormatType(format)
@@ -164,6 +165,12 @@ func initConfig(config string) {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func initAnilist() {
+	if UserConfig == nil {
+		log.Fatal("config is not initialized")
 	}
 
 	// check if anilist is enabled and token is experied
