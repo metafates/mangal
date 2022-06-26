@@ -31,7 +31,6 @@ type AnilistPreferences struct {
 type AnilistClient struct {
 	ID          string
 	Secret      string
-	cached      map[string]*AnilistURL
 	Preferences *AnilistPreferences `json:"preferences"`
 }
 
@@ -43,7 +42,6 @@ func NewAnilistClient(id, secret string) (*AnilistClient, error) {
 		},
 		ID:     id,
 		Secret: secret,
-		cached: make(map[string]*AnilistURL),
 	}
 
 	err := client.LoadPreferences()
@@ -120,9 +118,9 @@ func (a *AnilistClient) Login(code string) error {
 		return err
 	}
 
-	// set token that would expire in 1 hour
+	// set token that would expire in a day
 	a.Preferences.Token.JWT = response.AccessToken
-	a.Preferences.Token.ExpiresAt = time.Now().UnixNano() + int64(time.Hour)
+	a.Preferences.Token.ExpiresAt = time.Now().UnixNano() + int64(time.Hour*24)
 
 	// save preferences
 	if err = a.SavePreferences(); err != nil {
@@ -300,7 +298,7 @@ func (a *AnilistClient) SearchManga(manga string) ([]*AnilistURL, error) {
 // ToAnilistURL will find manga on anilist similar to the given title
 // It will cache the results
 func (a *AnilistClient) ToAnilistURL(manga *URL) *AnilistURL {
-	if cached, ok := a.cached[manga.Address]; ok {
+	if cached, ok := a.Preferences.Connections[manga.Address]; ok {
 		return cached
 	}
 
@@ -325,24 +323,18 @@ func (a *AnilistClient) ToAnilistURL(manga *URL) *AnilistURL {
 	}
 
 	// cache result
-	a.cached[manga.Address] = closest
+	a.Preferences.Connections[manga.Address] = closest
+	_ = a.SavePreferences()
 
 	return closest
 }
 
 // MarkChapter marks a chapter as read
 func (a *AnilistClient) MarkChapter(manga *URL, chapter int) error {
-	var anilistManga *AnilistURL
 
-	if connection, ok := a.Preferences.Connections[manga.Address]; ok {
-		anilistManga = connection
-	} else {
-		anilistManga = a.ToAnilistURL(manga)
-		if anilistManga == nil {
-			return errors.New("manga not found")
-		}
-		a.Preferences.Connections[manga.Address] = anilistManga
-		_ = a.SavePreferences()
+	anilistManga := a.ToAnilistURL(manga)
+	if anilistManga == nil {
+		return errors.New("manga not found")
 	}
 
 	// query to mark chapter

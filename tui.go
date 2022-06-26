@@ -34,13 +34,13 @@ var (
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
 	failStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	mangaListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#9f86c0")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#9f86c0")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 	chaptersListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#e0b1cb")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#e0b1cb")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 )
 
 // keyMap is a map of key bindings for the bubble.
@@ -624,7 +624,8 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.mangaList.StopSpinner()
 			b.mangaList.Select(0)
 			b.setState(searchState)
-			return b, nil
+			return b, b.chaptersList.NewStatusMessage("")
+
 		case key.Matches(msg, b.keyMap.Quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Open):
