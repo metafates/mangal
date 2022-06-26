@@ -3,7 +3,7 @@ package main
 import "time"
 
 // Version is the current version of the program.
-const Version = "1.6.0"
+const Version = "2.0.0"
 
 // Mangal is a name of application
 // I keep it in a constant to avoid typos
@@ -42,3 +42,9 @@ const AsciiArt = "                                _\n" +
 	"/ /\\/\\ \\ (_| | | | | (_| | (_| | |\n" +
 	"\\/    \\/\\__,_|_| |_|\\__, |\\__,_|_|\n" +
 	"                    |___/         "
+
+// Will be set during build
+var (
+	AnilistClientSecret string
+	AnilistClientID     string
+)

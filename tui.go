@@ -34,13 +34,13 @@ var (
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
 	failStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	mangaListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#9f86c0")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#9f86c0")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 	chaptersListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#e0b1cb")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#e0b1cb")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 )
 
 // keyMap is a map of key bindings for the bubble.
@@ -315,11 +315,22 @@ func (l *listItem) Select() {
 	l.selected = !l.selected
 }
 func (l listItem) Title() string {
+	var title string
+
 	if l.selected {
-		return accentStyle.Bold(true).Render(UserConfig.UI.Mark) + " " + l.url.Info
+		title = accentStyle.Bold(true).Render(UserConfig.UI.Mark) + " " + l.url.Info
+	} else {
+		title = l.url.Info
 	}
 
-	return l.url.Info
+	// if user set enumeration to false or if it's a manga
+	if !UserConfig.UI.EnumerateChapters || l.url.Relation == nil {
+		return title
+	}
+
+	index := l.url.Index
+
+	return fmt.Sprintf("[%d] %s", index, title)
 }
 
 func (l listItem) Description() string {
@@ -407,6 +418,11 @@ func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
 			return b.chaptersList.NewStatusMessage("Error occured while fetching chapters")()
 		}
 
+		if UserConfig.Anilist.Enabled {
+			// cache result
+			UserConfig.Anilist.Client.ToAnilistURL(manga)
+		}
+
 		b.chaptersChan <- chapters
 		return nil
 	}
@@ -456,6 +472,10 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 
 			path, err = DownloadChapter(chapter, b.chapterPagesProgressChan, false)
 			if err == nil {
+				if UserConfig.Anilist.MarkDownloaded {
+					_ = UserConfig.Anilist.Client.MarkChapter(chapter.Relation, chapter.Index)
+				}
+
 				// use path instead of the chapter name since it is used to get manga folder later
 				succeeded = append(succeeded, path)
 			} else {
@@ -518,6 +538,13 @@ func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 		if err != nil {
 			failed = append(failed, chapter)
 		} else {
+			// Mark chapter as read
+			if UserConfig.Anilist.Enabled {
+				go func() {
+					_ = UserConfig.Anilist.Client.MarkChapter(chapter.Relation, chapter.Index)
+				}()
+			}
+
 			succeeded = append(succeeded, path)
 		}
 
@@ -597,7 +624,8 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.mangaList.StopSpinner()
 			b.mangaList.Select(0)
 			b.setState(searchState)
-			return b, nil
+			return b, b.chaptersList.NewStatusMessage("")
+
 		case key.Matches(msg, b.keyMap.Quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Open):
@@ -620,9 +648,14 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case chapterGetDoneMsg:
 		b.setState(chaptersState)
 		b.loading = false
+		var anilistManga *AnilistURL
 
 		if len(msg) > 0 {
-			b.chaptersList.Title = "Chapters - " + PrettyTrim(msg[0].Relation.Info, 30)
+			manga := msg[0].Relation
+			if UserConfig.Anilist.Enabled {
+				anilistManga = UserConfig.Anilist.Client.ToAnilistURL(manga)
+			}
+			b.chaptersList.Title = "Chapters - " + PrettyTrim(manga.Info, 30)
 		} else {
 			b.chaptersList.Title = "Chapters"
 		}
@@ -638,7 +671,12 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			items = append(items, listItem{url: url})
 		}
 
-		cmd = b.chaptersList.SetItems(items)
+		var cmds []tea.Cmd
+
+		cmds = append(cmds, b.chaptersList.SetItems(items))
+		if anilistManga != nil {
+			cmds = append(cmds, b.chaptersList.NewStatusMessage("AL: "+PrettyTrim(anilistManga.Title, 25)))
+		}
 		b.mangaList.StopSpinner()
 		return b, cmd
 	}
@@ -662,7 +700,6 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.selectedChapters = make(map[int]interface{})
 
 			b.setState(mangaState)
-			cmd = b.chaptersList.NewStatusMessage("") // clear status message
 			return b, cmd
 		case key.Matches(msg, b.keyMap.Open):
 			item, ok := b.chaptersList.SelectedItem().(listItem)
@@ -700,7 +737,6 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				cmds := []tea.Cmd{
 					b.chaptersList.SetItem(index, item),
-					b.chaptersList.NewStatusMessage(fmt.Sprintf("%d selected", len(b.selectedChapters))),
 				}
 
 				return b, tea.Batch(cmds...)
@@ -721,8 +757,6 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				cmds[i] = b.chaptersList.SetItem(i, it)
 			}
-
-			cmds = append(cmds, b.chaptersList.NewStatusMessage(fmt.Sprintf("%d selected", len(b.selectedChapters))))
 
 			return b, tea.Batch(cmds...)
 		}

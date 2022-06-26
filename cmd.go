@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
@@ -25,6 +26,7 @@ The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		initConfig(config)
+		initAnilist()
 
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
 			UserConfig.Format = FormatType(format)
@@ -65,6 +67,67 @@ var cleanupCmd = &cobra.Command{
 		bytes += b
 
 		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupAnilistCmd = &cobra.Command{
+	Use:   "anilist",
+	Short: "Remove Anilist cache",
+	Run: func(cmd *cobra.Command, args []string) {
+		// get config dir
+		configDir, err := os.UserConfigDir()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// get config file
+		configFile := filepath.Join(configDir, Mangal, "anilist.json")
+
+		// check if config file exists
+		exists, err := Afero.Exists(configFile)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// if config file doesn't exist exit
+		if !exists {
+			fmt.Println("Anilist file doesn't exist so nothing to clean up")
+			return
+		}
+
+		// decode json
+		config, err := Afero.ReadFile(configFile)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var preferences AnilistPreferences
+		err = json.Unmarshal(config, &preferences)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		preferences.Connections = make(map[string]*AnilistURL)
+
+		// encode json
+		encoded, err := json.Marshal(preferences)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// write json to file
+		err = Afero.WriteFile(configFile, encoded, 0777)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Anilist cache removed")
 	},
 }
 
@@ -164,6 +227,41 @@ func initConfig(config string) {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func initAnilist() {
+	if UserConfig == nil {
+		log.Fatal("config is not initialized")
+	}
+
+	// check if anilist is enabled and token is expired
+	if UserConfig.Anilist.Enabled && UserConfig.Anilist.Client.IsExpired() {
+		fmt.Println("You are seeing this because you have enabled Anilist integration")
+		fmt.Println()
+		fmt.Printf("Anilist token is expired, press %s to open anilist page with a new token\n", accentStyle.Render("enter"))
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		fmt.Println("Opening Anilist page...")
+		err := open.Run(UserConfig.Anilist.Client.AuthURL())
+
+		if err != nil {
+			fmt.Println("Something went wrong, please copy the url below manually")
+			fmt.Println(accentStyle.Render(UserConfig.Anilist.Client.AuthURL()))
+		}
+
+		// wait for user to input token
+		fmt.Println()
+		fmt.Print("Enter token: ")
+
+		if scanner.Scan() {
+			token := scanner.Text()
+			if err := UserConfig.Anilist.Client.Login(token); err != nil {
+				log.Fatal("could not login to Anilist. Are you using the correct token?")
+			}
+		} else {
+			log.Fatal("could not read token")
+		}
 	}
 }
 
@@ -485,6 +583,7 @@ func init() {
 
 	cleanupCmd.AddCommand(cleanupTempCmd)
 	cleanupCmd.AddCommand(cleanupCacheCmd)
+	cleanupCmd.AddCommand(cleanupAnilistCmd)
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)

@@ -26,6 +26,7 @@ https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-
 - [Commands](#commands)
 - [Install](#install)
 - [Build](#build)
+- [Anilist Integration](#anilist-integration)
 - [Limitations](#limitations)
 
 ## About
@@ -333,6 +334,11 @@ go build -ldflags="-s -w"
 > 
 > Built binaries and generated packages
 > will be stored in the `bin` folder
+
+## Anilist Integration
+
+See [Wiki Page](https://github.com/metafates/mangal/wiki/Anilist-Integration)
+for more information
 
 ## Limitations
 

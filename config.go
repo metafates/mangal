@@ -21,17 +21,23 @@ const (
 )
 
 type UI struct {
-	Fullscreen  bool
-	Prompt      string
-	Title       string
-	Placeholder string
-	Mark        string
+	Fullscreen        bool
+	Prompt            string
+	Title             string
+	Placeholder       string
+	Mark              string
+	EnumerateChapters bool `toml:"enumerate_chapters"`
 }
 
 type Config struct {
-	Scrapers        []*Scraper
-	Format          FormatType
-	UI              UI
+	Scrapers []*Scraper
+	Format   FormatType
+	UI       UI
+	Anilist  struct {
+		Client         *AnilistClient
+		Enabled        bool
+		MarkDownloaded bool
+	}
 	UseCustomReader bool
 	CustomReader    string
 	Path            string
@@ -78,7 +84,24 @@ download_path = '.'
 # Usually happens on slow machines
 cache_images = false
 
+[anilist]
+# Enable Anilist integration (BETA)
+# See https://github.com/metafates/mangal/wiki/Anilist-Integration for more information
+enabled = false
+
+# Anilist client ID
+id = ""
+
+# Anilist client secret
+secret = ""
+
+# Will mark downloaded chapters as read on Anilist
+mark_downloaded = false
+
 [ui]
+# If true, then chapters will be enumerated
+enumerate_chapters = true
+
 # Fullscreen mode
 fullscreen = true
 
@@ -183,6 +206,12 @@ func ParseConfig(configString []byte) (*Config, error) {
 		Path            string `toml:"download_path"`
 		CacheImages     bool   `toml:"cache_images"`
 		Sources         map[string]Source
+		Anilist         struct {
+			Enabled        bool   `toml:"enabled"`
+			ID             string `toml:"id"`
+			Secret         string `toml:"secret"`
+			MarkDownloaded bool   `toml:"mark_downloaded"`
+		}
 	}
 
 	var (
@@ -224,6 +253,18 @@ func ParseConfig(configString []byte) (*Config, error) {
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
 
+	if tempConf.Anilist.Enabled {
+		id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret
+		conf.Anilist.Client, err = NewAnilistClient(id, secret)
+
+		if err != nil {
+			return nil, err
+		}
+
+		conf.Anilist.Enabled = true
+		conf.Anilist.MarkDownloaded = tempConf.Anilist.MarkDownloaded
+	}
+
 	return &conf, err
 }
 
@@ -232,6 +273,13 @@ func ValidateConfig(config *Config) error {
 	// check if any source is used
 	if len(config.Scrapers) == 0 {
 		return errors.New("no manga sources listed")
+	}
+
+	// check if anilist is properly configured
+	if config.Anilist.Enabled {
+		if config.Anilist.Client.ID == "" || config.Anilist.Client.Secret == "" {
+			return errors.New("anilist is enabled but id or secret is not set")
+		}
 	}
 
 	// check if custom reader is properly configured
