@@ -50,7 +50,7 @@ var versionCmd = &cobra.Command{
 	Short: "Show version",
 	Long:  fmt.Sprintf("Shows %s versions and build date", Mangal),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", Mangal, accentStyle.Render(version))
+		fmt.Printf("%s version %s\n", Mangal, accentStyle.Render(Version))
 	},
 }
 
@@ -338,7 +338,7 @@ var latestCmd = &cobra.Command{
 		}
 
 		// check if current version is latest
-		if latestVersion == version {
+		if latestVersion == Version {
 			fmt.Printf("You are using the latest version of %s\n", Mangal)
 		} else {
 			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
@@ -372,7 +372,7 @@ It checks if config file is valid and used sources are available`,
 			fail()
 			fmt.Printf("Can't find latest version\nRun %s to get more information\n", accentStyle.Render("mangal latest"))
 			os.Exit(1)
-		} else if latestVersion != version {
+		} else if latestVersion != Version {
 			fail()
 			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
 			fmt.Printf("Run %s to get more information\n", accentStyle.Render("mangal latest"))
