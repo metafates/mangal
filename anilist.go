@@ -141,6 +141,15 @@ func (a *AnilistClient) SavePreferences() error {
 	// get anilist file
 	anilistFile := filepath.Join(configDir, strings.ToLower(Mangal), "anilist.json")
 
+	// check if parent directory exists and create if not
+	if exists, err := Afero.Exists(filepath.Dir(anilistFile)); err != nil {
+		return err
+	} else if !exists {
+		if err := Afero.MkdirAll(filepath.Dir(anilistFile), 0777); err != nil {
+			return err
+		}
+	}
+
 	// check if file exists
 	if exists, err := Afero.Exists(anilistFile); err != nil {
 		return err
