@@ -173,7 +173,7 @@ func initAnilist() {
 		log.Fatal("config is not initialized")
 	}
 
-	// check if anilist is enabled and token is experied
+	// check if anilist is enabled and token is expired
 	if UserConfig.Anilist.Enabled && UserConfig.Anilist.Client.IsExpired() {
 		fmt.Println("You are seeing this because you have enabled Anilist integration")
 		fmt.Println()

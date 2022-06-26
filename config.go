@@ -86,7 +86,7 @@ cache_images = false
 
 [anilist]
 # Enable Anilist integration (BETA)
-# Will mark chapters as read on Anilist when you read them using Mangal
+# See https://github.com/metafates/mangal/wiki/Anilist-Integration for more information
 enabled = false
 
 # Anilist client ID
