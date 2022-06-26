@@ -442,7 +442,7 @@ var latestCmd = &cobra.Command{
 		}
 
 		// check if current version is latest
-		if latestVersion == Version {
+		if latestVersion <= Version {
 			fmt.Printf("You are using the latest version of %s\n", Mangal)
 		} else {
 			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
@@ -476,7 +476,7 @@ It checks if config file is valid and used sources are available`,
 			fail()
 			fmt.Printf("Can't find latest version\nRun %s to get more information\n", accentStyle.Render("mangal latest"))
 			os.Exit(1)
-		} else if latestVersion != Version {
+		} else if latestVersion > Version {
 			fail()
 			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
 			fmt.Printf("Run %s to get more information\n", accentStyle.Render("mangal latest"))

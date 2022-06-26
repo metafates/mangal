@@ -297,8 +297,9 @@ func ValidateConfig(config *Config) error {
 	// chapter name template should contain %d or %s placeholder
 	chapterNameTemplateValidaor := func(template string) error {
 		if !strings.Contains(template, "%d") &&
-			!strings.Contains(template, "%s") {
-			return errors.New("chapter name template should contain %d or %s placeholder")
+			!strings.Contains(template, "%s") &&
+			!strings.Contains(template, "%0d") {
+			return errors.New("chapter name template should contain at least one %d, %0d or %s placeholder")
 		}
 		return nil
 	}
