@@ -479,8 +479,8 @@ It checks if config file is valid and used sources are available`,
 	},
 }
 
-// CmdExecute adds all subcommands to the root command and executes it
-func CmdExecute() {
+// Adds all child commands to the root command and sets flags appropriately.
+func init() {
 	rootCmd.AddCommand(versionCmd)
 
 	cleanupCmd.AddCommand(cleanupTempCmd)
@@ -514,6 +514,9 @@ func CmdExecute() {
 	rootCmd.AddCommand(formatsCmd)
 	rootCmd.AddCommand(latestCmd)
 	rootCmd.AddCommand(doctorCmd)
+}
 
+// CmdExecute executes root command
+func CmdExecute() {
 	_ = rootCmd.Execute()
 }
