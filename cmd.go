@@ -38,6 +38,7 @@ The ultimate CLI manga downloader`,
 		if UserConfig.UI.Fullscreen {
 			program = tea.NewProgram(NewBubble(searchState), tea.WithAltScreen())
 		} else {
+			commonStyle.Margin(1, 1)
 			program = tea.NewProgram(NewBubble(searchState))
 		}
 
