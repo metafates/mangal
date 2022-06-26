@@ -39,7 +39,10 @@ that can be added with just a few lines of config file (see [config](#config) & 
 
 🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate with scripts
 
+🍥 Integration with Anilist! (BETA)
+
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
+
 
 Currently, Mangal supports these formats
 - PDF
