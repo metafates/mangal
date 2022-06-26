@@ -34,13 +34,13 @@ var (
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
 	failStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	mangaListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#9f86c0")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#9f86c0")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 	chaptersListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#e0b1cb")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#e0b1cb")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 )
 
 // keyMap is a map of key bindings for the bubble.
@@ -518,6 +518,13 @@ func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 		if err != nil {
 			failed = append(failed, chapter)
 		} else {
+			anilistURL := UserConfig.Anilist.ToAnilistURL(chapter.Relation)
+
+			// Mark chapter as read
+			go func() {
+				_ = UserConfig.Anilist.MarkChapter(anilistURL, chapter.Index)
+			}()
+
 			succeeded = append(succeeded, path)
 		}
 

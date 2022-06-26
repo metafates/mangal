@@ -284,7 +284,7 @@ func (a *AnilistClient) SearchManga(manga string) ([]*AnilistURL, error) {
 	var urls = make([]*AnilistURL, len(response.Data.Page.Media))
 	for i, media := range response.Data.Page.Media {
 		urls[i] = &AnilistURL{
-			// make anilist url from id
+			ID:      media.ID,
 			Address: "https://anilist.co/manga/" + ToString(media.ID),
 			Title:   media.Title.Romaji,
 		}
@@ -322,8 +322,8 @@ func (a *AnilistClient) ToAnilistURL(manga *URL) *AnilistURL {
 func (a *AnilistClient) MarkChapter(manga *AnilistURL, chapter int) error {
 	// query to mark chapter
 	query := `
-		mutation ($id: Int, $chapter: Int) {
-			MediaChapterUpdate (mediaId: $id, chapter: $chapter) {
+		mutation ($id: Int, $progress: Int) {
+			SaveMediaListEntry (mediaId: $id, progress: $progress, status: CURRENT) {
 				id
 			}
 		}
@@ -333,8 +333,8 @@ func (a *AnilistClient) MarkChapter(manga *AnilistURL, chapter int) error {
 	body := map[string]interface{}{
 		"query": query,
 		"variables": map[string]interface{}{
-			"id":      manga.ID,
-			"chapter": chapter,
+			"id":       manga.ID,
+			"progress": chapter,
 		},
 	}
 
