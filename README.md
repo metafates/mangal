@@ -20,16 +20,18 @@ https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-
 ## Table of Contents
 
 - [About](#about)
+- [Fixing Errors](#fixing-errors)
 - [Examples](#examples)
 - [Config](#config)
 - [Commands](#commands)
 - [Install](#install)
 - [Build](#build)
+- [Anilist Integration](#anilist-integration)
 - [Limitations](#limitations)
 
 ## About
 
-✨ __Mangal__ is feature rich, configurable manga browser & downloader
+✨ __Mangal__ is a feature rich, configurable manga browser & downloader
 written in Go with support for different formats
 
 ⚙️ One of the most important features of Mangal is that it supports user defined scrapers
@@ -37,16 +39,26 @@ that can be added with just a few lines of config file (see [config](#config) & 
 
 🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate with scripts
 
+🍥 Integration with Anilist! __BETA__
+
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
+
 
 Currently, Mangal supports these formats
 - PDF
-- Epub
+- ePub
 - CBZ
-- Zip
-- Plain (just images)
+- ZIP
+- Plain
 
 > Type `mangal formats` for more info
+
+## Fixing Errors
+
+If something is not working run `mangal doctor` and follow instructions
+
+If you still have problems,
+please [open an issue](https://github.com/metafates/mangal/issues/new?assignees=metafates&labels=bug&template=bug_report.yaml) 🙏
 
 ## Examples
 
@@ -99,30 +111,52 @@ By default, Mangal uses [manganelo](https://m.manganelo.com/www) as a source
 <summary>Click here to show config example</summary>
 
 ```toml
-# Which sources to use. You can use several sources, it won't affect perfomance'
+# Which sources to use. You can use several sources, it won't affect perfomance
 use = ['manganelo']
 
-# Available options: ` + strings.Join(Map(AvailableFormats, func(f FormatType) string { return string(f) }), ", ") + `
 # Type "mangal formats" to show more information about formats
 format = "pdf"
 
-# If false, then OS default pdf reader will be used
+# If false, then OS default reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
 
 # Custom download path, can be either relative (to the current directory) or absolute
 download_path = '.'
 
+# How chapters should be named when downloaded
+# Use %d to specify chapter number and %s to specify chapter title
+# If you want to pad chapter number with zeros for natural sorting (e.g. 0001, 0123) use %0d instead of %d
+chapter_name_template = "[%0d] %s"
+
 # Add images to cache
-# If set to true mangal could crash when trying to redownload something really quickly
+# If set to true mangal could crash when trying to redownload something quickly
 # Usually happens on slow machines
 cache_images = false
 
+[anilist]
+# Enable Anilist integration (BETA)
+# See https://github.com/metafates/mangal/wiki/Anilist-Integration for more information
+enabled = false
+
+# Anilist client ID
+id = ""
+
+# Anilist client secret
+secret = ""
+
+# Will mark downloaded chapters as read on Anilist
+mark_downloaded = false
+
 [ui]
-# Fullscreen mode
+# How to display chapters in TUI mode
+# Use %d to specify chapter number and %s to specify chapter title
+chapter_name_template = "[%d] %s"
+
+# Fullscreen mode 
 fullscreen = true
 
-# Input prompt icon
+# Input prompt symbol
 prompt = ">"
 
 # Input placeholder
@@ -132,7 +166,7 @@ placeholder = "What shall we look for?"
 mark = "▼"
 
 # Search window title
-title = "` + Mangal + `"
+title = "Mangal"
 
 [sources]
 [sources.manganelo]
@@ -180,14 +214,15 @@ Usage:
   mangal [command]
 
 Available Commands:
-  check-update Check if new version is available
-  cleanup      Remove cached and temp files
-  completion   Generate the autocompletion script for the specified shell
-  config       Config actions
-  formats      Information about available formats
-  help         Help about any command
-  inline       Search & Download manga in inline mode
-  version      Show version
+  cleanup     Remove cached and temp files
+  completion  Generate the autocompletion script for the specified shell
+  config      Config actions
+  doctor      Run this in case of any errors
+  formats     Information about available formats
+  help        Help about any command
+  inline      Search & Download manga in inline mode
+  latest      Check if latest version of Mangal is used
+  version     Show version
 
 Flags:
   -c, --config string   use config from path
@@ -203,6 +238,7 @@ Use "mangal [command] --help" for more information about a command.
 - [MacOS](#macos)
 - [Windows](#windows)
 - [Debian](#debian)
+- [Docker](#docker)
 
 
 ### Go
@@ -212,6 +248,8 @@ You will need [Go installed](https://go.dev/doc/install)
 ```bash
 go install -ldflags="-s -w" github.com/metafates/mangal@latest
 ```
+
+> `-ldflags="-s -w"` - just makes the binary smaller
 
 <details>
 <summary>Update / Uninstall</summary>
@@ -309,6 +347,21 @@ sudo dpkg -r mangal
 
 </details>
 
+### Docker
+
+> Thanks to @ArabCoders
+
+Docker image is available at [Docker Hub](https://hub.docker.com/repository/docker/metafates/mangal)
+
+You can run it by using
+
+```bash
+docker pull metafates/mangal
+docker run --rm -ti -v $(PWD)/downloads:/config metafates/mangal
+```
+
+This will create downloads directory in the current directory and will download manga to it
+
 ## Build
 
 ```bash
@@ -317,14 +370,16 @@ cd mangal
 go build -ldflags="-s -w"
 ```
 
-
-
-
 > You can also cross build for windows, linux & macos
 > by running `cross-compile.py` (you will need Python 3)
 > 
 > Built binaries and generated packages
 > will be stored in the `bin` folder
+
+## Anilist Integration
+
+See [Wiki Page](https://github.com/metafates/mangal/wiki/Anilist-Integration)
+for more information
 
 ## Limitations
 
@@ -339,13 +394,10 @@ there exist some (serious) limitations to which sites could be added
 
 Some sites that work well
 
+- https://m.manganelo.com
 - https://manganato.com
-- https://ww3.mangakakalot.tv
-- https://ww5.manganelo.tv
 
-
-I'm planning to make a more advanced scraper creation system
-to overcome this roadblocks somewhere in the future
+See [examples of scrapers](https://github.com/metafates/mangal/discussions/7)
 
 ---
 

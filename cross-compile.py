@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 
-VERSION = "1.5.2"
+VERSION = "2.0.0"
 TAG = f"v{VERSION}"
 DESCRIPTION = "The ultimate CLI manga downloader"
 GITHUB = "https://github.com/metafates/mangal"
@@ -101,14 +101,17 @@ def generate_scoop_manifest():
         # This will try to match the tag with \/releases\/tag\/(?:v|V)?([\d.]+)
         "checkver": "github",
         "autoupdate": {
-            "hash": {
-                "url": "$url.sha256",
-            },
             "32bit": {
                 "url": f"{GITHUB}/releases/download/v$version/{win32bin}",
+                "hash": {
+                    "url": f"{GITHUB}/releases/download/v$version/{win32bin}.sha256",
+                },
             },
             "64bit": {
                 "url": f"{GITHUB}/releases/download/v$version/{win64bin}",
+                "hash": {
+                    "url": f"{GITHUB}/releases/download/v$version/{win64bin}.sha256",
+                },
             }
         }
     }
@@ -260,6 +263,55 @@ def generate_deb_packages():
         generate_deb_package_for(arch)
 
 
+def generate_docker_image():
+    """
+    Generate Docker image for Docker Hub
+    """
+    docker_image = f"""
+FROM alpine:latest
+
+ENV VERSION=v1.5.2
+
+ADD {GITHUB}/releases/download/{TAG}/{BIN}-linux-amd64 /usr/local/bin/{BIN}
+
+RUN chmod +x /usr/local/bin/{BIN}
+
+WORKDIR /config
+
+VOLUME /config
+
+ENV XDG_CONFIG_HOME=/config
+
+RUN /usr/local/bin/{BIN} config init
+
+ENTRYPOINT ["/usr/local/bin/{BIN}"]
+"""
+
+    with open(os.path.join("bin", "Dockerfile"), 'w') as f:
+        f.write(docker_image)
+
+    # check if docker is installed
+    try:
+        subprocess.check_output(["docker", "--version"])
+    except subprocess.CalledProcessError:
+        print("docker is not installed. Please install docker to generate a docker image.")
+        print("see https://www.docker.com/docker-installation")
+        return
+
+    # check if docker daemon is running
+    try:
+        subprocess.check_output(["docker", "ps"])
+    except subprocess.CalledProcessError:
+        print("docker daemon is not running. Please start docker to generate a docker image.")
+        return
+
+    # build docker image
+    subprocess.call(["docker", "build", "-t", f"metafates/{BIN}", "bin"])
+
+    # remove dockerfile
+    os.remove(os.path.join("bin", "Dockerfile"))
+
+
 def generate_checksums():
     """
     Generate checksums for all files in bin folder
@@ -279,7 +331,8 @@ def generate_checksums():
             file.endswith(".json"),
             file.endswith(".sha256"),
             file == "PKGBUILD",
-            file.endswith(".rb")
+            file.endswith(".rb"),
+            file == "Dockerfile",
         ]
 
         if any(skip_conditions):
@@ -319,6 +372,9 @@ def main():
 
     print("Generating Debian Packages")
     generate_deb_packages()
+
+    print("Generating Docker Image")
+    generate_docker_image()
 
     print("Generating Checksums")
     generate_checksums()

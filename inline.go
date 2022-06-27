@@ -120,6 +120,9 @@ func InlineMode(query string, options InlineOptions) (string, error) {
 				if err := EpubFile.Write(chapterPath); err != nil {
 					return "", errors.New("error while making epub file")
 				}
+
+				// reset epub file
+				EpubFile = nil
 			}
 
 			// if options to read chapter is set, read it

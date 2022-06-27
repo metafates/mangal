@@ -147,6 +147,8 @@ func TestPackToCBZ(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	RemoveTemp()
 }
 
 func TestPackToEpub(t *testing.T) {
@@ -198,5 +200,123 @@ func TestPackToEpub(t *testing.T) {
 	err = Afero.RemoveAll(filepath.Dir(files[0]))
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	RemoveTemp()
+
+	EpubFile = nil
+}
+
+func TestPackToPlain(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping this PackToPlain is too expensive")
+	}
+
+	// create mock files
+	files := MockFiles(t)
+
+	if len(files) == 0 {
+		t.Fatal("no files created")
+	}
+
+	// create temp dir
+	tempDir, err := Afero.TempDir(os.TempDir(), TempPrefix)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// pack to plain
+	out, err := PackToPlain(files, tempDir)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if out == "" {
+		t.Fatal("output is empty")
+	}
+
+	// check if output is folder
+	if isDir, err := Afero.IsDir(out); err != nil {
+		t.Fatal(err)
+	} else if !isDir {
+		t.Error("output is not a folder")
+	}
+
+	// check if folder contains unique images
+	if images, err := Afero.ReadDir(out); err != nil {
+		t.Fatal(err)
+	} else if len(images) != len(files) {
+		t.Error("folder contains non-unique files")
+	} else {
+		for _, image := range images {
+			if filepath.Ext(image.Name()) != ".jpg" {
+				t.Error("folder contains non-jpg files")
+			}
+		}
+
+		// check if all filenames are unique
+		if !IsUnique(Map(images, func(i os.FileInfo) string {
+			return i.Name()
+		})) {
+			t.Error("folder contains non-unique filenames")
+		}
+	}
+
+	RemoveTemp()
+}
+
+func TestPackToZip(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping this PackToZip is too expensive")
+	}
+
+	// create mock files
+	files := MockFiles(t)
+
+	if len(files) == 0 {
+		t.Fatal("no files created")
+	}
+
+	// pack to zip
+	out, err := PackToZip(files, TempFile(t, ".zip"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if out == "" {
+		t.Fatal("output is empty")
+	}
+
+	// check if output is a zip
+	if !strings.HasSuffix(out, ".zip") {
+		t.Error("output is not a zip")
+	}
+
+	// check if zip is not empty
+	if stat, err := Afero.Stat(out); err != nil {
+		t.Fatal(err)
+	} else if stat.Size() == 0 {
+		t.Error("zip is empty")
+	}
+
+	// remove mock files
+	RemoveTemp()
+}
+
+func TestPackers(t *testing.T) {
+	// get keys in packers map
+	var keys []FormatType
+	for k := range Packers {
+		keys = append(keys, k)
+	}
+
+	// check if all keys are in packers map
+	for _, format := range AvailableFormats {
+		if !Contains(keys, format) {
+			t.Errorf("packer for %s is not registered", format)
+		}
 	}
 }

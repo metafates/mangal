@@ -5,7 +5,7 @@ import (
 )
 
 func TestParseConfig(t *testing.T) {
-	configString := `
+	configString := []byte(`
 use = ['manganelo']
 format = "pdf"
 use_custom_reader = false
@@ -29,7 +29,7 @@ chapter_title = 'li.a-h a.chapter-name'
 reader_page = '.container-chapter-reader img'
 random_delay_ms = 500 # ms
 reversed_chapters_order = true
-`
+`)
 
 	config, err := ParseConfig(configString)
 

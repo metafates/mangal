@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/BurntSushi/toml"
+	"github.com/pelletier/go-toml/v2"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,21 +21,28 @@ const (
 )
 
 type UI struct {
-	Fullscreen  bool
-	Prompt      string
-	Title       string
-	Placeholder string
-	Mark        string
+	Fullscreen          bool
+	Prompt              string
+	Title               string
+	Placeholder         string
+	Mark                string
+	ChapterNameTemplate string `toml:"chapter_name_template"`
 }
 
 type Config struct {
-	Scrapers        []*Scraper
-	Format          FormatType
-	UI              UI
-	UseCustomReader bool
-	CustomReader    string
-	Path            string
-	CacheImages     bool
+	Scrapers []*Scraper
+	Format   FormatType
+	UI       UI
+	Anilist  struct {
+		Client         *AnilistClient
+		Enabled        bool
+		MarkDownloaded bool
+	}
+	UseCustomReader     bool
+	CustomReader        string
+	Path                string
+	CacheImages         bool
+	ChapterNameTemplate string
 }
 
 // GetConfigPath returns path to config file
@@ -49,9 +56,9 @@ func GetConfigPath() (string, error) {
 	return filepath.Join(configDir, strings.ToLower(Mangal), "config.toml"), nil
 }
 
-// DefaultConfig maked default config
+// DefaultConfig makes default config
 func DefaultConfig() *Config {
-	conf, _ := ParseConfig(string(DefaultConfigBytes))
+	conf, _ := ParseConfig(DefaultConfigBytes)
 	return conf
 }
 
@@ -59,30 +66,52 @@ func DefaultConfig() *Config {
 var UserConfig *Config
 
 // DefaultConfigBytes is default config in TOML format
-var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance'
+var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance
 use = ['manganelo']
 
-# Available options: ` + strings.Join(Map(AvailableFormats, func(f FormatType) string { return string(f) }), ", ") + `
 # Type "mangal formats" to show more information about formats
 format = "pdf"
 
-# If false, then OS default pdf reader will be used
+# If false, then OS default reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
 
 # Custom download path, can be either relative (to the current directory) or absolute
 download_path = '.'
 
+# How chapters should be named when downloaded
+# Use %d to specify chapter number and %s to specify chapter title
+# If you want to pad chapter number with zeros for natural sorting (e.g. 0001, 0123) use %0d instead of %d
+chapter_name_template = "[%0d] %s"
+
 # Add images to cache
-# If set to true mangal could crash when trying to redownload something really quickly
+# If set to true mangal could crash when trying to redownload something quickly
 # Usually happens on slow machines
 cache_images = false
 
+[anilist]
+# Enable Anilist integration (BETA)
+# See https://github.com/metafates/mangal/wiki/Anilist-Integration for more information
+enabled = false
+
+# Anilist client ID
+id = ""
+
+# Anilist client secret
+secret = ""
+
+# Will mark downloaded chapters as read on Anilist
+mark_downloaded = false
+
 [ui]
-# Fullscreen mode
+# How to display chapters in TUI mode
+# Use %d to specify chapter number and %s to specify chapter title
+chapter_name_template = "[%d] %s"
+
+# Fullscreen mode 
 fullscreen = true
 
-# Input prompt icon
+# Input prompt symbol
 prompt = ">"
 
 # Input placeholder
@@ -92,7 +121,7 @@ placeholder = "What shall we look for?"
 mark = "▼"
 
 # Search window title
-title = "` + Mangal + `"
+title = "Mangal"
 
 [sources]
 [sources.manganelo]
@@ -163,7 +192,7 @@ func GetConfig(path string) *Config {
 	}
 
 	// Parse config
-	config, err := ParseConfig(string(contents))
+	config, err := ParseConfig(contents)
 	if err != nil {
 		return DefaultConfig()
 	}
@@ -172,24 +201,31 @@ func GetConfig(path string) *Config {
 }
 
 // ParseConfig parses config from given string
-func ParseConfig(configString string) (*Config, error) {
+func ParseConfig(configString []byte) (*Config, error) {
 	// tempConfig is a temporary config that will be used to store parsed config
 	type tempConfig struct {
-		Use             []string
-		Format          string
-		UI              UI     `toml:"ui"`
-		UseCustomReader bool   `toml:"use_custom_reader"`
-		CustomReader    string `toml:"custom_reader"`
-		Path            string `toml:"download_path"`
-		CacheImages     bool   `toml:"cache_images"`
-		Sources         map[string]Source
+		Use                 []string
+		Format              string
+		UI                  UI     `toml:"ui"`
+		UseCustomReader     bool   `toml:"use_custom_reader"`
+		CustomReader        string `toml:"custom_reader"`
+		Path                string `toml:"download_path"`
+		CacheImages         bool   `toml:"cache_images"`
+		Sources             map[string]Source
+		ChapterNameTemplate string `toml:"chapter_name_template"`
+		Anilist             struct {
+			Enabled        bool   `toml:"enabled"`
+			ID             string `toml:"id"`
+			Secret         string `toml:"secret"`
+			MarkDownloaded bool   `toml:"mark_downloaded"`
+		}
 	}
 
 	var (
 		tempConf tempConfig
 		conf     Config
 	)
-	_, err := toml.Decode(configString, &tempConf)
+	err := toml.Unmarshal(configString, &tempConf)
 
 	if err != nil {
 		return nil, err
@@ -206,7 +242,7 @@ func ParseConfig(configString string) (*Config, error) {
 
 		// Create scraper
 		source.Name = sourceName
-		scraper := MakeSourceScraper(source)
+		scraper := MakeSourceScraper(&source)
 
 		if !conf.CacheImages {
 			scraper.FilesCollector.CacheDir = ""
@@ -215,7 +251,12 @@ func ParseConfig(configString string) (*Config, error) {
 		conf.Scrapers = append(conf.Scrapers, scraper)
 	}
 
+	if tempConf.UI.ChapterNameTemplate == "" {
+		tempConf.UI.ChapterNameTemplate = "[%d] %s"
+	}
+
 	conf.UI = tempConf.UI
+
 	conf.Path = tempConf.Path
 
 	// Default format is pdf
@@ -224,11 +265,63 @@ func ParseConfig(configString string) (*Config, error) {
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
 
+	if template := tempConf.ChapterNameTemplate; template != "" {
+		conf.ChapterNameTemplate = template
+	} else {
+		conf.ChapterNameTemplate = "[%0d] %s"
+	}
+
+	if tempConf.Anilist.Enabled {
+		id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret
+		conf.Anilist.Client, err = NewAnilistClient(id, secret)
+
+		if err != nil {
+			return nil, err
+		}
+
+		conf.Anilist.Enabled = true
+		conf.Anilist.MarkDownloaded = tempConf.Anilist.MarkDownloaded
+	}
+
 	return &conf, err
 }
 
 // ValidateConfig checks if config is valid and returns error if it is not
 func ValidateConfig(config *Config) error {
+	// check if any source is used
+	if len(config.Scrapers) == 0 {
+		return errors.New("no manga sources listed")
+	}
+
+	// check if chapter name template is valid
+	// chapter name template should contain %d or %s placeholder
+	validateChapterNameTemplate := func(template string) error {
+		if !strings.Contains(template, "%d") &&
+			!strings.Contains(template, "%s") &&
+			!strings.Contains(template, "%0d") {
+			return errors.New("chapter name template should contain at least one %d, %0d or %s placeholder")
+		}
+		return nil
+	}
+
+	err := validateChapterNameTemplate(config.ChapterNameTemplate)
+	if err != nil {
+		return err
+	}
+
+	err = validateChapterNameTemplate(config.UI.ChapterNameTemplate)
+	if err != nil {
+		return err
+	}
+
+	// check if anilist is properly configured
+	if config.Anilist.Enabled {
+		if config.Anilist.Client.ID == "" || config.Anilist.Client.Secret == "" {
+			return errors.New("anilist is enabled but id or secret is not set")
+		}
+	}
+
+	// check if custom reader is properly configured
 	if config.UseCustomReader && config.CustomReader == "" {
 		return errors.New("use_custom_reader is set to true but reader isn't specified")
 	}

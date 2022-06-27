@@ -3,13 +3,14 @@ module github.com/metafates/mangal
 go 1.18
 
 require (
-	github.com/BurntSushi/toml v1.1.0
 	github.com/bmaupin/go-epub v1.0.0
 	github.com/charmbracelet/bubbles v0.10.3
 	github.com/charmbracelet/bubbletea v0.19.3
 	github.com/charmbracelet/lipgloss v0.4.0
 	github.com/gocolly/colly v1.2.0
+	github.com/ka-weihe/fast-levenshtein v0.0.0-20201227151214-4c99ee36a1ba
 	github.com/pdfcpu/pdfcpu v0.3.13
+	github.com/pelletier/go-toml/v2 v2.0.2
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/afero v1.8.2
 	github.com/spf13/cobra v1.4.0

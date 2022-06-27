@@ -1,8 +1,13 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"golang.org/x/exp/constraints"
+	"io"
+	"net/http"
 	"os"
+	"regexp"
 )
 
 // IfElse is a ternary operator equavlient
@@ -121,4 +126,58 @@ func Map[T, G any](list []T, f func(T) G) []G {
 	}
 
 	return mapped
+}
+
+// ToString converts any type to string
+// 	Example: ToString(1) => "1"
+func ToString[T any](v T) string {
+	return fmt.Sprintf("%v", v)
+}
+
+// FetchLatestVersion fetches the latest version tag of the app from the GitHub releases
+// 	Example: FetchLatestVersion() => "1.0.0"
+func FetchLatestVersion() (string, error) {
+	resp, err := http.Get("https://api.github.com/repos/metafates/mangal/releases/latest")
+	if err != nil {
+		return "", err
+	}
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
+
+	var release struct {
+		TagName string `json:"tag_name"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return "", err
+	}
+
+	// remove the v from the tag name
+	return release.TagName[1:], nil
+}
+
+// SanitizeFilename will remove all invalid characters from a path.
+func SanitizeFilename(filename string) string {
+
+	const forbiddenChars = `\\/<>:"|?* `
+
+	// replace all forbidden characters with underscore using regex
+	filename = regexp.MustCompile(`[`+forbiddenChars+`]`).ReplaceAllString(filename, "_")
+
+	// remove all double underscores
+	filename = regexp.MustCompile(`__+`).ReplaceAllString(filename, "_")
+
+	// remove all leading and trailing underscores
+	filename = regexp.MustCompile(`^_+|_+$`).ReplaceAllString(filename, "")
+
+	// remove all leading and trailing dots
+	filename = regexp.MustCompile(`^\.+|\.+$`).ReplaceAllString(filename, "")
+
+	return filename
+}
+
+// PadZeros pads a number with zeros to a certain length
+func PadZeros(n int, width int) string {
+	return fmt.Sprintf("%0*d", width, n)
 }

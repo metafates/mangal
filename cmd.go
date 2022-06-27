@@ -1,19 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
-	"io"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
@@ -25,14 +24,17 @@ var rootCmd = &cobra.Command{
 The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
+		incognito, _ := cmd.Flags().GetBool("incognito")
 		initConfig(config)
+
+		if !incognito {
+			initAnilist()
+		} else {
+			UserConfig.Anilist.Enabled = false
+		}
 
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
 			UserConfig.Format = FormatType(format)
-		}
-
-		if err := ValidateConfig(UserConfig); err != nil {
-			log.Fatal(err)
 		}
 
 		var program *tea.Program
@@ -40,6 +42,7 @@ The ultimate CLI manga downloader`,
 		if UserConfig.UI.Fullscreen {
 			program = tea.NewProgram(NewBubble(searchState), tea.WithAltScreen())
 		} else {
+			commonStyle.Margin(1, 1)
 			program = tea.NewProgram(NewBubble(searchState))
 		}
 
@@ -54,7 +57,7 @@ var versionCmd = &cobra.Command{
 	Short: "Show version",
 	Long:  fmt.Sprintf("Shows %s versions and build date", Mangal),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", Mangal, accentStyle.Render(version))
+		fmt.Printf("%s version %s\n", Mangal, accentStyle.Render(Version))
 	},
 }
 
@@ -69,6 +72,44 @@ var cleanupCmd = &cobra.Command{
 		bytes += b
 
 		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupAnilistCmd = &cobra.Command{
+	Use:   "anilist",
+	Short: "Remove Anilist cache",
+	Run: func(cmd *cobra.Command, args []string) {
+		// get config dir
+		configDir, err := os.UserConfigDir()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// get anilist file
+		anilistFile := filepath.Join(configDir, Mangal, "anilist.json")
+
+		// check if anilist file exists
+		exists, err := Afero.Exists(anilistFile)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// if anilist file doesn't exist exit
+		if !exists {
+			fmt.Println("Anilist file doesn't exist so nothing to clean up")
+			return
+		}
+
+		// remove anilist file
+		err = Afero.Remove(anilistFile)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Anilist file removed")
 	},
 }
 
@@ -138,13 +179,20 @@ Useful for scripting`,
 // initConfig initializes the config file
 // If the given string is empty, it will use the default config file
 func initConfig(config string) {
-	exists, err := Afero.Exists(config)
-
-	if err != nil {
-		log.Fatal(errors.New("access to config file denied"))
-	}
-
 	if config != "" {
+		// check if config is a TOML file
+		if filepath.Ext(config) != ".toml" {
+			log.Fatal("config file must be a TOML file")
+		}
+
+		// check if config file exists
+		exists, err := Afero.Exists(config)
+
+		if err != nil {
+			log.Fatal(errors.New("access to config file denied"))
+		}
+
+		// if config file doesn't exist raise error
 		config = path.Clean(config)
 		if !exists {
 			log.Fatal(errors.New(fmt.Sprintf("config at path %s doesn't exist", config)))
@@ -152,7 +200,50 @@ func initConfig(config string) {
 
 		UserConfig = GetConfig(config)
 	} else {
-		UserConfig = GetConfig("") // get config from default config path
+		// if config path is empty, use default config file
+		UserConfig = GetConfig("")
+	}
+
+	// check if config file is valid
+	err := ValidateConfig(UserConfig)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initAnilist() {
+	if UserConfig == nil {
+		log.Fatal("config is not initialized")
+	}
+
+	// check if anilist is enabled and token is expired
+	if UserConfig.Anilist.Enabled && UserConfig.Anilist.Client.IsExpired() {
+		fmt.Println("You are seeing this because you have enabled Anilist integration")
+		fmt.Println()
+		fmt.Printf("Anilist token is expired, press %s to open anilist page with a new token\n", accentStyle.Render("enter"))
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		fmt.Println("Opening Anilist page...")
+		err := open.Run(UserConfig.Anilist.Client.AuthURL())
+
+		if err != nil {
+			fmt.Println("Something went wrong, please copy the url below manually")
+			fmt.Println(accentStyle.Render(UserConfig.Anilist.Client.AuthURL()))
+		}
+
+		// wait for user to input token
+		fmt.Println()
+		fmt.Print("Enter token: ")
+
+		if scanner.Scan() {
+			token := scanner.Text()
+			if err := UserConfig.Anilist.Client.Login(token); err != nil {
+				log.Fatal("could not login to Anilist. Are you using the correct token?")
+			}
+		} else {
+			log.Fatal("could not read token")
+		}
 	}
 }
 
@@ -192,6 +283,7 @@ var configWhereCmd = &cobra.Command{
 var configPreviewCmd = &cobra.Command{
 	Use:   "preview",
 	Short: "Preview current config",
+	Long:  "Preview current config.\nIt will use `bat` to preview the config file if possible",
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath, err := GetConfigPath()
 
@@ -202,11 +294,31 @@ var configPreviewCmd = &cobra.Command{
 		exists, err := Afero.Exists(configPath)
 
 		if err != nil {
-			log.Fatalf("Permission to config file was denied")
+			log.Fatal("Permission to config file was denied")
 		}
 
 		if !exists {
 			log.Fatal("Config doesn't exist")
+		}
+
+		// check if bat command is installed
+		_, err = exec.LookPath("bat")
+		if err == nil {
+			cmd := exec.Command("bat", "-l", "toml", configPath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err = cmd.Run()
+			return
+		}
+
+		// check if less command is installed
+		_, err = exec.LookPath("less")
+		if err == nil {
+			cmd := exec.Command("less", configPath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err = cmd.Run()
+			return
 		}
 
 		contents, err := Afero.ReadFile(configPath)
@@ -280,21 +392,6 @@ var configInitCmd = &cobra.Command{
 	},
 }
 
-var configTestCmd = &cobra.Command{
-	Use:   "test",
-	Short: "Test user config for any errors",
-	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := cmd.Flags().GetString("config")
-		initConfig(config)
-
-		if err := ValidateConfig(UserConfig); err != nil {
-			log.Fatal(err)
-		} else {
-			fmt.Println(successStyle.Render("Everything is OK"))
-		}
-	},
-}
-
 var formatsCmd = &cobra.Command{
 	Use:   "formats",
 	Short: "Information about available formats",
@@ -307,49 +404,21 @@ var formatsCmd = &cobra.Command{
 	},
 }
 
-var checkUpdateCmd = &cobra.Command{
-	Use:   "check-update",
-	Short: "Check if new version is available",
-	Long:  "Fethces latest version of the program from github and compares it with current version",
+var latestCmd = &cobra.Command{
+	Use:   "latest",
+	Short: fmt.Sprintf("Check if latest version of %s is used", Mangal),
+	Long:  "Fetches the latest version from the GitHub and compares it with current version",
 	Run: func(cmd *cobra.Command, args []string) {
-		const githubReleaseURL = "https://github.com/metafates/mangal/releases"
+		const githubReleaseURL = "https://github.com/metafates/mangal/releases/latest"
 
-		resp, err := http.Get(githubReleaseURL)
-		if err != nil {
-			log.Fatal(err)
-		}
+		latestVersion, err := FetchLatestVersion()
 
-		defer func(Body io.ReadCloser) {
-			_ = Body.Close()
-		}(resp.Body)
-
-		doc, err := goquery.NewDocumentFromReader(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		var latestVersion string
-
-		// compile regex for tag
-		re := regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
-
-		// get latest release tag
-		doc.Find("a > div > span").Each(func(_ int, s *goquery.Selection) {
-			var tag = strings.TrimSpace(s.Text())
-
-			// check if latestVersion matches tag regex and set it if it does (only if it is not set yet)
-			if re.MatchString(tag) && latestVersion == "" {
-				// remove "v" from tag
-				latestVersion = strings.TrimPrefix(tag, "v")
-			}
-		})
-
-		if latestVersion == "" {
+		if err != nil || latestVersion == "" {
 			log.Fatalf("Can't find latest version\nYou can visit %s to check for updates", githubReleaseURL)
 		}
 
 		// check if current version is latest
-		if latestVersion == version {
+		if latestVersion <= Version {
 			fmt.Printf("You are using the latest version of %s\n", Mangal)
 		} else {
 			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
@@ -359,12 +428,144 @@ var checkUpdateCmd = &cobra.Command{
 	},
 }
 
-// CmdExecute adds all subcommands to the root command and executes it
-func CmdExecute() {
+var doctorCmd = &cobra.Command{
+	Use:   "doctor",
+	Short: "Run this in case of any errors",
+	Long: `Check if ` + Mangal + ` is properly configured.
+It checks if config file is valid and used sources are available`,
+	Run: func(cmd *cobra.Command, args []string) {
+		var (
+			ok = func() {
+				fmt.Print(successStyle.Render("OK"))
+				fmt.Println()
+			}
+
+			fail = func() {
+				fmt.Print(failStyle.Render("Fail"))
+				fmt.Println()
+			}
+		)
+
+		fmt.Print("Checking if latest version is used... ")
+		latestVersion, err := FetchLatestVersion()
+		if err != nil {
+			fail()
+			fmt.Printf("Can't find latest version\nRun %s to get more information\n", accentStyle.Render("mangal latest"))
+			os.Exit(1)
+		} else if latestVersion > Version {
+			fail()
+			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
+			fmt.Printf("Run %s to get more information\n", accentStyle.Render("mangal latest"))
+			os.Exit(1)
+		} else {
+			ok()
+		}
+
+		fmt.Print("Checking config... ")
+		UserConfig = GetConfig("")
+
+		err = ValidateConfig(UserConfig)
+		if err != nil {
+			fail()
+			fmt.Printf("Config error: %s\n", err)
+			os.Exit(1)
+		}
+
+		ok()
+
+		var sourceNotAvailable = func(source *Source) {
+			fail()
+			fmt.Printf("Source %s is not available\n", source.Name)
+			fmt.Printf("Try to reinitialize your config with %s\n", accentStyle.Render("mangal config init --force"))
+			fmt.Println("Note, that this will overwrite your current config")
+			os.Exit(1)
+		}
+
+		scanner := bufio.NewScanner(os.Stdin)
+
+		// check if scraper sources are online
+		for _, scraper := range UserConfig.Scrapers {
+			source := scraper.Source
+
+			// read line from stdin
+			fmt.Printf("Please, enter a manga title to test %s: ", source.Name)
+			scanner.Scan()
+
+			if scanner.Err() != nil {
+				fail()
+				fmt.Printf("Error while reading from stdin: %s\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Printf("Checking source %s... ", source.Name)
+			resp, err := http.Get(source.Base)
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			_ = resp.Body.Close()
+
+			// check if response is 200
+			if resp.StatusCode != 200 {
+				sourceNotAvailable(source)
+			}
+
+			// try to get any manga page using scraper
+			manga, err := scraper.SearchManga(scanner.Text())
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			// check if manga is not empty
+			if len(manga) == 0 {
+				sourceNotAvailable(source)
+			}
+
+			// get chapters for first manga
+			chapters, err := scraper.GetChapters(manga[0])
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			// check if chapters is not empty
+			if len(chapters) == 0 {
+				sourceNotAvailable(source)
+			}
+
+			// get pages for first chapter
+			pages, err := scraper.GetPages(chapters[0])
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			// check if pages is not empty
+			if len(pages) == 0 {
+				sourceNotAvailable(source)
+			}
+
+			// try to download first page
+			image, err := scraper.GetFile(pages[0])
+			if err != nil {
+				sourceNotAvailable(source)
+			}
+
+			// check if images is not empty
+			if len(*image) == 0 {
+				sourceNotAvailable(source)
+			}
+
+			ok()
+		}
+	},
+}
+
+// Adds all child commands to the root command and sets flags appropriately.
+func init() {
 	rootCmd.AddCommand(versionCmd)
 
 	cleanupCmd.AddCommand(cleanupTempCmd)
 	cleanupCmd.AddCommand(cleanupCacheCmd)
+	cleanupCmd.AddCommand(cleanupAnilistCmd)
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)
@@ -373,8 +574,6 @@ func CmdExecute() {
 	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
 	configCmd.AddCommand(configInitCmd)
 
-	configTestCmd.Flags().StringP("config", "c", "", "use config from path")
-	configCmd.AddCommand(configTestCmd)
 	rootCmd.AddCommand(configCmd)
 
 	inlineCmd.Flags().Int("manga", -1, "choose manga by index")
@@ -392,9 +591,14 @@ func CmdExecute() {
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 	rootCmd.Flags().StringP("format", "f", "", "use custom format")
+	rootCmd.Flags().BoolP("incognito", "i", false, "will not sync with anilist even if enabled")
 
 	rootCmd.AddCommand(formatsCmd)
-	rootCmd.AddCommand(checkUpdateCmd)
+	rootCmd.AddCommand(latestCmd)
+	rootCmd.AddCommand(doctorCmd)
+}
 
+// CmdExecute executes root command
+func CmdExecute() {
 	_ = rootCmd.Execute()
 }

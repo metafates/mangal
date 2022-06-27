@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -80,7 +80,7 @@ type ChapterDownloadProgress struct {
 
 // DownloadChapter downloads chapter from the given url and returns its path
 func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp bool) (string, error) {
-	mangaTitle := chapter.Relation.Info
+	mangaTitle := SanitizeFilename(chapter.Relation.Info)
 	var (
 		mangaPath string
 		err       error
@@ -108,27 +108,22 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		}
 	}
 
-	var chapterPath string
+	// replace all placeholders with actual values
+	var chapterName string
+
+	// Why pad with 5 zeros? Because there are no manga with more than 9999 chapters
+	// Actually, the longest manga has only 1960 chapters (Kochira Katsushika-ku Kameari Kōen-mae Hashutsujo)
+	chapterName = strings.ReplaceAll(UserConfig.ChapterNameTemplate, "%0d", PadZeros(chapter.Index, 4))
+	chapterName = strings.ReplaceAll(chapterName, "%d", strconv.Itoa(chapter.Index))
+	chapterName = strings.ReplaceAll(chapterName, "%s", chapter.Info)
+	chapterName = SanitizeFilename(chapterName)
+
 	// Get future path to chapter
+	var chapterPath string
 	if temp {
-		chapterPath = filepath.Join(mangaPath, fmt.Sprintf(TempPrefix+" [%d] %s", chapter.Index, chapter.Info))
+		chapterPath = filepath.Join(mangaPath, TempPrefix+" "+chapterName)
 	} else {
-		chapterPath = filepath.Join(mangaPath, fmt.Sprintf("[%d] %s", chapter.Index, chapter.Info))
-	}
-
-	// Replace whitespaces with underscore and colon with unicode colon
-	// Windows is very bad at escaping whitespaces, so have to use this workaround
-	if runtime.GOOS == "windows" {
-		chapterPath = strings.ReplaceAll(chapterPath, " ", "-")
-
-		volumeName := filepath.VolumeName(chapterPath)
-		if strings.Contains(volumeName, ":") {
-			chapterPath = strings.ReplaceAll(chapterPath, ":", "-")
-			// Return to original volume name
-			chapterPath = strings.Replace(chapterPath, "-", ":", 1)
-		} else {
-			chapterPath = strings.ReplaceAll(chapterPath, ":", "-") // Unicode U+A789
-		}
+		chapterPath = filepath.Join(mangaPath, chapterName)
 	}
 
 	// Get chapter contents
