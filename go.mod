@@ -6,7 +6,7 @@ require (
 	github.com/bmaupin/go-epub v1.0.0
 	github.com/charmbracelet/bubbles v0.10.3
 	github.com/charmbracelet/bubbletea v0.19.3
-	github.com/charmbracelet/lipgloss v0.4.0
+	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/gocolly/colly v1.2.0
 	github.com/ka-weihe/fast-levenshtein v0.0.0-20201227151214-4c99ee36a1ba
 	github.com/pdfcpu/pdfcpu v0.3.13
@@ -37,11 +37,11 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/muesli/ansi v0.0.0-20211018074035-2e021307bc4b // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
-	github.com/muesli/termenv v0.9.0 // indirect
+	github.com/muesli/termenv v0.11.1-0.20220204035834-5ac8409525e0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sahilm/fuzzy v0.1.0 // indirect
