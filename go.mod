@@ -3,7 +3,7 @@ module github.com/metafates/mangal
 go 1.18
 
 require (
-	github.com/bmaupin/go-epub v1.0.0
+	github.com/bmaupin/go-epub v1.0.1
 	github.com/charmbracelet/bubbles v0.10.3
 	github.com/charmbracelet/bubbletea v0.19.3
 	github.com/charmbracelet/lipgloss v0.4.0
