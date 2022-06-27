@@ -21,10 +21,6 @@ import (
 	"sync"
 )
 
-/*
-Styles
-*/
-
 var (
 	commonStyle         = lipgloss.NewStyle().Margin(2, 2)
 	accentStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
