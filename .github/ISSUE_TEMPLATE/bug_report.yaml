@@ -46,7 +46,7 @@ body:
     attributes:
       label: Checks
       options:
-        - label: "I'm using the latest version of Mangal"
+        - label: "I've used `mangal doctor` and it didn't help"
           required: true
   - type: markdown
     attributes:
