@@ -392,9 +392,9 @@ func (a *AnilistClient) MarkChapter(manga *URL, chapter int) error {
 	// decode response
 	var response struct {
 		Data struct {
-			MediaChapterUpdate struct {
+			SaveMediaListEntry struct {
 				ID int `json:"id"`
-			} `json:"MediaChapterUpdate"`
+			} `json:"SaveMediaListEntry"`
 		} `json:"data"`
 	}
 
