@@ -194,7 +194,7 @@ func addFileToZip(zipWriter *zip.Writer, filename string, index int) error {
 	}
 
 	// Set the desired header name
-	header.Name = strconv.Itoa(index) + filepath.Ext(header.Name)
+	header.Name = PadZeros(index, 4) + filepath.Ext(header.Name)
 
 	// Change to deflate to gain better compression
 	// see http://golang.org/pkg/archive/zip/#pkg-constants
@@ -223,7 +223,7 @@ func PackToPlain(images []string, destination string) (string, error) {
 		}
 
 		if err = Afero.WriteFile(
-			filepath.Join(destination, strconv.Itoa(i)+filepath.Ext(image)),
+			filepath.Join(destination, PadZeros(i, 4)+filepath.Ext(image)),
 			imageContents,
 			0700,
 		); err != nil {

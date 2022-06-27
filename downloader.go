@@ -111,7 +111,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	// replace all placeholders with actual values
 	var chapterName string
 
-	// Why pad with 5 zeros? Because there are no manga with more than 9999 chapters
+	// Why pad with 4 zeros? Because there are no manga with more than 9999 chapters
 	// Actually, the longest manga has only 1960 chapters (Kochira Katsushika-ku Kameari Kōen-mae Hashutsujo)
 	chapterName = strings.ReplaceAll(UserConfig.ChapterNameTemplate, "%0d", PadZeros(chapter.Index, 4))
 	chapterName = strings.ReplaceAll(chapterName, "%d", strconv.Itoa(chapter.Index))
