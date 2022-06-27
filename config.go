@@ -81,7 +81,7 @@ download_path = '.'
 
 # How chapters should be named when downloaded
 # Use %d to specify chapter number and %s to specify chapter title
-# If you want to pad chpater number with zeros for natural sorting (e.g. 0001, 0123) use %0d
+# If you want to pad chapter number with zeros for natural sorting (e.g. 0001, 0123) use %0d instead of %d
 chapter_name_template = "[%0d] %s"
 
 # Add images to cache

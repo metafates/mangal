@@ -31,7 +31,7 @@ https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-
 
 ## About
 
-✨ __Mangal__ is feature rich, configurable manga browser & downloader
+✨ __Mangal__ is a feature rich, configurable manga browser & downloader
 written in Go with support for different formats
 
 ⚙️ One of the most important features of Mangal is that it supports user defined scrapers
@@ -39,17 +39,17 @@ that can be added with just a few lines of config file (see [config](#config) & 
 
 🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate with scripts
 
-🍥 Integration with Anilist! (BETA)
+🍥 Integration with Anilist! __BETA__
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
 
 
 Currently, Mangal supports these formats
 - PDF
-- Epub
+- ePub
 - CBZ
-- Zip
-- Plain (just images)
+- ZIP
+- Plain
 
 > Type `mangal formats` for more info
 
@@ -126,7 +126,7 @@ download_path = '.'
 
 # How chapters should be named when downloaded
 # Use %d to specify chapter number and %s to specify chapter title
-# If you want to pad chpater number with zeros for natural sorting (e.g. 0001, 0123) use %0d
+# If you want to pad chapter number with zeros for natural sorting (e.g. 0001, 0123) use %0d instead of %d
 chapter_name_template = "[%0d] %s"
 
 # Add images to cache
@@ -249,6 +249,8 @@ You will need [Go installed](https://go.dev/doc/install)
 go install -ldflags="-s -w" github.com/metafates/mangal@latest
 ```
 
+> `-ldflags="-s -w"` - just makes the binary smaller
+
 <details>
 <summary>Update / Uninstall</summary>
 
@@ -354,7 +356,8 @@ Docker image is available at [Docker Hub](https://hub.docker.com/repository/dock
 You can run it by using
 
 ```bash
-docker run --rm -ti -v $(PWD)/downloads:/config mangal
+docker pull metafates/mangal
+docker run --rm -ti -v $(PWD)/downloads:/config metafates/mangal
 ```
 
 This will create downloads directory in the current directory and will download manga to it
@@ -366,9 +369,6 @@ git clone https://github.com/metafates/mangal.git
 cd mangal
 go build -ldflags="-s -w"
 ```
-
-
-
 
 > You can also cross build for windows, linux & macos
 > by running `cross-compile.py` (you will need Python 3)
@@ -394,13 +394,10 @@ there exist some (serious) limitations to which sites could be added
 
 Some sites that work well
 
+- https://m.manganelo.com
 - https://manganato.com
-- https://ww3.mangakakalot.tv
-- https://ww5.manganelo.tv
 
-
-I'm planning to make a more advanced scraper creation system
-to overcome this roadblocks somewhere in the future
+See [examples of scrapers](https://github.com/metafates/mangal/discussions/7)
 
 ---
 
