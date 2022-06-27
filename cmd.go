@@ -596,11 +596,20 @@ func init() {
 	inlineCmd.Flags().BoolP("open", "o", false, "open url")
 	inlineCmd.Flags().StringP("config", "c", "", "use config from path")
 	inlineCmd.Flags().SortFlags = false
+	_ = inlineCmd.MarkFlagRequired("query")
+	_ = inlineCmd.MarkFlagFilename("config", "toml")
+	_ = inlineCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return Map(AvailableFormats, ToString[FormatType]), cobra.ShellCompDirectiveDefault
+	})
 	rootCmd.AddCommand(inlineCmd)
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 	rootCmd.Flags().StringP("format", "f", "", "use custom format")
 	rootCmd.Flags().BoolP("incognito", "i", false, "will not sync with anilist even if enabled")
+	_ = rootCmd.MarkFlagFilename("config", "toml")
+	_ = rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return Map(AvailableFormats, ToString[FormatType]), cobra.ShellCompDirectiveDefault
+	})
 
 	rootCmd.AddCommand(formatsCmd)
 	rootCmd.AddCommand(latestCmd)
