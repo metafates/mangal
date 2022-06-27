@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 TAG = f"v{VERSION}"
 DESCRIPTION = "The ultimate CLI manga downloader"
 GITHUB = "https://github.com/metafates/mangal"
@@ -270,19 +270,32 @@ def generate_docker_image():
     docker_image = f"""
 FROM alpine:latest
 
-ENV VERSION=v1.5.2
+ENV USER=abc
+ENV UID=1000
+ENV GID=1000
 
-ADD {GITHUB}/releases/download/{TAG}/{BIN}-linux-amd64 /usr/local/bin/{BIN}
-
-RUN chmod +x /usr/local/bin/{BIN}
+ENV XDG_CONFIG_HOME=/config
 
 WORKDIR /config
 
 VOLUME /config
 
-ENV XDG_CONFIG_HOME=/config
+RUN addgroup -g "$GID" "$USER"
 
-RUN /usr/local/bin/{BIN} config init
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "$(pwd)" \
+    --ingroup "$USER" \
+    --no-create-home \
+    --uid "$UID" \
+    "$USER"
+
+ADD {GITHUB}/releases/download/{TAG}/{BIN}-linux-amd64 /usr/local/bin/{BIN}
+
+RUN chmod +x /usr/local/bin/{BIN}
+
+USER abc
 
 ENTRYPOINT ["/usr/local/bin/{BIN}"]
 """

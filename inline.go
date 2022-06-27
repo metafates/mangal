@@ -24,13 +24,11 @@ type InlineOptions struct {
 // InlineMode provides all functionality of TUI but in inline mode
 // TODO: split into subfunctions
 func InlineMode(query string, options InlineOptions) (string, error) {
-	initConfig(options.config)
+	initConfig(options.config, false)
 
-	defer func() {
-		if !options.asTemp {
-			RemoveTemp()
-		}
-	}()
+	if !options.asTemp {
+		defer RemoveTemp()
+	}
 
 	if options.format != "" {
 		UserConfig.Format = options.format
