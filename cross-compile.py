@@ -270,8 +270,6 @@ def generate_docker_image():
     docker_image = f"""
 FROM alpine:latest
 
-ENV VERSION=v1.5.2
-
 ADD {GITHUB}/releases/download/{TAG}/{BIN}-linux-amd64 /usr/local/bin/{BIN}
 
 RUN chmod +x /usr/local/bin/{BIN}

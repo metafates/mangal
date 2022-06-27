@@ -25,7 +25,7 @@ The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
 		incognito, _ := cmd.Flags().GetBool("incognito")
-		initConfig(config)
+		initConfig(config, false)
 
 		if !incognito {
 			initAnilist()
@@ -35,6 +35,11 @@ The ultimate CLI manga downloader`,
 
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
 			UserConfig.Format = FormatType(format)
+		}
+
+		err := ValidateConfig(UserConfig)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		var program *tea.Program
@@ -178,7 +183,7 @@ Useful for scripting`,
 
 // initConfig initializes the config file
 // If the given string is empty, it will use the default config file
-func initConfig(config string) {
+func initConfig(config string, validate bool) {
 	if config != "" {
 		// check if config is a TOML file
 		if filepath.Ext(config) != ".toml" {
@@ -202,6 +207,10 @@ func initConfig(config string) {
 	} else {
 		// if config path is empty, use default config file
 		UserConfig = GetConfig("")
+	}
+
+	if !validate {
+		return
 	}
 
 	// check if config file is valid
