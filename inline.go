@@ -26,11 +26,9 @@ type InlineOptions struct {
 func InlineMode(query string, options InlineOptions) (string, error) {
 	initConfig(options.config, false)
 
-	defer func() {
-		if !options.asTemp {
-			RemoveTemp()
-		}
-	}()
+	if !options.asTemp {
+		defer RemoveTemp()
+	}
 
 	if options.format != "" {
 		UserConfig.Format = options.format
