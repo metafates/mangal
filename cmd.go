@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
@@ -87,53 +86,30 @@ var cleanupAnilistCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		// get config file
-		configFile := filepath.Join(configDir, Mangal, "anilist.json")
+		// get anilist file
+		anilistFile := filepath.Join(configDir, Mangal, "anilist.json")
 
-		// check if config file exists
-		exists, err := Afero.Exists(configFile)
+		// check if anilist file exists
+		exists, err := Afero.Exists(anilistFile)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// if config file doesn't exist exit
+		// if anilist file doesn't exist exit
 		if !exists {
 			fmt.Println("Anilist file doesn't exist so nothing to clean up")
 			return
 		}
 
-		// decode json
-		config, err := Afero.ReadFile(configFile)
+		// remove anilist file
+		err = Afero.Remove(anilistFile)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		var preferences AnilistPreferences
-		err = json.Unmarshal(config, &preferences)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		preferences.Connections = make(map[string]*AnilistURL)
-
-		// encode json
-		encoded, err := json.Marshal(preferences)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// write json to file
-		err = Afero.WriteFile(configFile, encoded, 0777)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println("Anilist cache removed")
+		fmt.Println("Anilist file removed")
 	},
 }
 
@@ -431,7 +407,7 @@ var formatsCmd = &cobra.Command{
 var latestCmd = &cobra.Command{
 	Use:   "latest",
 	Short: fmt.Sprintf("Check if latest version of %s is used", Mangal),
-	Long:  "Fethces latest version of the program from github and compares it with current version",
+	Long:  "Fetches the latest version from the GitHub and compares it with current version",
 	Run: func(cmd *cobra.Command, args []string) {
 		const githubReleaseURL = "https://github.com/metafates/mangal/releases/latest"
 

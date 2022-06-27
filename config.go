@@ -295,7 +295,7 @@ func ValidateConfig(config *Config) error {
 
 	// check if chapter name template is valid
 	// chapter name template should contain %d or %s placeholder
-	chapterNameTemplateValidaor := func(template string) error {
+	validateChapterNameTemplate := func(template string) error {
 		if !strings.Contains(template, "%d") &&
 			!strings.Contains(template, "%s") &&
 			!strings.Contains(template, "%0d") {
@@ -304,12 +304,12 @@ func ValidateConfig(config *Config) error {
 		return nil
 	}
 
-	err := chapterNameTemplateValidaor(config.ChapterNameTemplate)
+	err := validateChapterNameTemplate(config.ChapterNameTemplate)
 	if err != nil {
 		return err
 	}
 
-	err = chapterNameTemplateValidaor(config.UI.ChapterNameTemplate)
+	err = validateChapterNameTemplate(config.UI.ChapterNameTemplate)
 	if err != nil {
 		return err
 	}
