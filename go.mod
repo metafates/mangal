@@ -13,7 +13,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.2
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/afero v1.8.2
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf
 	golang.org/x/term v0.0.0-20210422114643-f5beecf764ed
 )
