@@ -114,15 +114,26 @@ By default, Mangal uses [manganelo](https://m.manganelo.com/www) as a source
 # Which sources to use. You can use several sources, it won't affect perfomance
 use = ['manganelo']
 
-# Type "mangal formats" to show more information about formats
-format = "pdf"
-
 # If false, then OS default reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
 
+
+
+
+[formats]
+# Type "mangal formats" to show more information about formats
+default = "pdf"
+
+# Add ComicInfo.xml to CBZ files
+comicinfo = true
+
+
+
+
+[downloader]
 # Custom download path, can be either relative (to the current directory) or absolute
-download_path = '.'
+path = '.'
 
 # How chapters should be named when downloaded
 # Use %d to specify chapter number and %s to specify chapter title
@@ -133,6 +144,9 @@ chapter_name_template = "[%0d] %s"
 # If set to true mangal could crash when trying to redownload something quickly
 # Usually happens on slow machines
 cache_images = false
+
+
+
 
 [anilist]
 # Enable Anilist integration (BETA)
@@ -147,6 +161,9 @@ secret = ""
 
 # Will mark downloaded chapters as read on Anilist
 mark_downloaded = false
+
+
+
 
 [ui]
 # How to display chapters in TUI mode
@@ -167,6 +184,9 @@ mark = "▼"
 
 # Search window title
 title = "Mangal"
+
+
+
 
 [sources]
 [sources.manganelo]

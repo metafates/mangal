@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -363,6 +364,7 @@ var configInitCmd = &cobra.Command{
 	Long:  "Init default config at the default location.\nIf the config already exists, it will not be overwritten",
 	Run: func(cmd *cobra.Command, args []string) {
 		force, _ := cmd.Flags().GetBool("force")
+		clean, _ := cmd.Flags().GetBool("clean")
 
 		configPath, err := GetConfigPath()
 
@@ -373,11 +375,26 @@ var configInitCmd = &cobra.Command{
 		exists, err := Afero.Exists(configPath)
 
 		var createConfig = func() {
+			var configToWrite string
+
+			if clean {
+				// remove all lines with comments from toml string
+				configToWrite = regexp.MustCompile("\n[^\n]*#.*").ReplaceAllString(DefaultConfigString, "")
+
+				// remove all empty lines from toml string
+				configToWrite = regexp.MustCompile("\n\n+").ReplaceAllString(configToWrite, "\n")
+
+				// insert newline before each section
+				configToWrite = regexp.MustCompile("(?m)^(\\[.*])").ReplaceAllString(configToWrite, "\n$1")
+			} else {
+				configToWrite = DefaultConfigString
+			}
+
 			if err := Afero.MkdirAll(filepath.Dir(configPath), 0700); err != nil {
 				log.Fatal("Error while creating file")
 			} else if file, err := Afero.Create(configPath); err != nil {
 				log.Fatal("Error while creating file")
-			} else if _, err = file.Write([]byte(DefaultConfigString)); err != nil {
+			} else if _, err = file.Write([]byte(configToWrite)); err != nil {
 				log.Fatal("Error while writing to file")
 			} else {
 				fmt.Printf("Config created at\n%s\n", successStyle.Render(configPath))
@@ -397,6 +414,35 @@ var configInitCmd = &cobra.Command{
 			log.Fatalf("Config file already exists. Use %s to overwrite it", accentStyle.Render("--force"))
 		} else {
 			createConfig()
+		}
+	},
+}
+
+var configRemoveCmd = &cobra.Command{
+	Use:   "remove",
+	Short: "Remove config",
+	Long:  "Remove config.\nIf config doesn't exist, it will not be removed",
+	Run: func(cmd *cobra.Command, args []string) {
+		configPath, err := GetConfigPath()
+
+		if err != nil {
+			log.Fatal("Can't get config location, permission denied, probably")
+		}
+
+		exists, err := Afero.Exists(configPath)
+
+		if err != nil {
+			log.Fatalf("Can't understand if config exists or not. It is expected at\n%s\n", configPath)
+		}
+
+		if exists {
+			if err := Afero.Remove(configPath); err != nil {
+				log.Fatal("Error while removing file")
+			} else {
+				fmt.Println("Config removed")
+			}
+		} else {
+			fmt.Println("Config doesn't exist, nothing to remove")
 		}
 	},
 }
@@ -580,9 +626,12 @@ func init() {
 	configCmd.AddCommand(configWhereCmd)
 	configCmd.AddCommand(configPreviewCmd)
 	configCmd.AddCommand(configEditCmd)
-	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
 	configCmd.AddCommand(configInitCmd)
 
+	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
+	configInitCmd.Flags().BoolP("clean", "c", false, "do not add comments and empty lines")
+
+	configCmd.AddCommand(configRemoveCmd)
 	rootCmd.AddCommand(configCmd)
 
 	inlineCmd.Flags().Int("manga", -1, "choose manga by index")
