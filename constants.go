@@ -67,6 +67,8 @@ comicinfo = true
 
 [downloader]
 # Custom download path, can be either relative (to the current directory) or absolute
+# You can use environment variable $HOME to refer to user's home directory
+# If environment variable "MANGAL_DOWNLOAD_PATH" is set, then it will be used instead
 path = '.'
 
 # How chapters should be named when downloaded

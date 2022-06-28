@@ -101,9 +101,8 @@ Config is located at the OS default config directory.
 </details>
 
 
-You can load config from custom path by using `--config` flag
+You can load config from custom path by using `--config` flag or by setting `MANGAL_CONFIG_PATH` environment variable.
 
-`mangal --config /user/configs/config.toml`
 
 By default, Mangal uses [manganelo](https://m.manganelo.com/www) as a source
 
@@ -133,6 +132,8 @@ comicinfo = true
 
 [downloader]
 # Custom download path, can be either relative (to the current directory) or absolute
+# You can use environment variable $HOME to refer to user's home directory
+# If environment variable "MANGAL_DOWNLOAD_PATH" is set, then it will be used instead
 path = '.'
 
 # How chapters should be named when downloaded

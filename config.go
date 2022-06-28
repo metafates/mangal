@@ -57,7 +57,7 @@ type Config struct {
 // GetConfigPath returns path to config file
 func GetConfigPath() (string, error) {
 	// check if env variable MANGAL_CONFIG is set
-	if v, ok := os.LookupEnv("MANGAL_CONFIG"); ok {
+	if v, ok := os.LookupEnv("MANGAL_CONFIG_PATH"); ok {
 		return v, nil
 	}
 
@@ -182,6 +182,14 @@ func ParseConfig(configString []byte) (*Config, error) {
 		conf.Downloader.ChapterNameTemplate = "[%d] %s"
 	}
 
+	if strings.Contains(conf.Downloader.Path, "$HOME") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+		conf.Downloader.Path = strings.ReplaceAll(conf.Downloader.Path, "$HOME", home)
+	}
+
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
 
@@ -198,7 +206,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 	}
 
 	// check if env variable MANGAL_DOWNLOADS is set
-	if v, ok := os.LookupEnv("MANGAL_DOWNLOADS"); ok {
+	if v, ok := os.LookupEnv("MANGAL_DOWNLOAD_PATH"); ok {
 		conf.Downloader.Path = v
 	}
 
