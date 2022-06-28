@@ -88,7 +88,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	if temp {
 		mangaPath = os.TempDir()
 	} else {
-		absPath, err := filepath.Abs(UserConfig.Path)
+		absPath, err := filepath.Abs(UserConfig.Downloader.Path)
 
 		if err != nil {
 			return "", err
@@ -111,7 +111,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 
 	// Why pad with 4 zeros? Because there are no manga with more than 9999 chapters
 	// Actually, the longest manga has only 1960 chapters (Kochira Katsushika-ku Kameari Kōen-mae Hashutsujo)
-	chapterName = strings.ReplaceAll(UserConfig.ChapterNameTemplate, "%0d", PadZeros(chapter.Index, 4))
+	chapterName = strings.ReplaceAll(UserConfig.Downloader.ChapterNameTemplate, "%0d", PadZeros(chapter.Index, 4))
 	chapterName = strings.ReplaceAll(chapterName, "%d", strconv.Itoa(chapter.Index))
 	chapterName = strings.ReplaceAll(chapterName, "%s", chapter.Info)
 	chapterName = SanitizeFilename(chapterName)
@@ -181,7 +181,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	if showProgress {
 		progress <- ChapterDownloadProgress{
 			Stage:   Converting,
-			Message: fmt.Sprintf("Converting %d pages to %s", pagesCount, UserConfig.Format),
+			Message: fmt.Sprintf("Converting %d pages to %s", pagesCount, UserConfig.Formats.Default),
 		}
 	}
 
@@ -190,7 +190,10 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	}
 
 	// Convert pages to desired format
-	chapterPath, err = Packers[UserConfig.Format](buffers, chapterPath)
+	chapterPath, err = Packers[UserConfig.Formats.Default](buffers, chapterPath, &PackerContext{
+		Manga:   chapter.Relation,
+		Chapter: chapter,
+	})
 
 	if err != nil {
 		log.Fatal(err)

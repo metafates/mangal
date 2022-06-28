@@ -34,7 +34,7 @@ The ultimate CLI manga downloader`,
 		}
 
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
-			UserConfig.Format = FormatType(format)
+			UserConfig.Formats.Default = FormatType(format)
 		}
 
 		err := ValidateConfig(UserConfig)
@@ -377,7 +377,7 @@ var configInitCmd = &cobra.Command{
 				log.Fatal("Error while creating file")
 			} else if file, err := Afero.Create(configPath); err != nil {
 				log.Fatal("Error while creating file")
-			} else if _, err = file.Write([]byte(DefaultConfigStr)); err != nil {
+			} else if _, err = file.Write([]byte(DefaultConfigString)); err != nil {
 				log.Fatal("Error while writing to file")
 			} else {
 				fmt.Printf("Config created at\n%s\n", successStyle.Render(configPath))

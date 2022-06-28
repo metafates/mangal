@@ -99,7 +99,7 @@ func (k keyMap) fullHelpFor(state bubbleState) []key.Binding {
 		k.Open.SetHelp("o", "open manga url")
 		return []key.Binding{k.Open, k.Select, k.Back}
 	case chaptersState:
-		k.Read.SetHelp("r", fmt.Sprintf("read chapter in the default %s app", string(UserConfig.Format)))
+		k.Read.SetHelp("r", fmt.Sprintf("read chapter in the default %s app", string(UserConfig.Formats.Default)))
 		k.Open.SetHelp("o", "open chapter url")
 		k.Confirm.SetHelp("enter", "download selected chapters")
 		return []key.Binding{k.Open, k.Read, k.Select, k.SelectAll, k.Confirm, k.Back}

@@ -31,7 +31,7 @@ func InlineMode(query string, options InlineOptions) (string, error) {
 	}
 
 	if options.format != "" {
-		UserConfig.Format = options.format
+		UserConfig.Formats.Default = options.format
 	}
 
 	// Check if config is valid

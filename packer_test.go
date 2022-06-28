@@ -84,7 +84,7 @@ func TestPackToPDF(t *testing.T) {
 	}
 
 	// pack to pdf
-	out, err := PackToPDF(files, TempFile(t, ".pdf"))
+	out, err := PackToPDF(files, TempFile(t, ".pdf"), nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -123,7 +123,7 @@ func TestPackToCBZ(t *testing.T) {
 	}
 
 	// pack to cbz
-	out, err := PackToCBZ(files, TempFile(t, ".cbz"))
+	out, err := PackToCBZ(files, TempFile(t, ".cbz"), nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -161,7 +161,7 @@ func TestPackToEpub(t *testing.T) {
 	}
 
 	// pack to epub
-	out, err := PackToEpub(files, TempFile(t, ".epub"))
+	out, err := PackToEpub(files, TempFile(t, ".epub"), nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -218,7 +218,7 @@ func TestPackToPlain(t *testing.T) {
 	}
 
 	// pack to plain
-	out, err := PackToPlain(files, tempDir)
+	out, err := PackToPlain(files, tempDir, nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -271,7 +271,7 @@ func TestPackToZip(t *testing.T) {
 	}
 
 	// pack to zip
-	out, err := PackToZip(files, TempFile(t, ".zip"))
+	out, err := PackToZip(files, TempFile(t, ".zip"), nil)
 
 	if err != nil {
 		t.Fatal(err)

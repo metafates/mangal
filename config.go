@@ -20,7 +20,7 @@ const (
 	Epub  FormatType = "epub"
 )
 
-type UI struct {
+type UIConfig struct {
 	Fullscreen          bool
 	Prompt              string
 	Title               string
@@ -29,24 +29,38 @@ type UI struct {
 	ChapterNameTemplate string `toml:"chapter_name_template"`
 }
 
+type DownloaderConfig struct {
+	ChapterNameTemplate string `toml:"chapter_name_template"`
+	Path                string `toml:"path"`
+	CacheImages         bool   `toml:"cache_images"`
+}
+
+type FormatsConfig struct {
+	Default   FormatType `toml:"default"`
+	Comicinfo bool
+}
+
 type Config struct {
-	Scrapers []*Scraper
-	Format   FormatType
-	UI       UI
-	Anilist  struct {
+	Scrapers   []*Scraper
+	Formats    FormatsConfig
+	UI         UIConfig
+	Downloader DownloaderConfig
+	Anilist    struct {
 		Client         *AnilistClient
 		Enabled        bool
 		MarkDownloaded bool
 	}
-	UseCustomReader     bool
-	CustomReader        string
-	Path                string
-	CacheImages         bool
-	ChapterNameTemplate string
+	UseCustomReader bool
+	CustomReader    string
 }
 
 // GetConfigPath returns path to config file
 func GetConfigPath() (string, error) {
+	// check if env variable MANGAL_CONFIG is set
+	if v, ok := os.LookupEnv("MANGAL_CONFIG"); ok {
+		return v, nil
+	}
+
 	configDir, err := os.UserConfigDir()
 
 	if err != nil {
@@ -58,7 +72,7 @@ func GetConfigPath() (string, error) {
 
 // DefaultConfig makes default config
 func DefaultConfig() *Config {
-	conf, _ := ParseConfig([]byte(DefaultConfigStr))
+	conf, _ := ParseConfig([]byte(DefaultConfigString))
 	return conf
 }
 
@@ -109,16 +123,14 @@ func GetConfig(path string) *Config {
 func ParseConfig(configString []byte) (*Config, error) {
 	// tempConfig is a temporary config that will be used to store parsed config
 	type tempConfig struct {
-		Use                 []string
-		Format              string
-		UI                  UI     `toml:"ui"`
-		UseCustomReader     bool   `toml:"use_custom_reader"`
-		CustomReader        string `toml:"custom_reader"`
-		Path                string `toml:"download_path"`
-		CacheImages         bool   `toml:"cache_images"`
-		Sources             map[string]Source
-		ChapterNameTemplate string `toml:"chapter_name_template"`
-		Anilist             struct {
+		Use             []string
+		Formats         FormatsConfig `toml:"formats"`
+		UI              UIConfig      `toml:"ui"`
+		UseCustomReader bool          `toml:"use_custom_reader"`
+		CustomReader    string        `toml:"custom_reader"`
+		Sources         map[string]Source
+		Downloader      DownloaderConfig
+		Anilist         struct {
 			Enabled        bool   `toml:"enabled"`
 			ID             string `toml:"id"`
 			Secret         string `toml:"secret"`
@@ -136,8 +148,6 @@ func ParseConfig(configString []byte) (*Config, error) {
 		return nil, err
 	}
 
-	conf.CacheImages = tempConf.CacheImages
-
 	// Convert sources listed in tempConfig to Scrapers
 	for sourceName, source := range tempConf.Sources {
 		// If source is not listed in Use then skip it
@@ -149,32 +159,31 @@ func ParseConfig(configString []byte) (*Config, error) {
 		source.Name = sourceName
 		scraper := MakeSourceScraper(&source)
 
-		if !conf.CacheImages {
+		if !conf.Downloader.CacheImages {
 			scraper.FilesCollector.CacheDir = ""
 		}
 
 		conf.Scrapers = append(conf.Scrapers, scraper)
 	}
 
+	conf.UI = tempConf.UI
 	if tempConf.UI.ChapterNameTemplate == "" {
 		tempConf.UI.ChapterNameTemplate = "[%d] %s"
 	}
 
-	conf.UI = tempConf.UI
-
-	conf.Path = tempConf.Path
-
 	// Default format is pdf
-	conf.Format = IfElse(tempConf.Format == "", PDF, FormatType(tempConf.Format))
+	conf.Formats = tempConf.Formats
+	if conf.Formats.Default == "" {
+		conf.Formats.Default = PDF
+	}
+
+	conf.Downloader = tempConf.Downloader
+	if conf.Downloader.ChapterNameTemplate == "" {
+		conf.Downloader.ChapterNameTemplate = "[%d] %s"
+	}
 
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
-
-	if template := tempConf.ChapterNameTemplate; template != "" {
-		conf.ChapterNameTemplate = template
-	} else {
-		conf.ChapterNameTemplate = "[%0d] %s"
-	}
 
 	if tempConf.Anilist.Enabled {
 		id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret
@@ -186,6 +195,11 @@ func ParseConfig(configString []byte) (*Config, error) {
 
 		conf.Anilist.Enabled = true
 		conf.Anilist.MarkDownloaded = tempConf.Anilist.MarkDownloaded
+	}
+
+	// check if env variable MANGAL_DOWNLOADS is set
+	if v, ok := os.LookupEnv("MANGAL_DOWNLOADS"); ok {
+		conf.Downloader.Path = v
 	}
 
 	return &conf, err
@@ -209,7 +223,7 @@ func ValidateConfig(config *Config) error {
 		return nil
 	}
 
-	err := validateChapterNameTemplate(config.ChapterNameTemplate)
+	err := validateChapterNameTemplate(config.Downloader.ChapterNameTemplate)
 	if err != nil {
 		return err
 	}
@@ -232,11 +246,11 @@ func ValidateConfig(config *Config) error {
 	}
 
 	// Check if format is valid
-	if !Contains(AvailableFormats, config.Format) {
+	if !Contains(AvailableFormats, config.Formats.Default) {
 		msg := fmt.Sprintf(
 			`unknown format '%s'
 type %s to show available formats`,
-			string(config.Format),
+			string(config.Formats.Default),
 			accentStyle.Render(strings.ToLower(Mangal)+" formats"),
 		)
 		return errors.New(msg)
