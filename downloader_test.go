@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,7 +14,8 @@ func TestSaveTemp(t *testing.T) {
 	}
 
 	contents := []byte("Hello, World!")
-	path, err := SaveTemp(&contents)
+	buffer := bytes.NewBuffer(contents)
+	path, err := SaveTemp(buffer)
 
 	if err != nil {
 		t.Fatal()
@@ -47,8 +49,9 @@ func TestRemoveIfExists(t *testing.T) {
 	}
 
 	contents := []byte("Hello, World!")
+	buffer := bytes.NewBuffer(contents)
 
-	path, _ := SaveTemp(&contents)
+	path, _ := SaveTemp(buffer)
 
 	if err := RemoveIfExists(path); err != nil {
 		t.Fatal("Error while removing file")
