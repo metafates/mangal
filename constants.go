@@ -3,7 +3,7 @@ package main
 import "time"
 
 // Version is the current version of the program.
-const Version = "2.0.1"
+const Version = "2.1.0"
 
 // Mangal is a name of application
 // I keep it in a constant to avoid typos

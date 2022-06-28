@@ -151,6 +151,11 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	for _, page := range pages {
 		go func(p *URL) {
 			defer wg.Done()
+
+			if errorEncountered {
+				return
+			}
+
 			var data *bytes.Buffer
 
 			data, err = chapter.Scraper.GetFile(p)

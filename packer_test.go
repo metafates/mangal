@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,7 +10,7 @@ import (
 
 // MockFiles creates a temporary directory and fills it with files.
 // It is caller responsibility to remove created files.
-func MockFiles(t *testing.T) []string {
+func MockFiles(t *testing.T) []*bytes.Buffer {
 	t.Helper()
 
 	// options to get chapter images
@@ -43,8 +44,10 @@ func MockFiles(t *testing.T) []string {
 		t.Fatal("no images created")
 	}
 
-	return Map(images, func(i os.FileInfo) string {
-		return filepath.Join(out, i.Name())
+	return Map(images, func(i os.FileInfo) *bytes.Buffer {
+		file, _ := Afero.ReadFile(filepath.Join(out, i.Name()))
+
+		return bytes.NewBuffer(file)
 	})
 }
 
@@ -142,12 +145,6 @@ func TestPackToCBZ(t *testing.T) {
 		t.Error("cbz is empty")
 	}
 
-	// remove mock files
-	err = Afero.RemoveAll(filepath.Dir(files[0]))
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	RemoveTemp()
 }
 
@@ -194,12 +191,6 @@ func TestPackToEpub(t *testing.T) {
 		t.Fatal(err)
 	} else if stat.Size() == 0 {
 		t.Error("epub is empty")
-	}
-
-	// remove mock files
-	err = Afero.RemoveAll(filepath.Dir(files[0]))
-	if err != nil {
-		t.Fatal(err)
 	}
 
 	RemoveTemp()

@@ -199,10 +199,8 @@ func PackToZip(images []*bytes.Buffer, destination string) (string, error) {
 func addFileToZip(zipWriter *zip.Writer, file *bytes.Buffer, index int) error {
 	// Create a new zip file entry
 	header := &zip.FileHeader{
-		Name: PadZeros(index, 4) + ".jpg",
-		// Change to deflate to gain better compression
-		// see http://golang.org/pkg/archive/zip/#pkg-constants
-		Method: zip.Deflate,
+		Name:   PadZeros(index, 4) + ".jpg",
+		Method: zip.Store,
 	}
 
 	writer, err := zipWriter.CreateHeader(header)

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gocolly/colly"
-	"math/rand"
+	"github.com/gocolly/colly/extensions"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -66,13 +66,14 @@ func MakeSourceScraper(source *Source) *Scraper {
 	collector.SetRequestTimeout(20 * time.Second)
 	collector.AllowURLRevisit = true
 
+	extensions.RandomUserAgent(collector)
+
 	// Manga collector
 	mangaCollector := collector.Clone()
 
 	// Prevent scraper from being blocked
 	mangaCollector.OnRequest(func(r *colly.Request) {
 		r.Headers.Set("Referer", "https://www.google.com/")
-		r.Headers.Set("User-Agent", randomUserAgent())
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 	})
@@ -103,7 +104,6 @@ func MakeSourceScraper(source *Source) *Scraper {
 	chaptersCollector := collector.Clone()
 	chaptersCollector.OnRequest(func(r *colly.Request) {
 		r.Headers.Set("Referer", "https://www.google.com/")
-		r.Headers.Set("User-Agent", randomUserAgent())
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 	})
@@ -144,7 +144,6 @@ func MakeSourceScraper(source *Source) *Scraper {
 	pagesCollector := collector.Clone()
 	pagesCollector.OnRequest(func(r *colly.Request) {
 		r.Headers.Set("Referer", "https://www.google.com/")
-		r.Headers.Set("User-Agent", randomUserAgent())
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 	})
@@ -167,7 +166,6 @@ func MakeSourceScraper(source *Source) *Scraper {
 	filesCollector := collector.Clone()
 	filesCollector.OnRequest(func(r *colly.Request) {
 		r.Headers.Set("Referer", source.ChaptersBase)
-		r.Headers.Set("User-Agent", randomUserAgent())
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
 	})
@@ -275,17 +273,4 @@ func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
 // ResetFiles resets scraper files cache
 func (s *Scraper) ResetFiles() {
 	s.Files = sync.Map{}
-}
-
-// rangomUserAgent returns a random user agent from the userAgents list
-func randomUserAgent() string {
-	rand.Seed(time.Now().UnixNano())
-	return strings.TrimSpace(userAgents[rand.Intn(len(userAgents))])
-}
-
-// userAgents is a list of user agents to use when scraping
-var userAgents = []string{
-	"Mozilla / 5.0(Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36 Edg/103.0.1264.37",
-	"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0",
 }
