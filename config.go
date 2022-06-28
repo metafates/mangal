@@ -58,7 +58,7 @@ func GetConfigPath() (string, error) {
 
 // DefaultConfig makes default config
 func DefaultConfig() *Config {
-	conf, _ := ParseConfig(DefaultConfigBytes)
+	conf, _ := ParseConfig([]byte(DefaultConfigStr))
 	return conf
 }
 

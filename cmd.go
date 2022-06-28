@@ -377,7 +377,7 @@ var configInitCmd = &cobra.Command{
 				log.Fatal("Error while creating file")
 			} else if file, err := Afero.Create(configPath); err != nil {
 				log.Fatal("Error while creating file")
-			} else if _, err = file.Write(DefaultConfigBytes); err != nil {
+			} else if _, err = file.Write([]byte(DefaultConfigStr)); err != nil {
 				log.Fatal("Error while writing to file")
 			} else {
 				fmt.Printf("Config created at\n%s\n", successStyle.Render(configPath))
@@ -559,7 +559,7 @@ It checks if config file is valid and used sources are available`,
 			}
 
 			// check if images is not empty
-			if len(*image) == 0 {
+			if image.Len() == 0 {
 				sourceNotAvailable(source)
 			}
 

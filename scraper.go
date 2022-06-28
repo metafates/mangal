@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/gocolly/colly"
@@ -171,7 +172,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		r.Headers.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
 	})
 	filesCollector.OnResponse(func(r *colly.Response) {
-		scraper.Files.Store(r.Request.AbsoluteURL(r.Request.URL.Path), &r.Body)
+		scraper.Files.Store(r.Request.AbsoluteURL(r.Request.URL.Path), bytes.NewBuffer(r.Body))
 	})
 
 	scraper.MangaCollector = mangaCollector
@@ -249,9 +250,9 @@ func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
 }
 
 // GetFile returns manga file for given page url
-func (s *Scraper) GetFile(file *URL) (*[]byte, error) {
+func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
 	if data, ok := s.Files.Load(file.Address); ok {
-		return data.(*[]byte), nil
+		return data.(*bytes.Buffer), nil
 	}
 
 	err := s.FilesCollector.Visit(file.Address)
@@ -262,12 +263,10 @@ func (s *Scraper) GetFile(file *URL) (*[]byte, error) {
 
 	s.FilesCollector.Wait()
 
-	data, _ := s.Files.Load(file.Address)
-
-	bytes, ok := data.(*[]byte)
+	data, ok := s.Files.Load(file.Address)
 
 	if ok {
-		return bytes, nil
+		return data.(*bytes.Buffer), nil
 	}
 
 	return nil, errors.New("Couldn't get file at " + file.Address)

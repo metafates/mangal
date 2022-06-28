@@ -43,8 +43,8 @@ const AsciiArt = "                                _\n" +
 	"\\/    \\/\\__,_|_| |_|\\__, |\\__,_|_|\n" +
 	"                    |___/         "
 
-// DefaultConfigBytes is default config in TOML format
-var DefaultConfigBytes = []byte(`# Which sources to use. You can use several sources, it won't affect perfomance
+// DefaultConfigStr is default config in TOML format
+const DefaultConfigStr = `# Which sources to use. You can use several sources, it won't affect perfomance
 use = ['manganelo']
 
 # Type "mangal formats" to show more information about formats
@@ -136,4 +136,4 @@ reversed_chapters_order = true
 
 # With what character should the whitespace in query be replaced?
 whitespace_escape = "_"
-`)
+`

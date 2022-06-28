@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/spf13/afero"
@@ -32,7 +33,7 @@ func RemoveIfExists(path string) error {
 
 // SaveTemp saves file to OS temp dir and returns its path
 // It's a caller responsibility to remove created file
-func SaveTemp(contents *[]byte) (string, error) {
+func SaveTemp(buffer *bytes.Buffer) (string, error) {
 	out, err := Afero.TempFile("", TempPrefix+"*")
 
 	if err != nil {
@@ -40,13 +41,10 @@ func SaveTemp(contents *[]byte) (string, error) {
 	}
 
 	defer func(out afero.File) {
-		err := out.Close()
-		if err != nil {
-			log.Fatal("Unexpected error while closing file")
-		}
+		_ = out.Close()
 	}(out)
 
-	_, err = out.Write(*contents)
+	_, err = buffer.WriteTo(out)
 	if err != nil {
 		return "", err
 	}
@@ -154,7 +152,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		go func(p *URL) {
 			defer wg.Done()
 			var (
-				data     *[]byte
+				data     *bytes.Buffer
 				tempPath string
 			)
 
