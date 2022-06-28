@@ -140,7 +140,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	}
 
 	var (
-		tempPaths        = make([]string, pagesCount)
+		buffers          = make([]*bytes.Buffer, pagesCount)
 		wg               sync.WaitGroup
 		errorEncountered bool
 	)
@@ -151,10 +151,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	for _, page := range pages {
 		go func(p *URL) {
 			defer wg.Done()
-			var (
-				data     *bytes.Buffer
-				tempPath string
-			)
+			var data *bytes.Buffer
 
 			data, err = chapter.Scraper.GetFile(p)
 
@@ -164,10 +161,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 				return
 			}
 
-			tempPath, err = SaveTemp(data)
-			fixedTempPath := tempPath + ".jpg"
-			err = Afero.Rename(tempPath, fixedTempPath)
-			tempPaths[p.Index] = fixedTempPath
+			buffers[p.Index] = data
 		}(page)
 	}
 
@@ -186,12 +180,12 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		}
 	}
 
-	if len(tempPaths) == 0 {
+	if len(buffers) == 0 {
 		return "", errors.New("pages was not downloaded")
 	}
 
 	// Convert pages to desired format
-	chapterPath, err = Packers[UserConfig.Format](tempPaths, chapterPath)
+	chapterPath, err = Packers[UserConfig.Format](buffers, chapterPath)
 
 	if err != nil {
 		log.Fatal(err)
