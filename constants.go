@@ -116,7 +116,7 @@ prompt = ">"
 placeholder = "What shall we look for?"
 
 # Selected chapter mark
-mark = "▼"
+mark = "✘"
 
 # Search window title
 title = "Mangal"

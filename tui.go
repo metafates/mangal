@@ -603,7 +603,7 @@ func (b Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		var items []list.Item
 		for _, url := range msg {
-			items = append(items, listItem{url: url})
+			items = append(items, &listItem{url: url})
 		}
 		cmd = b.mangaList.SetItems(items)
 		return b, cmd
@@ -630,7 +630,7 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Open):
-			item, ok := b.mangaList.SelectedItem().(listItem)
+			item, ok := b.mangaList.SelectedItem().(*listItem)
 			if ok {
 				_ = open.Start(item.url.Address)
 			}
@@ -638,7 +638,7 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Do nothing if the chapters are loading
 			return b, nil
 		case key.Matches(msg, b.keyMap.Confirm), key.Matches(msg, b.keyMap.Select):
-			selected, ok := b.mangaList.SelectedItem().(listItem)
+			selected, ok := b.mangaList.SelectedItem().(*listItem)
 			if ok {
 				cmd = b.mangaList.StartSpinner()
 				b.loading = true
@@ -669,7 +669,7 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 
 		for _, url := range msg {
-			items = append(items, listItem{url: url})
+			items = append(items, &listItem{url: url})
 		}
 
 		var cmds []tea.Cmd
@@ -703,12 +703,12 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.setState(mangaState)
 			return b, cmd
 		case key.Matches(msg, b.keyMap.Open):
-			item, ok := b.chaptersList.SelectedItem().(listItem)
+			item, ok := b.chaptersList.SelectedItem().(*listItem)
 			if ok {
 				_ = open.Start(item.url.Address)
 			}
 		case key.Matches(msg, b.keyMap.Read):
-			chapter, ok := b.chaptersList.SelectedItem().(listItem)
+			chapter, ok := b.chaptersList.SelectedItem().(*listItem)
 
 			if ok {
 				b.setState(downloadingState)
@@ -725,7 +725,7 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.setState(confirmPromptState)
 			return b, nil
 		case key.Matches(msg, b.keyMap.Select):
-			item, ok := b.chaptersList.SelectedItem().(listItem)
+			item, ok := b.chaptersList.SelectedItem().(*listItem)
 			if ok {
 				index := b.chaptersList.Index()
 				item.Select()
@@ -736,18 +736,13 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 					delete(b.selectedChapters, index)
 				}
 
-				cmds := []tea.Cmd{
-					b.chaptersList.SetItem(index, item),
-				}
-
-				return b, tea.Batch(cmds...)
+				return b, nil
 			}
 		case key.Matches(msg, b.keyMap.SelectAll):
 			items := b.chaptersList.Items()
-			cmds := make([]tea.Cmd, len(items))
 
 			for i, item := range items {
-				it := item.(listItem)
+				it := item.(*listItem)
 				it.Select()
 
 				if it.selected {
@@ -755,11 +750,8 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					delete(b.selectedChapters, i)
 				}
-
-				cmds[i] = b.chaptersList.SetItem(i, it)
 			}
-
-			return b, tea.Batch(cmds...)
+			return b, nil
 		}
 	}
 
@@ -785,7 +777,7 @@ func (b Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			items := b.chaptersList.Items()
 
 			for index := range b.selectedChapters {
-				chapters = append(chapters, items[index].(listItem).url)
+				chapters = append(chapters, items[index].(*listItem).url)
 			}
 
 			return b, tea.Batch(
@@ -949,7 +941,7 @@ func (b Bubble) View() string {
 			log.Fatal("No chapters selected")
 		}
 
-		mangaName := b.chaptersList.Items()[0].(listItem).url.Relation.Info
+		mangaName := b.chaptersList.Items()[0].(*listItem).url.Relation.Info
 		chaptersToDownload := len(b.selectedChapters)
 		view = fmt.Sprintf(
 			template,
