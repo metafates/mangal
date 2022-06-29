@@ -28,12 +28,6 @@ The ultimate CLI manga downloader`,
 		incognito, _ := cmd.Flags().GetBool("incognito")
 		initConfig(config, false)
 
-		if !incognito {
-			initAnilist()
-		} else {
-			UserConfig.Anilist.Enabled = false
-		}
-
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
 			UserConfig.Formats.Default = FormatType(format)
 		}
@@ -41,6 +35,12 @@ The ultimate CLI manga downloader`,
 		err := ValidateConfig(UserConfig)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if !incognito {
+			initAnilist()
+		} else {
+			UserConfig.Anilist.Enabled = false
 		}
 
 		var program *tea.Program

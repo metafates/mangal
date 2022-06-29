@@ -25,6 +25,9 @@ const TestQuery = "Death Note"
 // It approximates to 292 years
 const Forever = time.Duration(1<<63 - 1)
 
+// Referer is a default referer for requests
+const Referer = "https://www.google.com"
+
 var AvailableFormats = []FormatType{PDF, CBZ, Plain, Zip, Epub}
 var FormatsInfo = map[FormatType]string{
 	PDF:   "Chapters as PDF with images",

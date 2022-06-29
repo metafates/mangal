@@ -42,9 +42,9 @@ type FormatsConfig struct {
 
 type Config struct {
 	Scrapers   []*Scraper
-	Formats    FormatsConfig
-	UI         UIConfig
-	Downloader DownloaderConfig
+	Formats    *FormatsConfig
+	UI         *UIConfig
+	Downloader *DownloaderConfig
 	Anilist    struct {
 		Client         *AnilistClient
 		Enabled        bool
@@ -148,6 +148,19 @@ func ParseConfig(configString []byte) (*Config, error) {
 		return nil, err
 	}
 
+	conf.Downloader = &tempConf.Downloader
+	if conf.Downloader.ChapterNameTemplate == "" {
+		conf.Downloader.ChapterNameTemplate = "[%d] %s"
+	}
+
+	if strings.Contains(conf.Downloader.Path, "$HOME") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+		conf.Downloader.Path = strings.ReplaceAll(conf.Downloader.Path, "$HOME", home)
+	}
+
 	// Convert sources listed in tempConfig to Scrapers
 	for sourceName, source := range tempConf.Sources {
 		// If source is not listed in Use then skip it
@@ -166,28 +179,15 @@ func ParseConfig(configString []byte) (*Config, error) {
 		conf.Scrapers = append(conf.Scrapers, scraper)
 	}
 
-	conf.UI = tempConf.UI
+	conf.UI = &tempConf.UI
 	if tempConf.UI.ChapterNameTemplate == "" {
 		tempConf.UI.ChapterNameTemplate = "[%d] %s"
 	}
 
 	// Default format is pdf
-	conf.Formats = tempConf.Formats
+	conf.Formats = &tempConf.Formats
 	if conf.Formats.Default == "" {
 		conf.Formats.Default = PDF
-	}
-
-	conf.Downloader = tempConf.Downloader
-	if conf.Downloader.ChapterNameTemplate == "" {
-		conf.Downloader.ChapterNameTemplate = "[%d] %s"
-	}
-
-	if strings.Contains(conf.Downloader.Path, "$HOME") {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return nil, err
-		}
-		conf.Downloader.Path = strings.ReplaceAll(conf.Downloader.Path, "$HOME", home)
 	}
 
 	conf.UseCustomReader = tempConf.UseCustomReader

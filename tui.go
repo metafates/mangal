@@ -129,7 +129,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 // NewBubble creates a new bubble.
 func NewBubble(initialState bubbleState) *Bubble {
 	// Create key bindings.
-	keys := keyMap{
+	keys := &keyMap{
 		state: initialState,
 
 		Quit: key.NewBinding(
@@ -232,16 +232,18 @@ func NewBubble(initialState bubbleState) *Bubble {
 	chaptersList.SetFilteringEnabled(false)
 	chaptersList.StatusMessageLifetime = Forever
 
+	helpModel := help.New()
+
 	// Create new bubble
 	bubble_ := Bubble{
 		state:                        initialState,
 		keyMap:                       keys,
-		input:                        input,
-		spinner:                      spinner_,
-		mangaList:                    mangaList,
-		chaptersList:                 chaptersList,
-		progress:                     progress_,
-		help:                         help.New(),
+		input:                        &input,
+		spinner:                      &spinner_,
+		mangaList:                    &mangaList,
+		chaptersList:                 &chaptersList,
+		progress:                     &progress_,
+		help:                         &helpModel,
 		mangaChan:                    make(chan []*URL),
 		chaptersChan:                 make(chan []*URL),
 		chaptersProgressChan:         make(chan ChaptersDownloadProgress),
@@ -280,14 +282,14 @@ type Bubble struct {
 	state   bubbleState
 	loading bool
 
-	keyMap keyMap
+	keyMap *keyMap
 
-	input        textinput.Model
-	spinner      spinner.Model
-	mangaList    list.Model
-	chaptersList list.Model
-	progress     progress.Model
-	help         help.Model
+	input        *textinput.Model
+	spinner      *spinner.Model
+	mangaList    *list.Model
+	chaptersList *list.Model
+	progress     *progress.Model
+	help         *help.Model
 
 	mangaChan                chan []*URL
 	chaptersChan             chan []*URL
@@ -588,7 +590,7 @@ func (b *Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	b.input, cmd = b.input.Update(msg)
+	*b.input, cmd = b.input.Update(msg)
 	return b, cmd
 }
 
@@ -601,15 +603,17 @@ func (b *Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.setState(mangaState)
 		b.mangaList.Title = "Manga - " + PrettyTrim(strings.TrimSpace(b.input.Value()), 30)
 
-		var items []list.Item
-		for _, url := range msg {
-			items = append(items, &listItem{url: url})
+		var items = make([]list.Item, len(msg))
+
+		for i, url := range msg {
+			items[i] = &listItem{url: url}
 		}
+
 		cmd = b.mangaList.SetItems(items)
 		return b, cmd
 	}
 
-	b.spinner, cmd = b.spinner.Update(msg)
+	*b.spinner, cmd = b.spinner.Update(msg)
 	return b, cmd
 }
 
@@ -682,7 +686,7 @@ func (b *Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b, cmd
 	}
 
-	b.mangaList, cmd = b.mangaList.Update(msg)
+	*b.mangaList, cmd = b.mangaList.Update(msg)
 	return b, cmd
 }
 
@@ -755,7 +759,7 @@ func (b *Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	b.chaptersList, cmd = b.chaptersList.Update(msg)
+	*b.chaptersList, cmd = b.chaptersList.Update(msg)
 	return b, cmd
 }
 
@@ -772,12 +776,16 @@ func (b *Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keyMap.Confirm):
 			b.setState(downloadingState)
 
-			var chapters []*URL
+			var (
+				chapters = make([]*URL, len(b.selectedChapters))
+				iterIdx  int
+			)
 
 			items := b.chaptersList.Items()
 
 			for index := range b.selectedChapters {
-				chapters = append(chapters, items[index].(*listItem).url)
+				chapters[iterIdx] = items[index].(*listItem).url
+				iterIdx++
 			}
 
 			return b, tea.Batch(
@@ -821,7 +829,7 @@ func (b *Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return b, tea.Batch(cmd, b.waitForChapterToReadDownloaded(), b.waitForChapterDownloadProgress())
 	case chapterDownloadProgressMsg:
-		b.spinner, cmd = b.spinner.Update(msg)
+		*b.spinner, cmd = b.spinner.Update(msg)
 		b.chapterDownloadProgressInfo = ChapterDownloadProgress(msg)
 		return b, tea.Batch(cmd, b.waitForChapterDownloadProgress(), b.waitForChaptersGetCompletion())
 	case chaptersDownloadProgressMsg:
@@ -838,11 +846,11 @@ func (b *Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var p tea.Model
 		// ???? why progress.Update() returns tea.Model and not progress.Model?
 		p, cmd = b.progress.Update(msg)
-		b.progress = p.(progress.Model)
+		*b.progress = p.(progress.Model)
 		return b, cmd
 	}
 
-	b.spinner, cmd = b.spinner.Update(msg)
+	*b.spinner, cmd = b.spinner.Update(msg)
 	return b, cmd
 }
 
