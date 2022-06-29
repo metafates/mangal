@@ -925,7 +925,7 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // View handles how the Bubble should be rendered
-func (b Bubble) View() string {
+func (b *Bubble) View() string {
 	var view string
 
 	template := viewTemplates[b.state]
