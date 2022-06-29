@@ -76,6 +76,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		r.Headers.Set("Referer", "https://www.google.com/")
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
+		r.Headers.Set("Host", source.Base)
 	})
 
 	// Get all manga urls
@@ -106,6 +107,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		r.Headers.Set("Referer", "https://www.google.com/")
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
+		r.Headers.Set("Host", source.Base)
 	})
 	chaptersCollector.OnHTML("html", func(html *colly.HTMLElement) {
 		var urls []*URL
@@ -148,11 +150,23 @@ func MakeSourceScraper(source *Source) *Scraper {
 		r.Headers.Set("Accept", "text/html")
 	})
 	pagesCollector.OnHTML(source.ReaderPage, func(e *colly.HTMLElement) {
-		link := e.Attr("src")
-
-		if link == "" {
-			link = e.Attr("data-src")
+		attributes := []string{
+			"src",
+			"data-src",
+			"data-url",
+			"href",
+			"data-original",
+			"data-original-src",
+			"data-original-url",
+			"data-srcset",
+			"data-src-set",
 		}
+
+		attr, _ := Find(attributes, func(attr string) bool {
+			return e.Attr(attr) != ""
+		})
+
+		link := e.Attr(attr)
 
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		scraper.Pages[path] = append(scraper.Pages[path], &URL{Address: link, Scraper: &scraper, Index: e.Index})
