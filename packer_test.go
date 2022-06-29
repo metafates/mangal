@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,7 +10,7 @@ import (
 
 // MockFiles creates a temporary directory and fills it with files.
 // It is caller responsibility to remove created files.
-func MockFiles(t *testing.T) []string {
+func MockFiles(t *testing.T) []*bytes.Buffer {
 	t.Helper()
 
 	// options to get chapter images
@@ -43,8 +44,10 @@ func MockFiles(t *testing.T) []string {
 		t.Fatal("no images created")
 	}
 
-	return Map(images, func(i os.FileInfo) string {
-		return filepath.Join(out, i.Name())
+	return Map(images, func(i os.FileInfo) *bytes.Buffer {
+		file, _ := Afero.ReadFile(filepath.Join(out, i.Name()))
+
+		return bytes.NewBuffer(file)
 	})
 }
 
@@ -81,7 +84,7 @@ func TestPackToPDF(t *testing.T) {
 	}
 
 	// pack to pdf
-	out, err := PackToPDF(files, TempFile(t, ".pdf"))
+	out, err := PackToPDF(files, TempFile(t, ".pdf"), nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -120,7 +123,7 @@ func TestPackToCBZ(t *testing.T) {
 	}
 
 	// pack to cbz
-	out, err := PackToCBZ(files, TempFile(t, ".cbz"))
+	out, err := PackToCBZ(files, TempFile(t, ".cbz"), nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -142,12 +145,6 @@ func TestPackToCBZ(t *testing.T) {
 		t.Error("cbz is empty")
 	}
 
-	// remove mock files
-	err = Afero.RemoveAll(filepath.Dir(files[0]))
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	RemoveTemp()
 }
 
@@ -164,7 +161,7 @@ func TestPackToEpub(t *testing.T) {
 	}
 
 	// pack to epub
-	out, err := PackToEpub(files, TempFile(t, ".epub"))
+	out, err := PackToEpub(files, TempFile(t, ".epub"), nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -196,12 +193,6 @@ func TestPackToEpub(t *testing.T) {
 		t.Error("epub is empty")
 	}
 
-	// remove mock files
-	err = Afero.RemoveAll(filepath.Dir(files[0]))
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	RemoveTemp()
 
 	EpubFile = nil
@@ -227,7 +218,7 @@ func TestPackToPlain(t *testing.T) {
 	}
 
 	// pack to plain
-	out, err := PackToPlain(files, tempDir)
+	out, err := PackToPlain(files, tempDir, nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -280,7 +271,7 @@ func TestPackToZip(t *testing.T) {
 	}
 
 	// pack to zip
-	out, err := PackToZip(files, TempFile(t, ".zip"))
+	out, err := PackToZip(files, TempFile(t, ".zip"), nil)
 
 	if err != nil {
 		t.Fatal(err)

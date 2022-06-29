@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/spf13/afero"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -32,7 +32,7 @@ func RemoveIfExists(path string) error {
 
 // SaveTemp saves file to OS temp dir and returns its path
 // It's a caller responsibility to remove created file
-func SaveTemp(contents *[]byte) (string, error) {
+func SaveTemp(buffer *bytes.Buffer) (string, error) {
 	out, err := Afero.TempFile("", TempPrefix+"*")
 
 	if err != nil {
@@ -40,13 +40,10 @@ func SaveTemp(contents *[]byte) (string, error) {
 	}
 
 	defer func(out afero.File) {
-		err := out.Close()
-		if err != nil {
-			log.Fatal("Unexpected error while closing file")
-		}
+		_ = out.Close()
 	}(out)
 
-	_, err = out.Write(*contents)
+	_, err = buffer.WriteTo(out)
 	if err != nil {
 		return "", err
 	}
@@ -60,7 +57,6 @@ const (
 	Scraping DownloaderStage = iota
 	Downloading
 	Converting
-	Cleanup
 	Done
 )
 
@@ -90,7 +86,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	if temp {
 		mangaPath = os.TempDir()
 	} else {
-		absPath, err := filepath.Abs(UserConfig.Path)
+		absPath, err := filepath.Abs(UserConfig.Downloader.Path)
 
 		if err != nil {
 			return "", err
@@ -111,9 +107,9 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	// replace all placeholders with actual values
 	var chapterName string
 
-	// Why pad with 5 zeros? Because there are no manga with more than 9999 chapters
+	// Why pad with 4 zeros? Because there are no manga with more than 9999 chapters
 	// Actually, the longest manga has only 1960 chapters (Kochira Katsushika-ku Kameari Kōen-mae Hashutsujo)
-	chapterName = strings.ReplaceAll(UserConfig.ChapterNameTemplate, "%0d", PadZeros(chapter.Index, 4))
+	chapterName = strings.ReplaceAll(UserConfig.Downloader.ChapterNameTemplate, "%0d", PadZeros(chapter.Index, 4))
 	chapterName = strings.ReplaceAll(chapterName, "%d", strconv.Itoa(chapter.Index))
 	chapterName = strings.ReplaceAll(chapterName, "%s", chapter.Info)
 	chapterName = SanitizeFilename(chapterName)
@@ -142,7 +138,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	}
 
 	var (
-		tempPaths        = make([]string, pagesCount)
+		buffers          = make([]*bytes.Buffer, pagesCount)
 		wg               sync.WaitGroup
 		errorEncountered bool
 	)
@@ -153,10 +149,12 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 	for _, page := range pages {
 		go func(p *URL) {
 			defer wg.Done()
-			var (
-				data     *[]byte
-				tempPath string
-			)
+
+			if errorEncountered {
+				return
+			}
+
+			var data *bytes.Buffer
 
 			data, err = chapter.Scraper.GetFile(p)
 
@@ -166,10 +164,7 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 				return
 			}
 
-			tempPath, err = SaveTemp(data)
-			fixedTempPath := tempPath + ".jpg"
-			err = Afero.Rename(tempPath, fixedTempPath)
-			tempPaths[p.Index] = fixedTempPath
+			buffers[p.Index] = data
 		}(page)
 	}
 
@@ -183,29 +178,24 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 
 	if showProgress {
 		progress <- ChapterDownloadProgress{
-			Stage:   Converting,
-			Message: fmt.Sprintf("Converting %d pages to %s", pagesCount, UserConfig.Format),
+			Stage: Converting,
+			Message: fmt.Sprintf(
+				"Converting %d pages to %s",
+				pagesCount,
+				strings.ToUpper(string(UserConfig.Formats.Default)),
+			),
 		}
 	}
 
-	if len(tempPaths) == 0 {
+	if len(buffers) == 0 {
 		return "", errors.New("pages was not downloaded")
 	}
 
 	// Convert pages to desired format
-	chapterPath, err = Packers[UserConfig.Format](tempPaths, chapterPath)
-
-	if err != nil {
-		log.Fatal(err)
-		return "", err
-	}
-
-	if showProgress {
-		progress <- ChapterDownloadProgress{
-			Stage:   Cleanup,
-			Message: "Removing temp files",
-		}
-	}
+	chapterPath, err = Packers[UserConfig.Formats.Default](buffers, chapterPath, &PackerContext{
+		Manga:   chapter.Relation,
+		Chapter: chapter,
+	})
 
 	if err != nil {
 		return "", err
