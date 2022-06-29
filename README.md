@@ -34,10 +34,12 @@ https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-
 ✨ __Mangal__ is a feature rich, configurable manga browser & downloader
 written in Go with support for different formats
 
-⚙️ One of the most important features of Mangal is that it supports user defined scrapers
-that can be added with just a few lines of config file (see [config](#config) & [limitations](#limitations))
+⚙️ User defined scrapers support
+ (see [config](#config) & [limitations](#limitations))
 
-🦎 Works in both modes - TUI & Inline. Use it as a standalone app or integrate with scripts
+🦎 TUI & Inline modes. Use it as a standalone app or integrate with scripts
+
+🚀 It's fast. Parallel downloader is capable of downloading ~1GB per minute
 
 🍥 Integration with Anilist! __BETA__
 
@@ -249,6 +251,7 @@ Flags:
   -c, --config string   use config from path
   -f, --format string   use custom format
   -h, --help            help for mangal
+  -i, --incognito       will not sync with anilist even if enabled
 
 Use "mangal [command] --help" for more information about a command.
 ```
