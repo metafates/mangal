@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/spf13/afero"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -58,7 +57,6 @@ const (
 	Scraping DownloaderStage = iota
 	Downloading
 	Converting
-	Cleanup
 	Done
 )
 
@@ -180,8 +178,12 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 
 	if showProgress {
 		progress <- ChapterDownloadProgress{
-			Stage:   Converting,
-			Message: fmt.Sprintf("Converting %d pages to %s", pagesCount, UserConfig.Formats.Default),
+			Stage: Converting,
+			Message: fmt.Sprintf(
+				"Converting %d pages to %s",
+				pagesCount,
+				strings.ToUpper(string(UserConfig.Formats.Default)),
+			),
 		}
 	}
 
@@ -194,18 +196,6 @@ func DownloadChapter(chapter *URL, progress chan ChapterDownloadProgress, temp b
 		Manga:   chapter.Relation,
 		Chapter: chapter,
 	})
-
-	if err != nil {
-		log.Fatal(err)
-		return "", err
-	}
-
-	if showProgress {
-		progress <- ChapterDownloadProgress{
-			Stage:   Cleanup,
-			Message: "Removing temp files",
-		}
-	}
 
 	if err != nil {
 		return "", err
