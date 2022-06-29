@@ -127,7 +127,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 }
 
 // NewBubble creates a new bubble.
-func NewBubble(initialState bubbleState) Bubble {
+func NewBubble(initialState bubbleState) *Bubble {
 	// Create key bindings.
 	keys := keyMap{
 		state: initialState,
@@ -260,7 +260,7 @@ func NewBubble(initialState bubbleState) Bubble {
 
 	bubble_.resize(width, height)
 	bubble_.input.Focus()
-	return bubble_
+	return &bubble_
 }
 
 type bubbleState int
@@ -310,7 +310,7 @@ type listItem struct {
 func (l *listItem) Select() {
 	l.selected = !l.selected
 }
-func (l listItem) Title() string {
+func (l *listItem) Title() string {
 	var title string
 
 	if l.selected {
@@ -334,11 +334,11 @@ func (l listItem) Title() string {
 	return template
 }
 
-func (l listItem) Description() string {
+func (l *listItem) Description() string {
 	return l.url.Address
 }
 
-func (l listItem) FilterValue() string {
+func (l *listItem) FilterValue() string {
 	return l.url.Info
 }
 
@@ -370,7 +370,7 @@ func (b *Bubble) setState(state bubbleState) {
 type mangaSearchDoneMsg []*URL
 
 // initMangaSearch initializes the manga search
-func (b Bubble) initMangaSearch(query string) tea.Cmd {
+func (b *Bubble) initMangaSearch(query string) tea.Cmd {
 	return func() tea.Msg {
 		var (
 			manga []*URL
@@ -399,7 +399,7 @@ func (b Bubble) initMangaSearch(query string) tea.Cmd {
 }
 
 // waitForMangaSearchCompletion waits for the manga search to finish
-func (b Bubble) waitForMangaSearchCompletion() tea.Cmd {
+func (b *Bubble) waitForMangaSearchCompletion() tea.Cmd {
 	return func() tea.Msg {
 		return mangaSearchDoneMsg(<-b.mangaChan)
 	}
@@ -409,7 +409,7 @@ type chapterGetDoneMsg []*URL
 type chapterDownloadProgressMsg ChapterDownloadProgress
 
 // initChaptersGet initializes the chapters get
-func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
+func (b *Bubble) initChaptersGet(manga *URL) tea.Cmd {
 	return func() tea.Msg {
 		chapters, err := manga.Scraper.GetChapters(manga)
 
@@ -430,14 +430,14 @@ func (b Bubble) initChaptersGet(manga *URL) tea.Cmd {
 }
 
 // waitForChaptersGetCompletion waits for the chapters get to finish
-func (b Bubble) waitForChaptersGetCompletion() tea.Cmd {
+func (b *Bubble) waitForChaptersGetCompletion() tea.Cmd {
 	return func() tea.Msg {
 		return chapterGetDoneMsg(<-b.chaptersChan)
 	}
 }
 
 // waitForChapterDownloadProgress waits for the chapter download progress to finish
-func (b Bubble) waitForChapterDownloadProgress() tea.Cmd {
+func (b *Bubble) waitForChapterDownloadProgress() tea.Cmd {
 	return func() tea.Msg {
 		return chapterDownloadProgressMsg(<-b.chapterPagesProgressChan)
 	}
@@ -446,7 +446,7 @@ func (b Bubble) waitForChapterDownloadProgress() tea.Cmd {
 type chaptersDownloadProgressMsg ChaptersDownloadProgress
 
 // initChaptersDownload initializes the chapters download
-func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
+func (b *Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 	return func() tea.Msg {
 		var (
 			failed    []*URL
@@ -509,7 +509,7 @@ func (b Bubble) initChaptersDownload(chapters []*URL) tea.Cmd {
 }
 
 // waitForChaptersDownloadProgress waits for the chapters download progress to finish
-func (b Bubble) waitForChaptersDownloadProgress() tea.Cmd {
+func (b *Bubble) waitForChaptersDownloadProgress() tea.Cmd {
 	return func() tea.Msg {
 		return chaptersDownloadProgressMsg(<-b.chaptersProgressChan)
 	}
@@ -518,7 +518,7 @@ func (b Bubble) waitForChaptersDownloadProgress() tea.Cmd {
 type chapterDownloadedToReadMsg ChaptersDownloadProgress
 
 // initChapterDownloadedToRead initializes the chapter downloaded to read
-func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
+func (b *Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 	return func() tea.Msg {
 		var (
 			failed    []*URL
@@ -563,14 +563,14 @@ func (b Bubble) initChapterDownloadToRead(chapter *URL) tea.Cmd {
 }
 
 // waitForChapterToReadDownloaded waits for the chapter to read download to finish
-func (b Bubble) waitForChapterToReadDownloaded() tea.Cmd {
+func (b *Bubble) waitForChapterToReadDownloaded() tea.Cmd {
 	return func() tea.Msg {
 		return chapterDownloadedToReadMsg(<-b.chaptersProgressChan)
 	}
 }
 
 // handleSearchState handles the search state
-func (b Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -593,7 +593,7 @@ func (b Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // handleLoadingState handles the loading state
-func (b Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -614,7 +614,7 @@ func (b Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // handleMangaState handles the manga state
-func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -687,7 +687,7 @@ func (b Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // handleChaptersState handles the chapters state
-func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -760,7 +760,7 @@ func (b Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // handleConfirmPromptState handles the confirmation prompt state
-func (b Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -794,7 +794,7 @@ func (b Bubble) handleConfirmPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // handleDownloadingState handles the downloading state
-func (b Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -847,7 +847,7 @@ func (b Bubble) handleDownloadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // handleExitPromptState handles the exit prompt state
-func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -881,7 +881,7 @@ func (b Bubble) handleExitPromptState(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // Update handles the Bubble update
-func (b Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)
