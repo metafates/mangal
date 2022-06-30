@@ -488,7 +488,7 @@ var doctorCmd = &cobra.Command{
 	Long: `Check if ` + Mangal + ` is properly configured.
 It checks if config file is valid and used sources are available`,
 	Run: func(cmd *cobra.Command, args []string) {
-		RunDoctor(false)
+		RunDoctor()
 	},
 }
 

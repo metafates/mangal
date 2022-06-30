@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func RunDoctor(vebose bool) {
+func RunDoctor() {
 	var (
 		ok = func() {
 			fmt.Print(successStyle.Render("OK"))
@@ -50,11 +50,10 @@ func RunDoctor(vebose bool) {
 	ok()
 
 	var (
-		sourceNotAvailable = func(source *Source) {
+		sourceNotAvailable = func(source *Source, status int) {
 			fail()
 			fmt.Printf("Source %s is not available\n", source.Name)
-			fmt.Printf("Try to reinitialize your config with %s\n", accentStyle.Render("mangal config init --force"))
-			fmt.Println("Note, that this will overwrite your current config")
+			fmt.Printf("Status code: %d\n", status)
 			os.Exit(1)
 		}
 
@@ -63,54 +62,54 @@ func RunDoctor(vebose bool) {
 			address := fmt.Sprintf(source.SearchTemplate, url.QueryEscape(strings.TrimSpace(strings.ToLower(query))))
 
 			fail()
-			fmt.Printf("Manga %s is not found\n", accentStyle.Render(manga))
-			fmt.Printf("Was trying to search with %s\n\n", accentStyle.Render(address))
-			fmt.Printf(
-				"That probably means that %s or %s tags are invalid or website has some protection that prevents page from rendering\n",
-				accentStyle.Render("manga_anchor"),
-				accentStyle.Render("manga_title"),
-			)
+
+			fmt.Println(`
+Manga ` + accentStyle.Render(manga) + ` was not found
+Was trying to search with address: ` + accentStyle.Render(address) + `
+That probably means that ` + accentStyle.Render("manga_anchor") + ` or ` + accentStyle.Render("manga_title") + ` tags are invalid, website is down or it has some protection that prevents page from rendering. 
+`)
 
 			os.Exit(1)
 		}
 
 		chaptersNotFound = func(source *Source, manga string) {
 			fail()
-			fmt.Printf("Chapters for %s are not found\n\n", accentStyle.Render(manga))
-			fmt.Printf(
-				"That probably means that %s or %s tags are invalid or website has some protection that prevents page from rendering\n",
-				accentStyle.Render("chapter_anchor"),
-				accentStyle.Render("chapter_title"),
-			)
+
+			fmt.Println(`
+Chapters for manga ` + accentStyle.Render(manga) + ` were not found
+Was trying to search with address: ` + accentStyle.Render(manga) + `
+That probably means that ` + accentStyle.Render("chapter_anchor") + ` or ` + accentStyle.Render("chapter_title") + ` tags are invalid or website has some protection that prevents page from rendering. 
+`)
 
 			os.Exit(1)
 		}
 
 		pagesNotFound = func(source *Source, manga string, chapter string) {
 			fail()
-			fmt.Printf("Pages for %s %s are not found\n\n", accentStyle.Render(manga), accentStyle.Render(chapter))
-			fmt.Printf(
-				"That probably means that %s or %s tags are invalid or website has some protection that prevents page from rendering\n",
-				accentStyle.Render("page_anchor"),
-				accentStyle.Render("page_title"),
-			)
+
+			fmt.Println(`
+Pages for chapter ` + accentStyle.Render(chapter) + ` of manga ` + accentStyle.Render(manga) + ` were not found
+Was trying to search with address: ` + accentStyle.Render(manga) + `
+That probably means that ` + accentStyle.Render("reader_page") + ` tag is invalid or website has some protection that prevents page from rendering. 
+`)
 
 			os.Exit(1)
 		}
 
 		imageWasNotDownloaded = func(source *Source, manga string, chapter string, page string) {
 			fail()
-			fmt.Printf("Image for %s %s %s is not downloaded\n\n", accentStyle.Render(manga), accentStyle.Render(chapter), accentStyle.Render(page))
-			fmt.Printf(
-				"That probably means that %s tag is invalid or website has some protection that prevents page from rendering\n",
-				accentStyle.Render("reader_page"),
-			)
 
+			fmt.Println(`
+Image for page ` + accentStyle.Render(page) + ` of chapter ` + accentStyle.Render(chapter) + ` of manga ` + accentStyle.Render(manga) + ` was not downloaded
+Was trying to download with address: ` + accentStyle.Render(page) + `
+That probably means that website has some protection that prevents image from downloading
+`)
 			os.Exit(1)
 		}
 
 		errorOccured = func(source *Source, action string, err error) {
 			fail()
+
 			fmt.Printf("Error occured while %s\n", action)
 			fmt.Printf("Error: %s\n", err)
 			os.Exit(1)
@@ -136,14 +135,14 @@ func RunDoctor(vebose bool) {
 		fmt.Printf("Checking source %s... ", source.Name)
 		resp, err := http.Get(source.Base)
 		if err != nil {
-			sourceNotAvailable(source)
+			errorOccured(source, "fetching base address", err)
 		}
 
 		_ = resp.Body.Close()
 
 		// check if response is 200
 		if resp.StatusCode != 200 {
-			sourceNotAvailable(source)
+			sourceNotAvailable(source, resp.StatusCode)
 		}
 
 		// try to get any manga page using scraper
@@ -160,7 +159,7 @@ func RunDoctor(vebose bool) {
 		// get chapters for first manga
 		chapters, err := scraper.GetChapters(manga[0])
 		if err != nil {
-			sourceNotAvailable(source)
+			errorOccured(source, "getting chapters", err)
 		}
 
 		// check if chapters is not empty
@@ -187,7 +186,7 @@ func RunDoctor(vebose bool) {
 
 		// check if images is not empty
 		if image.Len() == 0 {
-			imageWasNotDownloaded(source, manga[0].Info, chapters[0].Info, pages[0].Info)
+			imageWasNotDownloaded(source, manga[0].Info, chapters[0].Info, pages[0].Address)
 		}
 
 		ok()
