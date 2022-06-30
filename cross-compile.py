@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 
-VERSION = "2.1.0"
+VERSION = "2.1.1"
 TAG = f"v{VERSION}"
 DESCRIPTION = "The ultimate CLI manga downloader"
 GITHUB = "https://github.com/metafates/mangal"
