@@ -128,7 +128,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 		UI              UIConfig      `toml:"ui"`
 		UseCustomReader bool          `toml:"use_custom_reader"`
 		CustomReader    string        `toml:"custom_reader"`
-		Sources         map[string]Source
+		Sources         map[string]*Source
 		Downloader      DownloaderConfig
 		Anilist         struct {
 			Enabled        bool   `toml:"enabled"`
@@ -169,8 +169,8 @@ func ParseConfig(configString []byte) (*Config, error) {
 		}
 
 		// Create scraper
-		source.Name = sourceName
-		scraper := MakeSourceScraper(&source)
+		scraper := MakeSourceScraper(source)
+		scraper.Source.Name = sourceName
 
 		if !conf.Downloader.CacheImages {
 			scraper.FilesCollector.CacheDir = ""
