@@ -8,7 +8,6 @@ import (
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -28,12 +27,6 @@ The ultimate CLI manga downloader`,
 		incognito, _ := cmd.Flags().GetBool("incognito")
 		initConfig(config, false)
 
-		if !incognito {
-			initAnilist()
-		} else {
-			UserConfig.Anilist.Enabled = false
-		}
-
 		if format, _ := cmd.Flags().GetString("format"); format != "" {
 			UserConfig.Formats.Default = FormatType(format)
 		}
@@ -41,6 +34,12 @@ The ultimate CLI manga downloader`,
 		err := ValidateConfig(UserConfig)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if !incognito {
+			initAnilist()
+		} else {
+			UserConfig.Anilist.Enabled = false
 		}
 
 		var program *tea.Program
@@ -489,128 +488,7 @@ var doctorCmd = &cobra.Command{
 	Long: `Check if ` + Mangal + ` is properly configured.
 It checks if config file is valid and used sources are available`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			ok = func() {
-				fmt.Print(successStyle.Render("OK"))
-				fmt.Println()
-			}
-
-			fail = func() {
-				fmt.Print(failStyle.Render("Fail"))
-				fmt.Println()
-			}
-		)
-
-		fmt.Print("Checking if latest version is used... ")
-		latestVersion, err := FetchLatestVersion()
-		if err != nil {
-			fail()
-			fmt.Printf("Can't find latest version\nRun %s to get more information\n", accentStyle.Render("mangal latest"))
-			os.Exit(1)
-		} else if latestVersion > Version {
-			fail()
-			fmt.Printf("New version of %s is available: %s\n", Mangal, accentStyle.Render(latestVersion))
-			fmt.Printf("Run %s to get more information\n", accentStyle.Render("mangal latest"))
-			os.Exit(1)
-		} else {
-			ok()
-		}
-
-		fmt.Print("Checking config... ")
-		UserConfig = GetConfig("")
-
-		err = ValidateConfig(UserConfig)
-		if err != nil {
-			fail()
-			fmt.Printf("Config error: %s\n", err)
-			os.Exit(1)
-		}
-
-		ok()
-
-		var sourceNotAvailable = func(source *Source) {
-			fail()
-			fmt.Printf("Source %s is not available\n", source.Name)
-			fmt.Printf("Try to reinitialize your config with %s\n", accentStyle.Render("mangal config init --force"))
-			fmt.Println("Note, that this will overwrite your current config")
-			os.Exit(1)
-		}
-
-		scanner := bufio.NewScanner(os.Stdin)
-
-		// check if scraper sources are online
-		for _, scraper := range UserConfig.Scrapers {
-			source := scraper.Source
-
-			// read line from stdin
-			fmt.Printf("Please, enter a manga title to test %s: ", source.Name)
-			scanner.Scan()
-
-			if scanner.Err() != nil {
-				fail()
-				fmt.Printf("Error while reading from stdin: %s\n", err)
-				os.Exit(1)
-			}
-
-			fmt.Printf("Checking source %s... ", source.Name)
-			resp, err := http.Get(source.Base)
-			if err != nil {
-				sourceNotAvailable(source)
-			}
-
-			_ = resp.Body.Close()
-
-			// check if response is 200
-			if resp.StatusCode != 200 {
-				sourceNotAvailable(source)
-			}
-
-			// try to get any manga page using scraper
-			manga, err := scraper.SearchManga(scanner.Text())
-			if err != nil {
-				sourceNotAvailable(source)
-			}
-
-			// check if manga is not empty
-			if len(manga) == 0 {
-				sourceNotAvailable(source)
-			}
-
-			// get chapters for first manga
-			chapters, err := scraper.GetChapters(manga[0])
-			if err != nil {
-				sourceNotAvailable(source)
-			}
-
-			// check if chapters is not empty
-			if len(chapters) == 0 {
-				sourceNotAvailable(source)
-			}
-
-			// get pages for first chapter
-			pages, err := scraper.GetPages(chapters[0])
-			if err != nil {
-				sourceNotAvailable(source)
-			}
-
-			// check if pages is not empty
-			if len(pages) == 0 {
-				sourceNotAvailable(source)
-			}
-
-			// try to download first page
-			image, err := scraper.GetFile(pages[0])
-			if err != nil {
-				sourceNotAvailable(source)
-			}
-
-			// check if images is not empty
-			if image.Len() == 0 {
-				sourceNotAvailable(source)
-			}
-
-			ok()
-		}
+		RunDoctor()
 	},
 }
 

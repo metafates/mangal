@@ -42,9 +42,9 @@ type FormatsConfig struct {
 
 type Config struct {
 	Scrapers   []*Scraper
-	Formats    FormatsConfig
-	UI         UIConfig
-	Downloader DownloaderConfig
+	Formats    *FormatsConfig
+	UI         *UIConfig
+	Downloader *DownloaderConfig
 	Anilist    struct {
 		Client         *AnilistClient
 		Enabled        bool
@@ -128,7 +128,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 		UI              UIConfig      `toml:"ui"`
 		UseCustomReader bool          `toml:"use_custom_reader"`
 		CustomReader    string        `toml:"custom_reader"`
-		Sources         map[string]Source
+		Sources         map[string]*Source
 		Downloader      DownloaderConfig
 		Anilist         struct {
 			Enabled        bool   `toml:"enabled"`
@@ -148,36 +148,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 		return nil, err
 	}
 
-	// Convert sources listed in tempConfig to Scrapers
-	for sourceName, source := range tempConf.Sources {
-		// If source is not listed in Use then skip it
-		if !Contains[string](tempConf.Use, sourceName) {
-			continue
-		}
-
-		// Create scraper
-		source.Name = sourceName
-		scraper := MakeSourceScraper(&source)
-
-		if !conf.Downloader.CacheImages {
-			scraper.FilesCollector.CacheDir = ""
-		}
-
-		conf.Scrapers = append(conf.Scrapers, scraper)
-	}
-
-	conf.UI = tempConf.UI
-	if tempConf.UI.ChapterNameTemplate == "" {
-		tempConf.UI.ChapterNameTemplate = "[%d] %s"
-	}
-
-	// Default format is pdf
-	conf.Formats = tempConf.Formats
-	if conf.Formats.Default == "" {
-		conf.Formats.Default = PDF
-	}
-
-	conf.Downloader = tempConf.Downloader
+	conf.Downloader = &tempConf.Downloader
 	if conf.Downloader.ChapterNameTemplate == "" {
 		conf.Downloader.ChapterNameTemplate = "[%d] %s"
 	}
@@ -188,6 +159,35 @@ func ParseConfig(configString []byte) (*Config, error) {
 			return nil, err
 		}
 		conf.Downloader.Path = strings.ReplaceAll(conf.Downloader.Path, "$HOME", home)
+	}
+
+	// Convert sources listed in tempConfig to Scrapers
+	for sourceName, source := range tempConf.Sources {
+		// If source is not listed in Use then skip it
+		if !Contains[string](tempConf.Use, sourceName) {
+			continue
+		}
+
+		// Create scraper
+		scraper := MakeSourceScraper(source)
+		scraper.Source.Name = sourceName
+
+		if !conf.Downloader.CacheImages {
+			scraper.FilesCollector.CacheDir = ""
+		}
+
+		conf.Scrapers = append(conf.Scrapers, scraper)
+	}
+
+	conf.UI = &tempConf.UI
+	if tempConf.UI.ChapterNameTemplate == "" {
+		tempConf.UI.ChapterNameTemplate = "[%d] %s"
+	}
+
+	// Default format is pdf
+	conf.Formats = &tempConf.Formats
+	if conf.Formats.Default == "" {
+		conf.Formats.Default = PDF
 	}
 
 	conf.UseCustomReader = tempConf.UseCustomReader

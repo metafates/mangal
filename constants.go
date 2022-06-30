@@ -3,7 +3,7 @@ package main
 import "time"
 
 // Version is the current version of the program.
-const Version = "2.1.0"
+const Version = "2.1.1"
 
 // Mangal is a name of application
 // I keep it in a constant to avoid typos
@@ -24,6 +24,9 @@ const TestQuery = "Death Note"
 // Forever is a constant for inifite time duration.
 // It approximates to 292 years
 const Forever = time.Duration(1<<63 - 1)
+
+// Referer is a default referer for requests
+const Referer = "https://www.google.com"
 
 var AvailableFormats = []FormatType{PDF, CBZ, Plain, Zip, Epub}
 var FormatsInfo = map[FormatType]string{

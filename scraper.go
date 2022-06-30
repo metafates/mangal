@@ -27,7 +27,7 @@ type Scraper struct {
 	Chapters map[string][]*URL
 	// Pages maps chapter url with pages urls
 	Pages map[string][]*URL
-	Files sync.Map
+	Files *sync.Map
 }
 
 // URL represents an url with relation to another url with useful information
@@ -48,7 +48,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		Manga:    make(map[string][]*URL),
 		Chapters: make(map[string][]*URL),
 		Pages:    make(map[string][]*URL),
-		Files:    sync.Map{},
+		Files:    &sync.Map{},
 	}
 
 	var (
@@ -73,7 +73,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 
 	// Prevent scraper from being blocked
 	mangaCollector.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("Referer", "https://www.google.com/")
+		r.Headers.Set("Referer", Referer)
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 		r.Headers.Set("Host", source.Base)
@@ -104,7 +104,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 	// Paths collector
 	chaptersCollector := collector.Clone()
 	chaptersCollector.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("Referer", "https://www.google.com/")
+		r.Headers.Set("Referer", Referer)
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 		r.Headers.Set("Host", source.Base)
@@ -122,18 +122,24 @@ func MakeSourceScraper(source *Source) *Scraper {
 		})
 
 		// Get all chapter titles
-		html.ForEach(source.ChapterTitle, func(i int, e *colly.HTMLElement) {
+		html.ForEachWithBreak(source.ChapterTitle, func(i int, e *colly.HTMLElement) bool {
 			title := strings.TrimSpace(e.Text)
 			path := e.Request.AbsoluteURL(e.Request.URL.Path)
-			if e.Index < len(scraper.Chapters[path]) {
-				scraper.Chapters[path][e.Index].Info = title
+
+			if e.Index >= len(scraper.Chapters[path]) {
+				return false
 			}
+
+			scraper.Chapters[path][e.Index].Info = title
+			return true
 		})
 
-		// Add chapters indexes
-		length := len(urls)
-		for _, u := range urls {
-			u.Index = IfElse(source.ChaptersReversed, length-u.Index, u.Index)
+		// Reverse chapters indexes
+		if source.ChaptersReversed {
+			length := len(urls)
+			for _, u := range urls {
+				u.Index = length - u.Index
+			}
 		}
 	})
 	_ = chaptersCollector.Limit(&colly.LimitRule{
@@ -145,7 +151,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 	// Pages collector
 	pagesCollector := collector.Clone()
 	pagesCollector.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("Referer", "https://www.google.com/")
+		r.Headers.Set("Referer", Referer)
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 	})
@@ -286,5 +292,5 @@ func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
 
 // ResetFiles resets scraper files cache
 func (s *Scraper) ResetFiles() {
-	s.Files = sync.Map{}
+	s.Files = &sync.Map{}
 }
