@@ -171,7 +171,6 @@ func PackToCBZ(images []*bytes.Buffer, destination string, context *PackerContex
 
 func generateComicInfo(context *PackerContext) string {
 	return `
-<?xml version="1.0"?>
 <ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Title>` + context.Chapter.Info + `</Title>
   <Series>` + context.Manga.Info + `</Series>
