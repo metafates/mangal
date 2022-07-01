@@ -221,6 +221,16 @@ func AnilistCacheFile() (string, error) {
 	return filepath.Join(dir, CachePrefix+"-anilist.json"), nil
 }
 
+// HistoryFile returns the history file path
+func HistoryFile() (string, error) {
+	dir, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, CachePrefix+"-history.json"), nil
+}
+
 // MapKeys returns the keys of a map
 func MapKeys[T comparable, G any](m map[T]G) []T {
 	keys := make([]T, len(m))
@@ -232,4 +242,22 @@ func MapKeys[T comparable, G any](m map[T]G) []T {
 	}
 
 	return keys
+}
+
+// RemoveIfExists removes file if it exists
+func RemoveIfExists(path string) error {
+	exists, err := Afero.Exists(path)
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		err = Afero.Remove(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
