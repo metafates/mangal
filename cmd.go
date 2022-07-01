@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -13,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -24,6 +26,7 @@ var rootCmd = &cobra.Command{
 The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
+		resume, _ := cmd.Flags().GetBool("resume")
 		incognito, _ := cmd.Flags().GetBool("incognito")
 		initConfig(config, false)
 
@@ -53,7 +56,31 @@ The ultimate CLI manga downloader`,
 			commonStyle.Margin(1, 1)
 		}
 
-		bubble = NewBubble(searchState)
+		if resume {
+			HistoryMode = true
+
+			bubble = NewBubble(resumeState)
+
+			history, err := ReadHistory()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			var items []list.Item
+
+			for _, item := range history {
+				items = append(items, item)
+			}
+
+			sort.Slice(items, func(i, j int) bool {
+				return items[i].(*HistoryEntry).Manga.Info < items[j].(*HistoryEntry).Manga.Info
+			})
+
+			bubble.resumeList.SetItems(items)
+		} else {
+			bubble = NewBubble(searchState)
+		}
 
 		program := tea.NewProgram(bubble, options...)
 
@@ -523,6 +550,7 @@ func init() {
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 	rootCmd.Flags().StringP("format", "f", "", "use custom format")
 	rootCmd.Flags().BoolP("incognito", "i", false, "will not sync with anilist even if enabled")
+	rootCmd.Flags().BoolP("resume", "r", false, "resume reading")
 	_ = rootCmd.MarkFlagFilename("config", "toml")
 	_ = rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return Map(AvailableFormats, ToString[FormatType]), cobra.ShellCompDirectiveDefault

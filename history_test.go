@@ -18,7 +18,7 @@ func RemoveHistoryFile(t *testing.T) {
 	}
 }
 
-func SampleData(t *testing.T) (*URL, *URL) {
+func SampleChapter(t *testing.T) *URL {
 	t.Helper()
 
 	manga := &URL{
@@ -27,12 +27,14 @@ func SampleData(t *testing.T) (*URL, *URL) {
 	}
 
 	chapter := &URL{
-		Address: "https://anilist.co/chapter/1",
-		Index:   1,
-		Info:    "test chapter",
+		Address:  "https://anilist.co/chapter/1",
+		Index:    1,
+		Info:     "test chapter",
+		Relation: manga,
+		Scraper:  UserConfig.Scrapers[0],
 	}
 
-	return manga, chapter
+	return chapter
 }
 
 func TestReadHistory(t *testing.T) {
@@ -54,9 +56,9 @@ func TestReadHistory(t *testing.T) {
 func TestWriteHistory(t *testing.T) {
 	RemoveHistoryFile(t)
 
-	manga, chapter := SampleData(t)
+	chapter := SampleChapter(t)
 
-	err := WriteHistory(manga, chapter)
+	err := WriteHistory(chapter)
 
 	if err != nil {
 		t.Fatal(err)
@@ -72,6 +74,8 @@ func TestWriteHistory(t *testing.T) {
 		t.Error("history must be of length 1")
 	}
 
+	manga := chapter.Relation
+
 	if history[manga.Address] == nil {
 		t.Error("history entry must not be nil")
 	}
@@ -84,7 +88,7 @@ func TestWriteHistory(t *testing.T) {
 		t.Error("manga info must be equal")
 	}
 
-	if history[manga.Address].Chapter != chapter.Index {
+	if history[manga.Address].Chapter.Index != chapter.Index {
 		t.Error("chapter index must be equal")
 	}
 

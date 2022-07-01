@@ -1,13 +1,35 @@
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strconv"
+	"strings"
+)
 
 type HistoryEntry struct {
-	Manga   *URL
-	Chapter int
+	Manga      *URL
+	Chapter    *URL
+	SourceName string
 }
 
-func WriteHistory(manga *URL, chapter *URL) error {
+func (h *HistoryEntry) Title() string {
+	return h.Manga.Info
+}
+
+func (h *HistoryEntry) Description() string {
+	// replace according to the name description
+	description := strings.ReplaceAll(UserConfig.UI.ChapterNameTemplate, "%0d", PadZeros(h.Chapter.Index, 4))
+	description = strings.ReplaceAll(description, "%d", strconv.Itoa(h.Chapter.Index))
+	description = strings.ReplaceAll(description, "%s", h.Chapter.Info)
+
+	return description
+}
+
+func (h *HistoryEntry) FilterValue() string {
+	return h.Manga.Info
+}
+
+func WriteHistory(chapter *URL) error {
 	historyFile, err := HistoryFile()
 
 	if err != nil {
@@ -20,9 +42,10 @@ func WriteHistory(manga *URL, chapter *URL) error {
 		return err
 	}
 
-	history[manga.Address] = &HistoryEntry{
-		Manga:   manga,
-		Chapter: chapter.Index,
+	history[chapter.Relation.Address] = &HistoryEntry{
+		Manga:      chapter.Relation,
+		Chapter:    chapter,
+		SourceName: chapter.Scraper.Source.Name,
 	}
 
 	historyJSON, err := json.Marshal(history)
@@ -63,6 +86,19 @@ func ReadHistory() (map[string]*HistoryEntry, error) {
 	var historyEntries map[string]*HistoryEntry
 
 	err = json.Unmarshal(history, &historyEntries)
+
+	for k, entry := range historyEntries {
+		scraper, ok := Find(UserConfig.Scrapers, func(scraper *Scraper) bool {
+			return scraper.Source.Name == entry.SourceName
+		})
+
+		if !ok {
+			delete(historyEntries, k)
+		}
+
+		entry.Manga.Scraper = scraper
+		entry.Chapter.Scraper = scraper
+	}
 
 	if err != nil {
 		return nil, err
