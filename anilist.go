@@ -131,7 +131,7 @@ func (a *AnilistClient) Login(code string) error {
 // SavePreferences saves the preferences to the file
 func (a *AnilistClient) SavePreferences() error {
 	// get anilist file
-	anilistFile, err := UserAnilistConfigFile()
+	anilistFile, err := AnilistCacheFile()
 
 	if err != nil {
 		return err
@@ -195,7 +195,7 @@ func (a *AnilistClient) SavePreferences() error {
 // LoadPreferences loads the preferences from the file
 func (a *AnilistClient) LoadPreferences() error {
 	// get anilist file
-	anilistFile, err := UserAnilistConfigFile()
+	anilistFile, err := AnilistCacheFile()
 
 	if err != nil {
 		return err

@@ -39,6 +39,43 @@ var (
 				Padding(0, 1)
 )
 
+type bubbleState int
+
+const (
+	searchState bubbleState = iota + 1
+	loadingState
+	mangaState
+	chaptersState
+	confirmPromptState
+	downloadingState
+	exitPromptState
+)
+
+// Bubble is the main component of the application
+type Bubble struct {
+	state   bubbleState
+	loading bool
+
+	keyMap *keyMap
+
+	input        *textinput.Model
+	spinner      *spinner.Model
+	mangaList    *list.Model
+	chaptersList *list.Model
+	progress     *progress.Model
+	help         *help.Model
+
+	mangaChan                chan []*URL
+	chaptersChan             chan []*URL
+	chaptersProgressChan     chan ChaptersDownloadProgress
+	chapterPagesProgressChan chan ChapterDownloadProgress
+
+	chapterDownloadProgressInfo  ChapterDownloadProgress
+	chaptersDownloadProgressInfo ChaptersDownloadProgress
+
+	selectedChapters map[int]interface{}
+}
+
 // keyMap is a map of key bindings for the bubble.
 type keyMap struct {
 	state bubbleState
@@ -263,43 +300,6 @@ func NewBubble(initialState bubbleState) *Bubble {
 	bubble_.resize(width, height)
 	bubble_.input.Focus()
 	return &bubble_
-}
-
-type bubbleState int
-
-const (
-	searchState bubbleState = iota + 1
-	loadingState
-	mangaState
-	chaptersState
-	confirmPromptState
-	downloadingState
-	exitPromptState
-)
-
-// Bubble is the main component of the application
-type Bubble struct {
-	state   bubbleState
-	loading bool
-
-	keyMap *keyMap
-
-	input        *textinput.Model
-	spinner      *spinner.Model
-	mangaList    *list.Model
-	chaptersList *list.Model
-	progress     *progress.Model
-	help         *help.Model
-
-	mangaChan                chan []*URL
-	chaptersChan             chan []*URL
-	chaptersProgressChan     chan ChaptersDownloadProgress
-	chapterPagesProgressChan chan ChapterDownloadProgress
-
-	chapterDownloadProgressInfo  ChapterDownloadProgress
-	chaptersDownloadProgressInfo ChaptersDownloadProgress
-
-	selectedChapters map[int]interface{}
 }
 
 // listItem is a list item used in the manga and chapters lists

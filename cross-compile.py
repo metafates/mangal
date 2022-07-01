@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 
-VERSION = "2.1.1"
+VERSION = "2.2.0"
 TAG = f"v{VERSION}"
 DESCRIPTION = "The ultimate CLI manga downloader"
 GITHUB = "https://github.com/metafates/mangal"
@@ -251,6 +251,10 @@ Maintainer: metafates <fates@duck.com>
 
 
 def generate_deb_packages():
+    """
+    Generates deb packages for all architectures.
+    """
+
     # check if dpkg-deb is installed
     try:
         subprocess.check_output(["dpkg-deb", "--version"])
@@ -270,32 +274,30 @@ def generate_docker_image():
     docker_image = f"""
 FROM alpine:latest
 
-ENV USER=abc
-ENV UID=1000
-ENV GID=1000
+ENV MANGAL_VERSION={TAG}
+ENV MANGAL_CONFIG_PATH=/config/mangal.toml
+ENV MANGAL_DOWNLOAD_PATH=/downloads
+ENV MANGAL_USER=abc
+ENV MANGAL_UID=1000
+ENV MANGAL_GID=1000
 
-ENV XDG_CONFIG_HOME=/config
+WORKDIR "/config"
 
-WORKDIR /config
-
-VOLUME /config
-
-RUN addgroup -g "$GID" "$USER"
-
-RUN adduser \
+RUN mkdir -p "${{MANGAL_DOWNLOAD_PATH}}" && addgroup -g "${{MANGAL_GID}}" "${{MANGAL_USER}}" && adduser \
     --disabled-password \
     --gecos "" \
     --home "$(pwd)" \
-    --ingroup "$USER" \
+    --ingroup "${{MANGAL_USER}}" \
     --no-create-home \
-    --uid "$UID" \
-    "$USER"
+    --uid "${{MANGAL_UID}}" \
+    "${{MANGAL_USER}}" && \
+    chown abc:abc /config "${{MANGAL_DOWNLOAD_PATH}}"
 
-ADD {GITHUB}/releases/download/{TAG}/{BIN}-linux-amd64 /usr/local/bin/{BIN}
+ADD https://github.com/metafates/mangal/releases/download/${{MANGAL_VERSION}}/{BIN}-linux-amd64 /usr/local/bin/{BIN}
 
 RUN chmod +x /usr/local/bin/{BIN}
 
-USER abc
+USER "${{MANGAL_USER}}"
 
 ENTRYPOINT ["/usr/local/bin/{BIN}"]
 """

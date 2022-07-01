@@ -201,6 +201,7 @@ func UserConfigDir() (string, error) {
 	return filepath.Join(dir, strings.ToLower(Mangal)), nil
 }
 
+// UserConfigFile returns the user config file path
 func UserConfigFile() (string, error) {
 	dir, err := UserConfigDir()
 	if err != nil {
@@ -210,13 +211,14 @@ func UserConfigFile() (string, error) {
 	return filepath.Join(dir, "config.toml"), nil
 }
 
-func UserAnilistConfigFile() (string, error) {
-	dir, err := UserConfigDir()
+// AnilistCacheFile returns the anilist cache file path
+func AnilistCacheFile() (string, error) {
+	dir, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(dir, "anilist.json"), nil
+	return filepath.Join(dir, CachePrefix+"-anilist.json"), nil
 }
 
 // MapKeys returns the keys of a map

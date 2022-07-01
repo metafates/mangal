@@ -4,7 +4,7 @@ import "time"
 
 const (
 	// Version is the current version of the program.
-	Version = "2.1.1"
+	Version = "2.2.0"
 
 	// Mangal is a name of application
 	// I keep it in a constant to avoid typos

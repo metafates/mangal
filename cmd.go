@@ -42,14 +42,20 @@ The ultimate CLI manga downloader`,
 			UserConfig.Anilist.Enabled = false
 		}
 
-		var program *tea.Program
+		var (
+			bubble  *Bubble
+			options []tea.ProgramOption
+		)
 
 		if UserConfig.UI.Fullscreen {
-			program = tea.NewProgram(NewBubble(searchState), tea.WithAltScreen())
+			options = append(options, tea.WithAltScreen())
 		} else {
 			commonStyle.Margin(1, 1)
-			program = tea.NewProgram(NewBubble(searchState))
 		}
+
+		bubble = NewBubble(searchState)
+
+		program := tea.NewProgram(bubble, options...)
 
 		if err := program.Start(); err != nil {
 			log.Fatal(err)
@@ -77,44 +83,6 @@ var cleanupCmd = &cobra.Command{
 		bytes += b
 
 		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
-	},
-}
-
-var cleanupAnilistCmd = &cobra.Command{
-	Use:   "anilist",
-	Short: "Remove Anilist cache",
-	Run: func(cmd *cobra.Command, args []string) {
-		// get config dir
-		configDir, err := UserConfigDir()
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// get anilist file
-		anilistFile := filepath.Join(configDir, "anilist.json")
-
-		// check if anilist file exists
-		exists, err := Afero.Exists(anilistFile)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// if anilist file doesn't exist exit
-		if !exists {
-			fmt.Println("Anilist file doesn't exist so nothing to clean up")
-			return
-		}
-
-		// remove anilist file
-		err = Afero.Remove(anilistFile)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println("Anilist file removed")
 	},
 }
 
@@ -521,7 +489,6 @@ func init() {
 
 	cleanupCmd.AddCommand(cleanupTempCmd)
 	cleanupCmd.AddCommand(cleanupCacheCmd)
-	cleanupCmd.AddCommand(cleanupAnilistCmd)
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)
