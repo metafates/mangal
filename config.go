@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/pelletier/go-toml/v2"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -54,22 +53,6 @@ type Config struct {
 	CustomReader    string
 }
 
-// GetConfigPath returns path to config file
-func GetConfigPath() (string, error) {
-	// check if env variable MANGAL_CONFIG is set
-	if v, ok := os.LookupEnv("MANGAL_CONFIG_PATH"); ok {
-		return v, nil
-	}
-
-	configDir, err := os.UserConfigDir()
-
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Join(configDir, strings.ToLower(Mangal), "config.toml"), nil
-}
-
 // DefaultConfig makes default config
 func DefaultConfig() *Config {
 	conf, _ := ParseConfig([]byte(DefaultConfigString))
@@ -89,7 +72,7 @@ func GetConfig(path string) *Config {
 
 	// If path is empty string then default config will be used
 	if path == "" {
-		configPath, err = GetConfigPath()
+		configPath, err = UserConfigFile()
 	} else {
 		configPath = path
 	}
@@ -186,12 +169,19 @@ func ParseConfig(configString []byte) (*Config, error) {
 
 	// Default format is pdf
 	conf.Formats = &tempConf.Formats
-	if conf.Formats.Default == "" {
+	if format, ok := os.LookupEnv(EnvDefaultFormat); ok {
+		conf.Formats.Default = FormatType(format)
+	} else if conf.Formats.Default == "" {
 		conf.Formats.Default = PDF
 	}
 
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
+
+	if customReader := os.Getenv(EnvCustomReader); customReader != "" {
+		conf.UseCustomReader = true
+		conf.CustomReader = customReader
+	}
 
 	if tempConf.Anilist.Enabled {
 		id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret
@@ -205,8 +195,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 		conf.Anilist.MarkDownloaded = tempConf.Anilist.MarkDownloaded
 	}
 
-	// check if env variable MANGAL_DOWNLOADS is set
-	if v, ok := os.LookupEnv("MANGAL_DOWNLOAD_PATH"); ok {
+	if v, ok := os.LookupEnv(EnvDownloadPath); ok {
 		conf.Downloader.Path = v
 	}
 

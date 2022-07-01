@@ -85,14 +85,14 @@ var cleanupAnilistCmd = &cobra.Command{
 	Short: "Remove Anilist cache",
 	Run: func(cmd *cobra.Command, args []string) {
 		// get config dir
-		configDir, err := os.UserConfigDir()
+		configDir, err := UserConfigDir()
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// get anilist file
-		anilistFile := filepath.Join(configDir, Mangal, "anilist.json")
+		anilistFile := filepath.Join(configDir, "anilist.json")
 
 		// check if anilist file exists
 		exists, err := Afero.Exists(anilistFile)
@@ -269,7 +269,7 @@ var configWhereCmd = &cobra.Command{
 	Short: "Show config location",
 	Long:  "Show path where config is located if it exists.\nOtherwise show path where it is expected to be",
 	Run: func(cmd *cobra.Command, args []string) {
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Can't get config location, permission denied, probably")
@@ -294,7 +294,7 @@ var configPreviewCmd = &cobra.Command{
 	Short: "Preview current config",
 	Long:  "Preview current config.\nIt will use `bat` to preview the config file if possible",
 	Run: func(cmd *cobra.Command, args []string) {
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Permission to config file was denied")
@@ -344,7 +344,7 @@ var configEditCmd = &cobra.Command{
 	Short: "Edit config in the default editor",
 	Long:  "Edit config in the default editor.\nIf config doesn't exist, it will be created",
 	Run: func(cmd *cobra.Command, args []string) {
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Permission to config file was denied")
@@ -365,7 +365,7 @@ var configInitCmd = &cobra.Command{
 		force, _ := cmd.Flags().GetBool("force")
 		clean, _ := cmd.Flags().GetBool("clean")
 
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Can't get config location, permission denied, probably")
@@ -422,7 +422,7 @@ var configRemoveCmd = &cobra.Command{
 	Short: "Remove config",
 	Long:  "Remove config.\nIf config doesn't exist, it will not be removed",
 	Run: func(cmd *cobra.Command, args []string) {
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Can't get config location, permission denied, probably")
@@ -492,6 +492,29 @@ It checks if config file is valid and used sources are available`,
 	},
 }
 
+var envCmd = &cobra.Command{
+	Use:   "env",
+	Short: "Show environment variables",
+	Long:  "Show environment variables and their values",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(boldStyle.Render("Available environment variables"))
+		fmt.Println()
+
+		for envVar, description := range AvailableEnvVars {
+			value, isSet := os.LookupEnv(envVar)
+			fmt.Printf("%s - %s\n", accentStyle.Render(envVar), description)
+
+			if isSet {
+				fmt.Printf("%s - %s\n", "Value", value)
+			} else {
+				fmt.Printf("%s - %s\n", "Value", failStyle.Render("Not set"))
+			}
+
+			fmt.Println()
+		}
+	},
+}
+
 // Adds all child commands to the root command and sets flags appropriately.
 func init() {
 	rootCmd.AddCommand(versionCmd)
@@ -541,6 +564,7 @@ func init() {
 	rootCmd.AddCommand(formatsCmd)
 	rootCmd.AddCommand(latestCmd)
 	rootCmd.AddCommand(doctorCmd)
+	rootCmd.AddCommand(envCmd)
 }
 
 // CmdExecute executes root command
