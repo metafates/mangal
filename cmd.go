@@ -346,6 +346,17 @@ var configEditCmd = &cobra.Command{
 			log.Fatal("Permission to config file was denied")
 		}
 
+		// check if config file exists
+		exists, err := Afero.Exists(configPath)
+		if err != nil {
+			log.Fatal("Permission to config file was denied")
+		}
+
+		if !exists {
+			fmt.Println("Config doesn't exist, nothing to edit")
+			os.Exit(0)
+		}
+
 		err = open.Start(configPath)
 		if err != nil {
 			log.Fatal("Can't open editor")
