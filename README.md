@@ -39,9 +39,11 @@ written in Go with support for different formats
 
 🦎 TUI & Inline modes. Use it as a standalone app or integrate with scripts
 
-🚀 It's fast. Parallel downloader is capable of downloading ~1GB per minute
+🚀 It's fast. Mangal uses multithreading to speed up the process
 
 🍥 Integration with Anilist! __BETA__
+
+⏳ History mode
 
 🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
 
@@ -103,7 +105,10 @@ Config is located at the OS default config directory.
 </details>
 
 
-You can load config from custom path by using `--config` flag or by setting `MANGAL_CONFIG_PATH` environment variable.
+You can load config from custom path by using `--config` flag or
+by setting `MANGAL_CONFIG_PATH` environment variable.
+
+> Type `mangal env` to show all supported environment variables
 
 
 By default, Mangal uses [manganelo](https://m.manganelo.com/www) as a source
@@ -183,7 +188,7 @@ prompt = ">"
 placeholder = "What shall we look for?"
 
 # Selected chapter mark
-mark = "▼"
+mark = "*"
 
 # Search window title
 title = "Mangal"
@@ -241,6 +246,7 @@ Available Commands:
   completion  Generate the autocompletion script for the specified shell
   config      Config actions
   doctor      Run this in case of any errors
+  env         Show environment variables
   formats     Information about available formats
   help        Help about any command
   inline      Search & Download manga in inline mode
@@ -251,7 +257,8 @@ Flags:
   -c, --config string   use config from path
   -f, --format string   use custom format
   -h, --help            help for mangal
-  -i, --incognito       will not sync with anilist even if enabled
+  -i, --incognito       do not save history
+  -r, --resume          resume reading
 
 Use "mangal [command] --help" for more information about a command.
 ```
