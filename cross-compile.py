@@ -275,7 +275,7 @@ def generate_docker_image():
 FROM alpine:latest
 
 ENV MANGAL_VERSION={TAG}
-ENV MANGAL_CONFIG_PATH=/config/mangal.toml
+ENV MANGAL_CONFIG_PATH=/config
 ENV MANGAL_DOWNLOAD_PATH=/downloads
 ENV MANGAL_USER=abc
 ENV MANGAL_UID=1000
