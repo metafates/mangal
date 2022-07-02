@@ -68,7 +68,9 @@ please [open an issue](https://github.com/metafates/mangal/issues/new?assignees=
 
 ### TUI usage example
 
-https://user-images.githubusercontent.com/62389790/174574562-011f9c30-db6f-45a9-9ce2-03973564ace0.mov
+https://user-images.githubusercontent.com/62389790/177008719-355abc74-41c2-4e03-a7cd-ea5c2705537d.mov
+
+https://user-images.githubusercontent.com/62389790/177008929-8c6d1c9e-a892-4479-a003-b83cfe658309.mov
 
 ### Inline mode usage example
 
