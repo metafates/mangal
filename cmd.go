@@ -42,6 +42,7 @@ The ultimate CLI manga downloader`,
 		if !incognito {
 			initAnilist()
 		} else {
+			IncognitoMode = true
 			UserConfig.Anilist.Enabled = false
 		}
 
@@ -549,7 +550,7 @@ func init() {
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 	rootCmd.Flags().StringP("format", "f", "", "use custom format")
-	rootCmd.Flags().BoolP("incognito", "i", false, "will not sync with anilist even if enabled")
+	rootCmd.Flags().BoolP("incognito", "i", false, "do not save history")
 	rootCmd.Flags().BoolP("resume", "r", false, "resume reading")
 	_ = rootCmd.MarkFlagFilename("config", "toml")
 	_ = rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

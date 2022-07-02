@@ -22,6 +22,8 @@ import (
 )
 
 var (
+	IncognitoMode = false
+
 	HistoryMode = false
 	// HistoryChapterIndex is the index of the chapter in the history
 	// That's a hack to make passing the chapter index between states possible
@@ -39,13 +41,13 @@ var (
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
 	failStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	mangaListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#9f86c0")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#9f86c0")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 	chaptersListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#e0b1cb")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#e0b1cb")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 )
 
 type bubbleState int
@@ -100,6 +102,7 @@ type keyMap struct {
 	Read      key.Binding
 	Retry     key.Binding
 	Back      key.Binding
+	Filter    key.Binding
 
 	Up    key.Binding
 	Down  key.Binding
@@ -116,7 +119,7 @@ type keyMap struct {
 func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 	switch state {
 	case resumeState:
-		return []key.Binding{k.Select, k.Confirm, k.Back}
+		return []key.Binding{k.Select, k.Confirm, k.Back, k.Filter}
 	case searchState:
 		return []key.Binding{k.Confirm, k.ForceQuit}
 	case loadingState:
@@ -142,7 +145,7 @@ func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 func (k keyMap) fullHelpFor(state bubbleState) []key.Binding {
 	switch state {
 	case resumeState:
-		return []key.Binding{k.Select, k.Confirm, k.Back}
+		return []key.Binding{k.Select, k.Confirm, k.Back, k.Filter}
 	case searchState:
 		return []key.Binding{k.Confirm, k.ForceQuit}
 	case loadingState:
@@ -208,6 +211,9 @@ func NewBubble(initialState bubbleState) *Bubble {
 		Retry: key.NewBinding(
 			key.WithKeys("r"),
 			key.WithHelp("r", "retry")),
+		Filter: key.NewBinding(
+			key.WithKeys("/"),
+			key.WithHelp("/", "filter")),
 		Back: key.NewBinding(
 			key.WithKeys("esc"),
 			key.WithHelp("esc", "back")),
@@ -256,10 +262,10 @@ func NewBubble(initialState bubbleState) *Bubble {
 		PrevPage:             keys.Left,
 		GoToStart:            keys.Top,
 		GoToEnd:              keys.Bottom,
-		Filter:               key.Binding{},
+		Filter:               keys.Filter,
 		ClearFilter:          key.Binding{},
-		CancelWhileFiltering: key.Binding{},
-		AcceptWhileFiltering: key.Binding{},
+		CancelWhileFiltering: keys.Back,
+		AcceptWhileFiltering: keys.Confirm,
 		ShowFullHelp:         keys.Help,
 		CloseFullHelp:        keys.Help,
 		Quit:                 keys.Quit,
@@ -274,7 +280,7 @@ func NewBubble(initialState bubbleState) *Bubble {
 	resumeList.Styles.Title = mangaListTitleStyle
 	resumeList.Styles.Spinner = accentStyle
 	resumeList.Title = "Resume"
-	resumeList.SetFilteringEnabled(false)
+	resumeList.SetFilteringEnabled(true)
 
 	// Create manga list component
 	mangaList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
@@ -657,15 +663,34 @@ func (b *Bubble) handleResumeState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, b.keyMap.Back), key.Matches(msg, b.keyMap.Quit):
+		case key.Matches(msg, b.keyMap.Back):
+			if Contains([]list.FilterState{list.FilterApplied, list.Filtering}, b.resumeList.FilterState()) {
+				b.resumeList.ResetFilter()
+				return b, nil
+			}
+
+			return b, tea.Quit
+		case key.Matches(msg, b.keyMap.Quit):
+			if b.resumeList.FilterState() == list.Filtering {
+				break
+			}
+
 			return b, tea.Quit
 		case key.Matches(msg, b.keyMap.Open):
+			if b.resumeList.FilterState() == list.Filtering {
+				break
+			}
+
 			selected, ok := b.resumeList.SelectedItem().(*HistoryEntry)
 
 			if ok {
 				_ = open.Start(selected.Manga.Address)
 			}
 		case key.Matches(msg, b.keyMap.Select), key.Matches(msg, b.keyMap.Confirm):
+			if key.Matches(msg, b.keyMap.Select) && b.resumeList.FilterState() == list.Filtering {
+				break
+			}
+
 			// do not select twice while loading
 			if b.loading {
 				return b, nil
@@ -686,6 +711,7 @@ func (b *Bubble) handleResumeState(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case chaptersGetDoneMsg:
 		b.loading = false
+		b.resumeList.ResetFilter()
 		b.switchToChapters(msg, HistoryChapterIndex)
 		return b, nil
 	}
@@ -835,7 +861,11 @@ func (b *Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				b.setState(downloadingState)
 
-				_ = WriteHistory(chapter.url)
+				if !IncognitoMode {
+					go func() {
+						_ = WriteHistory(chapter.url)
+					}()
+				}
 
 				return b, tea.Batch(
 					b.progress.SetPercent(0),
