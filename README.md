@@ -388,10 +388,11 @@ You can run it by using
 
 ```bash
 docker pull metafates/mangal
-docker run --rm -ti -v $(PWD)/downloads:/config metafates/mangal
+docker run --rm -ti -v (PWD)/mangal/downloads:/downloads -v (PWD)/mangal/config:/config metafate
+s/mangal
 ```
 
-This will create downloads directory in the current directory and will download manga to it
+This will create `mangal` directory in the current directory and will download manga to `mangal/downloads`
 
 ## Build
 
