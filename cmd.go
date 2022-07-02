@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -13,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -24,6 +26,7 @@ var rootCmd = &cobra.Command{
 The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
+		resume, _ := cmd.Flags().GetBool("resume")
 		incognito, _ := cmd.Flags().GetBool("incognito")
 		initConfig(config, false)
 
@@ -39,17 +42,48 @@ The ultimate CLI manga downloader`,
 		if !incognito {
 			initAnilist()
 		} else {
+			IncognitoMode = true
 			UserConfig.Anilist.Enabled = false
 		}
 
-		var program *tea.Program
+		var (
+			bubble  *Bubble
+			options []tea.ProgramOption
+		)
 
 		if UserConfig.UI.Fullscreen {
-			program = tea.NewProgram(NewBubble(searchState), tea.WithAltScreen())
+			options = append(options, tea.WithAltScreen())
 		} else {
 			commonStyle.Margin(1, 1)
-			program = tea.NewProgram(NewBubble(searchState))
 		}
+
+		if resume {
+			HistoryMode = true
+
+			bubble = NewBubble(resumeState)
+
+			history, err := ReadHistory()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			var items []list.Item
+
+			for _, item := range history {
+				items = append(items, item)
+			}
+
+			sort.Slice(items, func(i, j int) bool {
+				return items[i].(*HistoryEntry).Manga.Info < items[j].(*HistoryEntry).Manga.Info
+			})
+
+			bubble.resumeList.SetItems(items)
+		} else {
+			bubble = NewBubble(searchState)
+		}
+
+		program := tea.NewProgram(bubble, options...)
 
 		if err := program.Start(); err != nil {
 			log.Fatal(err)
@@ -77,44 +111,6 @@ var cleanupCmd = &cobra.Command{
 		bytes += b
 
 		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
-	},
-}
-
-var cleanupAnilistCmd = &cobra.Command{
-	Use:   "anilist",
-	Short: "Remove Anilist cache",
-	Run: func(cmd *cobra.Command, args []string) {
-		// get config dir
-		configDir, err := os.UserConfigDir()
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// get anilist file
-		anilistFile := filepath.Join(configDir, Mangal, "anilist.json")
-
-		// check if anilist file exists
-		exists, err := Afero.Exists(anilistFile)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// if anilist file doesn't exist exit
-		if !exists {
-			fmt.Println("Anilist file doesn't exist so nothing to clean up")
-			return
-		}
-
-		// remove anilist file
-		err = Afero.Remove(anilistFile)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println("Anilist file removed")
 	},
 }
 
@@ -269,7 +265,7 @@ var configWhereCmd = &cobra.Command{
 	Short: "Show config location",
 	Long:  "Show path where config is located if it exists.\nOtherwise show path where it is expected to be",
 	Run: func(cmd *cobra.Command, args []string) {
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Can't get config location, permission denied, probably")
@@ -294,7 +290,7 @@ var configPreviewCmd = &cobra.Command{
 	Short: "Preview current config",
 	Long:  "Preview current config.\nIt will use `bat` to preview the config file if possible",
 	Run: func(cmd *cobra.Command, args []string) {
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Permission to config file was denied")
@@ -344,10 +340,21 @@ var configEditCmd = &cobra.Command{
 	Short: "Edit config in the default editor",
 	Long:  "Edit config in the default editor.\nIf config doesn't exist, it will be created",
 	Run: func(cmd *cobra.Command, args []string) {
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Permission to config file was denied")
+		}
+
+		// check if config file exists
+		exists, err := Afero.Exists(configPath)
+		if err != nil {
+			log.Fatal("Permission to config file was denied")
+		}
+
+		if !exists {
+			fmt.Println("Config doesn't exist, nothing to edit")
+			os.Exit(0)
 		}
 
 		err = open.Start(configPath)
@@ -365,7 +372,7 @@ var configInitCmd = &cobra.Command{
 		force, _ := cmd.Flags().GetBool("force")
 		clean, _ := cmd.Flags().GetBool("clean")
 
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Can't get config location, permission denied, probably")
@@ -422,7 +429,7 @@ var configRemoveCmd = &cobra.Command{
 	Short: "Remove config",
 	Long:  "Remove config.\nIf config doesn't exist, it will not be removed",
 	Run: func(cmd *cobra.Command, args []string) {
-		configPath, err := GetConfigPath()
+		configPath, err := UserConfigFile()
 
 		if err != nil {
 			log.Fatal("Can't get config location, permission denied, probably")
@@ -492,13 +499,35 @@ It checks if config file is valid and used sources are available`,
 	},
 }
 
+var envCmd = &cobra.Command{
+	Use:   "env",
+	Short: "Show environment variables",
+	Long:  "Show environment variables and their values",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(boldStyle.Render("Available environment variables"))
+		fmt.Println()
+
+		for envVar, description := range AvailableEnvVars {
+			value, isSet := os.LookupEnv(envVar)
+			fmt.Printf("%s - %s\n", accentStyle.Render(envVar), description)
+
+			if isSet {
+				fmt.Printf("%s - %s\n", "Value", value)
+			} else {
+				fmt.Printf("%s - %s\n", "Value", failStyle.Render("Not set"))
+			}
+
+			fmt.Println()
+		}
+	},
+}
+
 // Adds all child commands to the root command and sets flags appropriately.
 func init() {
 	rootCmd.AddCommand(versionCmd)
 
 	cleanupCmd.AddCommand(cleanupTempCmd)
 	cleanupCmd.AddCommand(cleanupCacheCmd)
-	cleanupCmd.AddCommand(cleanupAnilistCmd)
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)
@@ -532,7 +561,8 @@ func init() {
 
 	rootCmd.Flags().StringP("config", "c", "", "use config from path")
 	rootCmd.Flags().StringP("format", "f", "", "use custom format")
-	rootCmd.Flags().BoolP("incognito", "i", false, "will not sync with anilist even if enabled")
+	rootCmd.Flags().BoolP("incognito", "i", false, "do not save history")
+	rootCmd.Flags().BoolP("resume", "r", false, "resume reading")
 	_ = rootCmd.MarkFlagFilename("config", "toml")
 	_ = rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return Map(AvailableFormats, ToString[FormatType]), cobra.ShellCompDirectiveDefault
@@ -541,6 +571,7 @@ func init() {
 	rootCmd.AddCommand(formatsCmd)
 	rootCmd.AddCommand(latestCmd)
 	rootCmd.AddCommand(doctorCmd)
+	rootCmd.AddCommand(envCmd)
 }
 
 // CmdExecute executes root command

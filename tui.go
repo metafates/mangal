@@ -22,6 +22,17 @@ import (
 )
 
 var (
+	IncognitoMode = false
+
+	HistoryMode = false
+	// HistoryChapterIndex is the index of the chapter in the history
+	// That's a hack to make passing the chapter index between states possible
+	// But I have to admit that it looks very bad :(
+	// TODO: refactor me, please
+	HistoryChapterIndex = 0
+)
+
+var (
 	commonStyle         = lipgloss.NewStyle().Margin(2, 2)
 	accentStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	boldStyle           = lipgloss.NewStyle().Bold(true)
@@ -30,14 +41,53 @@ var (
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
 	failStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	mangaListTitleStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#9f86c0")).
-				Foreground(lipgloss.Color("#231942")).
-				Padding(0, 1)
+		Background(lipgloss.Color("#9f86c0")).
+		Foreground(lipgloss.Color("#231942")).
+		Padding(0, 1)
 	chaptersListTitleStyle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#e0b1cb")).
-				Foreground(lipgloss.Color("#231942")).
-				Padding(0, 1)
+		Background(lipgloss.Color("#e0b1cb")).
+		Foreground(lipgloss.Color("#231942")).
+		Padding(0, 1)
 )
+
+type bubbleState int
+
+const (
+	resumeState bubbleState = iota + 1
+	searchState
+	loadingState
+	mangaState
+	chaptersState
+	confirmPromptState
+	downloadingState
+	exitPromptState
+)
+
+// Bubble is the main component of the application
+type Bubble struct {
+	state   bubbleState
+	loading bool
+
+	keyMap *keyMap
+
+	input        *textinput.Model
+	spinner      *spinner.Model
+	resumeList   *list.Model
+	mangaList    *list.Model
+	chaptersList *list.Model
+	progress     *progress.Model
+	help         *help.Model
+
+	mangaChan                chan []*URL
+	chaptersChan             chan []*URL
+	chaptersProgressChan     chan ChaptersDownloadProgress
+	chapterPagesProgressChan chan ChapterDownloadProgress
+
+	chapterDownloadProgressInfo  ChapterDownloadProgress
+	chaptersDownloadProgressInfo ChaptersDownloadProgress
+
+	selectedChapters map[int]interface{}
+}
 
 // keyMap is a map of key bindings for the bubble.
 type keyMap struct {
@@ -52,6 +102,7 @@ type keyMap struct {
 	Read      key.Binding
 	Retry     key.Binding
 	Back      key.Binding
+	Filter    key.Binding
 
 	Up    key.Binding
 	Down  key.Binding
@@ -67,6 +118,8 @@ type keyMap struct {
 // shortHelpFor returns a short list of key bindings for the given state.
 func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 	switch state {
+	case resumeState:
+		return []key.Binding{k.Select, k.Confirm, k.Back, k.Filter}
 	case searchState:
 		return []key.Binding{k.Confirm, k.ForceQuit}
 	case loadingState:
@@ -91,6 +144,8 @@ func (k keyMap) shortHelpFor(state bubbleState) []key.Binding {
 // fulleHelpFor returns a full list of key bindings for the given state.
 func (k keyMap) fullHelpFor(state bubbleState) []key.Binding {
 	switch state {
+	case resumeState:
+		return []key.Binding{k.Select, k.Confirm, k.Back, k.Filter}
 	case searchState:
 		return []key.Binding{k.Confirm, k.ForceQuit}
 	case loadingState:
@@ -156,6 +211,9 @@ func NewBubble(initialState bubbleState) *Bubble {
 		Retry: key.NewBinding(
 			key.WithKeys("r"),
 			key.WithHelp("r", "retry")),
+		Filter: key.NewBinding(
+			key.WithKeys("/"),
+			key.WithHelp("/", "filter")),
 		Back: key.NewBinding(
 			key.WithKeys("esc"),
 			key.WithHelp("esc", "back")),
@@ -204,15 +262,25 @@ func NewBubble(initialState bubbleState) *Bubble {
 		PrevPage:             keys.Left,
 		GoToStart:            keys.Top,
 		GoToEnd:              keys.Bottom,
-		Filter:               key.Binding{},
+		Filter:               keys.Filter,
 		ClearFilter:          key.Binding{},
-		CancelWhileFiltering: key.Binding{},
-		AcceptWhileFiltering: key.Binding{},
+		CancelWhileFiltering: keys.Back,
+		AcceptWhileFiltering: keys.Confirm,
 		ShowFullHelp:         keys.Help,
 		CloseFullHelp:        keys.Help,
 		Quit:                 keys.Quit,
 		ForceQuit:            keys.ForceQuit,
 	}
+
+	// Create resume list component
+	resumeList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
+	resumeList.KeyMap = listKeyMap
+	resumeList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(mangaState) }
+	resumeList.AdditionalFullHelpKeys = func() []key.Binding { return keys.fullHelpFor(mangaState) }
+	resumeList.Styles.Title = mangaListTitleStyle
+	resumeList.Styles.Spinner = accentStyle
+	resumeList.Title = "Resume"
+	resumeList.SetFilteringEnabled(true)
 
 	// Create manga list component
 	mangaList := list.New(nil, list.NewDefaultDelegate(), 0, 0)
@@ -240,6 +308,7 @@ func NewBubble(initialState bubbleState) *Bubble {
 		keyMap:                       keys,
 		input:                        &input,
 		spinner:                      &spinner_,
+		resumeList:                   &resumeList,
 		mangaList:                    &mangaList,
 		chaptersList:                 &chaptersList,
 		progress:                     &progress_,
@@ -263,43 +332,6 @@ func NewBubble(initialState bubbleState) *Bubble {
 	bubble_.resize(width, height)
 	bubble_.input.Focus()
 	return &bubble_
-}
-
-type bubbleState int
-
-const (
-	searchState bubbleState = iota + 1
-	loadingState
-	mangaState
-	chaptersState
-	confirmPromptState
-	downloadingState
-	exitPromptState
-)
-
-// Bubble is the main component of the application
-type Bubble struct {
-	state   bubbleState
-	loading bool
-
-	keyMap *keyMap
-
-	input        *textinput.Model
-	spinner      *spinner.Model
-	mangaList    *list.Model
-	chaptersList *list.Model
-	progress     *progress.Model
-	help         *help.Model
-
-	mangaChan                chan []*URL
-	chaptersChan             chan []*URL
-	chaptersProgressChan     chan ChaptersDownloadProgress
-	chapterPagesProgressChan chan ChapterDownloadProgress
-
-	chapterDownloadProgressInfo  ChapterDownloadProgress
-	chaptersDownloadProgressInfo ChaptersDownloadProgress
-
-	selectedChapters map[int]interface{}
 }
 
 // listItem is a list item used in the manga and chapters lists
@@ -355,12 +387,14 @@ func (b *Bubble) resize(width int, height int) {
 	if !UserConfig.UI.Fullscreen {
 		b.mangaList.SetSize(0, 0)
 		b.chaptersList.SetSize(0, 0)
+		b.resumeList.SetSize(0, 0)
 		return
 	}
 
 	x, y := commonStyle.GetFrameSize()
 	b.mangaList.SetSize(width-x, height-y)
 	b.chaptersList.SetSize(width-x, height-y)
+	b.resumeList.SetSize(width-x, height-y)
 }
 
 // setState sets the state of the bubble
@@ -407,7 +441,7 @@ func (b *Bubble) waitForMangaSearchCompletion() tea.Cmd {
 	}
 }
 
-type chapterGetDoneMsg []*URL
+type chaptersGetDoneMsg []*URL
 type chapterDownloadProgressMsg ChapterDownloadProgress
 
 // initChaptersGet initializes the chapters get
@@ -434,7 +468,7 @@ func (b *Bubble) initChaptersGet(manga *URL) tea.Cmd {
 // waitForChaptersGetCompletion waits for the chapters get to finish
 func (b *Bubble) waitForChaptersGetCompletion() tea.Cmd {
 	return func() tea.Msg {
-		return chapterGetDoneMsg(<-b.chaptersChan)
+		return chaptersGetDoneMsg(<-b.chaptersChan)
 	}
 }
 
@@ -571,6 +605,122 @@ func (b *Bubble) waitForChapterToReadDownloaded() tea.Cmd {
 	}
 }
 
+func (b *Bubble) switchToChapters(msg chaptersGetDoneMsg, chapterIndex int) {
+	b.setState(chaptersState)
+	var anilistManga *AnilistURL
+
+	if len(msg) > 0 {
+		manga := msg[0].Relation
+		if UserConfig.Anilist.Enabled {
+			anilistManga = UserConfig.Anilist.Client.ToAnilistURL(manga)
+		}
+		b.chaptersList.Title = "Chapters - " + PrettyTrim(manga.Info, 30)
+	} else {
+		b.chaptersList.Title = "Chapters"
+	}
+
+	var items []list.Item
+
+	// Sort according to chapter index, in ascending order
+	sort.Slice(msg, func(i, j int) bool {
+		return msg[i].Index < msg[j].Index
+	})
+
+	for _, url := range msg {
+		items = append(items, &listItem{url: url})
+	}
+
+	var cmds []tea.Cmd
+
+	cmds = append(cmds, b.chaptersList.SetItems(items))
+	if anilistManga != nil {
+		cmds = append(cmds, b.chaptersList.NewStatusMessage("AL: "+PrettyTrim(anilistManga.Title, 25)))
+	}
+	b.mangaList.StopSpinner()
+	b.resumeList.StopSpinner()
+	b.chaptersList.Select(chapterIndex)
+}
+
+type selectIndexMsg int
+
+func (b *Bubble) selectIndex(index int) tea.Cmd {
+	return func() tea.Msg {
+		return selectIndexMsg(index)
+	}
+}
+
+type resumeMsg *HistoryEntry
+
+func (b *Bubble) resumeFromHistory(entry *HistoryEntry) tea.Cmd {
+	return func() tea.Msg {
+		return resumeMsg(entry)
+	}
+}
+
+func (b *Bubble) handleResumeState(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, b.keyMap.Back):
+			if Contains([]list.FilterState{list.FilterApplied, list.Filtering}, b.resumeList.FilterState()) {
+				b.resumeList.ResetFilter()
+				return b, nil
+			}
+
+			return b, tea.Quit
+		case key.Matches(msg, b.keyMap.Quit):
+			if b.resumeList.FilterState() == list.Filtering {
+				break
+			}
+
+			return b, tea.Quit
+		case key.Matches(msg, b.keyMap.Open):
+			if b.resumeList.FilterState() == list.Filtering {
+				break
+			}
+
+			selected, ok := b.resumeList.SelectedItem().(*HistoryEntry)
+
+			if ok {
+				_ = open.Start(selected.Manga.Address)
+			}
+		case key.Matches(msg, b.keyMap.Select), key.Matches(msg, b.keyMap.Confirm):
+			if key.Matches(msg, b.keyMap.Select) && b.resumeList.FilterState() == list.Filtering {
+				break
+			}
+
+			// do not select twice while loading
+			if b.loading {
+				return b, nil
+			}
+
+			selected, ok := b.resumeList.SelectedItem().(*HistoryEntry)
+
+			if ok {
+				b.loading = true
+				HistoryChapterIndex = selected.Chapter.Index - 1
+				return b, tea.Batch(
+					b.resumeList.StartSpinner(),
+					b.initChaptersGet(selected.Manga),
+					b.waitForChaptersGetCompletion(),
+					b.resumeList.StartSpinner(),
+				)
+			}
+		}
+	case chaptersGetDoneMsg:
+		b.loading = false
+		b.resumeList.ResetFilter()
+		b.switchToChapters(msg, HistoryChapterIndex)
+		return b, nil
+	}
+
+	*b.resumeList, cmd = b.resumeList.Update(msg)
+
+	return b, cmd
+}
+
 // handleSearchState handles the search state
 func (b *Bubble) handleSearchState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
@@ -650,39 +800,9 @@ func (b *Bubble) handleMangaState(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return b, tea.Batch(cmd, b.initChaptersGet(selected.url), b.waitForChaptersGetCompletion())
 			}
 		}
-	case chapterGetDoneMsg:
-		b.setState(chaptersState)
+	case chaptersGetDoneMsg:
 		b.loading = false
-		var anilistManga *AnilistURL
-
-		if len(msg) > 0 {
-			manga := msg[0].Relation
-			if UserConfig.Anilist.Enabled {
-				anilistManga = UserConfig.Anilist.Client.ToAnilistURL(manga)
-			}
-			b.chaptersList.Title = "Chapters - " + PrettyTrim(manga.Info, 30)
-		} else {
-			b.chaptersList.Title = "Chapters"
-		}
-
-		var items []list.Item
-
-		// Sort according to chapter index, in ascending order
-		sort.Slice(msg, func(i, j int) bool {
-			return msg[i].Index < msg[j].Index
-		})
-
-		for _, url := range msg {
-			items = append(items, &listItem{url: url})
-		}
-
-		var cmds []tea.Cmd
-
-		cmds = append(cmds, b.chaptersList.SetItems(items))
-		if anilistManga != nil {
-			cmds = append(cmds, b.chaptersList.NewStatusMessage("AL: "+PrettyTrim(anilistManga.Title, 25)))
-		}
-		b.mangaList.StopSpinner()
+		b.switchToChapters(msg, 0)
 		return b, cmd
 	}
 
@@ -704,7 +824,33 @@ func (b *Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.chaptersList.Select(0)
 			b.selectedChapters = make(map[int]interface{})
 
-			b.setState(mangaState)
+			if HistoryMode {
+				b.setState(resumeState)
+
+				// update history entries
+				history, err := ReadHistory()
+
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				var items []list.Item
+
+				for _, item := range history {
+					items = append(items, item)
+				}
+
+				sort.Slice(items, func(i, j int) bool {
+					return items[i].(*HistoryEntry).Manga.Info < items[j].(*HistoryEntry).Manga.Info
+				})
+
+				b.resumeList.SetItems(items)
+			} else {
+				b.setState(mangaState)
+			}
+
+			b.chaptersList.NewStatusMessage("")
+
 			return b, cmd
 		case key.Matches(msg, b.keyMap.Open):
 			item, ok := b.chaptersList.SelectedItem().(*listItem)
@@ -716,6 +862,12 @@ func (b *Bubble) handleChaptersState(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if ok {
 				b.setState(downloadingState)
+
+				if !IncognitoMode {
+					go func() {
+						_ = WriteHistory(chapter.url)
+					}()
+				}
 
 				return b, tea.Batch(
 					b.progress.SetPercent(0),
@@ -902,6 +1054,8 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch b.state {
+	case resumeState:
+		return b.handleResumeState(msg)
 	case searchState:
 		return b.handleSearchState(msg)
 	case loadingState:
@@ -931,6 +1085,8 @@ func (b *Bubble) View() string {
 	template := viewTemplates[b.state]
 
 	switch b.state {
+	case resumeState:
+		view = fmt.Sprintf(template, b.resumeList.View())
 	case searchState:
 		if UserConfig.UI.Title == "" {
 			view = b.input.View()
@@ -987,7 +1143,7 @@ func (b *Bubble) View() string {
 	}
 
 	// Do not add help Bubble at these states, since they already have one
-	if Contains([]bubbleState{mangaState, chaptersState}, b.state) {
+	if Contains([]bubbleState{mangaState, chaptersState, resumeState}, b.state) {
 		return commonStyle.Render(view)
 	}
 
@@ -997,6 +1153,7 @@ func (b *Bubble) View() string {
 
 // viewTemplates is a map of the templates for the different states
 var viewTemplates = map[bubbleState]string{
+	resumeState:        "%s",
 	searchState:        "%s\n\n%s",
 	loadingState:       "%s Searching...",
 	mangaState:         "%s",

@@ -12,24 +12,6 @@ import (
 	"sync"
 )
 
-// RemoveIfExists removes file if it exists
-func RemoveIfExists(path string) error {
-	exists, err := Afero.Exists(path)
-
-	if err != nil {
-		return err
-	}
-
-	if exists {
-		err = Afero.Remove(path)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // SaveTemp saves file to OS temp dir and returns its path
 // It's a caller responsibility to remove created file
 func SaveTemp(buffer *bytes.Buffer) (string, error) {

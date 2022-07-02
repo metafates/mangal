@@ -84,8 +84,6 @@ func TestRemoveCache(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cacheDir = filepath.Join(cacheDir, CachePrefix)
-
 	const count = 13
 
 	files, err := generateFiles(t, count, cacheDir, "")
@@ -99,19 +97,7 @@ func TestRemoveCache(t *testing.T) {
 		t.Fatal("files was not created")
 	}
 
-	countNested, err := os.ReadDir(cacheDir)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	removedCount, _ := RemoveCache()
-
-	if removedCount != len(countNested) {
-		t.Error("removed files count does not match expected count")
-	}
-
-	removedCount, _ = RemoveCache()
 
 	if removedCount != 0 {
 		t.Error("repeated call expected to remove 0 files")

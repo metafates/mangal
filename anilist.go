@@ -7,10 +7,8 @@ import (
 	"fmt"
 	levenshtein "github.com/ka-weihe/fast-levenshtein"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -132,14 +130,12 @@ func (a *AnilistClient) Login(code string) error {
 
 // SavePreferences saves the preferences to the file
 func (a *AnilistClient) SavePreferences() error {
-	// get preferences file location
-	configDir, err := os.UserConfigDir()
+	// get anilist file
+	anilistFile, err := AnilistCacheFile()
+
 	if err != nil {
 		return err
 	}
-
-	// get anilist file
-	anilistFile := filepath.Join(configDir, strings.ToLower(Mangal), "anilist.json")
 
 	// check if parent directory exists and create if not
 	if exists, err := Afero.Exists(filepath.Dir(anilistFile)); err != nil {
@@ -198,14 +194,12 @@ func (a *AnilistClient) SavePreferences() error {
 
 // LoadPreferences loads the preferences from the file
 func (a *AnilistClient) LoadPreferences() error {
-	// get cache dir
-	configDir, err := os.UserConfigDir()
+	// get anilist file
+	anilistFile, err := AnilistCacheFile()
+
 	if err != nil {
 		return err
 	}
-
-	// get anilist file
-	anilistFile := filepath.Join(configDir, strings.ToLower(Mangal), "anilist.json")
 
 	// check if file exists
 	if exists, err := Afero.Exists(anilistFile); err != nil {

@@ -22,18 +22,29 @@ func RemoveCache() (int, int64) {
 		return 0, 0
 	}
 
-	// Check if cache dir exists
-	scraperCacheDir := filepath.Join(cacheDir, CachePrefix)
-	if exists, err := Afero.Exists(scraperCacheDir); err == nil && exists {
-		files, err := Afero.ReadDir(scraperCacheDir)
-		if err == nil {
-			for _, f := range files {
+	files, err := Afero.ReadDir(cacheDir)
+
+	for _, cacheFile := range files {
+		name := cacheFile.Name()
+
+		// Check if file is cache file
+		if strings.HasPrefix(name, CachePrefix) {
+
+			p := filepath.Join(cacheDir, name)
+
+			if cacheFile.IsDir() {
+				b, err := DirSize(p)
+				if err == nil {
+					bytes += b
+				}
+			}
+
+			err = Afero.RemoveAll(p)
+			if err == nil {
+				bytes += cacheFile.Size()
 				counter++
-				bytes += f.Size()
 			}
 		}
-
-		_ = Afero.RemoveAll(scraperCacheDir)
 	}
 
 	return counter, bytes

@@ -7,7 +7,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 // IfElse is a ternary operator equavlient
@@ -180,4 +182,82 @@ func SanitizeFilename(filename string) string {
 // PadZeros pads a number with zeros to a certain length
 func PadZeros(n int, width int) string {
 	return fmt.Sprintf("%0*d", width, n)
+}
+
+// UserConfigDir returns the user config directory
+// If env variable is set it will return that, otherwise it will return the default config directory
+// 	Example: UserConfigDir() => "/home/user/.config/mangal"
+func UserConfigDir() (string, error) {
+	// check if env var is set
+	if dir, ok := os.LookupEnv(EnvConfigPath); ok {
+		return dir, nil
+	}
+
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, strings.ToLower(Mangal)), nil
+}
+
+// UserConfigFile returns the user config file path
+func UserConfigFile() (string, error) {
+	dir, err := UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, "config.toml"), nil
+}
+
+// AnilistCacheFile returns the anilist cache file path
+func AnilistCacheFile() (string, error) {
+	dir, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, CachePrefix+"-anilist.json"), nil
+}
+
+// HistoryFile returns the history file path
+func HistoryFile() (string, error) {
+	dir, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, CachePrefix+"-history.json"), nil
+}
+
+// MapKeys returns the keys of a map
+func MapKeys[T comparable, G any](m map[T]G) []T {
+	keys := make([]T, len(m))
+
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+
+	return keys
+}
+
+// RemoveIfExists removes file if it exists
+func RemoveIfExists(path string) error {
+	exists, err := Afero.Exists(path)
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		err = Afero.Remove(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

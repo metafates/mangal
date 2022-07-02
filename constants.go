@@ -2,33 +2,65 @@ package main
 
 import "time"
 
-// Version is the current version of the program.
-const Version = "2.1.1"
+const (
+	// Version is the current version of the program.
+	Version = "2.2.0"
 
-// Mangal is a name of application
-// I keep it in a constant to avoid typos
-const Mangal = "Mangal"
+	// Mangal is a name of application
+	// I keep it in a constant to avoid typos
+	Mangal = "Mangal"
+	// CachePrefix is prefix of cache files
+	CachePrefix = Mangal + "Cache"
 
-// CachePrefix is prefix of cache files
-const CachePrefix = Mangal + "Cache"
+	// TempPrefix is prefix of temp files
+	TempPrefix = Mangal + "Temp"
 
-// TempPrefix is prefix of temp files
-const TempPrefix = Mangal + "Temp"
+	// Parallelism is number of parallel workers for scraping
+	Parallelism = 100
 
-// Parallelism is number of parallel workers for scraping
-const Parallelism = 100
+	// TestQuery is a default query for testing
+	TestQuery = "Death Note"
 
-// TestQuery is a default query for testing
-const TestQuery = "Death Note"
+	// Forever is a constant for inifite time duration.
+	// It approximates to 292 years
+	Forever = time.Duration(1<<63 - 1)
 
-// Forever is a constant for inifite time duration.
-// It approximates to 292 years
-const Forever = time.Duration(1<<63 - 1)
+	// Referer is a default referer for requests
+	Referer = "https://www.google.com"
 
-// Referer is a default referer for requests
-const Referer = "https://www.google.com"
+	// AsciiArt of the app
+	// I think it looks cool :)
+	AsciiArt = "                                _\n" +
+		"  /\\/\\   __ _ _ __   __ _  __ _| |\n" +
+		" /    \\ / _` | '_ \\ / _` |/ _` | |\n" +
+		"/ /\\/\\ \\ (_| | | | | (_| | (_| | |\n" +
+		"\\/    \\/\\__,_|_| |_|\\__, |\\__,_|_|\n" +
+		"                    |___/         "
+)
 
-var AvailableFormats = []FormatType{PDF, CBZ, Plain, Zip, Epub}
+// Environment variables
+const (
+	// EnvConfigPath points to config directory
+	EnvConfigPath = "MANGAL_CONFIG_PATH"
+
+	// EnvDownloadPath points to download directory
+	EnvDownloadPath = "MANGAL_DOWNLOAD_PATH"
+
+	// EnvDefaultFormat defines default format
+	EnvDefaultFormat = "MANGAL_DEFAULT_FORMAT"
+
+	// EnvCustomReader defines custom reader
+	EnvCustomReader = "MANGAL_CUSTOM_READER"
+)
+
+var AvailableEnvVars = map[string]string{
+	EnvConfigPath:    "Points to the config directory",
+	EnvDownloadPath:  "Points to the downloads directory",
+	EnvDefaultFormat: "Defines default format",
+	EnvCustomReader:  "Defines custom reader",
+}
+
+var AvailableFormats = MapKeys(FormatsInfo)
 var FormatsInfo = map[FormatType]string{
 	PDF:   "Chapters as PDF with images",
 	CBZ:   "Comic book archive format. Basically zip but with .cbz extension",
@@ -36,15 +68,6 @@ var FormatsInfo = map[FormatType]string{
 	Zip:   "Chapters compressed in zip archives",
 	Epub:  "eBook format. Packs multiple chapters into single file",
 }
-
-// AsciiArt of the app
-// I think it looks cool :)
-const AsciiArt = "                                _\n" +
-	"  /\\/\\   __ _ _ __   __ _  __ _| |\n" +
-	" /    \\ / _` | '_ \\ / _` |/ _` | |\n" +
-	"/ /\\/\\ \\ (_| | | | | (_| | (_| | |\n" +
-	"\\/    \\/\\__,_|_| |_|\\__, |\\__,_|_|\n" +
-	"                    |___/         "
 
 // DefaultConfigString is default config in TOML format
 const DefaultConfigString = `
@@ -70,8 +93,6 @@ comicinfo = true
 
 [downloader]
 # Custom download path, can be either relative (to the current directory) or absolute
-# You can use environment variable $HOME to refer to user's home directory
-# If environment variable "MANGAL_DOWNLOAD_PATH" is set, then it will be used instead
 path = '.'
 
 # How chapters should be named when downloaded
@@ -119,7 +140,7 @@ prompt = ">"
 placeholder = "What shall we look for?"
 
 # Selected chapter mark
-mark = "✘"
+mark = "*"
 
 # Search window title
 title = "Mangal"

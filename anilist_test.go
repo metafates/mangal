@@ -2,9 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 )
 
@@ -47,12 +44,11 @@ func TestAnilistClient_SavePreferences(t *testing.T) {
 	}
 
 	// check if file was created
-	configDir, err := os.UserConfigDir()
+	anilistFile, err := AnilistCacheFile()
+
 	if err != nil {
 		t.Error(err)
 	}
-
-	anilistFile := filepath.Join(configDir, strings.ToLower(Mangal), "anilist.json")
 
 	if exists, err := Afero.Exists(anilistFile); err != nil {
 		t.Error(err)
