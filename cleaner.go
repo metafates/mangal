@@ -7,10 +7,10 @@ import (
 )
 
 // RemoveCache removes cache files
-func RemoveCache() (int, int64) {
+func RemoveCache() (uint16, int64) {
 	var (
 		// counter of removed files
-		counter int
+		counter uint16
 		// bytes removed
 		bytes int64
 	)
@@ -51,10 +51,10 @@ func RemoveCache() (int, int64) {
 }
 
 // RemoveTemp removes temp files
-func RemoveTemp() (int, int64) {
+func RemoveTemp() (uint16, int64) {
 	var (
 		// counter of removed files
-		counter int
+		counter uint16
 		// bytes removed
 		bytes int64
 	)

@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -27,7 +26,7 @@ type Scraper struct {
 	Chapters map[string][]*URL
 	// Pages maps chapter url with pages urls
 	Pages map[string][]*URL
-	Files *sync.Map
+	Files *RwMap[string, *bytes.Buffer]
 }
 
 // URL represents an url with relation to another url with useful information
@@ -48,7 +47,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		Manga:    make(map[string][]*URL),
 		Chapters: make(map[string][]*URL),
 		Pages:    make(map[string][]*URL),
-		Files:    &sync.Map{},
+		Files:    &RwMap[string, *bytes.Buffer]{data: make(map[string]*bytes.Buffer)},
 	}
 
 	var (
@@ -190,7 +189,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		r.Headers.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
 	})
 	filesCollector.OnResponse(func(r *colly.Response) {
-		scraper.Files.Store(r.Request.AbsoluteURL(r.Request.URL.Path), bytes.NewBuffer(r.Body))
+		scraper.Files.Set(r.Request.AbsoluteURL(r.Request.URL.Path), bytes.NewBuffer(r.Body))
 	})
 
 	scraper.MangaCollector = mangaCollector
@@ -269,8 +268,8 @@ func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
 
 // GetFile returns manga file for given page url
 func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
-	if data, ok := s.Files.Load(file.Address); ok {
-		return data.(*bytes.Buffer), nil
+	if data, ok := s.Files.Get(file.Address); ok {
+		return data, nil
 	}
 
 	err := s.FilesCollector.Visit(file.Address)
@@ -281,10 +280,10 @@ func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
 
 	s.FilesCollector.Wait()
 
-	data, ok := s.Files.Load(file.Address)
+	data, ok := s.Files.Get(file.Address)
 
 	if ok {
-		return data.(*bytes.Buffer), nil
+		return data, nil
 	}
 
 	return nil, errors.New("Couldn't get file at " + file.Address)
@@ -292,5 +291,5 @@ func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
 
 // ResetFiles resets scraper files cache
 func (s *Scraper) ResetFiles() {
-	s.Files = &sync.Map{}
+	s.Files.data = make(map[string]*bytes.Buffer)
 }
