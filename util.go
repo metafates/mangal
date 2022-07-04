@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"golang.org/x/exp/constraints"
+	"golang.org/x/exp/slices"
 	"io"
 	"net/http"
 	"os"
@@ -21,18 +22,6 @@ func IfElse[T any](condition bool, then, othwerwise T) T {
 	}
 
 	return othwerwise
-}
-
-// Contains checks if slice contains element
-// 	Example: Contains([]int{1, 2, 3}, 2) => true
-func Contains[T comparable](slice []T, elem T) bool {
-	for _, el := range slice {
-		if el == elem {
-			return true
-		}
-	}
-
-	return false
 }
 
 // BytesToMegabytes converts bytes to megabytes
@@ -107,16 +96,14 @@ func DirSize(path string) (int64, error) {
 // Find element in slice by function
 // 	Example: Find([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, func(i int) bool { return i > 5 }) => 6
 func Find[T any](list []T, f func(T) bool) (T, bool) {
-	var prev *T
+	index := slices.IndexFunc(list, f)
 
-	for _, el := range list {
-		prev = &el
-		if f(el) {
-			return el, true
-		}
+	if index == -1 {
+		var empty T
+		return empty, false
 	}
 
-	return *prev, false
+	return list[index], true
 }
 
 // Map applies function to each element of the slice

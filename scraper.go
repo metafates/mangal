@@ -13,11 +13,16 @@ import (
 	"time"
 )
 
+type ContextCollector[T any] struct {
+	Collector *colly.Collector
+	Ctx       T
+}
+
 type Scraper struct {
 	Source            *Source
 	MangaCollector    *colly.Collector
-	ChaptersCollector *colly.Collector
-	PagesCollector    *colly.Collector
+	ChaptersCollector *ContextCollector[*URL]
+	PagesCollector    *ContextCollector[*URL]
 	FilesCollector    *colly.Collector
 
 	// Manga maps search url with manga urls
@@ -115,10 +120,18 @@ func MakeSourceScraper(source *Source) *Scraper {
 		html.ForEach(source.ChapterAnchor, func(_ int, e *colly.HTMLElement) {
 			link := e.Attr("href")
 			path := e.Request.AbsoluteURL(e.Request.URL.Path)
-			u := &URL{Address: e.Request.AbsoluteURL(link), Scraper: &scraper, Index: e.Index}
+			u := &URL{
+				Address:  e.Request.AbsoluteURL(link),
+				Scraper:  &scraper,
+				Index:    e.Index,
+				Relation: scraper.ChaptersCollector.Ctx,
+			}
+
 			urls = append(urls, u)
 			scraper.Chapters[path] = append(scraper.Chapters[path], u)
 		})
+
+		urlsLength := len(urls)
 
 		// Get all chapter titles
 		html.ForEachWithBreak(source.ChapterTitle, func(i int, e *colly.HTMLElement) bool {
@@ -130,16 +143,11 @@ func MakeSourceScraper(source *Source) *Scraper {
 			}
 
 			scraper.Chapters[path][e.Index].Info = title
+			if source.ChaptersReversed {
+				scraper.Chapters[path][e.Index].Index = urlsLength - e.Index
+			}
 			return true
 		})
-
-		// Reverse chapters indexes
-		if source.ChaptersReversed {
-			length := len(urls)
-			for _, u := range urls {
-				u.Index = length - u.Index
-			}
-		}
 	})
 	_ = chaptersCollector.Limit(&colly.LimitRule{
 		Parallelism: Parallelism,
@@ -174,7 +182,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		link := e.Attr(attr)
 
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
-		scraper.Pages[path] = append(scraper.Pages[path], &URL{Address: link, Scraper: &scraper, Index: e.Index})
+		scraper.Pages[path] = append(scraper.Pages[path], &URL{Address: link, Scraper: &scraper, Index: e.Index, Relation: scraper.PagesCollector.Ctx})
 	})
 	_ = pagesCollector.Limit(&colly.LimitRule{
 		Parallelism: Parallelism,
@@ -193,8 +201,14 @@ func MakeSourceScraper(source *Source) *Scraper {
 	})
 
 	scraper.MangaCollector = mangaCollector
-	scraper.ChaptersCollector = chaptersCollector
-	scraper.PagesCollector = pagesCollector
+	scraper.ChaptersCollector = &ContextCollector[*URL]{
+		Collector: chaptersCollector,
+		Ctx:       nil,
+	}
+	scraper.PagesCollector = &ContextCollector[*URL]{
+		Collector: pagesCollector,
+		Ctx:       nil,
+	}
 	scraper.FilesCollector = filesCollector
 
 	return &scraper
@@ -226,19 +240,14 @@ func (s *Scraper) GetChapters(manga *URL) ([]*URL, error) {
 		return urls, nil
 	}
 
-	err := s.ChaptersCollector.Visit(manga.Address)
-
+	s.ChaptersCollector.Ctx = manga
+	err := s.ChaptersCollector.Collector.Visit(manga.Address)
 	if err != nil {
 		return nil, err
 	}
 
-	s.ChaptersCollector.Wait()
-
-	// Add relation to this manga url for each chapter
-	// It shouldn't affect performance since there won't be more than 1000 chapters as worst case
-	for _, chapter := range s.Chapters[manga.Address] {
-		chapter.Relation = manga
-	}
+	s.ChaptersCollector.Collector.Wait()
+	s.ChaptersCollector.Ctx = nil
 
 	return s.Chapters[manga.Address], nil
 }
@@ -249,19 +258,15 @@ func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
 		return urls, nil
 	}
 
-	err := s.PagesCollector.Visit(chapter.Address)
+	s.PagesCollector.Ctx = chapter
+	err := s.PagesCollector.Collector.Visit(chapter.Address)
 
 	if err != nil {
 		return nil, err
 	}
 
-	s.PagesCollector.Wait()
-
-	// Add relation to this chapter url for each page
-	// It shouldn't affect performance since there won't be more than ~400 pages as worst case (usually it's 30)
-	for _, page := range s.Pages[chapter.Address] {
-		page.Relation = chapter
-	}
+	s.PagesCollector.Collector.Wait()
+	s.PagesCollector.Ctx = nil
 
 	return s.Pages[chapter.Address], nil
 }

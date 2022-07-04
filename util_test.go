@@ -1,6 +1,7 @@
 package main
 
 import (
+	"golang.org/x/exp/slices"
 	"regexp"
 	"testing"
 )
@@ -11,8 +12,8 @@ func TestContains(t *testing.T) {
 	invalidItem := 42
 
 	conditions := []bool{
-		Contains[int](items, validItem),
-		!Contains[int](items, invalidItem),
+		slices.Contains(items, validItem),
+		!slices.Contains(items, invalidItem),
 	}
 
 	for _, condition := range conditions {

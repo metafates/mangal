@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/skratchdot/open-golang/open"
+	"golang.org/x/exp/slices"
 	"golang.org/x/term"
 	"log"
 	"os"
@@ -41,13 +42,13 @@ var (
 	successStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
 	failStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	mangaListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#9f86c0")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#9f86c0")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 	chaptersListTitleStyle = lipgloss.NewStyle().
-		Background(lipgloss.Color("#e0b1cb")).
-		Foreground(lipgloss.Color("#231942")).
-		Padding(0, 1)
+				Background(lipgloss.Color("#e0b1cb")).
+				Foreground(lipgloss.Color("#231942")).
+				Padding(0, 1)
 )
 
 type bubbleState int
@@ -664,7 +665,7 @@ func (b *Bubble) handleResumeState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, b.keyMap.Back):
-			if Contains([]list.FilterState{list.FilterApplied, list.Filtering}, b.resumeList.FilterState()) {
+			if slices.Contains([]list.FilterState{list.FilterApplied, list.Filtering}, b.resumeList.FilterState()) {
 				b.resumeList.ResetFilter()
 				return b, nil
 			}
@@ -1143,7 +1144,7 @@ func (b *Bubble) View() string {
 	}
 
 	// Do not add help Bubble at these states, since they already have one
-	if Contains([]bubbleState{mangaState, chaptersState, resumeState}, b.state) {
+	if slices.Contains([]bubbleState{mangaState, chaptersState, resumeState}, b.state) {
 		return commonStyle.Render(view)
 	}
 

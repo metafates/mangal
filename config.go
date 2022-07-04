@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pelletier/go-toml/v2"
+	"golang.org/x/exp/slices"
 	"os"
 	"strings"
 )
@@ -147,7 +148,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 	// Convert sources listed in tempConfig to Scrapers
 	for sourceName, source := range tempConf.Sources {
 		// If source is not listed in Use then skip it
-		if !Contains[string](tempConf.Use, sourceName) {
+		if !slices.Contains(tempConf.Use, sourceName) {
 			continue
 		}
 
@@ -243,7 +244,7 @@ func ValidateConfig(config *Config) error {
 	}
 
 	// Check if format is valid
-	if !Contains(AvailableFormats, config.Formats.Default) {
+	if !slices.Contains(AvailableFormats, config.Formats.Default) {
 		msg := fmt.Sprintf(
 			`unknown format '%s'
 type %s to show available formats`,

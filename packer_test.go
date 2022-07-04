@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"golang.org/x/exp/slices"
 	"os"
 	"path/filepath"
 	"strings"
@@ -306,7 +307,7 @@ func TestPackers(t *testing.T) {
 
 	// check if all keys are in packers map
 	for _, format := range AvailableFormats {
-		if !Contains(keys, format) {
+		if !slices.Contains(keys, format) {
 			t.Errorf("packer for %s is not registered", format)
 		}
 	}
