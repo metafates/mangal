@@ -30,7 +30,7 @@ func (h *HistoryEntry) FilterValue() string {
 }
 
 func WriteHistory(chapter *URL) error {
-	historyFile, err := HistoryFile()
+	historyFile, err := HistoryFilePath()
 
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func WriteHistory(chapter *URL) error {
 }
 
 func ReadHistory() (map[string]*HistoryEntry, error) {
-	historyFile, err := HistoryFile()
+	historyFile, err := HistoryFilePath()
 
 	if err != nil {
 		return nil, err

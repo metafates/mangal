@@ -7,10 +7,10 @@ import (
 )
 
 // RemoveCache removes cache files
-func RemoveCache() (uint16, int64) {
+func RemoveCache() (int, int64) {
 	var (
 		// counter of removed files
-		counter uint16
+		counter int
 		// bytes removed
 		bytes int64
 	)
@@ -51,10 +51,10 @@ func RemoveCache() (uint16, int64) {
 }
 
 // RemoveTemp removes temp files
-func RemoveTemp() (uint16, int64) {
+func RemoveTemp() (int, int64) {
 	var (
 		// counter of removed files
-		counter uint16
+		counter int
 		// bytes removed
 		bytes int64
 	)
@@ -90,4 +90,28 @@ func RemoveTemp() (uint16, int64) {
 	}
 
 	return counter, bytes
+}
+
+// RemoveHistory removes history file
+func RemoveHistory() (int, int64) {
+	path, err := HistoryFilePath()
+
+	if err != nil {
+		return 0, 0
+	}
+
+	// get file size
+	stat, err := Afero.Stat(path)
+
+	if err != nil {
+		return 0, 0
+	}
+
+	err = RemoveIfExists(path)
+
+	if err != nil {
+		return 0, 0
+	}
+
+	return 1, stat.Size()
 }

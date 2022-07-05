@@ -5,7 +5,7 @@ import "testing"
 func RemoveHistoryFile(t *testing.T) {
 	t.Helper()
 
-	path, err := HistoryFile()
+	path, err := HistoryFilePath()
 
 	if err != nil {
 		t.Fatal(err)

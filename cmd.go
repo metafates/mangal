@@ -102,15 +102,9 @@ var versionCmd = &cobra.Command{
 
 var cleanupCmd = &cobra.Command{
 	Use:   "cleanup",
-	Short: "Remove cached and temp files",
-	Long:  "Removes cached files produced by scraper and temp files from downloader",
+	Short: "Remove files created by mangal",
 	Run: func(cmd *cobra.Command, args []string) {
-		counter, bytes := RemoveTemp()
-		c, b := RemoveCache()
-		counter += c
-		bytes += b
-
-		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+		_ = cmd.Help()
 	},
 }
 
@@ -131,6 +125,32 @@ var cleanupCacheCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		counter, bytes := RemoveCache()
 		fmt.Printf("%d cache files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupHistoryCmd = &cobra.Command{
+	Use:   "history",
+	Short: "Clear history",
+	Long:  "Removes history files produced by reader",
+	Run: func(cmd *cobra.Command, args []string) {
+		_, bytes := RemoveHistory()
+		fmt.Printf("History file removed\nCleaned up %.2fMB\n", BytesToMegabytes(bytes))
+	},
+}
+
+var cleanupAllCmd = &cobra.Command{
+	Use:   "all",
+	Short: "Remove history, cache and temp files",
+	Long:  "Removes history files produced by reader, cache files produced by scraper and temp files produced by downloader",
+	Run: func(cmd *cobra.Command, args []string) {
+		counter, bytes := RemoveTemp()
+		c, b := RemoveCache()
+		counter += c
+		bytes += b
+		c, b = RemoveHistory()
+		counter += c
+		bytes += b
+		fmt.Printf("%d files removed\nCleaned up %.2fMB\n", counter, BytesToMegabytes(bytes))
 	},
 }
 
@@ -528,6 +548,8 @@ func init() {
 
 	cleanupCmd.AddCommand(cleanupTempCmd)
 	cleanupCmd.AddCommand(cleanupCacheCmd)
+	cleanupCmd.AddCommand(cleanupHistoryCmd)
+	cleanupCmd.AddCommand(cleanupAllCmd)
 	rootCmd.AddCommand(cleanupCmd)
 
 	configCmd.AddCommand(configWhereCmd)

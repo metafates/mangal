@@ -209,8 +209,8 @@ func AnilistCacheFile() (string, error) {
 	return filepath.Join(dir, CachePrefix+"-anilist.json"), nil
 }
 
-// HistoryFile returns the history file path
-func HistoryFile() (string, error) {
+// HistoryFilePath returns the history file path
+func HistoryFilePath() (string, error) {
 	dir, err := os.UserCacheDir()
 	if err != nil {
 		return "", err

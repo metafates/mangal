@@ -67,7 +67,6 @@ func MakeSourceScraper(source *Source) *Scraper {
 	}
 
 	collector = colly.NewCollector(collectorOptions...)
-	collector.SetRequestTimeout(20 * time.Second)
 	collector.AllowURLRevisit = true
 
 	extensions.RandomUserAgent(collector)
@@ -175,6 +174,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 			"data-src-set",
 		}
 
+		// TODO: handle situations when ok is false
 		attr, _ := Find(attributes, func(attr string) bool {
 			return e.Attr(attr) != ""
 		})
