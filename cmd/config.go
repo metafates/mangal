@@ -42,9 +42,9 @@ var configWhereCmd = &cobra.Command{
 		}
 
 		if exists {
-			fmt.Printf("Config exists at\n%s\n", style.SuccessStyle.Render(configPath))
+			fmt.Printf("Config exists at\n%s\n", style.Success.Render(configPath))
 		} else {
-			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", style.SuccessStyle.Render(configPath))
+			fmt.Printf("Config doesn't exist, but it is expected to be at\n%s\n", style.Success.Render(configPath))
 		}
 	},
 }
@@ -167,7 +167,7 @@ var configInitCmd = &cobra.Command{
 			} else if _, err = file.Write([]byte(configToWrite)); err != nil {
 				log.Fatal("Error while writing to file")
 			} else {
-				fmt.Printf("Config created at\n%s\n", style.SuccessStyle.Render(configPath))
+				fmt.Printf("Config created at\n%s\n", style.Success.Render(configPath))
 			}
 		}
 
@@ -181,7 +181,7 @@ var configInitCmd = &cobra.Command{
 		}
 
 		if exists {
-			log.Fatalf("Config file already exists. Use %s to overwrite it", style.AccentStyle.Render("--force"))
+			log.Fatalf("Config file already exists. Use %s to overwrite it", style.Accent.Render("--force"))
 		} else {
 			createConfig()
 		}

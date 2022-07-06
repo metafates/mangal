@@ -23,7 +23,7 @@ func (b *Bubble) View() string {
 		if config.UserConfig.UI.Title == "" {
 			view = b.input.View()
 		} else {
-			view = fmt.Sprintf(template, style.InputTitleStyle.Render(config.UserConfig.UI.Title), b.input.View())
+			view = fmt.Sprintf(template, style.InputTitle.Render(config.UserConfig.UI.Title), b.input.View())
 		}
 	case LoadingState:
 		view = fmt.Sprintf(template, b.spinner.View())
@@ -41,9 +41,9 @@ func (b *Bubble) View() string {
 		chaptersToDownload := len(b.selectedChapters)
 		view = fmt.Sprintf(
 			template,
-			style.AccentStyle.Render(strconv.Itoa(chaptersToDownload)),
+			style.Accent.Render(strconv.Itoa(chaptersToDownload)),
 			util.Plural("chapter", chaptersToDownload),
-			style.AccentStyle.Render(util.PrettyTrim(mangaName, 40)),
+			style.Accent.Render(util.PrettyTrim(mangaName, 40)),
 		)
 	case DownloadingState:
 
@@ -52,7 +52,7 @@ func (b *Bubble) View() string {
 		// It shouldn't be nil at this stage but it panics TODO: FIX THIS
 		if b.chaptersDownloadProgressInfo.Current != nil {
 			mangaName := b.chaptersDownloadProgressInfo.Current.Info
-			header = fmt.Sprintf("Downloading %s", util.PrettyTrim(style.AccentStyle.Render(mangaName), 40))
+			header = fmt.Sprintf("Downloading %s", util.PrettyTrim(style.Accent.Render(mangaName), 40))
 		} else {
 			header = "Preparing for download..."
 		}
@@ -63,24 +63,24 @@ func (b *Bubble) View() string {
 		succeeded := b.chaptersDownloadProgressInfo.Succeeded
 		failed := b.chaptersDownloadProgressInfo.Failed
 
-		succeededRendered := style.SuccessStyle.Render(strconv.Itoa(len(succeeded)))
-		failedRendered := style.FailStyle.Render(strconv.Itoa(len(failed)))
+		succeededRendered := style.Success.Render(strconv.Itoa(len(succeeded)))
+		failedRendered := style.Faile.Render(strconv.Itoa(len(failed)))
 
 		view = fmt.Sprintf(template, succeededRendered, util.Plural("chapter", len(succeeded)), failedRendered)
 
 		// show failed chapters
 		for _, chapter := range failed {
-			view += fmt.Sprintf("\n\n%s %s", style.FailStyle.Render("Failed"), chapter.Info)
+			view += fmt.Sprintf("\n\n%s %s", style.Faile.Render("Failed"), chapter.Info)
 		}
 	}
 
 	// Do not add help Bubble at these states, since they already have one
 	if slices.Contains([]bubbleState{MangaState, ChaptersState, ResumeState}, b.state) {
-		return style.CommonStyle.Render(view)
+		return style.Common.Render(view)
 	}
 
 	// Add help view
-	return style.CommonStyle.Render(fmt.Sprintf("%s\n\n%s", view, b.help.View(b.keyMap)))
+	return style.Common.Render(fmt.Sprintf("%s\n\n%s", view, b.help.View(b.keyMap)))
 }
 
 // viewTemplates is a map of the templates for the different states

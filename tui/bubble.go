@@ -105,12 +105,12 @@ func NewBubble(initialState bubbleState) *Bubble {
 	input := textinput.New()
 	input.Placeholder = config.UserConfig.UI.Placeholder
 	input.CharLimit = 50
-	input.Prompt = style.InputPromptStyle.Render(config.UserConfig.UI.Prompt + " ")
+	input.Prompt = style.InputPrompt.Render(config.UserConfig.UI.Prompt + " ")
 
 	// Create spinner component
 	spinner_ := spinner.New()
 	spinner_.Spinner = spinner.Dot
-	spinner_.Style = style.AccentStyle
+	spinner_.Style = style.Accent
 
 	// Create progress component
 	progress_ := progress.New(progress.WithDefaultGradient())
@@ -138,8 +138,8 @@ func NewBubble(initialState bubbleState) *Bubble {
 	ResumeList.KeyMap = listKeyMap
 	ResumeList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(MangaState) }
 	ResumeList.AdditionalFullHelpKeys = func() []key.Binding { return keys.fullHelpFor(MangaState) }
-	ResumeList.Styles.Title = style.MangaListTitleStyle
-	ResumeList.Styles.Spinner = style.AccentStyle
+	ResumeList.Styles.Title = style.MangaListTitle
+	ResumeList.Styles.Spinner = style.Accent
 	ResumeList.Title = "Resume"
 	ResumeList.SetFilteringEnabled(true)
 
@@ -148,8 +148,8 @@ func NewBubble(initialState bubbleState) *Bubble {
 	mangaList.KeyMap = listKeyMap
 	mangaList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(MangaState) }
 	mangaList.AdditionalFullHelpKeys = func() []key.Binding { return keys.fullHelpFor(MangaState) }
-	mangaList.Styles.Title = style.MangaListTitleStyle
-	mangaList.Styles.Spinner = style.AccentStyle
+	mangaList.Styles.Title = style.MangaListTitle
+	mangaList.Styles.Spinner = style.Accent
 	mangaList.SetFilteringEnabled(false)
 
 	// Create chapters list component
@@ -157,7 +157,7 @@ func NewBubble(initialState bubbleState) *Bubble {
 	chaptersList.KeyMap = listKeyMap
 	chaptersList.AdditionalShortHelpKeys = func() []key.Binding { return keys.shortHelpFor(ChaptersState) }
 	chaptersList.AdditionalFullHelpKeys = func() []key.Binding { return keys.fullHelpFor(ChaptersState) }
-	chaptersList.Styles.Title = style.ChaptersListTitleStyle
+	chaptersList.Styles.Title = style.ChaptersListTitle
 	chaptersList.SetFilteringEnabled(false)
 	chaptersList.StatusMessageLifetime = common.Forever
 

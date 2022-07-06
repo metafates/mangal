@@ -12,9 +12,9 @@ var formatsCmd = &cobra.Command{
 	Short: "Information about available formats",
 	Long:  "Show information about available formats with quick description of each",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(style.BoldStyle.Render("Available formats") + "\n\n")
+		fmt.Printf(style.Bold.Render("Available formats") + "\n\n")
 		for _, format := range common.AvailableFormats {
-			fmt.Printf("%s - %s\n", style.AccentStyle.Render(string(format)), common.FormatsInfo[format])
+			fmt.Printf("%s - %s\n", style.Accent.Render(string(format)), common.FormatsInfo[format])
 		}
 	},
 }

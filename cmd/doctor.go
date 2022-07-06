@@ -18,12 +18,12 @@ import (
 func runDoctor() {
 	var (
 		ok = func() {
-			fmt.Print(style.SuccessStyle.Render("OK"))
+			fmt.Print(style.Success.Render("OK"))
 			fmt.Println()
 		}
 
 		fail = func() {
-			fmt.Print(style.FailStyle.Render("Fail"))
+			fmt.Print(style.Faile.Render("Fail"))
 			fmt.Println()
 		}
 	)
@@ -32,12 +32,12 @@ func runDoctor() {
 	latestVersion, err := util.FetchLatestVersion()
 	if err != nil {
 		fail()
-		fmt.Printf("Can't find latest version\nRun %s to get more information\n", style.AccentStyle.Render("mangal latest"))
+		fmt.Printf("Can't find latest version\nRun %s to get more information\n", style.Accent.Render("mangal latest"))
 		os.Exit(1)
 	} else if latestVersion > common.Version {
 		fail()
-		fmt.Printf("New version of %s is available: %s\n", common.Mangal, style.AccentStyle.Render(latestVersion))
-		fmt.Printf("Run %s to get more information\n", style.AccentStyle.Render("mangal latest"))
+		fmt.Printf("New version of %s is available: %s\n", common.Mangal, style.Accent.Render(latestVersion))
+		fmt.Printf("Run %s to get more information\n", style.Accent.Render("mangal latest"))
 		os.Exit(1)
 	} else {
 		ok()
@@ -70,9 +70,9 @@ func runDoctor() {
 			fail()
 
 			fmt.Println(`
-Manga ` + style.AccentStyle.Render(manga) + ` was not found
-Was trying to search with address: ` + style.AccentStyle.Render(address) + `
-That probably means that ` + style.AccentStyle.Render("manga_anchor") + ` or ` + style.AccentStyle.Render("manga_title") + ` tags are invalid, website is down or it has some protection that prevents page from rendering. 
+Manga ` + style.Accent.Render(manga) + ` was not found
+Was trying to search with address: ` + style.Accent.Render(address) + `
+That probably means that ` + style.Accent.Render("manga_anchor") + ` or ` + style.Accent.Render("manga_title") + ` tags are invalid, website is down or it has some protection that prevents page from rendering. 
 `)
 
 			os.Exit(1)
@@ -82,9 +82,9 @@ That probably means that ` + style.AccentStyle.Render("manga_anchor") + ` or ` +
 			fail()
 
 			fmt.Println(`
-Chapters for manga ` + style.AccentStyle.Render(manga) + ` were not found
-Was trying to search with address: ` + style.AccentStyle.Render(manga) + `
-That probably means that ` + style.AccentStyle.Render("chapter_anchor") + ` or ` + style.AccentStyle.Render("chapter_title") + ` tags are invalid or website has some protection that prevents page from rendering. 
+Chapters for manga ` + style.Accent.Render(manga) + ` were not found
+Was trying to search with address: ` + style.Accent.Render(manga) + `
+That probably means that ` + style.Accent.Render("chapter_anchor") + ` or ` + style.Accent.Render("chapter_title") + ` tags are invalid or website has some protection that prevents page from rendering. 
 `)
 
 			os.Exit(1)
@@ -94,9 +94,9 @@ That probably means that ` + style.AccentStyle.Render("chapter_anchor") + ` or `
 			fail()
 
 			fmt.Println(`
-Pages for chapter ` + style.AccentStyle.Render(chapter) + ` of manga ` + style.AccentStyle.Render(manga) + ` were not found
-Was trying to search with address: ` + style.AccentStyle.Render(manga) + `
-That probably means that ` + style.AccentStyle.Render("reader_page") + ` tag is invalid or website has some protection that prevents page from rendering. 
+Pages for chapter ` + style.Accent.Render(chapter) + ` of manga ` + style.Accent.Render(manga) + ` were not found
+Was trying to search with address: ` + style.Accent.Render(manga) + `
+That probably means that ` + style.Accent.Render("reader_page") + ` tag is invalid or website has some protection that prevents page from rendering. 
 `)
 
 			os.Exit(1)
@@ -106,8 +106,8 @@ That probably means that ` + style.AccentStyle.Render("reader_page") + ` tag is 
 			fail()
 
 			fmt.Println(`
-Image for page ` + style.AccentStyle.Render(page) + ` of chapter ` + style.AccentStyle.Render(chapter) + ` of manga ` + style.AccentStyle.Render(manga) + ` was not downloaded
-Was trying to download with address: ` + style.AccentStyle.Render(page) + `
+Image for page ` + style.Accent.Render(page) + ` of chapter ` + style.Accent.Render(chapter) + ` of manga ` + style.Accent.Render(manga) + ` was not downloaded
+Was trying to download with address: ` + style.Accent.Render(page) + `
 That probably means that website has some protection that prevents image from downloading
 `)
 			os.Exit(1)

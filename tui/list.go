@@ -23,7 +23,7 @@ func (l *listItem) Title() string {
 	var title string
 
 	if l.selected {
-		title = style.AccentStyle.Bold(true).Render(config.UserConfig.UI.Mark) + " " + l.url.Info
+		title = style.Accent.Bold(true).Render(config.UserConfig.UI.Mark) + " " + l.url.Info
 	} else {
 		title = l.url.Info
 	}

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/cleaner"
 	"github.com/metafates/mangal/common"
-	config2 "github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/downloader"
-	scraper2 "github.com/metafates/mangal/scraper"
+	"github.com/metafates/mangal/scraper"
 	"github.com/metafates/mangal/util"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -18,7 +18,6 @@ import (
 
 // inlineOptions provides all options for inline mode
 type inlineOptions struct {
-	config     string
 	mangaIdx   int
 	chapterIdx int
 	asJson     bool
@@ -32,23 +31,21 @@ type inlineOptions struct {
 // inlineMode provides all functionality of TUI but in inline mode
 // TODO: split into subfunctions
 func inlineMode(query string, options inlineOptions) (string, error) {
-	initConfig(options.config, false)
-
 	if !options.asTemp {
 		defer cleaner.RemoveTemp()
 	}
 
 	if options.format != "" {
-		config2.UserConfig.Formats.Default = options.format
+		config.UserConfig.Formats.Default = options.format
 	}
 
 	// Check if config is valid
-	if err := config2.ValidateConfig(config2.UserConfig); err != nil {
+	if err := config.ValidateConfig(config.UserConfig); err != nil {
 		return "", err
 	}
 
 	var (
-		manga []*scraper2.URL
+		manga []*scraper.URL
 		wg    sync.WaitGroup
 	)
 
@@ -57,11 +54,11 @@ func inlineMode(query string, options inlineOptions) (string, error) {
 		return "", errors.New("query expected")
 	}
 
-	wg.Add(len(config2.UserConfig.Scrapers))
+	wg.Add(len(config.UserConfig.Scrapers))
 
 	// Search for manga in all scrapers
-	for _, scraper := range config2.UserConfig.Scrapers {
-		go func(s *scraper2.Scraper) {
+	for _, s := range config.UserConfig.Scrapers {
+		go func(s *scraper.Scraper) {
 			defer wg.Done()
 
 			m, err := s.SearchManga(query)
@@ -69,7 +66,7 @@ func inlineMode(query string, options inlineOptions) (string, error) {
 			if err == nil {
 				manga = append(manga, m...)
 			}
-		}(scraper)
+		}(s)
 	}
 
 	wg.Wait()
@@ -92,7 +89,7 @@ func inlineMode(query string, options inlineOptions) (string, error) {
 		if options.chapterIdx >= 0 {
 
 			// Get selected chapter
-			selectedChapter, ok := util.Find(chapters, func(c *scraper2.URL) bool {
+			selectedChapter, ok := util.Find(chapters, func(c *scraper.URL) bool {
 				return c.Index == options.chapterIdx
 			})
 
@@ -134,8 +131,8 @@ func inlineMode(query string, options inlineOptions) (string, error) {
 			// if options to read chapter is set, read it
 			if options.doRead {
 				// check if custom reader is set
-				if config2.UserConfig.UseCustomReader {
-					err = open.StartWith(chapterPath, config2.UserConfig.CustomReader)
+				if config.UserConfig.UseCustomReader {
+					err = open.StartWith(chapterPath, config.UserConfig.CustomReader)
 				} else {
 					err = open.Start(chapterPath)
 				}
@@ -219,10 +216,8 @@ Useful for scripting`,
 		asTemp, _ := cmd.Flags().GetBool("temp")
 		doRead, _ := cmd.Flags().GetBool("read")
 		doOpen, _ := cmd.Flags().GetBool("open")
-		config, _ := cmd.Flags().GetString("config")
 
 		res, err := inlineMode(query, inlineOptions{
-			config:     config,
 			mangaIdx:   mangaIdx,
 			chapterIdx: chapterIdx,
 			asJson:     asJson,
@@ -243,7 +238,7 @@ Useful for scripting`,
 			os.Exit(1)
 		}
 
-		fmt.Print(res)
+		fmt.Println(res)
 	},
 }
 
@@ -257,7 +252,6 @@ func init() {
 	inlineCmd.Flags().BoolP("temp", "t", false, "download as temp")
 	inlineCmd.Flags().BoolP("read", "r", false, "read chapter")
 	inlineCmd.Flags().BoolP("open", "o", false, "open url")
-	inlineCmd.Flags().StringP("config", "c", "", "use config from path")
 	inlineCmd.Flags().SortFlags = false
 	_ = inlineCmd.MarkFlagRequired("query")
 	_ = inlineCmd.MarkFlagFilename("config", "toml")

@@ -1,12 +1,12 @@
 package tui
 
 import (
-	"github.com/metafates/mangal/cmd"
+	"github.com/metafates/mangal/config"
 	"testing"
 )
 
 func TestNewBubble(t *testing.T) {
-	cmd.initConfig("", false)
+	config.Initialize("", false)
 
 	bubble := NewBubble(SearchState)
 

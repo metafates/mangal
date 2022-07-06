@@ -15,7 +15,7 @@ func (b *Bubble) resize(width int, height int) {
 		return
 	}
 
-	x, y := style.CommonStyle.GetFrameSize()
+	x, y := style.Common.GetFrameSize()
 	b.mangaList.SetSize(width-x, height-y)
 	b.chaptersList.SetSize(width-x, height-y)
 	b.ResumeList.SetSize(width-x, height-y)

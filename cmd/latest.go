@@ -26,8 +26,8 @@ var latestCmd = &cobra.Command{
 		if latestVersion <= common.Version {
 			fmt.Printf("You are using the latest version of %s\n", common.Mangal)
 		} else {
-			fmt.Printf("New version of %s is available: %s\n", common.Mangal, style.AccentStyle.Render(latestVersion))
-			fmt.Printf("You can download it from %s\n", style.AccentStyle.Render(githubReleaseURL))
+			fmt.Printf("New version of %s is available: %s\n", common.Mangal, style.Accent.Render(latestVersion))
+			fmt.Printf("You can download it from %s\n", style.Accent.Render(githubReleaseURL))
 			fmt.Println("Or use your package manager to update")
 		}
 	},

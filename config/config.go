@@ -225,7 +225,7 @@ func ValidateConfig(config *Config) error {
 			`unknown format '%s'
 type %s to show available formats`,
 			string(config.Formats.Default),
-			style.AccentStyle.Render(strings.ToLower(common.Mangal)+" formats"),
+			style.Accent.Render(strings.ToLower(common.Mangal)+" formats"),
 		)
 		return errors.New(msg)
 	}
