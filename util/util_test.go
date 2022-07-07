@@ -1,257 +1,440 @@
 package util
 
 import (
-	"golang.org/x/exp/slices"
+	"fmt"
+	"github.com/metafates/mangal/filesystem"
+	. "github.com/smartystreets/goconvey/convey"
+	"math"
+	"os"
 	"regexp"
 	"testing"
 )
 
-func TestContains(t *testing.T) {
-	items := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	validItem := 7
-	invalidItem := 42
+func TestPadZeros(t *testing.T) {
+	Convey("Given some 2 digit integer", t, func() {
+		const number = 42
 
-	conditions := []bool{
-		slices.Contains(items, validItem),
-		!slices.Contains(items, invalidItem),
-	}
+		Convey("When I pad it with 5 zeros", func() {
+			const padding = 5
 
-	for _, condition := range conditions {
-		if !condition {
-			t.Fail()
-		}
-	}
-}
+			Convey("Then it should have 3 leading zeros", func() {
+				So(PadZeros(number, padding), ShouldEqual, "00042")
+			})
+		})
 
-func TestIfElse(t *testing.T) {
-	IfElse(true, func() {}, func() { t.Fail() })()
-	IfElse(false, func() { t.Fail() }, func() {})()
+		Convey("When I pad it with 3 zeros", func() {
+			const padding = 3
+
+			Convey("Then it should have 1 leading zero", func() {
+				So(PadZeros(number, padding), ShouldEqual, "042")
+			})
+		})
+
+		Convey("When I pad it with 1 or 2 zeros", func() {
+			Convey("Then it should remain the same", func() {
+				So(PadZeros(number, 1), ShouldEqual, "42")
+				So(PadZeros(number, 2), ShouldEqual, "42")
+			})
+		})
+	})
 }
 
 func TestPlural(t *testing.T) {
-	conditions := []bool{
-		Plural("word", 2) == "words",
-		Plural("name", 29485) == "names",
-		Plural("apple", 1) == "apple",
-		Plural("dog", 0) == "dogs",
-	}
+	Convey("Given a singular word", t, func() {
+		const word = "book"
 
-	for _, condition := range conditions {
-		if !condition {
-			t.Fail()
-		}
-	}
-}
+		Convey("When I pluralize it", func() {
+			Convey("Then it should remain the same", func() {
+				So(Plural(word, 2), ShouldEqual, "books")
+			})
+		})
 
-func TestIsUnique(t *testing.T) {
-	conditions := []bool{
-		IsUnique([]int{1, 2, 3, 4}),
-		!IsUnique([]int{1, 2, 3, 1}),
-		IsUnique([]string{"Hello", "hello"}),
-	}
+		Convey("When I do not pluralize it", func() {
+			Convey("Then it should be the same word", func() {
+				So(Plural(word, 1), ShouldEqual, word)
+			})
+		})
+	})
 
-	for _, condition := range conditions {
-		if !condition {
-			t.Fail()
-		}
-	}
-}
+	Convey("Given a plural word", t, func() {
+		const word = "books"
 
-func TestFind(t *testing.T) {
-	integers := []int{1, 2, 3, 4, 10, 27, -258925}
+		Convey("When I pluralize it", func() {
+			Convey("Then it should remain the same", func() {
+				So(Plural(word, 2), ShouldEqual, "books")
+			})
+		})
 
-	if found, ok := Find(integers, func(i int) bool {
-		return i == 10
-	}); ok {
-		if found != 10 {
-			t.Error("Wrong element was found")
-		}
-	} else {
-		t.Error("Element was not found")
-	}
-
-	if _, ok := Find(integers, func(i int) bool {
-		return i == 0
-	}); ok {
-		t.Error("ok is expected to be false for the non-existing element")
-	}
-
-	type person struct {
-		name string
-		age  int
-	}
-
-	structs := []person{
-		{
-			name: "name 1",
-			age:  100,
-		},
-		{
-			name: "name 2",
-			age:  -1,
-		},
-	}
-
-	if found, ok := Find(structs, func(p person) bool {
-		return p.age < 0
-	}); ok {
-		if found.age != -1 {
-			t.Error("Wrong element was found")
-		}
-	} else {
-		t.Error("Element was not found")
-	}
+		Convey("When I do not pluralize it", func() {
+			Convey("Then it should be the same word", func() {
+				So(Plural(word, 1), ShouldEqual, word)
+			})
+		})
+	})
 }
 
 func TestMap(t *testing.T) {
-	square := func(n int) int { return n * n }
-	nums := []int{0, 1, 2, 3, 4}
-	squared := Map(nums, square)
+	Convey("Given a list of integers", t, func() {
+		var list = []int{1, 2, 3, 4, 5}
 
-	if len(nums) != len(squared) {
-		t.Error("Different lengths")
-	}
+		Convey("When I map it with function that returns string", func() {
+			Convey("Then it should return a list of strings", func() {
+				So(Map(list, func(i int) string {
+					return "x"
+				}), ShouldResemble, []string{"x", "x", "x", "x", "x"})
+			})
+		})
 
-	for i, s := range squared {
-		n := nums[i]
+		Convey("When I map it with function that does nothing", func() {
+			Convey("Then it should return the same list", func() {
+				So(Map(list, func(i int) int {
+					return i
+				}), ShouldResemble, []int{1, 2, 3, 4, 5})
+			})
+		})
 
-		if square(n) != s {
-			t.Error("Invalid value")
-		}
-	}
+		Convey("When I map it with function that returns nil", func() {
+			Convey("Then it should return an empty list", func() {
+				So(Map(list, func(i int) *int {
+					return nil
+				}), ShouldResemble, []*int{nil, nil, nil, nil, nil})
+			})
+		})
+	})
+
+	Convey("Given an empty list", t, func() {
+		var list []int
+
+		Convey("When I map it with function that returns string", func() {
+			Convey("Then it should return an empty list", func() {
+				So(Map(list, func(i int) string {
+					return "x"
+				}), ShouldResemble, []string{})
+			})
+		})
+	})
 }
 
-func TestToString(t *testing.T) {
-	if ToString(1) != "1" {
-		t.Error("Invalid value")
-	}
+func TestMax(t *testing.T) {
+	Convey("Given two values", t, func() {
+		const a = 1
+		const b = 2
 
-	if ToString(1.0) != "1" {
-		t.Error("Invalid value")
-	}
-
-	if ToString(true) != "true" {
-		t.Error("Invalid value")
-	}
-
-	if ToString(false) != "false" {
-		t.Error("Invalid value")
-	}
-
-	if ToString([]int{1, 2, 3}) != "[1 2 3]" {
-		t.Error("Invalid value")
-	}
-
-	if ToString([]string{"a", "b", "c"}) != "[a b c]" {
-		t.Error("Invalid value")
-	}
-
-	if ToString(map[string]int{"a": 1, "b": 2, "c": 3}) != "map[a:1 b:2 c:3]" {
-		t.Error("Invalid value")
-	}
-
-	if ToString(struct{}{}) != "{}" {
-		t.Error("Invalid value")
-	}
+		Convey("When I get the max", func() {
+			Convey("Then it should return the bigger one", func() {
+				So(Max(a, b), ShouldEqual, b)
+			})
+		})
+	})
 }
 
-func TestFetchLatestVersion(t *testing.T) {
-	version, err := FetchLatestVersion()
-	if err != nil {
-		t.Error(err)
-	}
+func TestIsUnique(t *testing.T) {
+	Convey("Given a list of unique elements", t, func() {
+		var list = []int{1, 2, 3, 4, 5}
 
-	if version == "" {
-		t.Error("Invalid version")
-	}
+		Convey("When I check if it's unique", func() {
+			Convey("Then it should return true", func() {
+				So(IsUnique(list), ShouldBeTrue)
+			})
+		})
+	})
 
-	// make version regex
-	versionRegex := regexp.MustCompile("^\\d+\\.\\d+\\.\\d+$")
+	Convey("Given a list of non-unique elements", t, func() {
+		var list = []int{1, 2, 3, 4, 5, 5}
 
-	// check if version matches version regex
-	if !versionRegex.MatchString(version) {
-		t.Error("Invalid version")
-	}
-
-	// check if version is greater than 0.0.0
-	if version < "0.0.0" {
-		t.Error("Invalid version")
-	}
+		Convey("When I check if it's unique", func() {
+			Convey("Then it should return false", func() {
+				So(IsUnique(list), ShouldBeFalse)
+			})
+		})
+	})
 }
 
 func TestSanitizeFilename(t *testing.T) {
+	Convey("Given a filename that contains whitespaces", t, func() {
+		const filename = "file name.ext"
 
-	// test with valid filename
-	if SanitizeFilename("test.txt") != "test.txt" {
-		t.Error("Invalid filename")
-	}
+		Convey("When I sanitize it", func() {
+			Convey("Then whitespaces should be replaced with underscores", func() {
+				So(SanitizeFilename(filename), ShouldEqual, "file_name.ext")
+			})
+		})
+	})
 
-	// test with invalid filename
-	if SanitizeFilename("test/test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
+	Convey("Given a filename that contains trailing dot", t, func() {
+		const filename = "file.name."
 
-	// test with invalid filename
-	if SanitizeFilename("test\\test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
+		Convey("When I sanitize it", func() {
+			Convey("Then trailing dot should be removed", func() {
+				So(SanitizeFilename(filename), ShouldEqual, "file.name")
+			})
+		})
+	})
 
-	// test with invalid filename
-	if SanitizeFilename("test:test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
+	Convey("Given a filename that contains leading dot", t, func() {
+		const filename = ".file.name"
 
-	// test with invalid filename
-	if SanitizeFilename("test*test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
+		Convey("When I sanitize it", func() {
+			Convey("Then leading dot should be removed", func() {
+				So(SanitizeFilename(filename), ShouldEqual, "file.name")
+			})
+		})
+	})
 
-	// test with invalid filename
-	if SanitizeFilename("test?test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
+	Convey("Given a filename that contains leading and trailing dot", t, func() {
+		const filename = ".file.name."
 
-	// test with invalid filename
-	if SanitizeFilename("test|test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
+		Convey("When I sanitize it", func() {
+			Convey("Then leading and trailing dot should be removed", func() {
+				So(SanitizeFilename(filename), ShouldEqual, "file.name")
+			})
+		})
+	})
 
-	// test with invalid filename
-	if SanitizeFilename("test<test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
+	Convey("Given a filename that contains multiple whitespaces", t, func() {
+		const filename = "file   name.ext"
 
-	// test with invalid filename
-	if SanitizeFilename("test>test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
-
-	// test with invalid filename
-	if SanitizeFilename("test?test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
-
-	// test with whitespace
-	if SanitizeFilename("test test.txt") != "test_test.txt" {
-		t.Error("Invalid filename")
-	}
+		Convey("When I sanitize it", func() {
+			Convey("Then whitespaces should be replaced with a single underscores", func() {
+				So(SanitizeFilename(filename), ShouldEqual, "file_name.ext")
+			})
+		})
+	})
 }
 
-func TestPadZeros(t *testing.T) {
-	if PadZeros(1, 2) != "01" {
-		t.Error("Invalid value")
+func TestPrettyTrim(t *testing.T) {
+	Convey("Given a long string", t, func() {
+		const longString = "This is a very long string that should be trimmed"
+
+		Convey("When I trim it", func() {
+			Convey("Then it should be trimmed with trailing ellipse", func() {
+				So(PrettyTrim(longString, 10), ShouldEqual, "This is...")
+			})
+		})
+	})
+
+	Convey("Given a short string", t, func() {
+		const shortString = "This is a short string"
+
+		Convey("When I trim it", func() {
+			Convey("Then it should be the same string", func() {
+				So(PrettyTrim(shortString, 30), ShouldEqual, shortString)
+			})
+		})
+	})
+}
+
+func TestFind(t *testing.T) {
+	Convey("Given a list of integers", t, func() {
+		var list = []int{1, 2, 3, 4, 5}
+
+		Convey("When I find an element", func() {
+			element, ok := Find(list, func(i int) bool {
+				return i == 3
+			})
+
+			Convey("Then it should indicate that it was found", func() {
+				So(ok, ShouldBeTrue)
+			})
+
+			Convey("Then it should return the element", func() {
+				So(element, ShouldEqual, 3)
+			})
+		})
+	})
+
+	Convey("Given a list of integers", t, func() {
+		var list = []int{1, 2, 3, 4, 5}
+
+		Convey("When I find an element that doesn't exist", func() {
+			element, ok := Find(list, func(i int) bool {
+				return i == 6
+			})
+
+			Convey("Then it should indicate that it was not found", func() {
+				So(ok, ShouldBeFalse)
+			})
+
+			Convey("Then it should return 0", func() {
+				So(element, ShouldEqual, 0)
+			})
+		})
+	})
+
+	Convey("Given an empty list", t, func() {
+		var list []int
+
+		Convey("When I find an element", func() {
+			element, ok := Find(list, func(i int) bool {
+				return i == 3
+			})
+
+			Convey("Then it should indicate that it was not found", func() {
+				So(ok, ShouldBeFalse)
+			})
+
+			Convey("Then it should return 0", func() {
+				So(element, ShouldEqual, 0)
+			})
+		})
+	})
+}
+
+func TestToString(t *testing.T) {
+	Convey("Given a list of integers", t, func() {
+		var list = []int{1, 2, 3, 4, 5}
+
+		Convey("When I convert it to a string", func() {
+			Convey("Then it should return a string representation if list", func() {
+				So(ToString(list), ShouldEqual, "[1 2 3 4 5]")
+			})
+		})
+	})
+
+	Convey("Given an empty list", t, func() {
+		var list []int
+
+		Convey("When I convert it to a string", func() {
+			Convey("Then it should return an empty string", func() {
+				So(ToString(list), ShouldEqual, "[]")
+			})
+		})
+	})
+
+	Convey("Given a type alias to string", t, func() {
+		type MyString string
+		var myString MyString = "Hello"
+		Convey("When I convert it to a string", func() {
+			Convey("Then it should return a string value", func() {
+				So(ToString(myString), ShouldEqual, "Hello")
+			})
+		})
+	})
+}
+
+func TestRemoveIfExists(t *testing.T) {
+	Convey("Given a file that exists", t, func() {
+		const fileName = "test.txt"
+		_, _ = filesystem.Get().Create(fileName)
+
+		Convey("When I remove it", func() {
+			err := RemoveIfExists(fileName)
+
+			Convey("Then it should not return an error", func() {
+				So(err, ShouldBeNil)
+			})
+
+			Convey("Then it should be removed", func() {
+				_, err = os.Stat(fileName)
+				So(os.IsNotExist(err), ShouldBeTrue)
+			})
+		})
+
+		Convey("When I remove it again", func() {
+			err := RemoveIfExists(fileName)
+
+			Convey("Then it should not return an error", func() {
+				So(err, ShouldBeNil)
+			})
+
+			Convey("Then it should be removed", func() {
+				_, err = os.Stat(fileName)
+				So(os.IsNotExist(err), ShouldBeTrue)
+			})
+		})
+	})
+
+	Convey("Given a file that doesn't exist", t, func() {
+		const fileName = "test.txt"
+
+		Convey("When I remove it", func() {
+			err := RemoveIfExists(fileName)
+
+			Convey("Then it should not return an error", func() {
+				So(err, ShouldBeNil)
+			})
+		})
+	})
+}
+
+func TestBytesToMegabytes(t *testing.T) {
+	Convey("Given 1024^2 bytes", t, func() {
+		const bytes = 1024 * 1024
+
+		Convey("When I convert it to megabytes", func() {
+			Convey("Then it should return 1", func() {
+				So(math.Floor(BytesToMegabytes(bytes)), ShouldEqual, 1)
+			})
+		})
+	})
+
+	Convey("Given 1025^2 bytes", t, func() {
+		const bytes = 1025 * 1025
+
+		Convey("When I convert it to megabytes", func() {
+			Convey("Then it should return 1", func() {
+				So(math.Floor(BytesToMegabytes(bytes)), ShouldEqual, 1)
+			})
+		})
+	})
+
+	Convey("Given 1023 bytes", t, func() {
+		const bytes = 1023
+
+		Convey("When I convert it to megabytes", func() {
+			Convey("Then it should return 0", func() {
+				So(math.Floor(BytesToMegabytes(bytes)), ShouldEqual, 0)
+			})
+		})
+	})
+}
+
+func TestIfElse(t *testing.T) {
+	Convey("Given a true", t, func() {
+		Convey("Then first value should be returned", func() {
+			So(IfElse(true, 1, 2), ShouldEqual, 1)
+		})
+	})
+
+	Convey("Given a false", t, func() {
+		Convey("Then second value should be returned", func() {
+			So(IfElse(false, 1, 2), ShouldEqual, 2)
+		})
+	})
+}
+
+func shouldMatch(actual interface{}, expected ...interface{}) string {
+	// compile regex
+	regex := expected[0].(string)
+	r, err := regexp.Compile(regex)
+
+	if err != nil {
+		return fmt.Sprintf("Error compiling regex: %s", err)
 	}
 
-	if PadZeros(10, 2) != "10" {
-		t.Error("Invalid value")
+	// match
+	if !r.MatchString(actual.(string)) {
+		return fmt.Sprintf("Expected %s to match %s", actual.(string), regex)
 	}
 
-	if PadZeros(10, 10) != "0000000010" {
-		t.Error("Invalid value")
-	}
+	return ""
+}
 
-	if PadZeros(100, 2) != "100" {
-		t.Error("Invalid value")
-	}
+func TestFetchLatestVersion(t *testing.T) {
+	Convey("When I fetch the latest version", t, func() {
+		version, err := FetchLatestVersion()
 
+		Convey("Then it should not return an error", func() {
+			So(err, ShouldBeNil)
+		})
+
+		Convey("Then it should return a version", func() {
+			So(version, ShouldNotBeEmpty)
+		})
+
+		Convey("Then it should look like a version", func() {
+
+			So(version, shouldMatch, `^\d+\.\d+\.\d+$`)
+		})
+	})
 }

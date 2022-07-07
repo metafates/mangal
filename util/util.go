@@ -45,7 +45,7 @@ func PrettyTrim(text string, limit int) string {
 // Plural makes singular word a plural if count ≠ 1
 // 	Example: Plural("book", 2) => "books"
 func Plural(word string, count int) string {
-	if count == 1 {
+	if count == 1 || strings.HasSuffix(word, "s") {
 		return word
 	}
 
@@ -141,7 +141,7 @@ func FetchLatestVersion() (string, error) {
 		TagName string `json:"tag_name"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&release); err != nil {
 		return "", err
 	}
 
@@ -219,19 +219,6 @@ func HistoryFilePath() (string, error) {
 	}
 
 	return filepath.Join(dir, common.CachePrefix+"-history.json"), nil
-}
-
-// MapKeys returns the keys of a map
-func MapKeys[T comparable, G any](m map[T]G) []T {
-	keys := make([]T, len(m))
-
-	i := 0
-	for k := range m {
-		keys[i] = k
-		i++
-	}
-
-	return keys
 }
 
 // RemoveIfExists removes file if it exists

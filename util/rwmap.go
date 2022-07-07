@@ -38,3 +38,10 @@ func (m *RwMap[K, V]) Reset() {
 
 	m.data = make(map[K]V)
 }
+
+func (m *RwMap[K, V]) Len() int {
+	m.rw.RLock()
+	defer m.rw.RUnlock()
+
+	return len(m.data)
+}
