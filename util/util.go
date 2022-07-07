@@ -218,7 +218,8 @@ func HistoryFilePath() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(dir, common.CachePrefix+"-history.json"), nil
+	path := filepath.Join(dir, common.CachePrefix+"-history.json")
+	return path, nil
 }
 
 // RemoveIfExists removes file if it exists

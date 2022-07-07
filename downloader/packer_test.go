@@ -8,6 +8,7 @@ import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/scraper"
 	"github.com/metafates/mangal/util"
+	pdfcpu "github.com/pdfcpu/pdfcpu/pkg/api"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/afero"
 	"log"
@@ -18,6 +19,11 @@ import (
 )
 
 var testImages []*bytes.Buffer
+
+func init() {
+	filesystem.Set(afero.NewMemMapFs())
+	config.Initialize("", false)
+}
 
 func init() {
 	filesystem.Set(afero.NewOsFs())
@@ -154,6 +160,36 @@ func TestPackToZip(t *testing.T) {
 	})
 }
 
+func TestGenerateComicInfo(t *testing.T) {
+	Convey("Given sample packer context", t, func() {
+		context := &PackerContext{
+			Manga: &scraper.URL{
+				Address: "https://example.com",
+				Info:    "Test manga",
+				Index:   0,
+			},
+			Chapter: &scraper.URL{
+				Address: "https://example.com",
+				Info:    "Test chapter",
+				Index:   0,
+			},
+		}
+
+		Convey("When generateComicInfo is called", func() {
+			xml := generateComicInfo(context)
+
+			Convey("It should return a non-empty string", func() {
+				So(xml, ShouldNotBeEmpty)
+
+				Convey("That contains the correct information", func() {
+					So(xml, ShouldContainSubstring, "<Series>Test manga</Series>")
+					So(xml, ShouldContainSubstring, "<Title>Test chapter</Title>")
+				})
+			})
+		})
+	})
+}
+
 func TestPackToCBZ(t *testing.T) {
 	Convey("Given "+strconv.Itoa(len(testImages))+" images", t, func() {
 		Convey("When packToCBZ is called with ComicInfo.xml option", func() {
@@ -248,6 +284,82 @@ func TestPackToCBZ(t *testing.T) {
 									}
 								})
 							})
+						})
+					})
+				})
+			})
+		})
+	})
+}
+
+func TestPackToPDF(t *testing.T) {
+	Convey("Given "+strconv.Itoa(len(testImages))+" images", t, func() {
+		Convey("When PackToPDF is called", func() {
+			path, err := PackToPDF(testImages, "test", nil)
+
+			Convey("It should not return an error", func() {
+				So(err, ShouldBeNil)
+			})
+
+			Convey("It should return a path", func() {
+				So(path, ShouldNotBeEmpty)
+
+				Convey("That points to a pdf file", func() {
+					isPdf := filepath.Ext(path) == ".pdf"
+					So(isPdf, ShouldBeTrue)
+
+					Convey("With the correct name", func() {
+						So(filepath.Base(path), ShouldEqual, "test.pdf")
+					})
+
+					Convey("With the correct number of pages", func() {
+						file, err := filesystem.Get().OpenFile(path, os.O_RDONLY, os.FileMode(0644))
+
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						images, err := pdfcpu.ListImages(file, []string{}, nil)
+
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						So(len(images), ShouldEqual, len(testImages))
+					})
+				})
+			})
+		})
+	})
+}
+
+func TestPackToEpub(t *testing.T) {
+	Convey("Given "+strconv.Itoa(len(testImages))+" images", t, func() {
+		Convey("When PackToEpub is called", func() {
+			path, err := PackToEpub(testImages, "test", nil)
+
+			Convey("It should not return an error", func() {
+				So(err, ShouldBeNil)
+			})
+
+			Convey("It should return a path", func() {
+				So(path, ShouldNotBeEmpty)
+
+				Convey("That points to an epub file", func() {
+					isEpub := filepath.Ext(path) == ".epub"
+					So(isEpub, ShouldBeTrue)
+
+					Convey("With the correct name", func() {
+						So(filepath.Base(path), ShouldEqual, "test.epub")
+
+						Convey("And it's not empty", func() {
+							err = EpubFile.Write(path)
+							if err != nil {
+								t.Fatal(err)
+							}
+
+							isEmpty, _ := afero.IsEmpty(filesystem.Get(), path)
+							So(isEmpty, ShouldBeFalse)
 						})
 					})
 				})

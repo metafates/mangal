@@ -5,105 +5,87 @@ import (
 	"github.com/metafates/mangal/common"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/util"
+	. "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/afero"
-	"os"
-	"path/filepath"
-	"strings"
+	"log"
 	"testing"
 )
 
-func TestSaveTemp(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping this SaveTemp is too expensive")
-	}
-
-	contents := []byte("Hello, World!")
-	buffer := bytes.NewBuffer(contents)
-	path, err := SaveTemp(buffer)
-
-	if err != nil {
-		t.Fatal()
-	}
-
-	defer func() {
-		_ = filesystem.Get().Remove(path)
-	}()
-
-	if !strings.HasPrefix(filepath.Base(path), common.TempPrefix) {
-		t.Error(common.TempPrefix + " is expected as a temp file prefix")
-	}
-
-	if exists, _ := afero.Exists(filesystem.Get(), path); !exists {
-		t.Fatal("File was not created")
-	}
-
-	newContents, err := afero.ReadFile(filesystem.Get(), path)
-	if err != nil {
-		t.Fatal("Can not open the file")
-	}
-
-	if string(newContents) != string(contents) {
-		t.Error("Written contents differ from the original")
-	}
+func init() {
+	filesystem.Set(afero.NewMemMapFs())
+	config.Initialize("", false)
 }
 
-func TestRemoveIfExists(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping this RemoveIfExists is too expensive")
-	}
+func TestSaveTemp(t *testing.T) {
+	Convey("Given a bytes buffer", t, func() {
+		buffer := bytes.NewBuffer([]byte("test"))
 
-	contents := []byte("Hello, World!")
-	buffer := bytes.NewBuffer(contents)
+		Convey("When saveTemp is called", func() {
+			path, err := SaveTemp(buffer)
 
-	path, _ := SaveTemp(buffer)
+			Convey("It should not return an error", func() {
+				So(err, ShouldBeNil)
+			})
 
-	if err := util.RemoveIfExists(path); err != nil {
-		t.Fatal("Error while removing file")
-	}
+			Convey("It should return a path", func() {
+				So(path, ShouldNotBeEmpty)
 
-	if exists, _ := afero.Exists(filesystem.Get(), path); exists {
-		t.Error("File was not removed")
-	}
+				Convey("That points to a non-empty file", func() {
+					isEmpty, err := afero.IsEmpty(filesystem.Get(), path)
 
-	if err := util.RemoveIfExists(path); err != nil {
-		t.Error("Unexpected error when removing file that doesn't exist")
-	}
+					So(err, ShouldBeNil)
+					So(isEmpty, ShouldBeFalse)
 
+					Convey("That contains the correct data", func() {
+						contents, err := afero.ReadFile(filesystem.Get(), path)
+
+						So(err, ShouldBeNil)
+						So(contents, ShouldResemble, []byte("test"))
+					})
+				})
+			})
+		})
+	})
 }
 
 func TestDownloadChapter(t *testing.T) {
-	config.Initialize("", false)
-	if testing.Short() {
-		t.Skip("skipping this DownloadChapter is too expensive")
-	}
+	Convey("Given a chapter", t, func() {
+		// get a chapter from the scraper
+		manga, err := config.UserConfig.Scrapers[0].SearchManga(common.TestQuery)
 
-	manga, _ := config.DefaultConfig().Scrapers[0].SearchManga(common.TestQuery)
-	chapters, _ := manga[0].Scraper.GetChapters(manga[0])
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	path, err := DownloadChapter(chapters[0], nil, true)
+		chapters, err := manga[0].Scraper.GetChapters(manga[0])
 
-	if err != nil {
-		t.Fatal("Chapter was not downloaded")
-	}
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	defer func() {
-		_ = filesystem.Get().RemoveAll(filepath.Dir(path))
-	}()
+		chapter := chapters[0]
 
-	if !strings.HasPrefix(path, os.TempDir()) {
-		t.Error("Chapter is expected to be downloaded in the temp folder")
-	}
+		Convey("When downloadChapter is called with PDF format", func() {
+			config.UserConfig.Formats.Default = common.PDF
 
-	if !strings.HasPrefix(filepath.Base(path), common.TempPrefix) {
-		t.Error(common.TempPrefix + " is expected as a temp chapter prefix")
-	}
+			path, err := DownloadChapter(chapter, nil, false)
 
-	if exists, _ := afero.Exists(filesystem.Get(), path); !exists {
-		t.Fatal("Chapter was not downloaded")
-	}
+			Convey("It should not return an error", func() {
+				So(err, ShouldBeNil)
+			})
 
-	if stat, _ := filesystem.Get().Stat(path); stat.Size() <= 0 {
-		t.Error("Downloaded pdf is empty")
-	}
+			Convey("It should return a path", func() {
+				So(path, ShouldNotBeEmpty)
+
+				Convey("That points to a pdf file", func() {
+					Convey("And it's not empty", func() {
+						isEmpty, err := afero.IsEmpty(filesystem.Get(), path)
+
+						So(err, ShouldBeNil)
+						So(isEmpty, ShouldBeFalse)
+					})
+				})
+			})
+		})
+	})
 }

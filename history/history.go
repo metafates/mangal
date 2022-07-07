@@ -7,6 +7,8 @@ import (
 	"github.com/metafates/mangal/scraper"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/afero"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -59,7 +61,16 @@ func WriteHistory(chapter *scraper.URL) error {
 		return err
 	}
 
-	err = afero.WriteFile(filesystem.Get(), historyFile, historyJSON, 0777)
+	// create the file if it doesn't exist
+	if exists, err := afero.Exists(filesystem.Get(), historyFile); err != nil {
+		return err
+	} else if !exists {
+		if err = filesystem.Get().MkdirAll(filepath.Dir(historyFile), os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	err = afero.WriteFile(filesystem.Get(), historyFile, historyJSON, os.ModePerm)
 
 	if err != nil {
 		return err

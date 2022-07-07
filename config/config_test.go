@@ -1,57 +1,77 @@
 package config
 
 import (
-	"github.com/metafates/mangal/common"
+	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
 
+func TestDefaultConfig(t *testing.T) {
+	Convey("Given a default config file", t, func() {
+		Convey("When initialize is called", func() {
+			Initialize("", false)
+
+			Convey("Should have at least one source", func() {
+				So(len(UserConfig.Scrapers), ShouldBeGreaterThan, 0)
+			})
+		})
+	})
+}
+
 func TestParseConfig(t *testing.T) {
-	config, err := ParseConfig(DefaultConfigBytes)
+	Convey("Given a config file", t, func() {
+		Convey("When parseConfig is called", func() {
+			config, err := ParseConfig(DefaultConfigBytes)
 
-	if err != nil {
-		t.Fatal(err)
-	}
+			Convey("Then the error should be nil", func() {
+				So(err, ShouldBeNil)
 
-	if config.UI.Fullscreen == false {
-		t.Error("Fullscreen is false")
-	}
+				Convey("And the config should be parsed", func() {
+					So(config, ShouldNotBeNil)
 
-	if config.Downloader.Path != "." {
-		t.Error("Downloader.Path is not .")
-	}
+					Convey("And the config should have at least one source", func() {
+						So(len(config.Scrapers), ShouldBeGreaterThan, 0)
+					})
+				})
+			})
 
-	if config.Anilist.Enabled == true {
-		t.Error("Anilist.Enabled is true")
-	}
-
-	if config.Anilist.MarkDownloaded == true {
-		t.Error("Anilist.MarkDownloaded is true")
-	}
-
-	if config.UseCustomReader == true {
-		t.Error("UseCustomReader is true")
-	}
-
-	if config.Formats.Default != common.PDF {
-		t.Error("Formats.Default is not PDF")
-	}
+		})
+	})
 }
 
 func TestGetConfig(t *testing.T) {
-	config := GetConfig("")
+	Convey("Given a config file", t, func() {
+		Convey("When getConfig is called with empty string", func() {
+			config := GetConfig("")
 
-	if err := ValidateConfig(config); err != nil {
-		t.Error(err)
-	}
+			Convey("Config should not be nil", func() {
+				So(config, ShouldNotBeNil)
+			})
+		})
+	})
 }
 
-func TestDefaultConfig(t *testing.T) {
-	config := DefaultConfig()
-	if config == nil {
-		t.Fatal("Error while parsing default config file")
-	}
+func TestValidateConfig(t *testing.T) {
+	Convey("Given a valid config file", t, func() {
+		config := GetConfig("")
+		Convey("When validateConfig is called", func() {
+			err := ValidateConfig(config)
 
-	if err := ValidateConfig(config); err != nil {
-		t.Error(err)
-	}
+			Convey("Then the error should be nil", func() {
+				So(err, ShouldBeNil)
+			})
+		})
+	})
+
+	Convey("Given an invalid config file", t, func() {
+		config := GetConfig("")
+		config.Scrapers = nil
+
+		Convey("When validateConfig is called", func() {
+			err := ValidateConfig(config)
+
+			Convey("Then the error should be returned", func() {
+				So(err, ShouldNotBeNil)
+			})
+		})
+	})
 }

@@ -2,100 +2,52 @@ package history
 
 import (
 	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/scraper"
-	"github.com/metafates/mangal/util"
+	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/afero"
 	"testing"
 )
 
-func RemoveHistoryFile(t *testing.T) {
-	t.Helper()
-
-	path, err := util.HistoryFilePath()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = util.RemoveIfExists(path)
-
-	if err != nil {
-		t.Fatal(err)
-	}
+func init() {
+	filesystem.Set(afero.NewMemMapFs())
+	config.Initialize("", false)
 }
 
-func SampleChapter(t *testing.T) *scraper.URL {
-	t.Helper()
+func TestHistory(t *testing.T) {
+	Convey("Given a sample chapter url", t, func() {
+		chapter := &scraper.URL{
+			Relation: &scraper.URL{
+				Address: "https://example.com",
+				Info:    "Test manga",
+				Index:   0,
+			},
+			Scraper: &scraper.Scraper{Source: &scraper.Source{Name: "Test source"}},
+			Address: "https://example.com",
+			Info:    "Test chapter",
+			Index:   0,
+		}
 
-	manga := &scraper.URL{
-		Address: "https://anilist.co/manga/1",
-		Info:    "test manga",
-	}
+		Convey("When writeHistory is called", func() {
+			err := WriteHistory(chapter)
 
-	chapter := &scraper.URL{
-		Address:  "https://anilist.co/chapter/1",
-		Index:    1,
-		Info:     "test chapter",
-		Relation: manga,
-		Scraper:  config.UserConfig.Scrapers[0],
-	}
+			Convey("Then the history should be written", func() {
+				So(err, ShouldBeNil)
 
-	return chapter
-}
+				Convey("And history file should contain the correct data", func() {
+					history, err := ReadHistory()
+					So(err, ShouldBeNil)
+					So(len(history), ShouldEqual, 1)
 
-func TestReadHistory(t *testing.T) {
-	RemoveHistoryFile(t)
-
-	history, err := ReadHistory()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(history) != 0 {
-		t.Error("history is not empty")
-	}
-
-	RemoveHistoryFile(t)
-}
-
-func TestWriteHistory(t *testing.T) {
-	RemoveHistoryFile(t)
-
-	chapter := SampleChapter(t)
-
-	err := WriteHistory(chapter)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	history, err := ReadHistory()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(history) != 1 {
-		t.Error("history must be of length 1")
-	}
-
-	manga := chapter.Relation
-
-	if history[manga.Address] == nil {
-		t.Error("history entry must not be nil")
-	}
-
-	if history[manga.Address].Manga.Address != manga.Address {
-		t.Error("manga address must be equal")
-	}
-
-	if history[manga.Address].Manga.Info != manga.Info {
-		t.Error("manga info must be equal")
-	}
-
-	if history[manga.Address].Chapter.Index != chapter.Index {
-		t.Error("chapter index must be equal")
-	}
-
-	RemoveHistoryFile(t)
+					So(history["https://example.com"].Chapter.Address, ShouldEqual, "https://example.com")
+					So(history["https://example.com"].Chapter.Info, ShouldEqual, "Test chapter")
+					So(history["https://example.com"].Chapter.Index, ShouldEqual, 0)
+					So(history["https://example.com"].Manga.Address, ShouldEqual, "https://example.com")
+					So(history["https://example.com"].Manga.Info, ShouldEqual, "Test manga")
+					So(history["https://example.com"].Manga.Index, ShouldEqual, 0)
+					So(history["https://example.com"].Manga.Scraper.Source.Name, ShouldEqual, "Test source")
+				})
+			})
+		})
+	})
 }
