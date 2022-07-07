@@ -3,9 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/metafates/mangal/common"
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/scraper"
+	"github.com/spf13/afero"
 	"path/filepath"
 	"testing"
 )
@@ -16,19 +16,18 @@ func TestInlineMode(t *testing.T) {
 	}
 
 	// test options
-	options := InlineOptions{
-		config:     "",
+	options := inlineOptions{
 		mangaIdx:   -1,
 		chapterIdx: -1,
 		asJson:     false,
-		format:     config.PDF,
+		format:     common.PDF,
 		showUrls:   false,
 		asTemp:     true,
 		doRead:     false,
 		doOpen:     false,
 	}
 
-	out, err := InlineMode(common.TestQuery, options)
+	out, err := inlineMode(common.TestQuery, options)
 	if err != nil {
 		t.Error(err)
 	}
@@ -40,7 +39,7 @@ func TestInlineMode(t *testing.T) {
 	// changet test options
 	options.asJson = true
 
-	out, err = InlineMode(common.TestQuery, options)
+	out, err = inlineMode(common.TestQuery, options)
 
 	if err != nil {
 		t.Error(err)
@@ -64,7 +63,7 @@ func TestInlineMode(t *testing.T) {
 	// select invalid manga
 	options.mangaIdx = 0
 
-	out, err = InlineMode(common.TestQuery, options)
+	out, err = inlineMode(common.TestQuery, options)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -72,7 +71,7 @@ func TestInlineMode(t *testing.T) {
 	// select invalid chapter
 	options.chapterIdx = 0
 
-	out, err = InlineMode(common.TestQuery, options)
+	out, err = inlineMode(common.TestQuery, options)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -81,7 +80,7 @@ func TestInlineMode(t *testing.T) {
 	options.mangaIdx = 1
 	options.chapterIdx = -1
 
-	out, err = InlineMode(common.TestQuery, options)
+	out, err = inlineMode(common.TestQuery, options)
 	if err != nil {
 		t.Error(err)
 	}
@@ -93,7 +92,7 @@ func TestInlineMode(t *testing.T) {
 	// select valid chapter
 	options.chapterIdx = 1
 
-	out, err = InlineMode(common.TestQuery, options)
+	out, err = inlineMode(common.TestQuery, options)
 	if err != nil {
 		t.Error(err)
 	}
@@ -105,7 +104,7 @@ func TestInlineMode(t *testing.T) {
 	// download as temp
 	options.asTemp = true
 
-	out, err = InlineMode(common.TestQuery, options)
+	out, err = inlineMode(common.TestQuery, options)
 	if err != nil {
 		t.Error(err)
 	}
@@ -115,12 +114,12 @@ func TestInlineMode(t *testing.T) {
 	}
 
 	// check if file at out path exists
-	if _, err = filesystem.Afero.Exists(out); err != nil {
+	if _, err = afero.Exists(filesystem.Get(), out); err != nil {
 		t.Error(err)
 	}
 
 	// check if file at out path is not empty
-	if _, err = filesystem.Afero.Stat(out); err != nil {
+	if _, err = filesystem.Get().Stat(out); err != nil {
 		t.Error(err)
 	}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/util"
+	"github.com/spf13/afero"
 	"testing"
 )
 
@@ -54,14 +55,14 @@ func TestAnilistClient_SavePreferences(t *testing.T) {
 		t.Error(err)
 	}
 
-	if exists, err := filesystem.Afero.Exists(anilistFile); err != nil {
+	if exists, err := afero.Exists(filesystem.Get(), anilistFile); err != nil {
 		t.Error(err)
 	} else if !exists {
 		t.Error("file was not created")
 	}
 
 	// check if file contains correct data
-	file, err := filesystem.Afero.ReadFile(anilistFile)
+	file, err := afero.ReadFile(filesystem.Get(), anilistFile)
 	if err != nil {
 		t.Error(err)
 	}
@@ -82,7 +83,7 @@ func TestAnilistClient_SavePreferences(t *testing.T) {
 	}
 
 	// delete file
-	if err := filesystem.Afero.Remove(anilistFile); err != nil {
+	if err := filesystem.Get().Remove(anilistFile); err != nil {
 		t.Error(err)
 	}
 }

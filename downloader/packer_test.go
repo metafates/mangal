@@ -21,8 +21,7 @@ func MockFiles(t *testing.T) []*bytes.Buffer {
 	t.Helper()
 
 	// options to get chapter images
-	options := cmd.InlineOptions{
-		config:     "",
+	options := inlineOptions{
 		mangaIdx:   1,
 		chapterIdx: 1,
 		asJson:     false,

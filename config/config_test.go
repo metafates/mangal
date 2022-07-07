@@ -6,7 +6,7 @@ import (
 )
 
 func TestParseConfig(t *testing.T) {
-	config, err := ParseConfig([]byte(common.DefaultConfigString))
+	config, err := ParseConfig(DefaultConfigBytes)
 
 	if err != nil {
 		t.Fatal(err)
@@ -18,10 +18,6 @@ func TestParseConfig(t *testing.T) {
 
 	if config.Downloader.Path != "." {
 		t.Error("Downloader.Path is not .")
-	}
-
-	if config.Downloader.CacheImages == true {
-		t.Error("Downloader.CacheImages is true")
 	}
 
 	if config.Anilist.Enabled == true {
@@ -36,7 +32,7 @@ func TestParseConfig(t *testing.T) {
 		t.Error("UseCustomReader is true")
 	}
 
-	if config.Formats.Default != PDF {
+	if config.Formats.Default != common.PDF {
 		t.Error("Formats.Default is not PDF")
 	}
 }

@@ -151,8 +151,8 @@ func TestScraper_ResetFiles(t *testing.T) {
 
 	file, _ := defaultScraper.GetFile(anyPage)
 
-	// check scraper has file
-	f, ok := defaultScraper.Files.Get(anyPage.Address)
+	// check scraper has files
+	f, ok := defaultScraper.files.Get(anyPage.Address)
 	if !ok {
 		t.Failed()
 	}
@@ -165,7 +165,7 @@ func TestScraper_ResetFiles(t *testing.T) {
 	defaultScraper.ResetFiles()
 
 	// check scraper has no file
-	_, ok = defaultScraper.Files.Get(anyPage.Address)
+	_, ok = defaultScraper.files.Get(anyPage.Address)
 	if ok {
 		t.Failed()
 	}
