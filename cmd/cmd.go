@@ -23,7 +23,7 @@ import (
 var mangalCmd = &cobra.Command{
 	Use:   strings.ToLower(common.Mangal),
 	Short: common.Mangal + " - A Manga Downloader",
-	Long: common.AsciiArt + `
+	Long: style.Bold.Render(common.AsciiArt) + `
 
 The ultimate CLI manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
