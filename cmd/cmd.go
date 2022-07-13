@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/metafates/mangal/common"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/history"
@@ -132,6 +133,18 @@ func init() {
 	_ = mangalCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return util.Map(common.AvailableFormats, util.ToString[common.FormatType]), cobra.ShellCompDirectiveDefault
 	})
+
+	// colorize help message
+	cobra.AddTemplateFunc("StyleHeading", lipgloss.NewStyle().Foreground(lipgloss.Color("#FAE3B0")).Render)
+	usageTemplate := mangalCmd.UsageTemplate()
+	usageTemplate = strings.NewReplacer(
+		`Usage:`, `{{StyleHeading "Usage:"}}`,
+		`Aliases:`, `{{StyleHeading "Aliases:"}}`,
+		`Available Commands:`, `{{StyleHeading "Available Commands:"}}`,
+		`Global Flags:`, `{{StyleHeading "Global Flags:"}}`,
+		`Flags:`, `{{StyleHeading "Flags:"}}`,
+	).Replace(usageTemplate)
+	mangalCmd.SetUsageTemplate(usageTemplate)
 }
 
 // Execute executes root command
