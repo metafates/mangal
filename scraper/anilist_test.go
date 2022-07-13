@@ -1,10 +1,11 @@
-package scraper
+package scraper_test
 
 import (
 	"encoding/json"
 	"github.com/metafates/mangal/common"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/scraper"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/afero"
 	"testing"
@@ -12,7 +13,7 @@ import (
 
 func TestAnilistClient_SearchManga(t *testing.T) {
 	// sample anilist client
-	anilistClient, err := NewAnilistClient("", "")
+	anilistClient, err := scraper.NewAnilistClient("", "")
 
 	if err != nil {
 		t.Error(err)
@@ -34,7 +35,7 @@ func TestAnilistClient_SearchManga(t *testing.T) {
 
 func TestAnilistClient_SavePreferences(t *testing.T) {
 	// sample anilist client
-	anilistClient, err := NewAnilistClient("", "")
+	anilistClient, err := scraper.NewAnilistClient("", "")
 
 	if err != nil {
 		t.Error(err)
@@ -67,7 +68,7 @@ func TestAnilistClient_SavePreferences(t *testing.T) {
 		t.Error(err)
 	}
 
-	var preferences AnilistPreferences
+	var preferences scraper.AnilistPreferences
 	err = json.Unmarshal(file, &preferences)
 	if err != nil {
 		t.Error(err)
@@ -90,7 +91,7 @@ func TestAnilistClient_SavePreferences(t *testing.T) {
 
 func TestAnilistClient_ToAnilistURL(t *testing.T) {
 	// sample anilist client
-	anilistClient, err := NewAnilistClient("", "")
+	anilistClient, err := scraper.NewAnilistClient("", "")
 
 	if err != nil {
 		t.Error(err)

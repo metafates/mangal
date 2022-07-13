@@ -34,7 +34,7 @@ type Scraper struct {
 	// Pages maps chapter url with pages urls
 	pages map[string][]*URL
 
-	files *util.RwMap[string, *bytes.Buffer]
+	Files *util.RwMap[string, *bytes.Buffer]
 }
 
 // URL represents an url with relation to another url with useful information
@@ -55,7 +55,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		manga:    make(map[string][]*URL),
 		chapters: make(map[string][]*URL),
 		pages:    make(map[string][]*URL),
-		files:    util.NewRwMap[string, *bytes.Buffer](),
+		Files:    util.NewRwMap[string, *bytes.Buffer](),
 	}
 
 	var (
@@ -201,7 +201,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 		r.Headers.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
 	})
 	filesCollector.OnResponse(func(r *colly.Response) {
-		scraper.files.Set(r.Request.AbsoluteURL(r.Request.URL.Path), bytes.NewBuffer(r.Body))
+		scraper.Files.Set(r.Request.AbsoluteURL(r.Request.URL.Path), bytes.NewBuffer(r.Body))
 	})
 
 	scraper.mangaCollector = mangaCollector
@@ -277,7 +277,7 @@ func (s *Scraper) GetPages(chapter *URL) ([]*URL, error) {
 
 // GetFile returns manga file for given page url
 func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
-	if data, ok := s.files.Get(file.Address); ok {
+	if data, ok := s.Files.Get(file.Address); ok {
 		return data, nil
 	}
 
@@ -289,7 +289,7 @@ func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
 
 	s.filesCollector.Wait()
 
-	data, ok := s.files.Get(file.Address)
+	data, ok := s.Files.Get(file.Address)
 
 	if ok {
 		return data, nil
@@ -300,5 +300,5 @@ func (s *Scraper) GetFile(file *URL) (*bytes.Buffer, error) {
 
 // ResetFiles resets scraper files cache
 func (s *Scraper) ResetFiles() {
-	s.files.Reset()
+	s.Files.Reset()
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/metafates/mangal/common"
+	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/scraper"
 	"github.com/spf13/afero"
@@ -14,6 +15,8 @@ func TestInlineMode(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping inline mode")
 	}
+
+	config.Initialize("", false)
 
 	// test options
 	options := inlineOptions{

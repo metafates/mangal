@@ -12,6 +12,10 @@ import (
 	"testing"
 )
 
+func init() {
+	filesystem.Set(afero.NewMemMapFs())
+}
+
 // generateFiles at the given directory with prefix appended to each file
 func generateFiles(t *testing.T, count int, dir, prefix string) ([]string, error) {
 	t.Helper()
@@ -49,8 +53,6 @@ func existAll(t *testing.T, files []string) (bool, error) {
 }
 
 func TestRemoveTemp(t *testing.T) {
-	RemoveTemp()
-
 	const count = 13
 
 	files, err := generateFiles(t, count, os.TempDir(), common.TempPrefix)

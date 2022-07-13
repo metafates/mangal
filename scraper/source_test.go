@@ -1,16 +1,17 @@
-package scraper
+package scraper_test
 
 import (
+	"github.com/metafates/mangal/scraper"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
 
 func TestValidateSource(t *testing.T) {
 	Convey("Given an empty source", t, func() {
-		source := &Source{}
+		source := &scraper.Source{}
 
 		Convey("When validateSource is called", func() {
-			err := ValidateSource(source)
+			err := scraper.ValidateSource(source)
 
 			Convey("Then the error should be returned", func() {
 				So(err, ShouldNotBeNil)
@@ -19,7 +20,7 @@ func TestValidateSource(t *testing.T) {
 	})
 
 	Convey("Given a valid source", t, func() {
-		source := &Source{
+		source := &scraper.Source{
 			Name:             "test",
 			Base:             "https://example.com",
 			ChaptersBase:     "https://example.com/chapters",
@@ -35,7 +36,7 @@ func TestValidateSource(t *testing.T) {
 		}
 
 		Convey("When validateSource is called", func() {
-			err := ValidateSource(source)
+			err := scraper.ValidateSource(source)
 
 			Convey("Then the error should be nil", func() {
 				So(err, ShouldBeNil)
