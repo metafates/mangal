@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/common"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/spf13/afero"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -11,20 +12,24 @@ import (
 	"testing"
 )
 
+func init() {
+	filesystem.Set(afero.NewMemMapFs())
+}
+
 // generateFiles at the given directory with prefix appended to each file
 func generateFiles(t *testing.T, count int, dir, prefix string) ([]string, error) {
 	t.Helper()
 
 	var files []string
 
-	if err := filesystem.Afero.MkdirAll(dir, 0777); err != nil {
+	if err := filesystem.Get().MkdirAll(dir, 0777); err != nil {
 		return nil, err
 	}
 
 	for i := 0; i < count; i++ {
 		path := filepath.Join(dir, prefix+strconv.Itoa(rand.Intn(100000)))
 
-		if _, err := filesystem.Afero.Create(path); err != nil {
+		if _, err := filesystem.Get().Create(path); err != nil {
 			return nil, err
 		}
 		files = append(files, path)
@@ -37,7 +42,7 @@ func generateFiles(t *testing.T, count int, dir, prefix string) ([]string, error
 func existAll(t *testing.T, files []string) (bool, error) {
 	t.Helper()
 	for _, file := range files {
-		if exists, err := filesystem.Afero.Exists(file); err != nil {
+		if exists, err := afero.Exists(filesystem.Get(), file); err != nil {
 			return false, err
 		} else if !exists {
 			return false, nil
@@ -48,8 +53,6 @@ func existAll(t *testing.T, files []string) (bool, error) {
 }
 
 func TestRemoveTemp(t *testing.T) {
-	RemoveTemp()
-
 	const count = 13
 
 	files, err := generateFiles(t, count, os.TempDir(), common.TempPrefix)

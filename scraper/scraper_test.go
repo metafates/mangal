@@ -1,8 +1,9 @@
-package scraper
+package scraper_test
 
 import (
 	"github.com/metafates/mangal/common"
 	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/scraper"
 	"github.com/metafates/mangal/util"
 	"testing"
 )
@@ -10,13 +11,13 @@ import (
 var testDefaultSource = config.GetConfig("").Scrapers[0].Source
 
 func TestMakeSourceScraper(t *testing.T) {
-	scraper := MakeSourceScraper(testDefaultSource)
+	s := scraper.MakeSourceScraper(testDefaultSource)
 
-	if scraper == nil {
+	if s == nil {
 		t.Failed()
 	}
 
-	if scraper.Source == nil || scraper.Source != testDefaultSource {
+	if s.Source == nil || s.Source != testDefaultSource {
 		t.Failed()
 	}
 }
@@ -26,7 +27,7 @@ func TestScraper_SearchManga(t *testing.T) {
 		t.Skip("skipping this scraper.SearchManga is too expensive")
 	}
 
-	defaultScraper := MakeSourceScraper(testDefaultSource)
+	defaultScraper := scraper.MakeSourceScraper(testDefaultSource)
 	manga, err := defaultScraper.SearchManga(common.TestQuery)
 
 	if err != nil {
@@ -53,7 +54,7 @@ func TestScraper_GetChapters(t *testing.T) {
 		t.Skip("skipping this scraper.GetChapters is too expensive")
 	}
 
-	defaultScraper := MakeSourceScraper(testDefaultSource)
+	defaultScraper := scraper.MakeSourceScraper(testDefaultSource)
 
 	manga, _ := defaultScraper.SearchManga(common.TestQuery)
 	anyManga := manga[0]
@@ -85,7 +86,7 @@ func TestScraper_GetPages(t *testing.T) {
 		t.Skip("skipping this scraper.GetPages is too expensive")
 	}
 
-	defaultScraper := MakeSourceScraper(testDefaultSource)
+	defaultScraper := scraper.MakeSourceScraper(testDefaultSource)
 
 	manga, _ := defaultScraper.SearchManga(common.TestQuery)
 	anyManga := manga[0]
@@ -119,7 +120,7 @@ func TestScraper_GetFile(t *testing.T) {
 		t.Skip("skipping this scaper.GetFile is too expensive")
 	}
 
-	defaultScraper := MakeSourceScraper(testDefaultSource)
+	defaultScraper := scraper.MakeSourceScraper(testDefaultSource)
 
 	manga, _ := defaultScraper.SearchManga(common.TestQuery)
 	anyManga := manga[0]
@@ -138,7 +139,7 @@ func TestScraper_GetFile(t *testing.T) {
 }
 
 func TestScraper_ResetFiles(t *testing.T) {
-	defaultScraper := MakeSourceScraper(testDefaultSource)
+	defaultScraper := scraper.MakeSourceScraper(testDefaultSource)
 
 	manga, _ := defaultScraper.SearchManga(common.TestQuery)
 	anyManga := manga[0]
@@ -151,7 +152,7 @@ func TestScraper_ResetFiles(t *testing.T) {
 
 	file, _ := defaultScraper.GetFile(anyPage)
 
-	// check scraper has file
+	// check scraper has files
 	f, ok := defaultScraper.Files.Get(anyPage.Address)
 	if !ok {
 		t.Failed()

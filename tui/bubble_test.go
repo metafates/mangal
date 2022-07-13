@@ -2,47 +2,47 @@ package tui
 
 import (
 	"github.com/metafates/mangal/config"
+	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
 
 func TestNewBubble(t *testing.T) {
 	config.Initialize("", false)
 
-	bubble := NewBubble(SearchState)
+	Convey("When NewBubble is called", t, func() {
+		bubble := NewBubble(SearchState)
+		Convey("Then the bubble should not be nil", func() {
+			So(bubble, ShouldNotBeNil)
 
-	if bubble.state != SearchState {
-		t.Error("Invalid state")
-	}
+			Convey("And the bubble should have an inital state", func() {
+				So(bubble.state, ShouldEqual, SearchState)
+			})
 
-	if bubble.mangaList.FilteringEnabled() {
-		t.Error("Filtered should be disabled for manga list")
-	}
+			Convey("And all components should exist", func() {
+				So(bubble.input, ShouldNotBeNil)
+				So(bubble.mangaList, ShouldNotBeNil)
+				So(bubble.chaptersList, ShouldNotBeNil)
+				So(bubble.ResumeList, ShouldNotBeNil)
+				So(bubble.spinner, ShouldNotBeNil)
+				So(bubble.help, ShouldNotBeNil)
+				So(bubble.progress, ShouldNotBeNil)
 
-	if bubble.chaptersList.FilteringEnabled() {
-		t.Error("Filtering should be disabled for chapters list")
-	}
+				Convey("And the input should be empty", func() {
+					So(bubble.input.Value(), ShouldEqual, "")
 
-	if bubble.mangaChan == nil {
-		t.Error("Manga channel should not be nil")
-	}
+					Convey("Input also should be focused", func() {
+						So(bubble.input.Focused(), ShouldBeTrue)
+					})
+				})
+			})
 
-	if bubble.chaptersChan == nil {
-		t.Error("Chapters channel should not be nil")
-	}
+			Convey("And channels should not be nil", func() {
+				So(bubble.mangaChan, ShouldNotBeNil)
+				So(bubble.chaptersChan, ShouldNotBeNil)
+				So(bubble.chaptersProgressChan, ShouldNotBeNil)
+				So(bubble.chapterPagesProgressChan, ShouldNotBeNil)
+			})
 
-	if bubble.chaptersProgressChan == nil {
-		t.Error("Chapters progress channel should not be nil")
-	}
-
-	if bubble.chapterPagesProgressChan == nil {
-		t.Error("Chapter pages progress channel should not be nil")
-	}
-
-	if !bubble.input.Focused() {
-		t.Error("Input should be focused")
-	}
-
-	if bubble.input.Value() != "" {
-		t.Error("Input should be empty")
-	}
+		})
+	})
 }

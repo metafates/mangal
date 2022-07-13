@@ -1,43 +1,46 @@
-package scraper
+package scraper_test
 
-import "testing"
+import (
+	"github.com/metafates/mangal/scraper"
+	. "github.com/smartystreets/goconvey/convey"
+	"testing"
+)
 
 func TestValidateSource(t *testing.T) {
-	// create a valid test source
-	source := Source{
-		Name:             "Test",
-		Base:             "https://example.com",
-		SearchTemplate:   "https://example.com/search?q=%s",
-		MangaAnchor:      "a",
-		MangaTitle:       "title",
-		ChapterAnchor:    "a",
-		ChapterTitle:     "title",
-		ReaderPage:       "a",
-		RandomDelayMs:    0,
-		ChaptersReversed: false,
-	}
+	Convey("Given an empty source", t, func() {
+		source := &scraper.Source{}
 
-	// validate source
-	err := ValidateSource(&source)
-	if err != nil {
-		t.Error(err)
-	}
+		Convey("When validateSource is called", func() {
+			err := scraper.ValidateSource(source)
 
-	// create an invalid test source
-	source.Base = ""
+			Convey("Then the error should be returned", func() {
+				So(err, ShouldNotBeNil)
+			})
+		})
+	})
 
-	// validate source
-	err = ValidateSource(&source)
-	if err == nil {
-		t.Error("expected error but got nil")
-	}
+	Convey("Given a valid source", t, func() {
+		source := &scraper.Source{
+			Name:             "test",
+			Base:             "https://example.com",
+			ChaptersBase:     "https://example.com/chapters",
+			SearchTemplate:   "https://example.com/search?q=%s",
+			MangaAnchor:      "a",
+			MangaTitle:       "a",
+			ChapterAnchor:    "a",
+			ChapterTitle:     "a",
+			ReaderPage:       "a",
+			RandomDelayMs:    0,
+			ChaptersReversed: false,
+			WhitespaceEscape: "%20",
+		}
 
-	// set search template to invalid url
-	source.SearchTemplate = "https://example.com/search?q="
+		Convey("When validateSource is called", func() {
+			err := scraper.ValidateSource(source)
 
-	// validate source
-	err = ValidateSource(&source)
-	if err == nil {
-		t.Error("expected error but got nil")
-	}
+			Convey("Then the error should be nil", func() {
+				So(err, ShouldBeNil)
+			})
+		})
+	})
 }
