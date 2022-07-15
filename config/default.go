@@ -1,9 +1,7 @@
 package config
 
 var DefaultConfigBytes = []byte(`
-# Which sources to use. You can use several sources, it won't affect perfomance
-use = ['manganelo']
-
+[reader]
 # If false, then OS default reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
@@ -78,13 +76,15 @@ title = "Mangal"
 
 
 
-[sources]
-[sources.manganelo]
+[[sources]]
+# Should this source be used
+enabled = true
+
+# Source name
+name = "manganelo"
+
 # Base url
 base = 'https://m.manganelo.com'
-
-# Chapters Base url
-chapters_base = 'https://chap.manganelo.com/'
 
 # Search endpoint. Put %s where the query should be
 search = 'https://m.manganelo.com/search/story/%s'

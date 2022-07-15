@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 var configCmd = &cobra.Command{
@@ -159,6 +160,9 @@ var configInitCmd = &cobra.Command{
 			} else {
 				configToWrite = string(config.DefaultConfigBytes)
 			}
+
+			// trim trailing newlines
+			configToWrite = strings.Trim(configToWrite, "\n")
 
 			if err := filesystem.Get().MkdirAll(filepath.Dir(configPath), 0700); err != nil {
 				log.Fatal("Error while creating file")

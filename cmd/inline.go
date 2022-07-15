@@ -131,8 +131,8 @@ func inlineMode(query string, options inlineOptions) (string, error) {
 			// if options to read chapter is set, read it
 			if options.doRead {
 				// check if custom reader is set
-				if config.UserConfig.UseCustomReader {
-					err = open.StartWith(chapterPath, config.UserConfig.CustomReader)
+				if config.UserConfig.Reader.UseCustomReader {
+					err = open.StartWith(chapterPath, config.UserConfig.Reader.CustomReader)
 				} else {
 					err = open.Start(chapterPath)
 				}

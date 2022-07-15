@@ -9,9 +9,9 @@ import (
 
 // Source is a source used to scrape manga
 type Source struct {
+	Enabled          bool
 	Name             string
 	Base             string
-	ChaptersBase     string `toml:"chapters_base"`
 	SearchTemplate   string `toml:"search"`
 	MangaAnchor      string `toml:"manga_anchor"`
 	MangaTitle       string `toml:"manga_title"`

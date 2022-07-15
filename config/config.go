@@ -25,10 +25,9 @@ type Config struct {
 		Enabled        bool
 		MarkDownloaded bool
 	}
-	UseCustomReader bool
-	CustomReader    string
-	HistoryMode     bool
-	IncognitoMode   bool
+	Reader        *ReaderConfig
+	HistoryMode   bool
+	IncognitoMode bool
 }
 
 // DefaultConfig makes default config
@@ -85,13 +84,13 @@ func GetConfig(path string) *Config {
 func ParseConfig(configString []byte) (*Config, error) {
 	// tempConfig is a temporary config that will be used to store parsed config
 	type tempConfig struct {
-		Use             []string
 		Formats         FormatsConfig `toml:"formats"`
 		UI              UIConfig      `toml:"ui"`
 		UseCustomReader bool          `toml:"use_custom_reader"`
 		CustomReader    string        `toml:"custom_reader"`
-		Sources         map[string]*scraper.Source
+		Sources         []*scraper.Source
 		Downloader      DownloaderConfig
+		Reader          ReaderConfig
 		Anilist         struct {
 			Enabled        bool   `toml:"enabled"`
 			ID             string `toml:"id"`
@@ -124,17 +123,12 @@ func ParseConfig(configString []byte) (*Config, error) {
 	}
 
 	// Convert sources listed in tempConfig to Scrapers
-	for sourceName, source := range tempConf.Sources {
-		// If source is not listed in Use then skip it
-		if !slices.Contains(tempConf.Use, sourceName) {
-			continue
+	for _, source := range tempConf.Sources {
+		if source.Enabled {
+			// Create scraper for this source
+			s := scraper.MakeSourceScraper(source)
+			conf.Scrapers = append(conf.Scrapers, s)
 		}
-
-		// Create scraper
-		s := scraper.MakeSourceScraper(source)
-		s.Source.Name = sourceName
-
-		conf.Scrapers = append(conf.Scrapers, s)
 	}
 
 	conf.UI = &tempConf.UI
@@ -150,14 +144,13 @@ func ParseConfig(configString []byte) (*Config, error) {
 		conf.Formats.Default = common.PDF
 	}
 
-	conf.UseCustomReader = tempConf.UseCustomReader
-	conf.CustomReader = tempConf.CustomReader
+	conf.Reader = &tempConf.Reader
 	conf.HistoryMode = false
 	conf.IncognitoMode = false
 
 	if customReader := os.Getenv(common.EnvCustomReader); customReader != "" {
-		conf.UseCustomReader = true
-		conf.CustomReader = customReader
+		conf.Reader.UseCustomReader = true
+		conf.Reader.CustomReader = customReader
 	}
 
 	if tempConf.Anilist.Enabled {
@@ -215,7 +208,7 @@ func ValidateConfig(config *Config) error {
 	}
 
 	// check if custom reader is properly configured
-	if config.UseCustomReader && config.CustomReader == "" {
+	if config.Reader.UseCustomReader && config.Reader.CustomReader == "" {
 		return errors.New("use_custom_reader is set to true but reader isn't specified")
 	}
 

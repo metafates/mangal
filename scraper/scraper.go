@@ -196,7 +196,7 @@ func MakeSourceScraper(source *Source) *Scraper {
 	filesCollector := collector.Clone()
 	filesCollector.CacheDir = ""
 	filesCollector.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("Referer", source.ChaptersBase)
+		r.Headers.Set("Referer", source.Base)
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
 	})
