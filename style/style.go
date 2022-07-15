@@ -3,13 +3,16 @@ package style
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	Common         = lipgloss.NewStyle().Margin(2, 2)
-	Accent         = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	Bold           = lipgloss.NewStyle().Bold(true)
+	Common    = lipgloss.NewStyle().Margin(2, 2)
+	Accent    = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	Secondary = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"})
+	Bold      = lipgloss.NewStyle().Bold(true)
+	Italic    = lipgloss.NewStyle().Italic(true)
+	Success   = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
+	Fail      = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+
 	InputPrompt    = Accent.Copy().Bold(true)
 	InputTitle     = InputPrompt.Copy()
-	Success        = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
-	Faile          = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 	MangaListTitle = lipgloss.NewStyle().
 			Background(lipgloss.Color("#9f86c0")).
 			Foreground(lipgloss.Color("#231942")).

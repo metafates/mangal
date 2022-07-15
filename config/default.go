@@ -58,7 +58,7 @@ mark_downloaded = false
 [ui]
 # How to display chapters in TUI mode
 # Use %d to specify chapter number and %s to specify chapter title
-chapter_name_template = "[%d] %s"
+chapter_name_template = "%d %s"
 
 # Fullscreen mode 
 fullscreen = true

@@ -64,13 +64,13 @@ func (b *Bubble) View() string {
 		failed := b.chaptersDownloadProgressInfo.Failed
 
 		succeededRendered := style.Success.Render(strconv.Itoa(len(succeeded)))
-		failedRendered := style.Faile.Render(strconv.Itoa(len(failed)))
+		failedRendered := style.Fail.Render(strconv.Itoa(len(failed)))
 
 		view = fmt.Sprintf(template, succeededRendered, util.Plural("chapter", len(succeeded)), failedRendered)
 
 		// show failed chapters
 		for _, chapter := range failed {
-			view += fmt.Sprintf("\n\n%s %s", style.Faile.Render("Failed"), chapter.Info)
+			view += fmt.Sprintf("\n\n%s %s", style.Fail.Render("Failed"), chapter.Info)
 		}
 	}
 

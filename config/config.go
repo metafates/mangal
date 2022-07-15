@@ -152,7 +152,7 @@ func ParseConfig(configString []byte) (*Config, error) {
 
 	conf.UseCustomReader = tempConf.UseCustomReader
 	conf.CustomReader = tempConf.CustomReader
-	conf.HistoryMode = true
+	conf.HistoryMode = false
 	conf.IncognitoMode = false
 
 	if customReader := os.Getenv(common.EnvCustomReader); customReader != "" {

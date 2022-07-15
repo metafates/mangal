@@ -20,25 +20,29 @@ func (l *listItem) Select() {
 	l.selected = !l.selected
 }
 func (l *listItem) Title() string {
-	var title string
+	var (
+		title    string
+		index    = l.url.Index
+		template string
+	)
 
 	if l.selected {
-		title = style.Accent.Bold(true).Render(config.UserConfig.UI.Mark) + " " + l.url.Info
+		title = style.Accent.Bold(true).Render(config.UserConfig.UI.Mark) + " " + style.Italic.Render(l.url.Info)
+		template = strings.ReplaceAll(config.UserConfig.UI.ChapterNameTemplate, "%0d", util.PadZeros(index, 4))
+		template = strings.ReplaceAll(template, "%d", style.Accent.Render(strconv.Itoa(index)))
 	} else {
-		title = l.url.Info
+		template = strings.ReplaceAll(config.UserConfig.UI.ChapterNameTemplate, "%0d", util.PadZeros(index, 4))
+		template = strings.ReplaceAll(template, "%d", style.Secondary.Render(strconv.Itoa(index)))
+		title = style.Italic.Render(l.url.Info)
 	}
+
+	// format according to the name template
+	template = strings.ReplaceAll(template, "%s", style.Italic.Render(title))
 
 	// If it's a manga
 	if l.url.Relation == nil {
 		return title
 	}
-
-	index := l.url.Index
-
-	// replace according to the name template
-	template := strings.ReplaceAll(config.UserConfig.UI.ChapterNameTemplate, "%0d", util.PadZeros(index, 4))
-	template = strings.ReplaceAll(template, "%d", strconv.Itoa(index))
-	template = strings.ReplaceAll(template, "%s", title)
 
 	return template
 }

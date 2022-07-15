@@ -23,7 +23,7 @@ func runDoctor() {
 		}
 
 		fail = func() {
-			fmt.Print(style.Faile.Render("Fail"))
+			fmt.Print(style.Fail.Render("Fail"))
 			fmt.Println()
 		}
 	)

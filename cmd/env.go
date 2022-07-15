@@ -23,7 +23,7 @@ var envCmd = &cobra.Command{
 			if isSet {
 				fmt.Printf("%s - %s\n", "Value", value)
 			} else {
-				fmt.Printf("%s - %s\n", "Value", style.Faile.Render("Not set"))
+				fmt.Printf("%s - %s\n", "Value", style.Fail.Render("Not set"))
 			}
 
 			fmt.Println()
