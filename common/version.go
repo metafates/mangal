@@ -1,4 +1,4 @@
 package common
 
 // Version is the current version of the program.
-const Version = "2.2.1"
+const Version = "3.0.0"
