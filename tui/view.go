@@ -57,6 +57,10 @@ func (b *Bubble) View() string {
 			header = "Preparing for download..."
 		}
 
+		if config.UserConfig.UI.Icons {
+			header = "羽" + header
+		}
+
 		subheader := b.chapterDownloadProgressInfo.Message
 		view = fmt.Sprintf("%s\n\n%s\n\n%s %s", header, b.progress.View(), b.spinner.View(), subheader)
 	case ExitPromptState:
@@ -65,6 +69,10 @@ func (b *Bubble) View() string {
 
 		succeededRendered := style.Success.Render(strconv.Itoa(len(succeeded)))
 		failedRendered := style.Fail.Render(strconv.Itoa(len(failed)))
+
+		if config.UserConfig.UI.Icons {
+			template = "\uF633 " + template
+		}
 
 		view = fmt.Sprintf(template, succeededRendered, util.Plural("chapter", len(succeeded)), failedRendered)
 
@@ -76,7 +84,7 @@ func (b *Bubble) View() string {
 
 	// Do not add help Bubble at these states, since they already have one
 	if slices.Contains([]bubbleState{MangaState, ChaptersState, ResumeState}, b.state) {
-		return style.Common.Render(view)
+		return style.List.Render(view)
 	}
 
 	// Add help view

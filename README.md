@@ -3,7 +3,7 @@
     <img width="200" src="assets/logo.png" alt="logo">
 </p>
 
-<h3 align="center">Manga Browser & Downloader</h3>
+<h3 align="center">The Ultimate CLI Manga Downloader</h3>
 
 <p align="center">
   <a href="https://goreportcard.com/report/github.com/metafates/mangal">
@@ -117,9 +117,7 @@ By default, Mangal uses [manganelo](https://m.manganelo.com/www) as a source
 <summary>Click here to show config example</summary>
 
 ```toml
-# Which sources to use. You can use several sources, it won't affect perfomance
-use = ['manganelo']
-
+[reader]
 # If false, then OS default reader will be used
 use_custom_reader = false
 custom_reader = "zathura"
@@ -139,8 +137,6 @@ comicinfo = true
 
 [downloader]
 # Custom download path, can be either relative (to the current directory) or absolute
-# You can use environment variable $HOME to refer to user's home directory
-# If environment variable "MANGAL_DOWNLOAD_PATH" is set, then it will be used instead
 path = '.'
 
 # How chapters should be named when downloaded
@@ -176,7 +172,7 @@ mark_downloaded = false
 [ui]
 # How to display chapters in TUI mode
 # Use %d to specify chapter number and %s to specify chapter title
-chapter_name_template = "[%d] %s"
+chapter_name_template = "%d %s"
 
 # Fullscreen mode 
 fullscreen = true
@@ -196,13 +192,15 @@ title = "Mangal"
 
 
 
-[sources]
-[sources.manganelo]
+[[sources]]
+# Should this source be used
+enabled = true
+
+# Source name
+name = "manganelo"
+
 # Base url
 base = 'https://m.manganelo.com'
-
-# Chapters Base url
-chapters_base = 'https://chap.manganelo.com/'
 
 # Search endpoint. Put %s where the query should be
 search = 'https://m.manganelo.com/search/story/%s'
@@ -306,8 +304,7 @@ To uninstall just delete the binary file
 Install using [Homebrew](https://brew.sh/)
 
 ```bash
-brew tap metafates/mangal
-brew install mangal
+brew install metafates/mangal/mangal
 ```
 
 <details>

@@ -10,6 +10,7 @@ import (
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/scraper"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/skratchdot/open-golang/open"
 	"golang.org/x/exp/slices"
@@ -231,10 +232,16 @@ func (b *Bubble) switchToChapters(msg chaptersGetDoneMsg, chapterIndex int) {
 		if config.UserConfig.Anilist.Enabled {
 			anilistManga = config.UserConfig.Anilist.Client.ToAnilistURL(manga)
 		}
-		b.chaptersList.Title = "Chapters - " + util.PrettyTrim(manga.Info, 30)
+		b.chaptersList.Title = "Chapters :: " + util.PrettyTrim(manga.Info, 30)
 	} else {
 		b.chaptersList.Title = "Chapters"
 	}
+
+	if config.UserConfig.UI.Icons {
+		b.chaptersList.Title = "\uF02D " + b.chaptersList.Title
+	}
+
+	b.chaptersList.Title = style.Bold.Render(b.chaptersList.Title)
 
 	var items []list.Item
 
@@ -368,7 +375,13 @@ func (b *Bubble) handleLoadingState(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case mangaSearchDoneMsg:
 		b.setState(MangaState)
-		b.mangaList.Title = "Manga - " + util.PrettyTrim(strings.TrimSpace(b.input.Value()), 30)
+		b.mangaList.Title = "Manga :: \"" + util.PrettyTrim(strings.TrimSpace(b.input.Value()), 30) + "\""
+
+		if config.UserConfig.UI.Icons {
+			b.mangaList.Title = "\uF02D " + b.mangaList.Title
+		}
+
+		b.mangaList.Title = style.Bold.Render(b.mangaList.Title)
 
 		var items = make([]list.Item, len(msg))
 

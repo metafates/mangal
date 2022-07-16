@@ -141,6 +141,9 @@ func NewBubble(initialState bubbleState) *Bubble {
 	ResumeList.Styles.Title = style.MangaListTitle
 	ResumeList.Styles.Spinner = style.Accent
 	ResumeList.Title = "Resume"
+	if config.UserConfig.UI.Icons {
+		ResumeList.Title = "\uF1DA " + ResumeList.Title
+	}
 	ResumeList.SetFilteringEnabled(true)
 
 	// Create manga list component

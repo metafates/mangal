@@ -41,6 +41,9 @@ func (l *listItem) Title() string {
 
 	// If it's a manga
 	if l.url.Relation == nil {
+		if config.UserConfig.UI.Icons {
+			return "龎 " + title
+		}
 		return title
 	}
 
@@ -48,6 +51,9 @@ func (l *listItem) Title() string {
 }
 
 func (l *listItem) Description() string {
+	if config.UserConfig.UI.Icons {
+		return "\uF838 " + l.url.Address
+	}
 	return l.url.Address
 }
 

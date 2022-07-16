@@ -20,6 +20,9 @@ type Entry struct {
 }
 
 func (h *Entry) Title() string {
+	if config.UserConfig.UI.Icons {
+		return "龎 " + h.Manga.Info
+	}
 	return h.Manga.Info
 }
 
@@ -29,6 +32,9 @@ func (h *Entry) Description() string {
 	description = strings.ReplaceAll(description, "%d", strconv.Itoa(h.Chapter.Index))
 	description = strings.ReplaceAll(description, "%s", h.Chapter.Info)
 
+	if config.UserConfig.UI.Icons {
+		return "\uF129 " + description
+	}
 	return description
 }
 

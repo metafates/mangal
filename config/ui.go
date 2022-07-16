@@ -7,4 +7,5 @@ type UIConfig struct {
 	Placeholder         string
 	Mark                string
 	ChapterNameTemplate string `toml:"chapter_name_template"`
+	Icons               bool
 }
