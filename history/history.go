@@ -21,7 +21,7 @@ type Entry struct {
 
 func (h *Entry) Title() string {
 	if config.UserConfig.UI.Icons {
-		return "龎 " + h.Manga.Info
+		return "\uF5B9 " + h.Manga.Info
 	}
 	return h.Manga.Info
 }
@@ -30,7 +30,7 @@ func (h *Entry) Description() string {
 	// replace according to the name description
 	description := strings.ReplaceAll(config.UserConfig.UI.ChapterNameTemplate, "%0d", util.PadZeros(h.Chapter.Index, 4))
 	description = strings.ReplaceAll(description, "%d", strconv.Itoa(h.Chapter.Index))
-	description = strings.ReplaceAll(description, "%s", h.Chapter.Info)
+	description = strings.ReplaceAll(description, "%s", "\""+h.Chapter.Info+"\"")
 
 	if config.UserConfig.UI.Icons {
 		return "\uF129 " + description

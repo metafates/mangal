@@ -34,6 +34,11 @@ The ultimate CLI manga downloader`,
 			config.UserConfig.Formats.Default = common.FormatType(format)
 		}
 
+		if icons, _ := cmd.Flags().GetBool("icons"); icons {
+			config.UserConfig.UI.Icons = true
+			config.UserConfig.UI.Mark = "\uF6D9"
+		}
+
 		err := config.ValidateConfig(config.UserConfig)
 		if err != nil {
 			log.Fatal(err)
@@ -128,6 +133,7 @@ func initAnilist() {
 
 func init() {
 	mangalCmd.Flags().StringP("format", "f", "", "use custom format")
+	mangalCmd.Flags().BoolP("icons", "n", false, "use nerdfont icons")
 	mangalCmd.Flags().BoolP("incognito", "i", false, "do not save history")
 	mangalCmd.Flags().BoolP("resume", "r", false, "resume reading")
 	_ = mangalCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

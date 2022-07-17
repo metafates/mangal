@@ -33,7 +33,6 @@ type Config struct {
 // DefaultConfig makes default config
 func DefaultConfig() *Config {
 	conf, _ := ParseConfig(DefaultConfigBytes)
-
 	return conf
 }
 
