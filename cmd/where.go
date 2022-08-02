@@ -7,6 +7,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+func init() {
+	rootCmd.AddCommand(whereCmd)
+
+	whereCmd.Flags().BoolP("config", "c", false, "configuration path")
+	whereCmd.Flags().BoolP("sources", "s", false, "sources path")
+
+	whereCmd.MarkFlagsMutuallyExclusive("config", "sources")
+}
+
 var whereCmd = &cobra.Command{
 	Use:   "where",
 	Short: "Show the paths to the configuration",
@@ -38,13 +47,4 @@ var whereCmd = &cobra.Command{
 			printSourcesPath()
 		}
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(whereCmd)
-
-	whereCmd.Flags().BoolP("config", "c", false, "configuration path")
-	whereCmd.Flags().BoolP("sources", "s", false, "sources path")
-
-	whereCmd.MarkFlagsMutuallyExclusive("config", "sources")
 }

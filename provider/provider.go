@@ -17,6 +17,12 @@ var defaultProviders = []*Provider{
 	},
 }
 
-func Default() []*Provider {
-	return defaultProviders
+func DefaultProviders() map[string]*Provider {
+	providers := make(map[string]*Provider)
+
+	for _, provider := range defaultProviders {
+		providers[provider.Name] = provider
+	}
+
+	return providers
 }

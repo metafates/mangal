@@ -2,20 +2,23 @@ package cmd
 
 import (
 	cc "github.com/ivanpirog/coloredcobra"
+	"github.com/metafates/mangal/constants"
 	"github.com/spf13/cobra"
 	"os"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "mangal",
+	Use:   constants.Mangal,
 	Short: "The ultimate manga downloader",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Long: `                                __
+  /\/\   __ _ _ __   __ _  __ _| |
+ /    \ / _  | '_ \ / _  |/ _  | |
+/ /\/\ \ (_| | | | | (_| | (_| | |
+\/    \/\__,_|_| |_|\__, |\__,_|_|
+                    |___/
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	- The ultimate cli manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Println("Hello, world!")
 	},
@@ -36,7 +39,4 @@ func Execute() {
 	if rootCmd.Execute() != nil {
 		os.Exit(1)
 	}
-}
-
-func init() {
 }
