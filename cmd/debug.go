@@ -4,6 +4,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var debugCmd = &cobra.Command{
@@ -14,6 +15,7 @@ var debugCmd = &cobra.Command{
 		source, err := source.LoadSource(sourcePath)
 		if err != nil {
 			cmd.PrintErr(err)
+			os.Exit(1)
 		}
 
 		err = source.Debug()

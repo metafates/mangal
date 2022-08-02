@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -27,10 +28,10 @@ to quickly create a Cobra application.`,
 		}
 
 		source := lo.Must(source.LoadSource(sources[0]))
-		mangas := lo.Must(source.Search("berserk"))
+		mangas := lo.Must(source.Search(strings.Join(args, " ")))
 
 		for _, manga := range mangas {
-			cmd.Println(manga)
+			cmd.Println(manga.Name)
 		}
 	},
 }

@@ -3,7 +3,8 @@ module github.com/metafates/mangal
 go 1.18
 
 require (
-	git.sr.ht/~ghost08/ratt v0.0.0-20220510043845-bf539e1cb040
+	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/go-rod/rod v0.108.1
 	github.com/samber/lo v1.27.0
 	github.com/spf13/afero v1.9.2
 	github.com/spf13/cobra v1.5.0
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/VividCortex/ewma v1.1.1 // indirect
 	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
@@ -25,7 +25,6 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/go-rod/rod v0.108.1 // indirect
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -60,6 +59,7 @@ require (
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

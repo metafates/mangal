@@ -69,6 +69,72 @@ func (s *Source) Search(query string) ([]*Manga, error) {
 	return mangas, nil
 }
 
+func (s *Source) ChaptersOf(manga *Manga) ([]*Chapter, error) {
+	_, err := s.call(MangaChaptersFn, lua.LTTable, lua.LString(manga.URL))
+
+	if err != nil {
+		return nil, err
+	}
+
+	table := s.state.CheckTable(-1)
+	var i uint
+	chapters := make([]*Chapter, table.Len())
+
+	table.ForEach(func(k lua.LValue, v lua.LValue) {
+		if k.Type() != lua.LTNumber {
+			s.state.RaiseError(MangaChaptersFn + " was expected to return a table with numbers as keys, got " + k.Type().String() + " as a key")
+		}
+
+		if v.Type() != lua.LTTable {
+			s.state.RaiseError(MangaChaptersFn + " was expected to return a table with tables as values, got " + v.Type().String() + " as a value")
+		}
+
+		chapter, err := chapterFromTable(v.(*lua.LTable), manga)
+
+		if err != nil {
+			s.state.RaiseError(err.Error())
+		}
+
+		chapters[i] = chapter
+		i++
+	})
+
+	return chapters, nil
+}
+
+func (s *Source) PagesOf(chapter *Chapter) ([]*Page, error) {
+	_, err := s.call(ChapterPagesFn, lua.LTTable, lua.LString(chapter.URL))
+
+	if err != nil {
+		return nil, err
+	}
+
+	table := s.state.CheckTable(-1)
+	var i uint
+	pages := make([]*Page, table.Len())
+
+	table.ForEach(func(k lua.LValue, v lua.LValue) {
+		if k.Type() != lua.LTNumber {
+			s.state.RaiseError(ChapterPagesFn + " was expected to return a table with numbers as keys, got " + k.Type().String() + " as a key")
+		}
+
+		if v.Type() != lua.LTTable {
+			s.state.RaiseError(ChapterPagesFn + " was expected to return a table with tables as values, got " + v.Type().String() + " as a value")
+		}
+
+		page, err := pageFromTable(v.(*lua.LTable), chapter)
+
+		if err != nil {
+			s.state.RaiseError(err.Error())
+		}
+
+		pages[i] = page
+		i++
+	})
+
+	return pages, nil
+}
+
 func (s *Source) Debug() error {
 	_, err := s.call(DebugFn, lua.LTNil)
 	return err

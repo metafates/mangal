@@ -3,13 +3,12 @@ package source
 import (
 	"bufio"
 	"errors"
-	goquerylua "git.sr.ht/~ghost08/ratt/goquery-lua"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/luamodules"
 	"github.com/samber/lo"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
-	libs "github.com/vadv/gopher-lua-libs"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/yuin/gopher-lua/parse"
 	"os"
@@ -19,16 +18,13 @@ import (
 const sourceExtension = ".lua"
 
 func LoadSource(path string) (*Source, error) {
-	base := filepath.Base(path)
-	name := base[:len(base)-len(sourceExtension)]
-
 	proto, err := compileSource(path)
 	if err != nil {
 		return nil, err
 	}
 
 	state := lua.NewState()
-	loadModules(state)
+	luamodules.PreloadAll(state)
 
 	lfunc := state.NewFunctionFromProto(proto)
 	state.Push(lfunc)
@@ -36,6 +32,9 @@ func LoadSource(path string) (*Source, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	base := filepath.Base(path)
+	name := base[:len(base)-len(sourceExtension)]
 
 	for _, fn := range mustHave {
 		defined := state.GetGlobal(fn)
@@ -51,11 +50,6 @@ func LoadSource(path string) (*Source, error) {
 	}
 
 	return source, nil
-}
-
-func loadModules(state *lua.LState) {
-	libs.Preload(state)
-	state.PreloadModule("goquery", goquerylua.Loader())
 }
 
 func AvailableSources() ([]string, error) {
@@ -79,15 +73,19 @@ func AvailableSources() ([]string, error) {
 }
 
 func compileSource(path string) (*lua.FunctionProto, error) {
-	file, err := filesystem.Get().Open(path)
+	if exists, err := filesystem.Get().Exists(path); !exists || err != nil {
+		return nil, errors.New("source file does not exist")
+	}
 
-	defer func(file afero.File) {
-		_ = file.Close()
-	}(file)
+	file, err := filesystem.Get().Open(path)
 
 	if err != nil {
 		return nil, err
 	}
+
+	defer func(file afero.File) {
+		_ = file.Close()
+	}(file)
 
 	reader := bufio.NewReader(file)
 	chunk, err := parse.Parse(reader, path)
