@@ -14,7 +14,7 @@ func (_ Headless) Name() string {
 
 func (_ Headless) Loader() lua.LGFunction {
 	var exports = map[string]lua.LGFunction{
-		"newBrowser": newBrowser(),
+		"browser": newBrowser(),
 	}
 
 	return func(L *lua.LState) int {

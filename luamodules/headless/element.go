@@ -6,15 +6,17 @@ import (
 )
 
 var elementMethods = map[string]lua.LGFunction{
-	"input":     elementInput,
-	"click":     elementClick,
-	"text":      elementText,
-	"attribute": elementAttribute,
-	"html":      elementHtml,
+	"input":         elementInput,
+	"click":         elementClick,
+	"text":          elementText,
+	"attribute":     elementAttribute,
+	"html":          elementHtml,
+	"selectAllText": elementSelectAllText,
+	"property":      elementProperty,
 }
 
 func registerElementType(L *lua.LState) {
-	mt := L.NewTypeMetatable("element")
+	mt := L.NewTypeMetatable("pageElement")
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), elementMethods))
 }
 
@@ -23,46 +25,62 @@ func checkElement(L *lua.LState) *rod.Element {
 	if v, ok := ud.Value.(*rod.Element); ok {
 		return v
 	}
-	L.ArgError(1, "element expected")
+	L.ArgError(1, "pageElement expected")
 	return nil
 }
 
 func elementInput(L *lua.LState) int {
-	element := checkElement(L)
+	el := checkElement(L)
 	value := L.ToString(2)
-	element.MustInput(value)
+	el.MustInput(value)
 
 	return 0
 }
 
 func elementClick(L *lua.LState) int {
-	element := checkElement(L)
-	element.MustClick()
+	el := checkElement(L)
+	el.MustClick()
 
 	return 0
 }
 
 func elementText(L *lua.LState) int {
-	element := checkElement(L)
-	text := element.MustText()
+	el := checkElement(L)
+	text := el.MustText()
 
 	L.Push(lua.LString(text))
 	return 1
 }
 
 func elementAttribute(L *lua.LState) int {
-	element := checkElement(L)
+	el := checkElement(L)
 	name := L.ToString(2)
-	value := element.MustAttribute(name)
+	value := el.MustAttribute(name)
 
 	L.Push(lua.LString(*value))
 	return 1
 }
 
 func elementHtml(L *lua.LState) int {
-	element := checkElement(L)
-	html := element.MustHTML()
+	el := checkElement(L)
+	html := el.MustHTML()
 
 	L.Push(lua.LString(html))
+	return 1
+}
+
+func elementSelectAllText(L *lua.LState) int {
+	el := checkElement(L)
+	el.MustSelectAllText()
+
+	return 0
+}
+
+func elementProperty(L *lua.LState) int {
+	el := checkElement(L)
+	name := L.ToString(2)
+	value := el.MustProperty(name)
+
+	L.Push(lua.LString(value.Str()))
 	return 1
 }

@@ -19,13 +19,8 @@ func (_ Goquery) Name() string {
 }
 
 func (_ Goquery) Loader() lua.LGFunction {
-	s := &settings{
-		client: http.DefaultClient,
-	}
-
 	var exports = map[string]lua.LGFunction{
-		"newDoc":        newDoc(),
-		"newDocFromURL": newDocFromURL(s),
+		"doc": newDoc(),
 	}
 	return func(L *lua.LState) int {
 		mod := L.SetFuncs(L.NewTable(), exports)

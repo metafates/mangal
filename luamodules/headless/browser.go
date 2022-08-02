@@ -6,7 +6,7 @@ import (
 )
 
 var browserMethods = map[string]lua.LGFunction{
-	"open": browserOpenPage,
+	"page": browserPage,
 }
 
 func newBrowser() lua.LGFunction {
@@ -44,14 +44,14 @@ func checkBrowser(L *lua.LState) *rod.Browser {
 	return nil
 }
 
-func browserOpenPage(L *lua.LState) int {
+func browserPage(L *lua.LState) int {
 	browser := checkBrowser(L)
 	url := L.ToString(2)
-	page := browser.MustPage(url)
+	p := browser.MustPage(url)
 
 	ud := L.NewUserData()
-	ud.Value = page
-	L.SetMetatable(ud, L.GetTypeMetatable("page"))
+	ud.Value = p
+	L.SetMetatable(ud, L.GetTypeMetatable("browserPage"))
 
 	L.Push(ud)
 	return 1

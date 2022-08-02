@@ -6,18 +6,20 @@ import (
 )
 
 var pageMethods = map[string]lua.LGFunction{
-	"waitLoad":    waitPage,
-	"element":     selectElement,
-	"elements":    selectElements,
-	"elementByJS": selectElementByJS,
-	"navigate":    pageNavigate,
-	"exists":      exists,
-	"evalJS":      evalJS,
-	"html":        pageHTML,
+	"waitLoad":             pageWaitLoad,
+	"element":              pageElement,
+	"elementR":             pageElementR,
+	"elements":             pageElements,
+	"elementByJS":          pageElementByJS,
+	"waitElementsMoreThan": pageWaitElementsMoreThan,
+	"navigate":             pageNavigate,
+	"has":                  pageHas,
+	"eval":                 pageEval,
+	"html":                 pageHTML,
 }
 
 func registerPageType(L *lua.LState) {
-	mt := L.NewTypeMetatable("page")
+	mt := L.NewTypeMetatable("browserPage")
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), pageMethods))
 }
 
@@ -26,61 +28,59 @@ func checkPage(L *lua.LState) *rod.Page {
 	if v, ok := ud.Value.(*rod.Page); ok {
 		return v
 	}
-	L.ArgError(1, "page expected")
+	L.ArgError(1, "browserPage expected")
 	return nil
 }
 
-func waitPage(L *lua.LState) int {
+func pageWaitLoad(L *lua.LState) int {
 	page := checkPage(L)
 	page.MustWaitLoad()
 
 	return 0
 }
 
-func selectElement(L *lua.LState) int {
-	page := checkPage(L)
-	selector := L.ToString(2)
-	element := page.MustElement(selector)
+func pageElement(L *lua.LState) int {
+	p := checkPage(L)
+	selector := L.CheckString(2)
 
 	ud := L.NewUserData()
-	ud.Value = element
-	L.SetMetatable(ud, L.GetTypeMetatable("element"))
+	ud.Value = p.MustElement(selector)
+	L.SetMetatable(ud, L.GetTypeMetatable("pageElement"))
 
 	L.Push(ud)
 	return 1
 }
 
 func pageNavigate(L *lua.LState) int {
-	page := checkPage(L)
-	url := L.ToString(2)
-	page.MustNavigate(url)
+	p := checkPage(L)
+	url := L.CheckString(2)
+	p.MustNavigate(url)
 
 	return 0
 }
 
-func selectElementByJS(L *lua.LState) int {
-	page := checkPage(L)
-	selector := L.ToString(2)
-	element := page.MustElementByJS(selector)
+func pageElementByJS(L *lua.LState) int {
+	p := checkPage(L)
+	selector := L.CheckString(2)
 
 	ud := L.NewUserData()
-	ud.Value = element
-	L.SetMetatable(ud, L.GetTypeMetatable("element"))
+	ud.Value = p.MustElementByJS(selector)
+	L.SetMetatable(ud, L.GetTypeMetatable("pageElement"))
 
 	L.Push(ud)
 	return 1
 }
 
-func selectElements(L *lua.LState) int {
-	page := checkPage(L)
-	selector := L.ToString(2)
-	elements := page.MustElements(selector)
+func pageElements(L *lua.LState) int {
+	p := checkPage(L)
+	selector := L.CheckString(2)
+	els := p.MustElements(selector)
 
 	table := L.NewTable()
-	for i, element := range elements {
+	for i, el := range els {
 		ud := L.NewUserData()
-		ud.Value = element
-		L.SetMetatable(ud, L.GetTypeMetatable("element"))
+		ud.Value = el
+		L.SetMetatable(ud, L.GetTypeMetatable("pageElement"))
 		table.RawSetInt(i+1, ud)
 	}
 
@@ -88,25 +88,46 @@ func selectElements(L *lua.LState) int {
 	return 1
 }
 
-func exists(L *lua.LState) int {
-	page := checkPage(L)
-	selector := L.ToString(2)
-	has := page.MustHas(selector)
-	L.Push(lua.LBool(has))
+func pageHas(L *lua.LState) int {
+	p := checkPage(L)
+	selector := L.CheckString(2)
+	L.Push(lua.LBool(p.MustHas(selector)))
 	return 1
 }
 
-func evalJS(L *lua.LState) int {
-	page := checkPage(L)
-	js := L.ToString(2)
-	result := page.MustEval(js).Str()
+func pageEval(L *lua.LState) int {
+	p := checkPage(L)
+	js := L.CheckString(2)
+	result := p.MustEval(js).Str()
 	L.Push(lua.LString(result))
 	return 1
 }
 
 func pageHTML(L *lua.LState) int {
-	page := checkPage(L)
-	html := page.MustHTML()
+	p := checkPage(L)
+	html := p.MustHTML()
 	L.Push(lua.LString(html))
 	return 1
+}
+
+func pageElementR(L *lua.LState) int {
+	p := checkPage(L)
+	selector := L.CheckString(2)
+	re := L.CheckString(3)
+
+	ud := L.NewUserData()
+	ud.Value = p.MustElementR(selector, re)
+	L.SetMetatable(ud, L.GetTypeMetatable("pageElement"))
+
+	L.Push(ud)
+	return 1
+}
+
+func pageWaitElementsMoreThan(L *lua.LState) int {
+	p := checkPage(L)
+	selector := L.CheckString(2)
+	count := L.CheckInt(3)
+	p.MustWaitElementsMoreThan(selector, count)
+
+	return 0
 }
