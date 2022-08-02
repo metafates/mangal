@@ -24,12 +24,13 @@ to quickly create a Cobra application.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
 	cc.Init(&cc.Config{
-		RootCmd:  rootCmd,
-		Headings: cc.HiCyan + cc.Bold + cc.Underline,
-		Commands: cc.HiYellow + cc.Bold,
-		Example:  cc.Italic,
-		ExecName: cc.Bold,
-		Flags:    cc.Bold,
+		RootCmd:       rootCmd,
+		Headings:      cc.HiCyan + cc.Bold + cc.Underline,
+		Commands:      cc.HiYellow + cc.Bold,
+		Example:       cc.Italic,
+		ExecName:      cc.Bold,
+		Flags:         cc.Bold,
+		FlagsDataType: cc.Italic + cc.HiBlue,
 	})
 
 	if rootCmd.Execute() != nil {
