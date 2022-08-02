@@ -2,14 +2,28 @@ package filesystem
 
 import "github.com/spf13/afero"
 
-var appFs = afero.NewOsFs()
+var wrapper = afero.Afero{}
 
-// Get returns afero filesystem abstraction layer
-func Get() afero.Fs {
-	return appFs
+// SetOsFs sets the filesystem to the os filesystem
+func SetOsFs() {
+	if wrapper.Fs == nil || wrapper.Fs.Name() != "os" {
+		wrapper.Fs = afero.NewOsFs()
+	}
 }
 
-// Set sets afero filesystem abstraction layer
-func Set(fs afero.Fs) {
-	appFs = fs
+// SetMemMapFs sets the filesystem to the memory mapped filesystem
+// Use this if you want to use the filesystem in a sandbox
+func SetMemMapFs() {
+	if wrapper.Fs == nil || wrapper.Fs.Name() != "memmap" {
+		wrapper.Fs = afero.NewMemMapFs()
+	}
+}
+
+// Get returns the filesystem
+func Get() afero.Afero {
+	return wrapper
+}
+
+func init() {
+	SetOsFs()
 }
