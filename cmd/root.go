@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -22,6 +23,15 @@ to quickly create a Cobra application.`,
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
+	cc.Init(&cc.Config{
+		RootCmd:  rootCmd,
+		Headings: cc.HiCyan + cc.Bold + cc.Underline,
+		Commands: cc.HiYellow + cc.Bold,
+		Example:  cc.Italic,
+		ExecName: cc.Bold,
+		Flags:    cc.Bold,
+	})
+
 	if rootCmd.Execute() != nil {
 		os.Exit(1)
 	}

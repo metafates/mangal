@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/metafates/mangal/filesystem"
+	"github.com/samber/lo"
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
@@ -13,17 +14,10 @@ func Setup() error {
 	setName()
 	setFs()
 	setEnvs()
-	err := setDefaults()
-	if err != nil {
-		return err
-	}
+	setDefaults()
+	setPaths()
 
-	err = setPaths()
-	if err != nil {
-		return err
-	}
-
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 
 	switch err.(type) {
 	case viper.ConfigFileNotFoundError:
@@ -44,17 +38,12 @@ func setFs() {
 }
 
 // setPaths sets the paths to the config files
-func setPaths() error {
-	paths, err := Paths()
-	if err != nil {
-		return err
-	}
+func setPaths() {
+	paths := lo.Must(Paths())
 
 	for _, path := range paths {
 		viper.AddConfigPath(path)
 	}
-
-	return nil
 }
 
 // setEnvs sets the environment variables
@@ -68,21 +57,15 @@ func setEnvs() {
 }
 
 // setDefaults sets the default values
-func setDefaults() error {
+func setDefaults() {
 	viper.SetTypeByDefaultValue(true)
 
 	viper.SetDefault(DownloaderPath, ".")
 	viper.SetDefault(DownloaderChapterNameTemplate, "[%0d] %s")
 	viper.SetDefault(FormatsDefault, "pdf")
 
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return err
-	}
-
+	configDir := lo.Must(os.UserConfigDir())
 	viper.SetDefault(SourcesPath, filepath.Join(configDir, "mangal", "sources"))
-
-	return nil
 }
 
 // Paths returns the paths to the config files
@@ -98,7 +81,6 @@ func Paths() ([]string, error) {
 	}
 
 	return []string{
-		".",
 		homeDir,
 		filepath.Join(configDir, "mangal"),
 	}, nil
