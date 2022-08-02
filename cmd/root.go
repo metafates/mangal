@@ -1,12 +1,8 @@
 package cmd
 
 import (
-	"github.com/metafates/mangal/source"
-	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -20,19 +16,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		sources := lo.Must(source.AvailableSources())
-
-		cmd.Println("Available sources:")
-		for _, source := range sources {
-			cmd.Println("  " + filepath.Base(source))
-		}
-
-		source := lo.Must(source.LoadSource(sources[0]))
-		mangas := lo.Must(source.Search(strings.Join(args, " ")))
-
-		for _, manga := range mangas {
-			cmd.Println(manga.Name)
-		}
+		cmd.Println("Hello, world!")
 	},
 }
 

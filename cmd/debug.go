@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 )
 
 var debugCmd = &cobra.Command{
@@ -12,15 +14,24 @@ var debugCmd = &cobra.Command{
 	Short: "Run source in debug mode",
 	Run: func(cmd *cobra.Command, args []string) {
 		sourcePath := lo.Must(cmd.Flags().GetString("file"))
-		source, err := source.LoadSource(sourcePath)
+		sourceContents, err := filesystem.Get().ReadFile(sourcePath)
+
 		if err != nil {
-			cmd.PrintErr(err)
+			cmd.Println(err)
 			os.Exit(1)
 		}
 
-		err = source.Debug()
+		compiled, err := source.Compile(sourcePath, strings.NewReader(string(sourceContents)))
 		if err != nil {
-			cmd.PrintErr(err)
+			cmd.Println(err)
+			os.Exit(1)
+		}
+
+		// LoadSource runs file when it's loaded
+		_, err = source.LoadSource(sourcePath, compiled)
+		if err != nil {
+			cmd.Println(err)
+			os.Exit(1)
 		}
 	},
 }

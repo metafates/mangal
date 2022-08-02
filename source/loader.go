@@ -7,34 +7,26 @@ import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/luamodules"
 	"github.com/samber/lo"
-	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/yuin/gopher-lua/parse"
+	"io"
 	"os"
 	"path/filepath"
 )
 
 const sourceExtension = ".lua"
 
-func LoadSource(path string) (*Source, error) {
-	proto, err := compileSource(path)
-	if err != nil {
-		return nil, err
-	}
-
+func LoadSource(name string, proto *lua.FunctionProto) (Source, error) {
 	state := lua.NewState()
 	luamodules.PreloadAll(state)
 
 	lfunc := state.NewFunctionFromProto(proto)
 	state.Push(lfunc)
-	err = state.PCall(0, lua.MultRet, nil)
+	err := state.PCall(0, lua.MultRet, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	base := filepath.Base(path)
-	name := base[:len(base)-len(sourceExtension)]
 
 	for _, fn := range mustHave {
 		defined := state.GetGlobal(fn)
@@ -44,7 +36,7 @@ func LoadSource(path string) (*Source, error) {
 		}
 	}
 
-	source, err := newSource(name, state)
+	source, err := newLuaSource(name, state)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +44,7 @@ func LoadSource(path string) (*Source, error) {
 	return source, nil
 }
 
-func AvailableSources() ([]string, error) {
+func AvailableCustomSources() ([]string, error) {
 	if exists := lo.Must(filesystem.Get().Exists(viper.GetString(config.SourcesPath))); !exists {
 		return nil, errors.New("sources directory does not exist")
 	}
@@ -72,29 +64,14 @@ func AvailableSources() ([]string, error) {
 	}), nil
 }
 
-func compileSource(path string) (*lua.FunctionProto, error) {
-	if exists, err := filesystem.Get().Exists(path); !exists || err != nil {
-		return nil, errors.New("source file does not exist")
-	}
-
-	file, err := filesystem.Get().Open(path)
+func Compile(name string, script io.Reader) (*lua.FunctionProto, error) {
+	chunk, err := parse.Parse(bufio.NewReader(script), name)
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer func(file afero.File) {
-		_ = file.Close()
-	}(file)
-
-	reader := bufio.NewReader(file)
-	chunk, err := parse.Parse(reader, path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	proto, err := lua.Compile(chunk, path)
+	proto, err := lua.Compile(chunk, name)
 	if err != nil {
 		return nil, err
 	}
