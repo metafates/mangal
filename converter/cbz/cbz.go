@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constants"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -30,7 +31,18 @@ func (c *CBZ) SaveTemp(chapter *source.Chapter) (string, error) {
 }
 
 func (_ *CBZ) save(chapter *source.Chapter, temp bool) (string, error) {
-	mangaDir, err := prepareMangaDir(chapter.Manga)
+
+	var (
+		mangaDir string
+		err      error
+	)
+
+	if temp {
+		mangaDir, err = filesystem.Get().TempDir("", constants.TempPrefix)
+	} else {
+		mangaDir, err = prepareMangaDir(chapter.Manga)
+	}
+
 	if err != nil {
 		return "", err
 	}

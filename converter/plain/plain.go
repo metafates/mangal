@@ -34,10 +34,10 @@ func (_ *Plain) save(chapter *source.Chapter, temp bool) (string, error) {
 		err        error
 	)
 
-	if !temp {
-		chapterDir, err = prepareChapterDir(chapter)
-	} else {
+	if temp {
 		chapterDir, err = filesystem.Get().TempDir("", constants.TempPrefix)
+	} else {
+		chapterDir, err = prepareChapterDir(chapter)
 	}
 
 	if err != nil {
