@@ -129,9 +129,12 @@ func selectSource() (source.Source, error) {
 		}
 	}
 
+	options := lo.Keys(sources)
+	slices.Sort(options)
+
 	prompt := survey.Select{
 		Message: "Select a source",
-		Options: lo.Keys(sources),
+		Options: options,
 		VimMode: viper.GetBool(config.MiniVimMode),
 	}
 

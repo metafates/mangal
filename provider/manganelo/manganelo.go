@@ -1,25 +1,20 @@
 package manganelo
 
-import "github.com/metafates/mangal/source"
+import (
+	"github.com/gocolly/colly"
+	"github.com/metafates/mangal/source"
+)
 
-type Manganelo struct{}
+type Manganelo struct {
+	mangasCollector   *colly.Collector
+	chaptersCollector *colly.Collector
+	pagesCollector    *colly.Collector
 
-func New() source.Source {
-	return &Manganelo{}
+	mangas   map[string][]*source.Manga
+	chapters map[string][]*source.Chapter
+	pages    map[string][]*source.Page
 }
 
 func (_ Manganelo) Name() string {
 	return "manganelo"
-}
-
-func (m Manganelo) Search(query string) ([]*source.Manga, error) {
-	return nil, nil
-}
-
-func (m Manganelo) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
-	return nil, nil
-}
-
-func (m Manganelo) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
-	return nil, nil
 }

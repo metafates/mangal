@@ -67,7 +67,7 @@ func setDefaults() {
 	fields := map[string]any{
 		// Downloader
 		DownloaderPath:                ".",
-		DownloaderChapterNameTemplate: "[{padded_index}] {chapter}",
+		DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
 
 		// Formats
 		FormatsUse: "plain",

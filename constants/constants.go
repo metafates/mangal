@@ -7,7 +7,8 @@ const (
 )
 
 const (
-	TempPrefix = Mangal + "Temp_"
+	TempPrefix  = Mangal + "Temp_"
+	CachePrefix = Mangal + "Cache_"
 )
 
 const AssciiArtLogo = `                                __
