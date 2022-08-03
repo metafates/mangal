@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 type Plain struct{}
@@ -19,60 +20,70 @@ func New() *Plain {
 }
 
 func (_ *Plain) Save(chapter *source.Chapter) (string, error) {
-	mangaDir, err := prepareMangaDir(chapter.Manga)
+	chapterDir, err := prepareChapterDir(chapter)
 	if err != nil {
 		return "", err
 	}
 
-	chapterDir := filepath.Join(mangaDir, util.SanitizeFilename(chapter.Name))
-	exists, err := filesystem.Get().Exists(chapterDir)
-	if err != nil {
-		return "", err
-	}
-
-	if !exists {
-		err = filesystem.Get().Mkdir(chapterDir, os.ModePerm)
-		if err != nil {
-			return "", err
-		}
-	}
-
+	wg := sync.WaitGroup{}
+	wg.Add(len(chapter.Pages))
 	for _, page := range chapter.Pages {
-		pageName := fmt.Sprintf("%d%s", page.Index, page.Extension)
-		pageName = util.PadZero(pageName, 10)
+		func(page *source.Page) {
+			defer wg.Done()
 
-		file, err := filesystem.Get().Create(filepath.Join(chapterDir, pageName))
-		if err != nil {
-			return "", err
-		}
+			if err != nil {
+				return
+			}
 
-		_, err = io.Copy(file, page.Contents)
-		if err != nil {
-			return "", err
-		}
-
-		_ = file.Close()
-		_ = page.Close()
+			err = savePage(page, chapterDir)
+		}(page)
 	}
 
-	absMangaDir, err := filepath.Abs(mangaDir)
+	wg.Wait()
+
 	if err != nil {
-		absMangaDir = mangaDir
+		return "", err
 	}
 
-	return absMangaDir, nil
-}
-
-// prepareMangaDir will create manga direcotry if it doesn't exist
-func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
-	mangaDir = filepath.Join(
-		viper.GetString(config.DownloaderPath),
-		util.SanitizeFilename(manga.Name),
-	)
-
-	if err = filesystem.Get().MkdirAll(mangaDir, os.ModePerm); err != nil {
-		return "", err
+	mangaDir, err := filepath.Abs(filepath.Dir(chapterDir))
+	if err != nil {
+		mangaDir = filepath.Dir(chapterDir)
 	}
 
 	return mangaDir, nil
+}
+
+// prepareMangaDir will create manga direcotry if it doesn't exist
+func prepareChapterDir(chapter *source.Chapter) (chapterDir string, err error) {
+	chapterDir = filepath.Join(
+		viper.GetString(config.DownloaderPath),
+		util.SanitizeFilename(chapter.Manga.Name),
+		util.SanitizeFilename(chapter.Name),
+	)
+
+	if err = filesystem.Get().MkdirAll(chapterDir, os.ModePerm); err != nil {
+		return "", err
+	}
+
+	return chapterDir, nil
+}
+
+func savePage(page *source.Page, to string) error {
+	pageName := fmt.Sprintf("%d%s", page.Index, page.Extension)
+	pageName = util.PadZero(pageName, 10)
+
+	file, err := filesystem.Get().Create(filepath.Join(to, pageName))
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(file, page.Contents)
+	if err != nil {
+		return err
+	}
+
+	_ = file.Close()
+	_ = page.Close()
+
+	return nil
 }

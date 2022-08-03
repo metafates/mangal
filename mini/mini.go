@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/manifoldco/promptui"
 	"github.com/metafates/mangal/converter"
-	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -39,14 +38,13 @@ func Run() error {
 		return err
 	}
 
-	fmt.Println("Got ", len(pages), " pages")
-	fmt.Println("Downloading...")
-	err = downloader.Populate(pages)
+	fmt.Printf("Downloading %d pages\n", len(pages))
+	err = chapter.DownloadPages()
 	if err != nil {
 		return err
 	}
-	fmt.Println("Converting...")
-	path, err := converter.Converters()["plain"].Save(chapter)
+
+	path, err := converter.Converters()["cbz"].Save(chapter)
 	if err != nil {
 		return err
 	}
@@ -104,7 +102,7 @@ func selectSource() (source.Source, error) {
 			return nil, err
 		}
 	} else {
-		s = defaultProviders[name].Create()
+		s = defaultProviders[name].CreateSource()
 	}
 
 	return s, nil

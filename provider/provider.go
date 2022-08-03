@@ -6,14 +6,14 @@ import (
 )
 
 type Provider struct {
-	Name   string
-	Create func() source.Source
+	Name         string
+	CreateSource func() source.Source
 }
 
 var defaultProviders = []*Provider{
 	{
-		Name:   "manganelo",
-		Create: manganelo.New,
+		Name:         "manganelo",
+		CreateSource: manganelo.New,
 	},
 }
 

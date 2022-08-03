@@ -3,6 +3,7 @@ package source
 import (
 	"errors"
 	lua "github.com/yuin/gopher-lua"
+	"sync"
 )
 
 type Chapter struct {
@@ -33,4 +34,28 @@ func chapterFromTable(table *lua.LTable, manga *Manga) (*Chapter, error) {
 
 	manga.Chapters = append(manga.Chapters, chapter)
 	return chapter, nil
+}
+
+// DownloadPages downloads the Pages contents of the Chapter.
+// Pages needs to be set before calling this function.
+func (c *Chapter) DownloadPages() error {
+	wg := sync.WaitGroup{}
+	wg.Add(len(c.Pages))
+
+	var err error
+	for _, page := range c.Pages {
+		go func(page *Page) {
+			defer wg.Done()
+
+			// if at any point, an error is encountered, stop downloading other pages
+			if err != nil {
+				return
+			}
+
+			err = page.Download()
+		}(page)
+	}
+
+	wg.Wait()
+	return err
 }
