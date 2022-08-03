@@ -23,8 +23,8 @@ func init() {
 var rootCmd = &cobra.Command{
 	Use:   constants.Mangal,
 	Short: "The ultimate manga downloader",
-	Long: constants.AssciiArtLogo + "\n" +
-		style.Accent("    - The ultimate cli manga downloader"),
+	Long: style.Combined(style.Yellow, style.Bold)(constants.AssciiArtLogo) + "\n" +
+		style.Combined(style.HiRed, style.Italic)("    - The ultimate cli manga downloader"),
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Println("TUI is not implemented yet")
 	},
