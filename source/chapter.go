@@ -9,9 +9,10 @@ type Chapter struct {
 	Name  string
 	URL   string
 	Manga *Manga
+	Pages []*Page
 }
 
-func chapterFromTable(table *lua.LTable, mangaRelation *Manga) (*Chapter, error) {
+func chapterFromTable(table *lua.LTable, manga *Manga) (*Chapter, error) {
 	name := table.RawGetString("name")
 
 	if name.Type() != lua.LTString {
@@ -23,9 +24,13 @@ func chapterFromTable(table *lua.LTable, mangaRelation *Manga) (*Chapter, error)
 		return nil, errors.New("type of field \"url\" should be string")
 	}
 
-	return &Chapter{
+	chapter := &Chapter{
 		Name:  name.String(),
 		URL:   url.String(),
-		Manga: mangaRelation,
-	}, nil
+		Manga: manga,
+		Pages: []*Page{},
+	}
+
+	manga.Chapters = append(manga.Chapters, chapter)
+	return chapter, nil
 }

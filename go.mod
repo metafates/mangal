@@ -5,12 +5,15 @@ go 1.18
 require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/go-rod/rod v0.108.1
+	github.com/ivanpirog/coloredcobra v1.0.1
+	github.com/manifoldco/promptui v0.9.0
 	github.com/samber/lo v1.27.0
 	github.com/spf13/afero v1.9.2
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
 	github.com/vadv/gopher-lua-libs v0.2.0
 	github.com/yuin/gopher-lua v0.0.0-20220504180219-658193537a64
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17
 )
 
 require (
@@ -22,6 +25,7 @@ require (
 	github.com/cbroglie/mustache v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.5 // indirect
+	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
@@ -29,7 +33,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/ivanpirog/coloredcobra v1.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.3.0 // indirect
 	github.com/lib/pq v1.7.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
@@ -55,7 +58,6 @@ require (
 	github.com/ysmood/gson v0.7.1 // indirect
 	github.com/ysmood/leakless v0.8.0 // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7 // indirect
-	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
 	golang.org/x/sys v0.0.0-20220731174439-a90be440212d // indirect
 	golang.org/x/text v0.3.7 // indirect

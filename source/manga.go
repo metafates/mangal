@@ -6,8 +6,9 @@ import (
 )
 
 type Manga struct {
-	Name string
-	URL  string
+	Name     string
+	URL      string
+	Chapters []*Chapter
 }
 
 func mangaFromTable(table *lua.LTable) (*Manga, error) {
@@ -23,7 +24,8 @@ func mangaFromTable(table *lua.LTable) (*Manga, error) {
 	}
 
 	return &Manga{
-		Name: name.String(),
-		URL:  url.String(),
+		Name:     name.String(),
+		URL:      url.String(),
+		Chapters: []*Chapter{},
 	}, nil
 }

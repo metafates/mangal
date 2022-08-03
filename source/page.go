@@ -2,14 +2,19 @@ package source
 
 import (
 	"errors"
+	"github.com/metafates/mangal/constants"
 	lua "github.com/yuin/gopher-lua"
+	"io"
+	"net/http"
 	"strconv"
 )
 
 type Page struct {
-	URL     string
-	Index   uint16
-	Chapter *Chapter
+	URL       string
+	Index     uint16
+	Extension string
+	Contents  io.ReadCloser
+	Chapter   *Chapter
 }
 
 func pageFromTable(table *lua.LTable, chapter *Chapter) (*Page, error) {
@@ -31,9 +36,40 @@ func pageFromTable(table *lua.LTable, chapter *Chapter) (*Page, error) {
 		return nil, errors.New("index must be an unsigned 16 bit integer")
 	}
 
-	return &Page{
-		URL:     url.String(),
-		Index:   uint16(num),
-		Chapter: chapter,
-	}, nil
+	page := &Page{
+		URL:       url.String(),
+		Index:     uint16(num),
+		Chapter:   chapter,
+		Extension: ".jpg",
+	}
+
+	chapter.Pages = append(chapter.Pages, page)
+	return page, nil
+}
+
+func (p *Page) Download() error {
+	req, err := http.NewRequest("GET", p.URL, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Referer", p.Chapter.URL)
+	req.Header.Set("User-Agent", constants.UserAgent)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("http error: " + resp.Status)
+	}
+
+	p.Contents = resp.Body
+
+	return nil
+}
+
+func (p *Page) Close() error {
+	return p.Contents.Close()
 }

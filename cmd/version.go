@@ -50,6 +50,6 @@ var versionLatestCmd = &cobra.Command{
 		// remove the v from the tag name
 		latestVersion := release.TagName[1:]
 
-		cmd.Println("mangal latest version " + latestVersion)
+		cmd.Println("mangal latest version is " + latestVersion)
 	},
 }
