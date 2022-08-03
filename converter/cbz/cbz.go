@@ -21,7 +21,15 @@ func New() *CBZ {
 	return &CBZ{}
 }
 
-func (_ *CBZ) Save(chapter *source.Chapter) (string, error) {
+func (c *CBZ) Save(chapter *source.Chapter) (string, error) {
+	return c.save(chapter, false)
+}
+
+func (c *CBZ) SaveTemp(chapter *source.Chapter) (string, error) {
+	return c.save(chapter, true)
+}
+
+func (_ *CBZ) save(chapter *source.Chapter, temp bool) (string, error) {
 	mangaDir, err := prepareMangaDir(chapter.Manga)
 	if err != nil {
 		return "", err
@@ -56,7 +64,12 @@ func (_ *CBZ) Save(chapter *source.Chapter) (string, error) {
 		return "", err
 	}
 
-	return chapterCbz, nil
+	absPath, err := filepath.Abs(chapterCbz)
+	if err != nil {
+		return chapterCbz, nil
+	}
+
+	return absPath, nil
 }
 
 // prepareMangaDir will create manga direcotry if it doesn't exist

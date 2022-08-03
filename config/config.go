@@ -60,13 +60,26 @@ func setEnvs() {
 // setDefaults sets the default values
 func setDefaults() {
 	viper.SetTypeByDefaultValue(true)
-
-	viper.SetDefault(DownloaderPath, ".")
-	viper.SetDefault(DownloaderChapterNameTemplate, "[%0d] %s")
-	viper.SetDefault(FormatsDefault, "pdf")
-
 	configDir := lo.Must(os.UserConfigDir())
-	viper.SetDefault(SourcesPath, filepath.Join(configDir, constants.Mangal, "sources"))
+
+	fields := map[string]any{
+		// Downloader
+		DownloaderPath:                ".",
+		DownloaderChapterNameTemplate: "[%0d] %s",
+
+		// Formats
+		FormatsUse: "plain",
+
+		// Sources
+		SourcesPath: filepath.Join(configDir, constants.Mangal, "sources"),
+
+		// Mini-mode
+		MiniVimMode: false,
+	}
+
+	for field, value := range fields {
+		viper.SetDefault(field, value)
+	}
 }
 
 // Paths returns the paths to the config files

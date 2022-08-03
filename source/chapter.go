@@ -3,17 +3,19 @@ package source
 import (
 	"errors"
 	lua "github.com/yuin/gopher-lua"
+	"strings"
 	"sync"
 )
 
 type Chapter struct {
 	Name  string
 	URL   string
+	Index uint16
 	Manga *Manga
 	Pages []*Page
 }
 
-func chapterFromTable(table *lua.LTable, manga *Manga) (*Chapter, error) {
+func chapterFromTable(table *lua.LTable, manga *Manga, index uint16) (*Chapter, error) {
 	name := table.RawGetString("name")
 
 	if name.Type() != lua.LTString {
@@ -26,9 +28,10 @@ func chapterFromTable(table *lua.LTable, manga *Manga) (*Chapter, error) {
 	}
 
 	chapter := &Chapter{
-		Name:  name.String(),
-		URL:   url.String(),
+		Name:  strings.TrimSpace(name.String()),
+		URL:   strings.TrimSpace(url.String()),
 		Manga: manga,
+		Index: index,
 		Pages: []*Page{},
 	}
 

@@ -2,17 +2,25 @@ package mini
 
 import (
 	"fmt"
-	"github.com/manifoldco/promptui"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/skratchdot/open-golang/open"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
-	"strings"
+	"sync"
 )
 
-func Run() error {
+func Run(download bool) error {
+	conv, err := converter.Get(viper.GetString(config.FormatsUse))
+	if err != nil {
+		return err
+	}
+
 	s, err := selectSource()
 	if err != nil {
 		return err
@@ -28,28 +36,72 @@ func Run() error {
 		return err
 	}
 
-	chapter, err := selectChapter(s, manga)
-	if err != nil {
-		return err
-	}
+	if !download {
+		chapter, err := selectChapter(s, manga)
+		if err != nil {
+			return err
+		}
 
-	pages, err := s.PagesOf(chapter)
-	if err != nil {
-		return err
-	}
+		pages, err := s.PagesOf(chapter)
+		if err != nil {
+			return err
+		}
 
-	fmt.Printf("Downloading %d pages\n", len(pages))
-	err = chapter.DownloadPages()
-	if err != nil {
-		return err
-	}
+		fmt.Printf("Downloading %d pages\n", len(pages))
+		err = chapter.DownloadPages()
+		if err != nil {
+			return err
+		}
 
-	path, err := converter.Converters()["cbz"].Save(chapter)
-	if err != nil {
-		return err
-	}
+		path, err := conv.SaveTemp(chapter)
+		if err != nil {
+			return err
+		}
 
-	fmt.Println("Saved to ", path)
+		err = open.Start(path)
+		if err != nil {
+			return err
+		}
+	} else {
+		chapters, err := selectChapters(s, manga)
+		if err != nil {
+			return err
+		}
+
+		for _, chapter := range chapters {
+			fmt.Printf("Downloading %s\n", chapter.Name)
+			_, err = s.PagesOf(chapter)
+			if err != nil {
+				return err
+			}
+
+			err = chapter.DownloadPages()
+			if err != nil {
+				return err
+			}
+		}
+
+		wg := sync.WaitGroup{}
+		wg.Add(len(chapters))
+		for _, chapter := range chapters {
+			go func(chapter *source.Chapter) {
+				defer wg.Done()
+
+				if err != nil {
+					return
+				}
+
+				_, err = conv.Save(chapter)
+			}(chapter)
+		}
+		wg.Wait()
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Saved")
+	}
 
 	return nil
 }
@@ -63,58 +115,42 @@ func selectSource() (source.Source, error) {
 		return nil, err
 	}
 
-	defaultProvidersNames := lo.Keys(defaultProviders)
-	slices.Sort(defaultProvidersNames)
+	var sources = make(map[string]func() (source.Source, error))
 
-	customSourcesNames := lo.Keys(customSources)
-	slices.Sort(customSourcesNames)
-
-	items := append(
-		lo.Map(defaultProvidersNames, func(name string, _ int) string {
-			return "Builtin: " + name
-		}),
-		customSourcesNames...,
-	)
-
-	prompt := promptui.Select{
-		Label:     "Select a source",
-		Items:     items,
-		IsVimMode: true,
-		Searcher: func(input string, index int) bool {
-			return strings.Contains(items[index], input)
-		},
-		StartInSearchMode: true,
-		Size:              10,
+	for name, s := range customSources {
+		sources[name] = func() (source.Source, error) {
+			return source.LoadSource(s, true)
+		}
 	}
 
-	i, name, err := prompt.Run()
+	for name, p := range defaultProviders {
+		sources[name] = func() (source.Source, error) {
+			return p.CreateSource(), nil
+		}
+	}
 
+	prompt := survey.Select{
+		Message: "Select a source",
+		Options: lo.Keys(sources),
+		VimMode: viper.GetBool(config.MiniVimMode),
+	}
+
+	var sourceName string
+	err = survey.AskOne(&prompt, &sourceName, survey.WithValidator(survey.Required))
 	if err != nil {
 		return nil, err
 	}
 
-	var s source.Source
-
-	if i >= len(defaultProviders) {
-		path := customSources[name]
-		s, err = source.LoadSource(path, true)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		s = defaultProviders[name].CreateSource()
-	}
-
-	return s, nil
+	return sources[sourceName]()
 }
 
 func searchMangas(s source.Source) ([]*source.Manga, error) {
-	prompt := promptui.Prompt{
-		Label:       "Search",
-		HideEntered: true,
+	prompt := survey.Input{
+		Message: "Search manga",
 	}
 
-	query, err := prompt.Run()
+	var query string
+	err := survey.AskOne(&prompt, &query, survey.WithValidator(survey.Required))
 	if err != nil {
 		return nil, err
 	}
@@ -128,21 +164,30 @@ func searchMangas(s source.Source) ([]*source.Manga, error) {
 }
 
 func selectManga(mangas []*source.Manga) (*source.Manga, error) {
-	prompt := promptui.Select{
-		Label: "Select a manga",
-		Items: lo.Map(mangas, func(manga *source.Manga, _ int) string {
-			return manga.Name
-		}),
-		Size: 20,
+	var m = make(map[string]*source.Manga)
+
+	for _, manga := range mangas {
+		m[util.PrettyTrim(manga.Name, 30)] = manga
 	}
 
-	i, _, err := prompt.Run()
+	options := lo.Keys(m)
+	slices.SortFunc(options, func(a, b string) bool {
+		return m[a].Index < m[b].Index
+	})
 
+	prompt := survey.Select{
+		Message: "Select manga",
+		Options: options,
+		VimMode: viper.GetBool(config.MiniVimMode),
+	}
+
+	var mangaName string
+	err := survey.AskOne(&prompt, &mangaName, survey.WithValidator(survey.Required))
 	if err != nil {
 		return nil, err
 	}
 
-	return mangas[i], nil
+	return m[mangaName], nil
 }
 
 func selectChapter(s source.Source, manga *source.Manga) (*source.Chapter, error) {
@@ -151,19 +196,67 @@ func selectChapter(s source.Source, manga *source.Manga) (*source.Chapter, error
 		return nil, err
 	}
 
-	prompt := promptui.Select{
-		Label: "Select a chapter",
-		Items: lo.Map(chapters, func(chapter *source.Chapter, _ int) string {
-			return util.PrettyTrim(chapter.Name, 30)
-		}),
-		Size: 20,
+	var c = make(map[string]*source.Chapter)
+	for _, chapter := range chapters {
+		c[util.PrettyTrim(chapter.Name, 30)] = chapter
 	}
 
-	i, _, err := prompt.Run()
+	options := lo.Keys(c)
+	slices.SortFunc(options, func(a, b string) bool {
+		return c[a].Index < c[b].Index
+	})
 
+	prompt := survey.Select{
+		Message: "Select chapter",
+		Options: options,
+		VimMode: viper.GetBool(config.MiniVimMode),
+	}
+
+	var chapterName string
+	err = survey.AskOne(&prompt, &chapterName, survey.WithValidator(survey.Required))
 	if err != nil {
 		return nil, err
 	}
 
-	return chapters[i], nil
+	return c[chapterName], nil
+}
+
+func selectChapters(s source.Source, manga *source.Manga) ([]*source.Chapter, error) {
+	chapters, err := s.ChaptersOf(manga)
+	if err != nil {
+		return nil, err
+	}
+
+	var c = make(map[string]*source.Chapter)
+	for _, chapter := range chapters {
+		c[util.PrettyTrim(chapter.Name, 30)] = chapter
+	}
+
+	options := lo.Keys(c)
+	slices.SortFunc(options, func(a, b string) bool {
+		return c[a].Index < c[b].Index
+	})
+
+	prompt := survey.MultiSelect{
+		Message: "Select chapters",
+		Options: options,
+		VimMode: viper.GetBool(config.MiniVimMode),
+	}
+
+	var chapterNames []string
+	err = survey.AskOne(&prompt, &chapterNames, survey.WithValidator(survey.Required))
+	if err != nil {
+		return nil, err
+	}
+
+	var chaptersToDownload []*source.Chapter
+	for _, chapterName := range chapterNames {
+		chaptersToDownload = append(chaptersToDownload, c[chapterName])
+	}
+
+	slices.SortFunc(chaptersToDownload, func(a, b *source.Chapter) bool {
+		return a.Index < b.Index
+	})
+
+	return chaptersToDownload, nil
 }

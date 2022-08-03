@@ -6,7 +6,7 @@ const (
 )
 
 const (
-	FormatsDefault = "formats.default"
+	FormatsUse = "formats.use"
 )
 
 const (
@@ -17,10 +17,14 @@ const (
 	SourcesPath = "sources.path"
 )
 
+const (
+	MiniVimMode = "mini.vim_mode"
+)
+
 var envFields = []string{
 	DownloaderPath,
 	DownloaderChapterNameTemplate,
-	FormatsDefault,
+	FormatsUse,
 	ReaderName,
 	SourcesPath,
 }

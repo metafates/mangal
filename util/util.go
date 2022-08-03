@@ -1,8 +1,10 @@
 package util
 
 import (
+	"fmt"
 	"github.com/samber/lo"
 	"regexp"
+	"strings"
 )
 
 func PrettyTrim(s string, maxLen int) string {
@@ -36,4 +38,16 @@ func SanitizeFilename(filename string) string {
 	}
 
 	return filename
+}
+
+func Quantity(count int, thing string) string {
+	if strings.HasSuffix(thing, "s") {
+		thing = thing[:len(thing)-1]
+	}
+
+	if count == 1 {
+		return fmt.Sprintf("%d %s", count, thing)
+	}
+
+	return fmt.Sprintf("%d %ss", count, thing)
 }

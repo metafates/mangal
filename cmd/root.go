@@ -2,10 +2,17 @@ package cmd
 
 import (
 	cc "github.com/ivanpirog/coloredcobra"
+	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constants"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 )
+
+func init() {
+	rootCmd.PersistentFlags().StringP("format", "f", "", "output format")
+	_ = viper.BindPFlag(config.FormatsUse, rootCmd.PersistentFlags().Lookup("format"))
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

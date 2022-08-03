@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type Page struct {
@@ -37,7 +38,7 @@ func pageFromTable(table *lua.LTable, chapter *Chapter) (*Page, error) {
 	}
 
 	page := &Page{
-		URL:       url.String(),
+		URL:       strings.TrimSpace(url.String()),
 		Index:     uint16(num),
 		Chapter:   chapter,
 		Extension: ".jpg",

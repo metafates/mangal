@@ -3,6 +3,7 @@ package plain
 import (
 	"fmt"
 	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constants"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -19,8 +20,26 @@ func New() *Plain {
 	return &Plain{}
 }
 
-func (_ *Plain) Save(chapter *source.Chapter) (string, error) {
-	chapterDir, err := prepareChapterDir(chapter)
+func (p *Plain) Save(chapter *source.Chapter) (string, error) {
+	return p.save(chapter, false)
+}
+
+func (p *Plain) SaveTemp(chapter *source.Chapter) (string, error) {
+	return p.save(chapter, true)
+}
+
+func (_ *Plain) save(chapter *source.Chapter, temp bool) (string, error) {
+	var (
+		chapterDir string
+		err        error
+	)
+
+	if !temp {
+		chapterDir, err = prepareChapterDir(chapter)
+	} else {
+		chapterDir, err = filesystem.Get().TempDir("", constants.TempPrefix)
+	}
+
 	if err != nil {
 		return "", err
 	}
@@ -45,12 +64,12 @@ func (_ *Plain) Save(chapter *source.Chapter) (string, error) {
 		return "", err
 	}
 
-	mangaDir, err := filepath.Abs(filepath.Dir(chapterDir))
+	abs, err := filepath.Abs(chapterDir)
 	if err != nil {
-		mangaDir = filepath.Dir(chapterDir)
+		return chapterDir, nil
 	}
 
-	return mangaDir, nil
+	return abs, nil
 }
 
 // prepareMangaDir will create manga direcotry if it doesn't exist

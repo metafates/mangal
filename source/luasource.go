@@ -2,6 +2,7 @@ package source
 
 import (
 	lua "github.com/yuin/gopher-lua"
+	"strconv"
 )
 
 type LuaSource struct {
@@ -60,7 +61,12 @@ func (s *LuaSource) Search(query string) ([]*Manga, error) {
 			s.state.RaiseError(SearchMangaFn + " was expected to return a table with tables as values, got " + v.Type().String() + " as a value")
 		}
 
-		manga, err := mangaFromTable(v.(*lua.LTable))
+		index, err := strconv.ParseUint(k.String(), 10, 16)
+		if err != nil {
+			s.state.RaiseError(SearchMangaFn + " was expected to return a table with unsigned integers as keys. " + err.Error())
+		}
+
+		manga, err := mangaFromTable(v.(*lua.LTable), uint16(index))
 
 		if err != nil {
 			s.state.RaiseError(err.Error())
@@ -93,7 +99,12 @@ func (s *LuaSource) ChaptersOf(manga *Manga) ([]*Chapter, error) {
 			s.state.RaiseError(MangaChaptersFn + " was expected to return a table with tables as values, got " + v.Type().String() + " as a value")
 		}
 
-		chapter, err := chapterFromTable(v.(*lua.LTable), manga)
+		index, err := strconv.ParseUint(k.String(), 10, 16)
+		if err != nil {
+			s.state.RaiseError(MangaChaptersFn + " was expected to return a table with unsigned integers as keys. " + err.Error())
+		}
+
+		chapter, err := chapterFromTable(v.(*lua.LTable), manga, uint16(index))
 
 		if err != nil {
 			s.state.RaiseError(err.Error())

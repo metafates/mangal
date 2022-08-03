@@ -12,7 +12,7 @@ type Provider struct {
 
 var defaultProviders = []*Provider{
 	{
-		Name:         "manganelo",
+		Name:         "Manganelo",
 		CreateSource: manganelo.New,
 	},
 }

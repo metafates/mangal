@@ -3,15 +3,17 @@ package source
 import (
 	"errors"
 	lua "github.com/yuin/gopher-lua"
+	"strings"
 )
 
 type Manga struct {
 	Name     string
 	URL      string
+	Index    uint16
 	Chapters []*Chapter
 }
 
-func mangaFromTable(table *lua.LTable) (*Manga, error) {
+func mangaFromTable(table *lua.LTable, index uint16) (*Manga, error) {
 	name := table.RawGetString("name")
 
 	if name.Type() != lua.LTString {
@@ -24,8 +26,9 @@ func mangaFromTable(table *lua.LTable) (*Manga, error) {
 	}
 
 	return &Manga{
-		Name:     name.String(),
-		URL:      url.String(),
+		Name:     strings.TrimSpace(name.String()),
+		URL:      strings.TrimSpace(url.String()),
+		Index:    index,
 		Chapters: []*Chapter{},
 	}, nil
 }
