@@ -35,7 +35,7 @@ func (_ *CBZ) save(chapter *source.Chapter, temp bool) (string, error) {
 		return "", err
 	}
 
-	chapterCbz := filepath.Join(mangaDir, util.SanitizeFilename(chapter.Name)+".cbz")
+	chapterCbz := filepath.Join(mangaDir, util.SanitizeFilename(chapter.FormattedName())+".cbz")
 	cbzFile, err := filesystem.Get().Create(chapterCbz)
 	if err != nil {
 		return "", err

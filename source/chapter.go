@@ -2,6 +2,10 @@ package source
 
 import (
 	"errors"
+	"fmt"
+	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/util"
+	"github.com/spf13/viper"
 	lua "github.com/yuin/gopher-lua"
 	"strings"
 	"sync"
@@ -61,4 +65,15 @@ func (c *Chapter) DownloadPages() error {
 
 	wg.Wait()
 	return err
+}
+
+func (c *Chapter) FormattedName() (name string) {
+	template := viper.GetString(config.DownloaderChapterNameTemplate)
+
+	name = strings.ReplaceAll(template, "{manga}", c.Manga.Name)
+	name = strings.ReplaceAll(name, "{chapter}", c.Name)
+	name = strings.ReplaceAll(name, "{index}", fmt.Sprintf("%d", c.Index))
+	name = strings.ReplaceAll(name, "{padded_index}", util.PadZero(fmt.Sprintf("%d", c.Index), 5))
+
+	return
 }

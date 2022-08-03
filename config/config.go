@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -25,6 +26,7 @@ func Setup() error {
 		// Use defaults then
 		return nil
 	default:
+		resolveAliases()
 		return err
 	}
 }
@@ -65,7 +67,7 @@ func setDefaults() {
 	fields := map[string]any{
 		// Downloader
 		DownloaderPath:                ".",
-		DownloaderChapterNameTemplate: "[%0d] %s",
+		DownloaderChapterNameTemplate: "[{padded_index}] {chapter}",
 
 		// Formats
 		FormatsUse: "plain",
@@ -80,6 +82,24 @@ func setDefaults() {
 	for field, value := range fields {
 		viper.SetDefault(field, value)
 	}
+}
+
+// resolveAliases resolves the aliases for the downloader path
+func resolveAliases() {
+	home := lo.Must(os.UserHomeDir())
+	path := viper.GetString(DownloaderPath)
+
+	switch runtime.GOOS {
+	case "windows":
+		path = strings.ReplaceAll(path, "%USERPROFILE%", home)
+	case "darwin", "linux":
+		path = strings.ReplaceAll(path, "$HOME", home)
+		path = strings.ReplaceAll(path, "~", home)
+	default:
+		panic("unsupported OS: " + runtime.GOOS)
+	}
+
+	viper.Set(DownloaderPath, path)
 }
 
 // Paths returns the paths to the config files

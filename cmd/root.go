@@ -18,13 +18,7 @@ func init() {
 var rootCmd = &cobra.Command{
 	Use:   constants.Mangal,
 	Short: "The ultimate manga downloader",
-	Long: `                                __
-  /\/\   __ _ _ __   __ _  __ _| |
- /    \ / _  | '_ \ / _  |/ _  | |
-/ /\/\ \ (_| | | | | (_| | (_| | |
-\/    \/\__,_|_| |_|\__, |\__,_|_|
-                    |___/
-
+	Long: constants.AssciiArtLogo + `
 	- The ultimate cli manga downloader`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Println("Hello, world!")
@@ -33,6 +27,7 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
+	// colored cobra injection
 	cc.Init(&cc.Config{
 		RootCmd:       rootCmd,
 		Headings:      cc.HiCyan + cc.Bold + cc.Underline,
