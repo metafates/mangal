@@ -4,6 +4,8 @@ import (
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/style"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -11,6 +13,9 @@ import (
 
 func init() {
 	rootCmd.PersistentFlags().StringP("format", "f", "", "output format")
+	_ = rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return converter.Available(), cobra.ShellCompDirectiveDefault
+	})
 	_ = viper.BindPFlag(config.FormatsUse, rootCmd.PersistentFlags().Lookup("format"))
 }
 
@@ -18,10 +23,10 @@ func init() {
 var rootCmd = &cobra.Command{
 	Use:   constants.Mangal,
 	Short: "The ultimate manga downloader",
-	Long: constants.AssciiArtLogo + `
-	- The ultimate cli manga downloader`,
+	Long: constants.AssciiArtLogo + "\n" +
+		style.Accent("    - The ultimate cli manga downloader"),
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Println("Hello, world!")
+		cmd.Println("TUI is not implemented yet")
 	},
 }
 

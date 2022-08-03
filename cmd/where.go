@@ -12,16 +12,14 @@ func init() {
 
 	whereCmd.Flags().BoolP("config", "c", false, "configuration path")
 	whereCmd.Flags().BoolP("sources", "s", false, "sources path")
-
-	whereCmd.MarkFlagsMutuallyExclusive("config", "sources")
 }
 
 var whereCmd = &cobra.Command{
 	Use:   "where",
 	Short: "Show the paths to the configuration",
 	Run: func(cmd *cobra.Command, args []string) {
-		configOnly, _ := cmd.Flags().GetBool("config")
-		sourcesOnly, _ := cmd.Flags().GetBool("sources")
+		whereConfig, _ := cmd.Flags().GetBool("config")
+		whereSources, _ := cmd.Flags().GetBool("sources")
 
 		printConfigPath := func() {
 			for _, path := range lo.Must(config.Paths()) {
@@ -33,11 +31,15 @@ var whereCmd = &cobra.Command{
 			cmd.Println(viper.GetString(config.SourcesPath))
 		}
 
-		if configOnly {
+		if whereConfig {
 			printConfigPath()
-		} else if sourcesOnly {
+		}
+
+		if whereSources {
 			printSourcesPath()
-		} else {
+		}
+
+		if !whereConfig && !whereSources {
 			cmd.Println("Configuration path:")
 			printConfigPath()
 

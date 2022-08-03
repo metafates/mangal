@@ -23,6 +23,13 @@ var converters = map[string]Converter{
 	CBZ:   cbz.New(),
 }
 
+func Available() []string {
+	return []string{
+		Plain,
+		CBZ,
+	}
+}
+
 func Get(name string) (Converter, error) {
 	if converter, ok := converters[name]; ok {
 		return converter, nil
