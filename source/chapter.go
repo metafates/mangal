@@ -73,7 +73,7 @@ func (c *Chapter) FormattedName() (name string) {
 	name = strings.ReplaceAll(template, "{manga}", c.Manga.Name)
 	name = strings.ReplaceAll(name, "{chapter}", c.Name)
 	name = strings.ReplaceAll(name, "{index}", fmt.Sprintf("%d", c.Index))
-	name = strings.ReplaceAll(name, "{padded-index}", util.PadZero(fmt.Sprintf("%d", c.Index), 5))
+	name = strings.ReplaceAll(name, "{padded-index}", util.PadZero(fmt.Sprintf("%d", c.Index), 4))
 
 	return
 }
