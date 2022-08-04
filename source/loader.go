@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/luamodules"
 	"github.com/samber/lo"
 	"github.com/spf13/afero"
@@ -72,8 +73,7 @@ func AvailableCustomSources() (map[string]string, error) {
 	})
 
 	for _, path := range paths {
-		name := filepath.Base(path)
-		name = strings.TrimSuffix(name, sourceExtension)
+		name := strings.TrimSuffix(filepath.Base(path), sourceExtension) + " " + icon.Lua()
 		sources[name] = path
 	}
 

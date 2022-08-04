@@ -44,3 +44,9 @@ func Combined(styles ...func(string) string) func(string) string {
 		return s
 	}
 }
+
+func Padding(padding int) func(string) string {
+	return func(s string) string {
+		return lipgloss.NewStyle().Padding(padding).Render(s)
+	}
+}

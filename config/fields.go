@@ -21,6 +21,10 @@ const (
 	MiniVimMode = "mini.vim_mode"
 )
 
+const (
+	IconsVariant = "icons.variant"
+)
+
 var envFields = []string{
 	DownloaderPath,
 	DownloaderChapterNameTemplate,

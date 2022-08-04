@@ -77,6 +77,9 @@ func setDefaults() {
 
 		// Mini-mode
 		MiniVimMode: false,
+
+		// Icons
+		IconsVariant: "emoji",
 	}
 
 	for field, value := range fields {

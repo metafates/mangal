@@ -3,17 +3,22 @@ package mini
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/briandowns/spinner"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
-	"sync"
+	"os"
+	"time"
 )
+
+var pageSize = 15
 
 func Run(download bool) error {
 	conv, err := converter.Get(viper.GetString(config.FormatsUse))
@@ -21,12 +26,12 @@ func Run(download bool) error {
 		return err
 	}
 
-	s, err := selectSource()
+	src, err := selectSource()
 	if err != nil {
 		return err
 	}
 
-	mangas, err := searchMangas(s)
+	mangas, err := searchMangas(src)
 	if err != nil {
 		return err
 	}
@@ -37,70 +42,72 @@ func Run(download bool) error {
 	}
 
 	if !download {
-		chapter, err := selectChapter(s, manga)
+		chapter, err := selectChapter(src, manga)
 		if err != nil {
 			return err
 		}
 
-		pages, err := s.PagesOf(chapter)
+		pages, err := src.PagesOf(chapter)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("Downloading %d pages\n", len(pages))
+		s := spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+		s.Suffix = fmt.Sprintf(" Downloading %d pages", len(pages))
+		s.FinalMSG = style.Combined(style.Padding(1), style.Magenta)("ฅ^•ﻌ•^ฅ\nDone! Bye")
+		lo.Must0(s.Color("bold", "magenta"))
+		s.Start()
 		err = chapter.DownloadPages()
 		if err != nil {
 			return err
 		}
 
+		s.Suffix = " Converting pages"
 		path, err := conv.SaveTemp(chapter)
 		if err != nil {
 			return err
 		}
 
-		err = open.Start(path)
-		if err != nil {
-			return err
-		}
-	} else {
-		chapters, err := selectChapters(s, manga)
+		s.Suffix = " Opening"
+		err = open.Run(path)
 		if err != nil {
 			return err
 		}
 
+		s.Stop()
+	} else {
+		chapters, err := selectChapters(src, manga)
+		if err != nil {
+			return err
+		}
+
+		var counter int
+		s := spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+		lo.Must0(s.Color("bold", "magenta"))
+		s.Suffix = " Starting..."
+		s.FinalMSG = style.Combined(style.Padding(1), style.Magenta)("ฅ^•ﻌ•^ฅ\nDone! Bye")
+		s.Start()
+
 		for _, chapter := range chapters {
-			fmt.Printf("Downloading %s\n", chapter.Name)
-			_, err = s.PagesOf(chapter)
+			counter++
+
+			s.Suffix = fmt.Sprintf(" [%d/%d] Getting pages of %s", counter, len(chapters), util.PrettyTrim(chapter.Name, 40))
+			_, err = src.PagesOf(chapter)
 			if err != nil {
 				return err
 			}
 
+			s.Suffix = fmt.Sprintf(" [%d/%d] Downloading %d pages", counter, len(chapters), len(chapter.Pages))
 			err = chapter.DownloadPages()
 			if err != nil {
 				return err
 			}
+
+			s.Suffix = fmt.Sprintf(" [%d/%d] Converting to %s", counter, len(chapters), viper.GetString(config.FormatsUse))
+			_, err = conv.Save(chapter)
 		}
 
-		wg := sync.WaitGroup{}
-		wg.Add(len(chapters))
-		for _, chapter := range chapters {
-			go func(chapter *source.Chapter) {
-				defer wg.Done()
-
-				if err != nil {
-					return
-				}
-
-				_, err = conv.Save(chapter)
-			}(chapter)
-		}
-		wg.Wait()
-
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("Saved")
+		s.Stop()
 	}
 
 	return nil
@@ -133,9 +140,10 @@ func selectSource() (source.Source, error) {
 	slices.Sort(options)
 
 	prompt := survey.Select{
-		Message: "Select a source",
-		Options: options,
-		VimMode: viper.GetBool(config.MiniVimMode),
+		Message:  "Select a source",
+		Options:  options,
+		VimMode:  viper.GetBool(config.MiniVimMode),
+		PageSize: pageSize,
 	}
 
 	var sourceName string
@@ -179,9 +187,10 @@ func selectManga(mangas []*source.Manga) (*source.Manga, error) {
 	})
 
 	prompt := survey.Select{
-		Message: "Select manga",
-		Options: options,
-		VimMode: viper.GetBool(config.MiniVimMode),
+		Message:  "Select manga",
+		Options:  options,
+		VimMode:  viper.GetBool(config.MiniVimMode),
+		PageSize: pageSize,
 	}
 
 	var mangaName string
@@ -210,9 +219,10 @@ func selectChapter(s source.Source, manga *source.Manga) (*source.Chapter, error
 	})
 
 	prompt := survey.Select{
-		Message: "Select chapter",
-		Options: options,
-		VimMode: viper.GetBool(config.MiniVimMode),
+		Message:  "Select chapter",
+		Options:  options,
+		VimMode:  viper.GetBool(config.MiniVimMode),
+		PageSize: pageSize,
 	}
 
 	var chapterName string
@@ -240,10 +250,31 @@ func selectChapters(s source.Source, manga *source.Manga) ([]*source.Chapter, er
 		return c[a].Index < c[b].Index
 	})
 
+	// Remove selection answer
+	survey.MultiSelectQuestionTemplate = `
+{{- define "option"}}
+    {{- if eq .SelectedIndex .CurrentIndex }}{{color .Config.Icons.SelectFocus.Format }}{{ .Config.Icons.SelectFocus.Text }}{{color "reset"}}{{else}} {{end}}
+    {{- if index .Checked .CurrentOpt.Index }}{{color .Config.Icons.MarkedOption.Format }} {{ .Config.Icons.MarkedOption.Text }} {{else}}{{color .Config.Icons.UnmarkedOption.Format }} {{ .Config.Icons.UnmarkedOption.Text }} {{end}}
+    {{- color "reset"}}
+    {{- " "}}{{- .CurrentOpt.Value}}
+{{end}}
+{{- if .ShowHelp }}{{- color .Config.Icons.Help.Format }}{{ .Config.Icons.Help.Text }} {{ .Help }}{{color "reset"}}{{"\n"}}{{end}}
+{{- color .Config.Icons.Question.Format }}{{ .Config.Icons.Question.Text }} {{color "reset"}}
+{{- color "default+hb"}}{{ .Message }}{{ .FilterMessage }}{{color "reset"}}
+{{- if .ShowAnswer}}{{color "cyan"}} {{ "Selected" }}{{color "reset"}}{{"\n"}}
+{{- else }}
+	{{- "  "}}{{- color "cyan"}}[Use arrows to move, space to select, <right> to all, <left> to none, type to filter{{- if and .Help (not .ShowHelp)}}, {{ .Config.HelpInput }} for more help{{end}}]{{color "reset"}}
+  {{- "\n"}}
+  {{- range $ix, $option := .PageEntries}}
+    {{- template "option" $.IterateOption $ix $option}}
+  {{- end}}
+{{- end}}`
+
 	prompt := survey.MultiSelect{
-		Message: "Select chapters",
-		Options: options,
-		VimMode: viper.GetBool(config.MiniVimMode),
+		Message:  "Select chapters",
+		Options:  options,
+		VimMode:  viper.GetBool(config.MiniVimMode),
+		PageSize: pageSize,
 	}
 
 	var chapterNames []string

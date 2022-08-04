@@ -24,6 +24,7 @@ require (
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/aws/aws-sdk-go v1.32.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/briandowns/spinner v1.19.0 // indirect
 	github.com/cbroglie/mustache v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/charmbracelet/lipgloss v0.5.0 // indirect
