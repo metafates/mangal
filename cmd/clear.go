@@ -15,7 +15,7 @@ import (
 func init() {
 	rootCmd.AddCommand(clearCmd)
 	clearCmd.Flags().BoolP("cache", "c", false, "Clear cache files")
-	clearCmd.Flags().BoolP("history", "H", false, "Clear reading history")
+	clearCmd.Flags().BoolP("history-file", "r", false, "Clear history")
 }
 
 var clearCmd = &cobra.Command{

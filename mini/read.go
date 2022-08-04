@@ -73,10 +73,8 @@ func readChapter(src source.Source, chapter *source.Chapter) error {
 	}
 
 	if viper.GetBool(config.HistorySaveOnRead) {
-		// TODO: remove must0, because history is not that important to interrupt whole process
-		// Currently, this is used only for debug purposes
 		s.Suffix = " Writing history"
-		lo.Must0(history.Save(chapter))
+		_ = history.Save(chapter)
 	}
 
 	if reader := viper.GetString(config.ReaderName); reader != "" {

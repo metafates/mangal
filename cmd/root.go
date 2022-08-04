@@ -26,8 +26,8 @@ func init() {
 	}))
 	lo.Must0(viper.BindPFlag(config.IconsVariant, rootCmd.PersistentFlags().Lookup("icons")))
 
-	rootCmd.PersistentFlags().BoolP("incognito", "I", false, "incognito mode (no history)")
-	lo.Must0(viper.BindPFlag(config.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("incognito")))
+	rootCmd.PersistentFlags().BoolP("history", "H", true, "write history of read chapters")
+	lo.Must0(viper.BindPFlag(config.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("history")))
 
 	// Clear temporary files on startup
 	go clearTemp()
