@@ -3,17 +3,10 @@ package util
 import (
 	"fmt"
 	"github.com/samber/lo"
+	"golang.org/x/sys/unix"
 	"regexp"
 	"strings"
 )
-
-func PrettyTrim(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-
-	return s[:maxLen] + "..."
-}
 
 func PadZero(s string, l int) string {
 	for l > len(s) {
@@ -50,4 +43,14 @@ func Quantity(count int, thing string) string {
 	}
 
 	return fmt.Sprintf("%d %ss", count, thing)
+}
+
+// TerminalSize returns the dimensions of the given terminal.
+func TerminalSize() (width, height int, err error) {
+	fd := unix.Stdout
+	ws, err := unix.IoctlGetWinsize(fd, unix.TIOCGWINSZ)
+	if err != nil {
+		return -1, -1, err
+	}
+	return int(ws.Col), int(ws.Row), nil
 }

@@ -74,3 +74,7 @@ func (p *Page) Download() error {
 func (p *Page) Close() error {
 	return p.Contents.Close()
 }
+
+func (p *Page) Read(b []byte) (int, error) {
+	return p.Contents.Read(b)
+}

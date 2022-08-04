@@ -2,6 +2,8 @@ package style
 
 import "github.com/charmbracelet/lipgloss"
 
+type Style func(string) string
+
 var (
 	Bold      = lipgloss.NewStyle().Bold(true).Render
 	Italic    = lipgloss.NewStyle().Italic(true).Render
@@ -45,8 +47,18 @@ func Combined(styles ...func(string) string) func(string) string {
 	}
 }
 
-func Padding(padding int) func(string) string {
+func Padding(padding int) Style {
 	return func(s string) string {
 		return lipgloss.NewStyle().Padding(padding).Render(s)
+	}
+}
+
+func Trim(max int) Style {
+	return func(s string) string {
+		if len(s) <= max {
+			return s
+		}
+
+		return s[:max] + "..."
 	}
 }

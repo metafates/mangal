@@ -20,15 +20,15 @@ func New() *Plain {
 	return &Plain{}
 }
 
-func (p *Plain) Save(chapter *source.Chapter) (string, error) {
-	return p.save(chapter, false)
+func (_ *Plain) Save(chapter *source.Chapter) (string, error) {
+	return save(chapter, false)
 }
 
-func (p *Plain) SaveTemp(chapter *source.Chapter) (string, error) {
-	return p.save(chapter, true)
+func (_ *Plain) SaveTemp(chapter *source.Chapter) (string, error) {
+	return save(chapter, true)
 }
 
-func (_ *Plain) save(chapter *source.Chapter, temp bool) (string, error) {
+func save(chapter *source.Chapter, temp bool) (string, error) {
 	var (
 		chapterDir string
 		err        error

@@ -21,6 +21,10 @@ var miniCmd = &cobra.Command{
 		err := mini.Run(lo.Must(cmd.Flags().GetBool("download")))
 
 		if err != nil {
+			if err.Error() == "interrupt" {
+				os.Exit(0)
+			}
+
 			cmd.PrintErr(err)
 			os.Exit(1)
 		}

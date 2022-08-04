@@ -18,9 +18,16 @@ import (
 	"time"
 )
 
-var pageSize = 15
+var (
+	pageSize = 15
+	trimAt   = 30
+)
 
 func Run(download bool) error {
+	if w, _, err := util.TerminalSize(); err == nil {
+		trimAt = lo.Max([]int{trimAt, w - 10})
+	}
+
 	conv, err := converter.Get(viper.GetString(config.FormatsUse))
 	if err != nil {
 		return err
@@ -68,8 +75,14 @@ func Run(download bool) error {
 			return err
 		}
 
-		s.Suffix = " Opening"
-		err = open.Run(path)
+		if reader := viper.GetString(config.ReaderName); reader != "" {
+			s.Suffix = fmt.Sprintf(" Opening \"%s\"", reader)
+			err = open.StartWith(path, reader)
+		} else {
+			s.Suffix = " Opening"
+			err = open.Start(path)
+		}
+
 		if err != nil {
 			return err
 		}
@@ -91,7 +104,7 @@ func Run(download bool) error {
 		for _, chapter := range chapters {
 			counter++
 
-			s.Suffix = fmt.Sprintf(" [%d/%d] Getting pages of %s", counter, len(chapters), util.PrettyTrim(chapter.Name, 40))
+			s.Suffix = fmt.Sprintf(" [%d/%d] Getting pages of %s", counter, len(chapters), style.Trim(40)(chapter.Name))
 			_, err = src.PagesOf(chapter)
 			if err != nil {
 				return err
@@ -178,7 +191,7 @@ func selectManga(mangas []*source.Manga) (*source.Manga, error) {
 	var m = make(map[string]*source.Manga)
 
 	for _, manga := range mangas {
-		m[util.PrettyTrim(manga.Name, 30)] = manga
+		m[style.Trim(trimAt)(manga.Name)] = manga
 	}
 
 	options := lo.Keys(m)
@@ -210,7 +223,7 @@ func selectChapter(s source.Source, manga *source.Manga) (*source.Chapter, error
 
 	var c = make(map[string]*source.Chapter)
 	for _, chapter := range chapters {
-		c[util.PrettyTrim(chapter.Name, 30)] = chapter
+		c[style.Trim(trimAt)(chapter.Name)] = chapter
 	}
 
 	options := lo.Keys(c)
@@ -242,7 +255,7 @@ func selectChapters(s source.Source, manga *source.Manga) ([]*source.Chapter, er
 
 	var c = make(map[string]*source.Chapter)
 	for _, chapter := range chapters {
-		c[util.PrettyTrim(chapter.Name, 30)] = chapter
+		c[style.Trim(trimAt)(chapter.Name)] = chapter
 	}
 
 	options := lo.Keys(c)
@@ -261,7 +274,7 @@ func selectChapters(s source.Source, manga *source.Manga) ([]*source.Chapter, er
 {{- if .ShowHelp }}{{- color .Config.Icons.Help.Format }}{{ .Config.Icons.Help.Text }} {{ .Help }}{{color "reset"}}{{"\n"}}{{end}}
 {{- color .Config.Icons.Question.Format }}{{ .Config.Icons.Question.Text }} {{color "reset"}}
 {{- color "default+hb"}}{{ .Message }}{{ .FilterMessage }}{{color "reset"}}
-{{- if .ShowAnswer}}{{color "cyan"}} {{ "Selected" }}{{color "reset"}}{{"\n"}}
+{{- if .ShowAnswer}}{{color "cyan"}} {{ "..." }}{{color "reset"}}{{"\n"}}
 {{- else }}
 	{{- "  "}}{{- color "cyan"}}[Use arrows to move, space to select, <right> to all, <left> to none, type to filter{{- if and .Help (not .ShowHelp)}}, {{ .Config.HelpInput }} for more help{{end}}]{{color "reset"}}
   {{- "\n"}}

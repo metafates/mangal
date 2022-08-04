@@ -22,15 +22,15 @@ func New() *CBZ {
 	return &CBZ{}
 }
 
-func (c *CBZ) Save(chapter *source.Chapter) (string, error) {
-	return c.save(chapter, false)
+func (_ *CBZ) Save(chapter *source.Chapter) (string, error) {
+	return save(chapter, false)
 }
 
-func (c *CBZ) SaveTemp(chapter *source.Chapter) (string, error) {
-	return c.save(chapter, true)
+func (_ *CBZ) SaveTemp(chapter *source.Chapter) (string, error) {
+	return save(chapter, true)
 }
 
-func (_ *CBZ) save(chapter *source.Chapter, temp bool) (string, error) {
+func save(chapter *source.Chapter, temp bool) (string, error) {
 
 	var (
 		mangaDir string

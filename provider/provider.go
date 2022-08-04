@@ -22,7 +22,7 @@ func DefaultProviders() map[string]*Provider {
 	providers := make(map[string]*Provider)
 
 	for _, provider := range defaultProviders {
-		provider.Name += " " + icon.Go()
+		provider.Name += " " + icon.Get(icon.Go)
 		providers[provider.Name] = provider
 	}
 

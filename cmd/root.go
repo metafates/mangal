@@ -5,6 +5,7 @@ import (
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constants"
 	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -17,6 +18,15 @@ func init() {
 		return converter.Available(), cobra.ShellCompDirectiveDefault
 	})
 	_ = viper.BindPFlag(config.FormatsUse, rootCmd.PersistentFlags().Lookup("format"))
+
+	rootCmd.PersistentFlags().StringP("icon", "i", "", "icons variant")
+	_ = rootCmd.RegisterFlagCompletionFunc("icon", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return icon.AvailableVariants(), cobra.ShellCompDirectiveDefault
+	})
+	_ = viper.BindPFlag(config.IconsVariant, rootCmd.PersistentFlags().Lookup("icon"))
+
+	// Clear temporary files on startup
+	go clearTemp()
 }
 
 // rootCmd represents the base command when called without any subcommands

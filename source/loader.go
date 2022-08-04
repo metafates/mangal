@@ -73,7 +73,7 @@ func AvailableCustomSources() (map[string]string, error) {
 	})
 
 	for _, path := range paths {
-		name := strings.TrimSuffix(filepath.Base(path), sourceExtension) + " " + icon.Lua()
+		name := strings.TrimSuffix(filepath.Base(path), sourceExtension) + " " + icon.Get(icon.Lua)
 		sources[name] = path
 	}
 
