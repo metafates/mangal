@@ -5,6 +5,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/style"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
@@ -67,6 +68,11 @@ func download() error {
 
 		s.Suffix = fmt.Sprintf(" [%d/%d] Converting to %s", counter, len(chapters), viper.GetString(config.FormatsUse))
 		_, err = conv.Save(chapter)
+
+		if viper.GetBool(config.HistorySaveOnDownload) {
+			s.Suffix = fmt.Sprintf(" [%d/%d] Writing history", counter, len(chapters))
+			_ = history.Save(chapter)
+		}
 	}
 
 	s.Stop()
