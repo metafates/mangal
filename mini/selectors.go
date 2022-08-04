@@ -186,9 +186,9 @@ func selectChapters(chapters []*source.Chapter) ([]*source.Chapter, error) {
 		return nil, err
 	}
 
-	var chaptersToDownload []*source.Chapter
-	for _, chapterName := range chapterNames {
-		chaptersToDownload = append(chaptersToDownload, c[chapterName])
+	var chaptersToDownload = make([]*source.Chapter, len(chapterNames))
+	for i, chapterName := range chapterNames {
+		chaptersToDownload[i] = c[chapterName]
 	}
 
 	slices.SortFunc(chaptersToDownload, func(a, b *source.Chapter) bool {

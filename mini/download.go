@@ -54,23 +54,23 @@ func download() error {
 	for _, chapter := range selected {
 		counter++
 
-		s.Suffix = fmt.Sprintf(" [%d/%d] Getting pages of %s", counter, len(chapters), style.Trim(40)(chapter.Name))
+		s.Suffix = fmt.Sprintf(" [%d/%d] Getting pages of %s", counter, len(selected), style.Trim(40)(chapter.Name))
 		_, err = src.PagesOf(chapter)
 		if err != nil {
 			return err
 		}
 
-		s.Suffix = fmt.Sprintf(" [%d/%d] Downloading %d pages", counter, len(chapters), len(chapter.Pages))
+		s.Suffix = fmt.Sprintf(" [%d/%d] Downloading %d pages", counter, len(selected), len(chapter.Pages))
 		err = chapter.DownloadPages()
 		if err != nil {
 			return err
 		}
 
-		s.Suffix = fmt.Sprintf(" [%d/%d] Converting to %s", counter, len(chapters), viper.GetString(config.FormatsUse))
+		s.Suffix = fmt.Sprintf(" [%d/%d] Converting to %s", counter, len(selected), viper.GetString(config.FormatsUse))
 		_, err = conv.Save(chapter)
 
 		if viper.GetBool(config.HistorySaveOnDownload) {
-			s.Suffix = fmt.Sprintf(" [%d/%d] Writing history", counter, len(chapters))
+			s.Suffix = fmt.Sprintf(" [%d/%d] Writing history", counter, len(selected))
 			_ = history.Save(chapter)
 		}
 	}
