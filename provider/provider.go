@@ -1,19 +1,20 @@
 package provider
 
 import (
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/provider/manganelo"
 	"github.com/metafates/mangal/source"
 )
 
 type Provider struct {
+	ID           string
 	Name         string
 	CreateSource func() source.Source
 }
 
 var defaultProviders = []*Provider{
 	{
-		Name:         "Manganelo",
+		ID:           manganelo.ID,
+		Name:         manganelo.Name,
 		CreateSource: manganelo.New,
 	},
 }
@@ -22,7 +23,6 @@ func DefaultProviders() map[string]*Provider {
 	providers := make(map[string]*Provider)
 
 	for _, provider := range defaultProviders {
-		provider.Name += " " + icon.Get(icon.Go)
 		providers[provider.Name] = provider
 	}
 

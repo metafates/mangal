@@ -80,6 +80,13 @@ func setDefaults() {
 
 		// Icons
 		IconsVariant: "emoji",
+
+		// Reader
+		ReaderName: "",
+
+		// History
+		HistorySaveOnRead:     true,
+		HistorySaveOnDownload: false,
 	}
 
 	for field, value := range fields {

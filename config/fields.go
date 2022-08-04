@@ -14,6 +14,11 @@ const (
 )
 
 const (
+	HistorySaveOnRead     = "history.save_on_read"
+	HistorySaveOnDownload = "history.save_on_download"
+)
+
+const (
 	SourcesPath = "sources.path"
 )
 
@@ -26,9 +31,25 @@ const (
 )
 
 var envFields = []string{
+	// downloader
 	DownloaderPath,
 	DownloaderChapterNameTemplate,
+
+	// formats
 	FormatsUse,
+
+	// reader
 	ReaderName,
+
+	// history
+	HistorySaveOnRead,
+	HistorySaveOnDownload,
+
+	// sources
 	SourcesPath,
+
+	// mini
+	MiniVimMode,
+
+	IconsVariant,
 }

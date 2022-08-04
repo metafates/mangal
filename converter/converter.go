@@ -6,6 +6,7 @@ import (
 	"github.com/metafates/mangal/converter/cbz"
 	"github.com/metafates/mangal/converter/pdf"
 	"github.com/metafates/mangal/converter/plain"
+	"github.com/metafates/mangal/converter/zip"
 	"github.com/metafates/mangal/source"
 )
 
@@ -18,12 +19,14 @@ const (
 	Plain = "plain"
 	CBZ   = "cbz"
 	PDF   = "pdf"
+	ZIP   = "zip"
 )
 
 var converters = map[string]Converter{
 	Plain: plain.New(),
 	CBZ:   cbz.New(),
 	PDF:   pdf.New(),
+	ZIP:   zip.New(),
 }
 
 func Available() []string {
@@ -31,6 +34,7 @@ func Available() []string {
 		Plain,
 		CBZ,
 		PDF,
+		ZIP,
 	}
 }
 

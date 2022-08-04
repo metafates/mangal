@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/luamodules"
 	"github.com/samber/lo"
 	"github.com/spf13/afero"
@@ -17,6 +16,10 @@ import (
 )
 
 const sourceExtension = ".lua"
+
+func IDfromName(name string) string {
+	return name + " lua"
+}
 
 func LoadSource(path string, validate bool) (Source, error) {
 	proto, err := Compile(path)
@@ -34,8 +37,9 @@ func LoadSource(path string, validate bool) (Source, error) {
 		return nil, err
 	}
 
+	name := makeNameFromPath(path)
+
 	if validate {
-		name := strings.TrimSuffix(filepath.Base(path), sourceExtension)
 		for _, fn := range mustHave {
 			defined := state.GetGlobal(fn)
 
@@ -45,7 +49,7 @@ func LoadSource(path string, validate bool) (Source, error) {
 		}
 	}
 
-	source, err := newLuaSource(path, state)
+	source, err := newLuaSource(name, state)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +77,7 @@ func AvailableCustomSources() (map[string]string, error) {
 	})
 
 	for _, path := range paths {
-		name := strings.TrimSuffix(filepath.Base(path), sourceExtension) + " " + icon.Get(icon.Lua)
+		name := makeNameFromPath(path)
 		sources[name] = path
 	}
 
@@ -103,4 +107,8 @@ func Compile(path string) (*lua.FunctionProto, error) {
 	}
 
 	return proto, nil
+}
+
+func makeNameFromPath(path string) string {
+	return strings.TrimSuffix(filepath.Base(path), sourceExtension)
 }

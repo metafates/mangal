@@ -72,6 +72,7 @@ func (s *LuaSource) Search(query string) ([]*Manga, error) {
 			s.state.RaiseError(err.Error())
 		}
 
+		manga.SourceID = s.ID()
 		mangas[i] = manga
 		i++
 	})
@@ -110,6 +111,7 @@ func (s *LuaSource) ChaptersOf(manga *Manga) ([]*Chapter, error) {
 			s.state.RaiseError(err.Error())
 		}
 
+		chapter.SourceID = s.ID()
 		chapters[i] = chapter
 		i++
 	})
@@ -143,6 +145,7 @@ func (s *LuaSource) PagesOf(chapter *Chapter) ([]*Page, error) {
 			s.state.RaiseError(err.Error())
 		}
 
+		page.SourceID = s.ID()
 		pages[i] = page
 		i++
 	})
@@ -153,4 +156,8 @@ func (s *LuaSource) PagesOf(chapter *Chapter) ([]*Page, error) {
 func (s *LuaSource) Debug() error {
 	_, err := s.call(DebugFn, lua.LTNil)
 	return err
+}
+
+func (s *LuaSource) ID() string {
+	return IDfromName(s.name)
 }

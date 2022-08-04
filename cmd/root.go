@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -14,16 +15,19 @@ import (
 
 func init() {
 	rootCmd.PersistentFlags().StringP("format", "f", "", "output format")
-	_ = rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	lo.Must0(rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return converter.Available(), cobra.ShellCompDirectiveDefault
-	})
-	_ = viper.BindPFlag(config.FormatsUse, rootCmd.PersistentFlags().Lookup("format"))
+	}))
+	lo.Must0(viper.BindPFlag(config.FormatsUse, rootCmd.PersistentFlags().Lookup("format")))
 
-	rootCmd.PersistentFlags().StringP("icon", "i", "", "icons variant")
-	_ = rootCmd.RegisterFlagCompletionFunc("icon", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	rootCmd.PersistentFlags().StringP("icons", "i", "", "icons variant")
+	lo.Must0(rootCmd.RegisterFlagCompletionFunc("icons", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return icon.AvailableVariants(), cobra.ShellCompDirectiveDefault
-	})
-	_ = viper.BindPFlag(config.IconsVariant, rootCmd.PersistentFlags().Lookup("icon"))
+	}))
+	lo.Must0(viper.BindPFlag(config.IconsVariant, rootCmd.PersistentFlags().Lookup("icons")))
+
+	rootCmd.PersistentFlags().BoolP("incognito", "I", false, "incognito mode (no history)")
+	lo.Must0(viper.BindPFlag(config.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("incognito")))
 
 	// Clear temporary files on startup
 	go clearTemp()

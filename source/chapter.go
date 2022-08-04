@@ -12,11 +12,12 @@ import (
 )
 
 type Chapter struct {
-	Name  string
-	URL   string
-	Index uint16
-	Manga *Manga
-	Pages []*Page
+	Name     string `json:"name"`
+	URL      string `json:"url"`
+	Index    uint16 `json:"index"`
+	SourceID string `json:"source_id"`
+	Manga    *Manga
+	Pages    []*Page
 }
 
 func chapterFromTable(table *lua.LTable, manga *Manga, index uint16) (*Chapter, error) {

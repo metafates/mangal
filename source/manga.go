@@ -7,9 +7,10 @@ import (
 )
 
 type Manga struct {
-	Name     string
-	URL      string
-	Index    uint16
+	Name     string `json:"name"`
+	URL      string `json:"url"`
+	Index    uint16 `json:"index"`
+	SourceID string `json:"source_id"`
 	Chapters []*Chapter
 }
 

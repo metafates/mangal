@@ -11,9 +11,10 @@ import (
 )
 
 type Page struct {
-	URL       string
-	Index     uint16
-	Extension string
+	URL       string `json:"url"`
+	Index     uint16 `json:"index"`
+	Extension string `json:"extension"`
+	SourceID  string `json:"source_id"`
 	Contents  io.ReadCloser
 	Chapter   *Chapter
 }

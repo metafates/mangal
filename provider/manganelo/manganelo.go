@@ -5,6 +5,11 @@ import (
 	"github.com/metafates/mangal/source"
 )
 
+const (
+	Name = "Manganelo"
+	ID   = Name + " go"
+)
+
 type Manganelo struct {
 	mangasCollector   *colly.Collector
 	chaptersCollector *colly.Collector
@@ -15,6 +20,10 @@ type Manganelo struct {
 	pages    map[string][]*source.Page
 }
 
-func (_ Manganelo) Name() string {
-	return "manganelo"
+func (_ *Manganelo) Name() string {
+	return Name
+}
+
+func (m *Manganelo) ID() string {
+	return ID
 }

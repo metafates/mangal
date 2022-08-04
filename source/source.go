@@ -5,4 +5,5 @@ type Source interface {
 	Search(query string) ([]*Manga, error)
 	ChaptersOf(manga *Manga) ([]*Chapter, error)
 	PagesOf(chapter *Chapter) ([]*Page, error)
+	ID() string
 }
