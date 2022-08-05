@@ -3,7 +3,7 @@ package cmd
 import (
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/metafates/mangal/config"
-	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
@@ -38,9 +38,9 @@ func init() {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   constants.Mangal,
+	Use:   constant.Mangal,
 	Short: "The ultimate manga downloader",
-	Long: style.Combined(style.Yellow, style.Bold)(constants.AssciiArtLogo) + "\n" +
+	Long: style.Combined(style.Yellow, style.Bold)(constant.AssciiArtLogo) + "\n" +
 		style.Combined(style.HiRed, style.Italic)("    - The ultimate cli manga downloader"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		options := tui.Options{

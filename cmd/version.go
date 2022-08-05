@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
-	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/constant"
 	"github.com/spf13/cobra"
 	"io"
 	"net/http"
@@ -18,7 +18,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of mangal",
 	Long:  `All software has versions. This is mangal's`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Println("mangal version " + constants.Version)
+		cmd.Println("mangal version " + constant.Version)
 	},
 }
 

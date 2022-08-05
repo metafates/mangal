@@ -2,7 +2,7 @@ package manganelo
 
 import (
 	"github.com/gocolly/colly"
-	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	"os"
@@ -19,7 +19,7 @@ func New() source.Source {
 		pages:    make(map[string][]*source.Page),
 	}
 
-	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constants.CachePrefix)
+	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constant.CachePrefix)
 
 	collectorOptions := []func(*colly.Collector){
 		colly.AllowURLRevisit(),
@@ -36,7 +36,7 @@ func New() source.Source {
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 		r.Headers.Set("Host", "https://ww5.manganelo.tv/")
-		r.Headers.Set("User-Agent", constants.UserAgent)
+		r.Headers.Set("User-Agent", constant.UserAgent)
 	})
 
 	// Get mangas
@@ -66,7 +66,7 @@ func New() source.Source {
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
 		r.Headers.Set("Host", "https://ww5.manganelo.tv/")
-		r.Headers.Set("User-Agent", constants.UserAgent)
+		r.Headers.Set("User-Agent", constant.UserAgent)
 	})
 
 	// Get chapters
@@ -97,7 +97,7 @@ func New() source.Source {
 		r.Headers.Set("Referer", r.Ctx.GetAny("chapter").(*source.Chapter).URL)
 		r.Headers.Set("accept-language", "en-US")
 		r.Headers.Set("Accept", "text/html")
-		r.Headers.Set("User-Agent", constants.UserAgent)
+		r.Headers.Set("User-Agent", constant.UserAgent)
 	})
 
 	// Get pages

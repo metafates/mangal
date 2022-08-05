@@ -3,7 +3,7 @@ package history
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
@@ -84,13 +84,13 @@ func Save(chapter *source.Chapter) error {
 }
 
 func Location() (string, error) {
-	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constants.CachePrefix)
+	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constant.CachePrefix)
 	err := filesystem.Get().MkdirAll(filepath.Dir(cacheDir), os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
-	historyFile := filepath.Join(cacheDir, constants.History+".json")
+	historyFile := filepath.Join(cacheDir, constant.History+".json")
 	exists, err := filesystem.Get().Exists(historyFile)
 	if err != nil {
 		return "", err

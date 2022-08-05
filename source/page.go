@@ -2,7 +2,7 @@ package source
 
 import (
 	"errors"
-	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/constant"
 	lua "github.com/yuin/gopher-lua"
 	"io"
 	"net/http"
@@ -56,7 +56,7 @@ func (p *Page) Download() error {
 	}
 
 	req.Header.Set("Referer", p.Chapter.URL)
-	req.Header.Set("User-Agent", constants.UserAgent)
+	req.Header.Set("User-Agent", constant.UserAgent)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/history"
 	"github.com/samber/lo"
@@ -38,7 +38,7 @@ var clearCmd = &cobra.Command{
 
 func clearCache() {
 	cacheDir := lo.Must(os.UserCacheDir())
-	cacheDir = filepath.Join(cacheDir, constants.CachePrefix)
+	cacheDir = filepath.Join(cacheDir, constant.CachePrefix)
 	_ = filesystem.Get().RemoveAll(cacheDir)
 }
 
@@ -50,7 +50,7 @@ func clearTemp() {
 			return nil
 		}
 
-		if strings.HasPrefix(info.Name(), constants.TempPrefix) {
+		if strings.HasPrefix(info.Name(), constant.TempPrefix) {
 			if info.IsDir() {
 				return filesystem.Get().RemoveAll(path)
 			} else {

@@ -1,4 +1,4 @@
-package constants
+package constant
 
 const (
 	Mangal    = "mangal"

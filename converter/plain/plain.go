@@ -3,7 +3,7 @@ package plain
 import (
 	"fmt"
 	"github.com/metafates/mangal/config"
-	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -35,7 +35,7 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 	)
 
 	if temp {
-		chapterDir, err = filesystem.Get().TempDir("", constants.TempPrefix)
+		chapterDir, err = filesystem.Get().TempDir("", constant.TempPrefix)
 	} else {
 		chapterDir, err = prepareChapterDir(chapter)
 	}

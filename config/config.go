@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/metafates/mangal/constants"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
@@ -32,7 +32,7 @@ func Setup() error {
 }
 
 func setName() {
-	viper.SetConfigName(constants.Mangal)
+	viper.SetConfigName(constant.Mangal)
 	viper.SetConfigType("toml")
 }
 
@@ -51,7 +51,7 @@ func setPaths() {
 
 // setEnvs sets the environment variables
 func setEnvs() {
-	viper.SetEnvPrefix(constants.Mangal)
+	viper.SetEnvPrefix(constant.Mangal)
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	for _, env := range envFields {
@@ -73,7 +73,7 @@ func setDefaults() {
 		FormatsUse: "plain",
 
 		// Sources
-		SourcesPath: filepath.Join(configDir, constants.Mangal, "sources"),
+		SourcesPath: filepath.Join(configDir, constant.Mangal, "sources"),
 
 		// Mini-mode
 		MiniVimMode: false,
@@ -127,6 +127,6 @@ func Paths() ([]string, error) {
 
 	return []string{
 		homeDir,
-		filepath.Join(configDir, constants.Mangal),
+		filepath.Join(configDir, constant.Mangal),
 	}, nil
 }
