@@ -2,6 +2,7 @@ package history
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/metafates/mangal/constants"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
@@ -65,7 +66,7 @@ func Save(chapter *source.Chapter) error {
 		URL:       chapter.URL,
 	}
 
-	chapters[chapter.Manga.Name] = &jsonChapter
+	chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)] = &jsonChapter
 
 	// encode json
 	encoded, err := json.Marshal(chapters)
