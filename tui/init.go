@@ -5,6 +5,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (_ *statefulBubble) Init() tea.Cmd {
-	return textinput.Blink
+func (b *statefulBubble) Init() tea.Cmd {
+	return tea.Batch(textinput.Blink, b.loadSources())
 }

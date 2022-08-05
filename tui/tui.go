@@ -13,9 +13,9 @@ func Run(options *Options) error {
 	bubble := newBubble()
 
 	if options.Continue {
-		bubble.setState(historyState)
+		bubble.newState(historyState)
 	} else {
-		bubble.setState(searchState)
+		bubble.newState(sourcesState)
 	}
 
 	if err := tea.NewProgram(bubble, tea.WithAltScreen()).Start(); err != nil {

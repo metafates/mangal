@@ -14,10 +14,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.forceQuit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keymap.back):
-			if b.statesHistory.Length() > 0 {
-				b.setState(*b.statesHistory.Pop())
-			}
-
+			b.previousState()
 			return b, nil
 		}
 	}
@@ -55,6 +52,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (b *statefulBubble) updateIdle(msg tea.Msg) (tea.Model, tea.Cmd) {
+	panic("idle state must not be reached")
 	return b, nil
 }
 
@@ -67,7 +65,18 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return b, nil
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
+			return b, tea.Quit
+		}
+	}
+
+	b.sourcesC, cmd = b.sourcesC.Update(msg)
+	return b, cmd
 }
 
 func (b *statefulBubble) updateSearch(msg tea.Msg) (tea.Model, tea.Cmd) {
