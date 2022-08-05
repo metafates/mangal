@@ -5,6 +5,7 @@ import (
 	"github.com/samber/lo"
 	"golang.org/x/term"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -58,4 +59,8 @@ func Capitalize(s string) string {
 	}
 
 	return strings.ToUpper(s[:1]) + strings.ToLower(s[1:])
+}
+
+func FileStem(path string) string {
+	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }

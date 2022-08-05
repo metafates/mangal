@@ -125,7 +125,7 @@ func newBubble() *statefulBubble {
 
 func (b *statefulBubble) loadSources() tea.Cmd {
 	providers := provider.DefaultProviders()
-	sources, err := source.AvailableCustomSources()
+	customProviders, err := provider.CustomProviders()
 
 	var items []list.Item
 	for _, p := range providers {
@@ -137,11 +137,11 @@ func (b *statefulBubble) loadSources() tea.Cmd {
 	}
 
 	if err == nil {
-		for name, path := range sources {
+		for _, p := range customProviders {
 			items = append(items, &listItem{
-				title:       name,
-				description: path,
-				internal:    nil,
+				title:       p.Name,
+				description: "Custom provider",
+				internal:    p,
 			})
 		}
 	} else {

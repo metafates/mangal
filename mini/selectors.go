@@ -16,7 +16,7 @@ import (
 func selectSource() (source.Source, error) {
 
 	defaultProviders := provider.DefaultProviders()
-	customSources, err := source.AvailableCustomSources()
+	customProviders, err := provider.CustomProviders()
 
 	if err != nil {
 		return nil, err
@@ -24,16 +24,12 @@ func selectSource() (source.Source, error) {
 
 	var sources = make(map[string]func() (source.Source, error))
 
-	for name, s := range customSources {
-		sources[name+" "+icon.Get(icon.Lua)] = func() (source.Source, error) {
-			return source.LoadSource(s, true)
-		}
+	for name, p := range customProviders {
+		sources[name+" "+icon.Get(icon.Lua)] = p.CreateSource
 	}
 
 	for name, p := range defaultProviders {
-		sources[name+" "+icon.Get(icon.Go)] = func() (source.Source, error) {
-			return p.CreateSource(), nil
-		}
+		sources[name+" "+icon.Get(icon.Go)] = p.CreateSource
 	}
 
 	options := lo.Keys(sources)

@@ -17,8 +17,6 @@ func (t *listItem) Title() string {
 	}
 
 	switch t.internal.(type) {
-	case source.Source:
-		return t.internal.(source.Source).Name()
 	case *source.Manga:
 		return t.internal.(*source.Manga).Name
 	case *source.Chapter:
@@ -27,7 +25,7 @@ func (t *listItem) Title() string {
 		return t.internal.(*history.SavedChapter).MangaName
 	}
 
-	panic(t.internal)
+	panic("unsupported type")
 }
 
 func (t *listItem) Description() string {
@@ -36,8 +34,6 @@ func (t *listItem) Description() string {
 	}
 
 	switch t.internal.(type) {
-	case source.Source:
-		return t.internal.(source.Source).ID()
 	case *source.Manga:
 		return t.internal.(*source.Manga).URL
 	case *source.Chapter:
@@ -46,7 +42,7 @@ func (t *listItem) Description() string {
 		return t.internal.(*history.SavedChapter).Name
 	}
 
-	panic("unreachable")
+	panic("unsupported type")
 }
 
 func (t *listItem) FilterValue() string {

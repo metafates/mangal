@@ -2,17 +2,12 @@ package source
 
 import (
 	"errors"
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/luamodules"
-	"github.com/samber/lo"
+	"github.com/metafates/mangal/util"
 	"github.com/spf13/afero"
-	"github.com/spf13/viper"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/yuin/gopher-lua/parse"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 const sourceExtension = ".lua"
@@ -37,7 +32,7 @@ func LoadSource(path string, validate bool) (Source, error) {
 		return nil, err
 	}
 
-	name := makeNameFromPath(path)
+	name := util.FileStem(path)
 
 	if validate {
 		for _, fn := range mustHave {
@@ -55,33 +50,6 @@ func LoadSource(path string, validate bool) (Source, error) {
 	}
 
 	return source, nil
-}
-
-func AvailableCustomSources() (map[string]string, error) {
-	if exists := lo.Must(filesystem.Get().Exists(viper.GetString(config.SourcesPath))); !exists {
-		return nil, errors.New("sources directory does not exist")
-	}
-
-	files, err := filesystem.Get().ReadDir(viper.GetString(config.SourcesPath))
-
-	if err != nil {
-		return nil, err
-	}
-
-	sources := make(map[string]string)
-	paths := lo.FilterMap(files, func(f os.FileInfo, _ int) (string, bool) {
-		if filepath.Ext(f.Name()) == sourceExtension {
-			return filepath.Join(viper.GetString(config.SourcesPath), f.Name()), true
-		}
-		return "", false
-	})
-
-	for _, path := range paths {
-		name := makeNameFromPath(path)
-		sources[name] = path
-	}
-
-	return sources, nil
 }
 
 func Compile(path string) (*lua.FunctionProto, error) {
@@ -107,8 +75,4 @@ func Compile(path string) (*lua.FunctionProto, error) {
 	}
 
 	return proto, nil
-}
-
-func makeNameFromPath(path string) string {
-	return strings.TrimSuffix(filepath.Base(path), sourceExtension)
 }

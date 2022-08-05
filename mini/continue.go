@@ -40,7 +40,7 @@ func continueReading() error {
 	}
 
 	defaultProviders := provider.DefaultProviders()
-	customSources, err := source.AvailableCustomSources()
+	customProviders, err := provider.CustomProviders()
 
 	if err != nil {
 		return err
@@ -48,16 +48,12 @@ func continueReading() error {
 
 	var sources = make(map[string]func() (source.Source, error))
 
-	for name, path := range customSources {
-		sources[source.IDfromName(name)] = func() (source.Source, error) {
-			return source.LoadSource(path, true)
-		}
+	for _, p := range customProviders {
+		sources[p.ID] = p.CreateSource
 	}
 
 	for _, p := range defaultProviders {
-		sources[p.ID] = func() (source.Source, error) {
-			return p.CreateSource(), nil
-		}
+		sources[p.ID] = p.CreateSource
 	}
 
 	chap := saved[mangaName]
