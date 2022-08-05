@@ -54,3 +54,12 @@ func TerminalSize() (width, height int, err error) {
 	}
 	return int(ws.Col), int(ws.Row), nil
 }
+
+// Capitalize will capitalize the first letter of a string.
+func Capitalize(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+
+	return strings.ToUpper(s[:1]) + strings.ToLower(s[1:])
+}

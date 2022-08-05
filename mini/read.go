@@ -7,7 +7,6 @@ import (
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/source"
-	"github.com/metafates/mangal/style"
 	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
@@ -52,7 +51,7 @@ func readChapter(src source.Source, chapter *source.Chapter) error {
 
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 	s.Suffix = fmt.Sprintf(" Downloading %d pages", len(pages))
-	s.FinalMSG = style.Combined(style.Padding(1), style.Magenta)("ฅ^•ﻌ•^ฅ\nDone! Bye")
+	s.FinalMSG = finalMSG()
 	lo.Must0(s.Color("bold", "magenta"))
 	s.Start()
 	err = chapter.DownloadPages()

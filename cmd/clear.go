@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/metafates/mangal/constants"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/history"
@@ -40,18 +39,13 @@ var clearCmd = &cobra.Command{
 func clearCache() {
 	cacheDir := lo.Must(os.UserCacheDir())
 	cacheDir = filepath.Join(cacheDir, constants.CachePrefix)
-	err := filesystem.Get().RemoveAll(cacheDir)
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = filesystem.Get().RemoveAll(cacheDir)
 }
 
 func clearTemp() {
 	tempDir := os.TempDir()
 
-	err := filesystem.Get().Walk(tempDir, func(path string, info os.FileInfo, err error) error {
+	_ = filesystem.Get().Walk(tempDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -66,33 +60,14 @@ func clearTemp() {
 
 		return nil
 	})
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 }
 
 func clearHistory() {
-	historyFile, err := history.Location()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	exists, err := filesystem.Get().Exists(historyFile)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
+	historyFile, _ := history.Location()
+	exists, _ := filesystem.Get().Exists(historyFile)
 	if !exists {
 		return
 	}
 
-	err = filesystem.Get().Remove(historyFile)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = filesystem.Get().Remove(historyFile)
 }

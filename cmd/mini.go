@@ -1,12 +1,9 @@
 package cmd
 
 import (
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/mini"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"os"
-	"strings"
 )
 
 func init() {
@@ -22,7 +19,7 @@ var miniCmd = &cobra.Command{
 	Use:   "mini",
 	Short: "Launch in mini mode",
 	Long:  `Launch in mini mode. Will use simple prompts instead of TUI.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		options := mini.Options{
 			Download: lo.Must(cmd.Flags().GetBool("download")),
 			Continue: lo.Must(cmd.Flags().GetBool("continue")),
@@ -31,12 +28,12 @@ var miniCmd = &cobra.Command{
 
 		if err != nil {
 			if err.Error() == "interrupt" {
-				os.Exit(0)
+				return nil
 			}
 
-			cmd.PrintErrf("%s %s", icon.Get(icon.Fail), strings.Title(err.Error()))
-			cmd.Println()
-			os.Exit(1)
+			return err
 		}
+
+		return nil
 	},
 }

@@ -2,8 +2,11 @@ package mini
 
 import (
 	"errors"
+	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -34,4 +37,12 @@ func Run(options *Options) error {
 	} else {
 		return read()
 	}
+}
+
+func finalMSG() string {
+	if viper.GetBool(config.MiniBye) {
+		return style.Combined(style.Padding(1), style.Magenta)("ฅ^•ﻌ•^ฅ\nDone! Bye")
+	}
+
+	return ""
 }

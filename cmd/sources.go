@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 )
@@ -16,16 +18,20 @@ var sourcesCmd = &cobra.Command{
 	Short:   "List available sources",
 	Example: "mangal sources",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Println("Builtin sources:")
+		headerStyle := style.Combined(style.Bold, style.HiBlue)
+
+		cmd.Println(headerStyle("Builtin sources:"))
 		for name := range provider.DefaultProviders() {
-			cmd.Println("  " + name)
+			name = "  " + name + " " + icon.Get(icon.Go)
+			cmd.Println(name)
 		}
 
 		cmd.Println()
 
-		cmd.Println("Custom sources:")
+		cmd.Println(headerStyle("Custom sources:"))
 		for name := range lo.Must(source.AvailableCustomSources()) {
-			cmd.Println("  " + name)
+			name = "  " + name + " " + icon.Get(icon.Lua)
+			cmd.Println(name)
 		}
 	},
 }

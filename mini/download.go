@@ -43,7 +43,7 @@ func download() error {
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 	lo.Must0(s.Color("bold", "magenta"))
 	s.Suffix = " Starting..."
-	s.FinalMSG = style.Combined(style.Padding(1), style.Magenta)("ฅ^•ﻌ•^ฅ\nDone! Bye")
+	s.FinalMSG = finalMSG()
 	s.Start()
 
 	conv, err := converter.Get(viper.GetString(config.FormatsUse))

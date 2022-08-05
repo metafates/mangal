@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	"net/http"
-	"os"
 )
 
 func init() {
@@ -27,11 +26,10 @@ var versionLatestCmd = &cobra.Command{
 	Use:   "latest",
 	Short: "Print the latest version number of mangal",
 	Long:  `It will fetch the latest version from github and print it`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		resp, err := http.Get("https://api.github.com/repos/metafates/mangal/releases/latest")
 		if err != nil {
-			cmd.PrintErr(err)
-			os.Exit(1)
+			return err
 		}
 
 		defer func(Body io.ReadCloser) {
@@ -43,13 +41,13 @@ var versionLatestCmd = &cobra.Command{
 		}
 
 		if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-			cmd.PrintErr(err)
-			os.Exit(1)
+			return err
 		}
 
 		// remove the v from the tag name
 		latestVersion := release.TagName[1:]
 
 		cmd.Println("mangal latest version is " + latestVersion)
+		return nil
 	},
 }

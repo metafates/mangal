@@ -77,6 +77,7 @@ func setDefaults() {
 
 		// Mini-mode
 		MiniVimMode: false,
+		MiniBye:     true,
 
 		// Icons
 		IconsVariant: "emoji",

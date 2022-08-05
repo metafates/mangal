@@ -13,6 +13,32 @@ import (
 )
 
 func continueReading() error {
+
+	saved, err := history.Get()
+	if err != nil {
+		return err
+	}
+
+	if len(saved) == 0 {
+		return errors.New("history is empty")
+	}
+
+	options := lo.Keys(saved)
+	slices.Sort(options)
+
+	prompt := survey.Select{
+		Message:  "Select a manga",
+		Options:  options,
+		VimMode:  viper.GetBool(config.MiniVimMode),
+		PageSize: pageSize,
+	}
+
+	var mangaName string
+	err = survey.AskOne(&prompt, &mangaName, survey.WithValidator(survey.Required))
+	if err != nil {
+		return err
+	}
+
 	defaultProviders := provider.DefaultProviders()
 	customSources, err := source.AvailableCustomSources()
 
@@ -32,27 +58,6 @@ func continueReading() error {
 		sources[p.ID] = func() (source.Source, error) {
 			return p.CreateSource(), nil
 		}
-	}
-
-	saved, err := history.Get()
-	if err != nil {
-		return err
-	}
-
-	options := lo.Keys(saved)
-	slices.Sort(options)
-
-	prompt := survey.Select{
-		Message:  "Select a manga",
-		Options:  options,
-		VimMode:  viper.GetBool(config.MiniVimMode),
-		PageSize: pageSize,
-	}
-
-	var mangaName string
-	err = survey.AskOne(&prompt, &mangaName, survey.WithValidator(survey.Required))
-	if err != nil {
-		return err
 	}
 
 	chap := saved[mangaName]

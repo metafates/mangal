@@ -24,6 +24,7 @@ const (
 
 const (
 	MiniVimMode = "mini.vim_mode"
+	MiniBye     = "mini.bye"
 )
 
 const (
@@ -50,6 +51,8 @@ var envFields = []string{
 
 	// mini
 	MiniVimMode,
+	MiniBye,
 
+	// Icons
 	IconsVariant,
 }
