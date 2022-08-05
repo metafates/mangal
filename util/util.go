@@ -3,7 +3,8 @@ package util
 import (
 	"fmt"
 	"github.com/samber/lo"
-	"golang.org/x/sys/unix"
+	"golang.org/x/term"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -47,12 +48,7 @@ func Quantity(count int, thing string) string {
 
 // TerminalSize returns the dimensions of the given terminal.
 func TerminalSize() (width, height int, err error) {
-	fd := unix.Stdout
-	ws, err := unix.IoctlGetWinsize(fd, unix.TIOCGWINSZ)
-	if err != nil {
-		return -1, -1, err
-	}
-	return int(ws.Col), int(ws.Row), nil
+	return term.GetSize(int(os.Stdout.Fd()))
 }
 
 // Capitalize will capitalize the first letter of a string.
