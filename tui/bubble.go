@@ -2,6 +2,7 @@ package tui
 
 import (
 	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -35,8 +36,17 @@ type statefulBubble struct {
 
 	selectedSource   source.Source
 	selectedManga    *source.Manga
-	selectedChapter  *source.Chapter
 	selectedChapters map[*source.Chapter]struct{} // mathematical set
+
+	foundMangasChannel     chan []*source.Manga
+	foundChaptersChannel   chan []*source.Chapter
+	chapterReadChannel     chan struct{}
+	chapterDownloadChannel chan struct{}
+	errorChannel           chan error
+
+	progressStatus string
+
+	chaptersToDownload util.Stack[*source.Chapter]
 }
 
 func (b *statefulBubble) setState(s state) {
@@ -46,7 +56,7 @@ func (b *statefulBubble) setState(s state) {
 
 func (b *statefulBubble) newState(s state) {
 	// Transitioning to these states is not allowed (it makes no sense)
-	if !lo.Contains([]state{loadingState, exitState, readDownloadState, downloadDoneState}, s) {
+	if !lo.Contains([]state{loadingState, exitState, readState, downloadDoneState, downloadState, exitState, confirmState}, b.state) {
 		b.statesHistory.Push(b.state)
 	}
 
@@ -66,12 +76,16 @@ func (b *statefulBubble) resize(width, height int) {
 	b.chaptersC.SetSize(width, height)
 }
 
-func (b *statefulBubble) startLoading() {
+func (b *statefulBubble) startLoading() tea.Cmd {
 	b.loading = true
+	return tea.Batch(b.mangasC.StartSpinner(), b.chaptersC.StartSpinner())
 }
 
-func (b *statefulBubble) stopLoading() {
+func (b *statefulBubble) stopLoading() tea.Cmd {
 	b.loading = false
+	b.mangasC.StopSpinner()
+	b.chaptersC.StopSpinner()
+	return nil
 }
 
 func newBubble() *statefulBubble {
@@ -80,6 +94,15 @@ func newBubble() *statefulBubble {
 		state:         idle,
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
+
+		foundMangasChannel:     make(chan []*source.Manga),
+		foundChaptersChannel:   make(chan []*source.Chapter),
+		chapterReadChannel:     make(chan struct{}),
+		chapterDownloadChannel: make(chan struct{}),
+		errorChannel:           make(chan error),
+
+		selectedChapters:   make(map[*source.Chapter]struct{}),
+		chaptersToDownload: util.Stack[*source.Chapter]{},
 	}
 
 	defer func() {
@@ -88,8 +111,10 @@ func newBubble() *statefulBubble {
 	makeList := func(title string) list.Model {
 		listC := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 		listC.KeyMap = bubble.keymap.forList()
-		listC.AdditionalShortHelpKeys = bubble.keymap.shortHelp
-		listC.AdditionalFullHelpKeys = bubble.keymap.fullHelp
+		listC.AdditionalShortHelpKeys = bubble.keymap.ShortHelp
+		listC.AdditionalFullHelpKeys = func() []key.Binding {
+			return bubble.keymap.FullHelp()[0]
+		}
 		listC.Title = title
 
 		return listC
@@ -104,7 +129,6 @@ func newBubble() *statefulBubble {
 	bubble.inputC = textinput.New()
 	bubble.inputC.Placeholder = "Search"
 	bubble.inputC.CharLimit = 60
-	bubble.inputC.Prompt = "> "
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 

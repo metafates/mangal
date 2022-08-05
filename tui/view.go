@@ -20,16 +20,16 @@ func (b *statefulBubble) View() string {
 		return b.viewChapters()
 	case confirmState:
 		return b.viewConfirm()
-	case readDownloadState:
-		return b.viewReadDownload()
-	case readDownloadDoneState:
-		return b.viewReadDownloadDone()
+	case readState:
+		return b.viewRead()
 	case downloadState:
 		return b.viewDownload()
 	case downloadDoneState:
 		return b.viewDownloadDone()
 	case exitState:
 		return b.viewExit()
+	case errorState:
+		return b.viewError()
 	}
 
 	panic("unknown state")
@@ -52,7 +52,7 @@ func (b *statefulBubble) viewSources() string {
 }
 
 func (b *statefulBubble) viewSearch() string {
-	return b.inputC.View()
+	return b.inputC.View() + "\n" + b.helpC.View(b.keymap)
 }
 
 func (b *statefulBubble) viewMangas() string {
@@ -64,25 +64,25 @@ func (b *statefulBubble) viewChapters() string {
 }
 
 func (b *statefulBubble) viewConfirm() string {
-	return ""
+	return fmt.Sprintf("Download %d chapters?\n%s", len(b.selectedChapters), b.helpC.View(b.keymap))
 }
 
-func (b *statefulBubble) viewReadDownload() string {
-	return ""
-}
-
-func (b *statefulBubble) viewReadDownloadDone() string {
-	return ""
+func (b *statefulBubble) viewRead() string {
+	return b.spinnerC.View() + " " + b.progressStatus + "\n" + b.helpC.View(b.keymap)
 }
 
 func (b *statefulBubble) viewDownload() string {
-	return ""
+	return b.progressC.View() + "\n" + b.spinnerC.View() + " " + b.progressStatus + "\n" + b.helpC.View(b.keymap)
 }
 
 func (b *statefulBubble) viewDownloadDone() string {
-	return ""
+	return "Download done" + "\n" + b.helpC.View(b.keymap)
 }
 
 func (b *statefulBubble) viewExit() string {
 	return ""
+}
+
+func (b *statefulBubble) viewError() string {
+	return "Error"
 }

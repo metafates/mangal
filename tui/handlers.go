@@ -1,0 +1,164 @@
+package tui
+
+import (
+	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
+	"github.com/skratchdot/open-golang/open"
+	"github.com/spf13/viper"
+)
+
+func (b *statefulBubble) searchManga(query string) tea.Cmd {
+	return func() tea.Msg {
+		mangas, err := b.selectedSource.Search(query)
+		if err != nil {
+			b.errorChannel <- err
+		} else {
+			b.foundMangasChannel <- mangas
+		}
+
+		return nil
+	}
+}
+
+func (b *statefulBubble) waitForMangas() tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case found := <-b.foundMangasChannel:
+			return found
+		case err := <-b.errorChannel:
+			return err
+		}
+	}
+}
+
+func (b *statefulBubble) getChapters(manga *source.Manga) tea.Cmd {
+	return func() tea.Msg {
+		chapters, err := b.selectedSource.ChaptersOf(manga)
+		if err != nil {
+			b.errorChannel <- err
+		} else {
+			b.foundChaptersChannel <- chapters
+		}
+
+		return nil
+	}
+}
+
+func (b *statefulBubble) waitForChapters() tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case found := <-b.foundChaptersChannel:
+			return found
+		case err := <-b.errorChannel:
+			return err
+		}
+	}
+}
+
+func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
+	return func() tea.Msg {
+		b.progressStatus = fmt.Sprintf("Gettings pages of %s", style.Trim(30)(chapter.Name))
+		pages, err := b.selectedSource.PagesOf(chapter)
+		if err != nil {
+			b.errorChannel <- err
+		}
+
+		b.progressStatus = fmt.Sprintf("Downloading %d pages", len(pages))
+		err = chapter.DownloadPages()
+		if err != nil {
+			b.errorChannel <- err
+		}
+
+		conv, err := converter.Get(viper.GetString(config.FormatsUse))
+		if err != nil {
+			b.errorChannel <- err
+		}
+
+		b.progressStatus = fmt.Sprintf("Converting to %s", viper.GetString(config.FormatsUse))
+		path, err := conv.SaveTemp(chapter)
+		if err != nil {
+			b.errorChannel <- err
+		}
+
+		if reader := viper.GetString(config.ReaderName); reader != "" {
+			b.progressStatus = fmt.Sprintf("Opening %s", reader)
+			err = open.RunWith(reader, path)
+			if err != nil {
+				b.errorChannel <- err
+			}
+		} else {
+			b.progressStatus = "Opening"
+			err = open.Run(path)
+			if err != nil {
+				b.errorChannel <- err
+			}
+		}
+
+		b.progressStatus = "Done"
+		b.chapterReadChannel <- struct{}{}
+
+		return nil
+	}
+}
+
+func (b *statefulBubble) waitForChapterRead() tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case res := <-b.chapterReadChannel:
+			return res
+		case err := <-b.errorChannel:
+			return err
+		}
+	}
+}
+
+func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
+	return func() tea.Msg {
+		b.progressStatus = fmt.Sprintf("Getting pages for %s", style.Trim(30)(chapter.Name))
+		pages, err := b.selectedSource.PagesOf(chapter)
+		if err != nil {
+			b.errorChannel <- err
+			return nil
+		}
+
+		b.progressStatus = fmt.Sprintf("Downloading %d pages", len(pages))
+		err = chapter.DownloadPages()
+		if err != nil {
+			b.errorChannel <- err
+			return nil
+		}
+
+		b.progressStatus = fmt.Sprintf("Converting to %s", viper.GetString(config.FormatsUse))
+		conv, err := converter.Get(viper.GetString(config.FormatsUse))
+		if err != nil {
+			b.errorChannel <- err
+			return nil
+		}
+
+		_, err = conv.Save(chapter)
+		if err != nil {
+			b.errorChannel <- err
+			return nil
+		}
+
+		b.progressStatus = "Downloaded"
+		b.chapterDownloadChannel <- struct{}{}
+
+		return nil
+	}
+}
+
+func (b *statefulBubble) waitForChapterDownload() tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case res := <-b.chapterDownloadChannel:
+			return res
+		case err := <-b.errorChannel:
+			return err
+		}
+	}
+}

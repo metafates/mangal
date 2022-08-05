@@ -127,30 +127,30 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 		return to2(h(k.selectOne, k.selectAll, k.back, k.filter))
 	case confirmState:
 		return to2(h(k.confirm, k.back, k.forceQuit))
-	case readDownloadState:
+	case readState:
 		return to2(h(k.back, k.forceQuit))
-	case readDownloadDoneState:
-		return to2(h(k.back, k.forceQuit, k.confirm))
 	case downloadState:
 		return to2(h(k.back, k.forceQuit))
 	case downloadDoneState:
-		return to2(h(k.back, k.forceQuit, k.confirm))
+		return to2(h(k.back, k.quit))
 	case exitState:
 		return to2(h(k.quit))
+	case errorState:
+		return to2(h(k.back, k.forceQuit))
 	default:
 		// unreachable
 		panic("unknown state")
 	}
 }
 
-func (k *statefulKeymap) shortHelp() []key.Binding {
+func (k *statefulKeymap) ShortHelp() []key.Binding {
 	short, _ := k.help()
 	return short
 }
 
-func (k *statefulKeymap) fullHelp() []key.Binding {
+func (k *statefulKeymap) FullHelp() [][]key.Binding {
 	_, full := k.help()
-	return full
+	return [][]key.Binding{full}
 }
 
 func (k *statefulKeymap) forList() list.KeyMap {

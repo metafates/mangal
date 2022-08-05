@@ -1,10 +1,5 @@
 package tui
 
-import (
-	"github.com/metafates/mangal/history"
-	"github.com/metafates/mangal/source"
-)
-
 type listItem struct {
 	title       string
 	description string
@@ -18,19 +13,14 @@ func (t *listItem) toggleMark() {
 
 func (t *listItem) Title() string {
 	if t.title != "" {
-		return t.title
+		if t.marked {
+			return "* " + t.title
+		} else {
+			return t.title
+		}
 	}
 
-	switch t.internal.(type) {
-	case *source.Manga:
-		return t.internal.(*source.Manga).Name
-	case *source.Chapter:
-		return t.internal.(*source.Chapter).Name
-	case *history.SavedChapter:
-		return t.internal.(*history.SavedChapter).MangaName
-	}
-
-	panic("unsupported type")
+	panic("title is empty")
 }
 
 func (t *listItem) Description() string {
@@ -38,16 +28,7 @@ func (t *listItem) Description() string {
 		return t.description
 	}
 
-	switch t.internal.(type) {
-	case *source.Manga:
-		return t.internal.(*source.Manga).URL
-	case *source.Chapter:
-		return t.internal.(*source.Chapter).URL
-	case *history.SavedChapter:
-		return t.internal.(*history.SavedChapter).Name
-	}
-
-	panic("unsupported type")
+	panic("description is empty")
 }
 
 func (t *listItem) FilterValue() string {

@@ -4,6 +4,7 @@ type state int
 
 const (
 	idle state = iota + 1
+	errorState
 	loadingState
 	historyState
 	sourcesState
@@ -11,8 +12,7 @@ const (
 	mangasState
 	chaptersState
 	confirmState
-	readDownloadState
-	readDownloadDoneState
+	readState
 	downloadState
 	downloadDoneState
 	exitState
