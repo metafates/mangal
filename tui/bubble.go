@@ -47,6 +47,8 @@ type statefulBubble struct {
 	progressStatus string
 
 	chaptersToDownload util.Stack[*source.Chapter]
+
+	lastDownloadedChapterPath string
 }
 
 func (b *statefulBubble) setState(s state) {

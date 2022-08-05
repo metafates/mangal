@@ -9,10 +9,11 @@ type statefulKeymap struct {
 	state state
 
 	quit, forceQuit,
-	selectOne, selectAll,
+	selectOne, selectAll, clearSelection,
 	confirm,
 	openURL,
 	read,
+	openFolder,
 	back,
 	filter,
 	up, down, left, right,
@@ -46,7 +47,11 @@ func newStatefulKeymap() *statefulKeymap {
 		),
 		selectAll: k(
 			keys("ctrl+a", "tab", "*"),
-			help("tab", "select all"),
+			help("↹ ", "select all"),
+		),
+		clearSelection: k(
+			keys("backspace"),
+			help("\u232B ", "clear selection"),
 		),
 		confirm: k(
 			keys("enter"),
@@ -59,6 +64,10 @@ func newStatefulKeymap() *statefulKeymap {
 		read: k(
 			keys("r"),
 			help("r", "read"),
+		),
+		openFolder: k(
+			keys("o"),
+			help("o", "open folder"),
 		),
 		back: k(
 			keys("esc"),
@@ -124,7 +133,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case mangasState:
 		return to2(h(k.selectOne, k.back, k.filter))
 	case chaptersState:
-		return to2(h(k.selectOne, k.selectAll, k.back, k.filter))
+		return h(k.selectOne, k.selectAll, k.back, k.filter), h(k.selectOne, k.selectAll, k.clearSelection, k.back, k.filter)
 	case confirmState:
 		return to2(h(k.confirm, k.back, k.forceQuit))
 	case readState:
@@ -132,7 +141,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case downloadState:
 		return to2(h(k.back, k.forceQuit))
 	case downloadDoneState:
-		return to2(h(k.back, k.quit))
+		return to2(h(k.back, k.quit, k.openFolder))
 	case exitState:
 		return to2(h(k.quit))
 	case errorState:

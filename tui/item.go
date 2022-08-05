@@ -1,5 +1,7 @@
 package tui
 
+import "github.com/metafates/mangal/icon"
+
 type listItem struct {
 	title       string
 	description string
@@ -14,7 +16,7 @@ func (t *listItem) toggleMark() {
 func (t *listItem) Title() string {
 	if t.title != "" {
 		if t.marked {
-			return "* " + t.title
+			return icon.Get(icon.Mark) + " " + t.title
 		} else {
 			return t.title
 		}

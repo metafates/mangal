@@ -139,7 +139,7 @@ func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 			return nil
 		}
 
-		_, err = conv.Save(chapter)
+		path, err := conv.Save(chapter)
 		if err != nil {
 			b.errorChannel <- err
 			return nil
@@ -147,6 +147,7 @@ func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 
 		b.progressStatus = "Downloaded"
 		b.chapterDownloadChannel <- struct{}{}
+		b.lastDownloadedChapterPath = path
 
 		return nil
 	}

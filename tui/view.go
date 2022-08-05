@@ -68,11 +68,11 @@ func (b *statefulBubble) viewConfirm() string {
 }
 
 func (b *statefulBubble) viewRead() string {
-	return b.spinnerC.View() + " " + b.progressStatus + "\n" + b.helpC.View(b.keymap)
+	return b.spinnerC.View() + b.progressStatus + "\n" + b.helpC.View(b.keymap)
 }
 
 func (b *statefulBubble) viewDownload() string {
-	return b.progressC.View() + "\n" + b.spinnerC.View() + " " + b.progressStatus + "\n" + b.helpC.View(b.keymap)
+	return b.progressC.View() + "\n" + b.spinnerC.View() + b.progressStatus + "\n" + b.helpC.View(b.keymap)
 }
 
 func (b *statefulBubble) viewDownloadDone() string {

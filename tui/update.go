@@ -8,9 +8,12 @@ import (
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/skratchdot/open-golang/open"
+	"path/filepath"
+	"time"
 )
 
 func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)
@@ -31,6 +34,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			b.previousState()
+			b.stopLoading()
 			return b, nil
 		}
 	}
@@ -80,7 +84,6 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, b.keymap.back):
 			b.previousState()
-			return b, nil
 		}
 	case []*source.Manga:
 		items := make([]list.Item, len(msg))
@@ -95,10 +98,8 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd = b.mangasC.SetItems(items)
 		b.newState(mangasState)
 		b.stopLoading()
-		return b, cmd
 	case error:
 		b.newState(errorState)
-		return b, nil
 	}
 
 	b.spinnerC, cmd = b.spinnerC.Update(msg)
@@ -124,8 +125,6 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.selectedSource = s
 				b.newState(searchState)
 			}
-
-			return b, nil
 		}
 	}
 
@@ -167,8 +166,6 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				b.newState(errorState)
 			}
-
-			return b, nil
 		}
 	case []*source.Chapter:
 		items := make([]list.Item, len(msg))
@@ -186,7 +183,6 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b, cmd
 	case error:
 		b.newState(errorState)
-		return b, nil
 	}
 
 	b.mangasC, cmd = b.mangasC.Update(msg)
@@ -209,8 +205,6 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				delete(b.selectedChapters, chapter)
 			}
-
-			return b, nil
 		case key.Matches(msg, b.keymap.selectAll):
 			items := b.chaptersC.Items()
 			for _, item := range items {
@@ -223,7 +217,14 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 					delete(b.selectedChapters, chapter)
 				}
 			}
-			return b, nil
+		case key.Matches(msg, b.keymap.clearSelection):
+			items := b.chaptersC.Items()
+			for _, item := range items {
+				item := item.(*listItem)
+				item.marked = false
+				chapter := item.internal.(*source.Chapter)
+				delete(b.selectedChapters, chapter)
+			}
 		case key.Matches(msg, b.keymap.read):
 			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
 			b.newState(readState)
@@ -231,7 +232,6 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.confirm):
 			if len(b.selectedChapters) != 0 {
 				b.newState(confirmState)
-				return b, nil
 			}
 		}
 	}
@@ -251,7 +251,7 @@ func (b *statefulBubble) updateConfirm(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.chaptersToDownload.Push(chapter)
 			}
 			b.newState(downloadState)
-			return b, tea.Batch(b.startLoading(), b.downloadChapter(b.chaptersToDownload.Pop()), b.waitForChapterDownload())
+			return b, tea.Batch(b.startLoading(), b.downloadChapter(b.chaptersToDownload.Pop()), b.waitForChapterDownload(), b.progressC.SetPercent(0))
 		case key.Matches(msg, b.keymap.back):
 			b.previousState()
 		}
@@ -278,17 +278,23 @@ func (b *statefulBubble) updateDownload(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case struct{}:
-		if b.chaptersToDownload.Length() == 0 {
-			b.newState(downloadDoneState)
-			return b, nil
-		}
-
 		inc := 1 / float64(len(b.selectedChapters))
+
+		if b.chaptersToDownload.Length() == 0 {
+			// a little hack to make the progress render to the end
+			go func() {
+				time.Sleep(time.Millisecond * 400)
+				b.newState(downloadDoneState)
+			}()
+
+			return b, b.progressC.IncrPercent(inc)
+		}
 
 		return b, tea.Batch(b.progressC.IncrPercent(inc), b.downloadChapter(b.chaptersToDownload.Pop()), b.waitForChapterDownload())
 	case progress.FrameMsg:
 		model, cmd := b.progressC.Update(msg)
 		b.progressC = model.(progress.Model)
+
 		return b, cmd
 	}
 
@@ -302,12 +308,13 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, b.keymap.back):
-			b.previousState()
-			b.stopLoading()
-			return b, nil
 		case key.Matches(msg, b.keymap.quit):
 			return b, tea.Quit
+		case key.Matches(msg, b.keymap.openFolder):
+			err := open.Start(filepath.Dir(b.lastDownloadedChapterPath))
+			if err != nil {
+				b.newState(errorState)
+			}
 		}
 	}
 
