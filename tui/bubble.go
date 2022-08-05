@@ -138,10 +138,13 @@ func newBubble() *statefulBubble {
 	bubble.historyC = makeList("History")
 
 	bubble.sourcesC = makeList("Sources")
+	bubble.sourcesC.SetStatusBarItemName("source", "sources")
 
 	bubble.mangasC = makeList("Mangas")
+	bubble.mangasC.SetStatusBarItemName("manga", "mangas")
 
 	bubble.chaptersC = makeList("Chapters")
+	bubble.chaptersC.SetStatusBarItemName("chapter", "chapters")
 
 	if w, h, err := util.TerminalSize(); err == nil {
 		bubble.resize(w, h)

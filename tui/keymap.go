@@ -47,11 +47,11 @@ func newStatefulKeymap() *statefulKeymap {
 		),
 		selectAll: k(
 			keys("ctrl+a", "tab", "*"),
-			help("↹ ", "select all"),
+			help("tab", "select all"),
 		),
 		clearSelection: k(
 			keys("backspace"),
-			help("\u232B ", "clear selection"),
+			help("backspace", "clear selection"),
 		),
 		confirm: k(
 			keys("enter"),
@@ -133,7 +133,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case mangasState:
 		return to2(h(k.selectOne, k.back, k.openURL))
 	case chaptersState:
-		return h(k.selectOne, k.selectAll, k.back), h(k.selectOne, k.selectAll, k.clearSelection, k.openURL, k.back)
+		return h(k.selectOne, k.selectAll, k.confirm, k.back), h(k.selectOne, k.selectAll, k.clearSelection, k.openURL, k.confirm, k.back)
 	case confirmState:
 		return to2(h(k.confirm, k.back, k.forceQuit))
 	case readState:

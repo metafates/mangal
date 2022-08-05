@@ -317,13 +317,9 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			items := b.chaptersC.Items()
 			for _, item := range items {
 				item := item.(*listItem)
-				item.toggleMark()
+				item.marked = true
 				chapter := item.internal.(*source.Chapter)
-				if item.marked {
-					b.selectedChapters[chapter] = struct{}{}
-				} else {
-					delete(b.selectedChapters, chapter)
-				}
+				b.selectedChapters[chapter] = struct{}{}
 			}
 		case key.Matches(msg, b.keymap.clearSelection):
 			items := b.chaptersC.Items()

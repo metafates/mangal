@@ -40,7 +40,7 @@ func (b *statefulBubble) viewIdle() string {
 }
 
 func (b *statefulBubble) viewLoading() string {
-	return fmt.Sprintf("%s Loading...", b.spinnerC.View())
+	return fmt.Sprintf("%sSearching...", b.spinnerC.View())
 }
 
 func (b *statefulBubble) viewHistory() string {
