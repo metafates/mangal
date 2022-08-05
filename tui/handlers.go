@@ -5,6 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
 	"github.com/skratchdot/open-golang/open"
@@ -98,6 +99,7 @@ func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 			}
 		}
 
+		_ = history.Save(chapter)
 		b.progressStatus = "Done"
 		b.chapterReadChannel <- struct{}{}
 

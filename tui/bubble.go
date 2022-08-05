@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
@@ -177,4 +178,22 @@ func (b *statefulBubble) loadSources() tea.Cmd {
 	}
 
 	return b.sourcesC.SetItems(items)
+}
+
+func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
+	saved, err := history.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	var items []list.Item
+	for _, s := range saved {
+		items = append(items, &listItem{
+			title:       s.MangaName,
+			description: s.Name,
+			internal:    s,
+		})
+	}
+
+	return tea.Batch(b.historyC.SetItems(items), b.loadSources()), nil
 }

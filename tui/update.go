@@ -5,8 +5,10 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
 	"path/filepath"
 	"time"
@@ -107,7 +109,68 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return b, nil
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, b.keymap.selectOne, b.keymap.confirm):
+			selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+			providers := lo.Map(b.sourcesC.Items(), func(i list.Item, _ int) *provider.Provider {
+				return i.(*listItem).internal.(*provider.Provider)
+			})
+
+			p, ok := lo.Find(providers, func(p *provider.Provider) bool {
+				return p.ID == selected.SourceID
+			})
+
+			if !ok {
+				b.newState(errorState)
+				return b, nil
+			}
+
+			src, err := p.CreateSource()
+			if err != nil {
+				b.newState(errorState)
+				return b, nil
+			}
+
+			b.selectedSource = src
+
+			chapters, err := src.ChaptersOf(&source.Manga{
+				Name:     selected.MangaName,
+				URL:      selected.MangaURL,
+				Index:    0,
+				SourceID: selected.SourceID,
+			})
+
+			if err != nil {
+				b.newState(errorState)
+				return b, nil
+			}
+
+			_, index, _ := lo.FindIndexOf(chapters, func(c *source.Chapter) bool {
+				return c.URL == selected.URL
+			})
+
+			items := make([]list.Item, len(chapters))
+			for i, c := range chapters {
+				items[i] = &listItem{
+					internal:    c,
+					title:       c.Name,
+					description: c.URL,
+				}
+			}
+
+			cmd = b.chaptersC.SetItems(items)
+			b.chaptersC.Select(index)
+			b.newState(chaptersState)
+			return b, cmd
+		}
+	}
+
+	b.historyC, cmd = b.historyC.Update(msg)
+	return b, cmd
 }
 
 func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {

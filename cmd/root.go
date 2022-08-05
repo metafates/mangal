@@ -30,6 +30,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolP("history", "H", true, "write history of read chapters")
 	lo.Must0(viper.BindPFlag(config.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("history")))
 
+	rootCmd.Flags().BoolP("continue", "c", false, "continue reading")
+
 	// Clear temporary files on startup
 	go clearTemp()
 }
@@ -41,7 +43,9 @@ var rootCmd = &cobra.Command{
 	Long: style.Combined(style.Yellow, style.Bold)(constants.AssciiArtLogo) + "\n" +
 		style.Combined(style.HiRed, style.Italic)("    - The ultimate cli manga downloader"),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		options := tui.Options{}
+		options := tui.Options{
+			Continue: lo.Must(cmd.Flags().GetBool("continue")),
+		}
 		return tui.Run(&options)
 	},
 }

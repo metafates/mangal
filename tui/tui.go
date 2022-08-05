@@ -13,6 +13,11 @@ func Run(options *Options) error {
 	bubble := newBubble()
 
 	if options.Continue {
+		_, err := bubble.loadHistory()
+		if err != nil {
+			return err
+		}
+
 		bubble.state = historyState
 	} else {
 		bubble.state = sourcesState
