@@ -10,10 +10,8 @@ import (
 	"github.com/yuin/gopher-lua/parse"
 )
 
-const sourceExtension = ".lua"
-
 func IDfromName(name string) string {
-	return name + " lua"
+	return name + " custom"
 }
 
 func LoadSource(path string, validate bool) (Source, error) {

@@ -7,7 +7,7 @@ import (
 
 const (
 	Name = "Manganelo"
-	ID   = Name + " go"
+	ID   = Name + " built-in"
 )
 
 type Manganelo struct {
