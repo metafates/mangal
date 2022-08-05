@@ -125,15 +125,15 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case loadingState:
 		return to2(h(k.forceQuit, k.back))
 	case historyState:
-		return to2(h(k.selectOne, k.back, k.openURL, k.filter))
+		return to2(h(k.selectOne, k.back, k.openURL))
 	case sourcesState:
-		return to2(h(k.selectOne, k.back, k.filter))
+		return to2(h(k.selectOne, k.back))
 	case searchState:
 		return to2(h(k.confirm, k.forceQuit))
 	case mangasState:
-		return to2(h(k.selectOne, k.back, k.filter))
+		return to2(h(k.selectOne, k.back, k.openURL))
 	case chaptersState:
-		return h(k.selectOne, k.selectAll, k.back, k.filter), h(k.selectOne, k.selectAll, k.clearSelection, k.back, k.filter)
+		return h(k.selectOne, k.selectAll, k.back), h(k.selectOne, k.selectAll, k.clearSelection, k.openURL, k.back)
 	case confirmState:
 		return to2(h(k.confirm, k.back, k.forceQuit))
 	case readState:
@@ -171,7 +171,7 @@ func (k *statefulKeymap) forList() list.KeyMap {
 		GoToStart:            k.top,
 		GoToEnd:              k.bottom,
 		Filter:               k.filter,
-		ClearFilter:          key.Binding{},
+		ClearFilter:          k.back,
 		CancelWhileFiltering: k.back,
 		AcceptWhileFiltering: k.confirm,
 		ShowFullHelp:         k.showHelp,

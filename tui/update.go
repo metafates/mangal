@@ -15,6 +15,7 @@ import (
 )
 
 func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -24,15 +25,37 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.forceQuit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keymap.back):
-			b.inputC.SetValue("")
 
-			if b.state == chaptersState {
+			switch b.state {
+			case searchState:
+				b.inputC.SetValue("")
+			case chaptersState:
+				if b.chaptersC.FilterState() != list.Unfiltered {
+					b.chaptersC, cmd = b.chaptersC.Update(msg)
+					return b, cmd
+				}
+
 				b.chaptersC.ResetSelected()
+				b.chaptersC.ResetFilter()
 				b.selectedChapters = make(map[*source.Chapter]struct{})
-			}
+			case mangasState:
+				if b.mangasC.FilterState() != list.Unfiltered {
+					b.mangasC, cmd = b.mangasC.Update(msg)
+					return b, cmd
+				}
 
-			if b.state == mangasState {
 				b.mangasC.ResetSelected()
+				b.mangasC.ResetFilter()
+			case historyState:
+				if b.historyC.FilterState() != list.Unfiltered {
+					b.historyC, cmd = b.historyC.Update(msg)
+					return b, cmd
+				}
+			case sourcesState:
+				if b.sourcesC.FilterState() != list.Unfiltered {
+					b.sourcesC, cmd = b.sourcesC.Update(msg)
+					return b, cmd
+				}
 			}
 
 			b.previousState()
@@ -114,6 +137,16 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case b.sourcesC.FilterState() == list.Filtering:
+			break
+		case key.Matches(msg, b.keymap.openURL):
+			if b.historyC.SelectedItem() != nil {
+				chapter := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+				err := open.Run(chapter.URL)
+				if err != nil {
+					b.newState(errorState)
+				}
+			}
 		case key.Matches(msg, b.keymap.selectOne, b.keymap.confirm):
 			selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 			providers := lo.Map(b.sourcesC.Items(), func(i list.Item, _ int) *provider.Provider {
@@ -179,6 +212,8 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case b.sourcesC.FilterState() == list.Filtering:
+			break
 		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
 			s, err := b.sourcesC.SelectedItem().(*listItem).internal.(*provider.Provider).CreateSource()
 
@@ -219,6 +254,8 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case b.mangasC.FilterState() == list.Filtering:
+			break
 		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
 			m, _ := b.mangasC.SelectedItem().(*listItem).internal.(*source.Manga)
 			b.selectedManga = m
@@ -258,6 +295,14 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case b.chaptersC.FilterState() == list.Filtering:
+			break
+		case key.Matches(msg, b.keymap.openURL):
+			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
+			err := open.Start(chapter.URL)
+			if err != nil {
+				b.newState(errorState)
+			}
 		case key.Matches(msg, b.keymap.selectOne):
 			item := b.chaptersC.SelectedItem().(*listItem)
 			chapter := item.internal.(*source.Chapter)
