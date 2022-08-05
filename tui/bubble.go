@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -38,22 +39,23 @@ type statefulBubble struct {
 	selectedChapters map[*source.Chapter]struct{} // mathematical set
 }
 
-func (b *statefulBubble) newState(s state) {
-	// Transitioning to these states is not allowed (it makes no sense)
-	// Ignore idle because idle is the state that is set only when the bubble is created
-	if b.state != idle && !lo.Contains([]state{loadingState, exitState, readDownloadState, downloadDoneState}, s) {
-		b.statesHistory.Push(&b.state)
-	}
-
+func (b *statefulBubble) setState(s state) {
 	b.state = s
 	b.keymap.setState(s)
 }
 
+func (b *statefulBubble) newState(s state) {
+	// Transitioning to these states is not allowed (it makes no sense)
+	if !lo.Contains([]state{loadingState, exitState, readDownloadState, downloadDoneState}, s) {
+		b.statesHistory.Push(b.state)
+	}
+
+	b.setState(s)
+}
+
 func (b *statefulBubble) previousState() {
 	if b.statesHistory.Length() > 0 {
-		b.statesHistory.Pop()
-		b.state = *b.statesHistory.Peek()
-		b.keymap.setState(b.state)
+		b.setState(b.statesHistory.Pop())
 	}
 }
 
@@ -131,7 +133,7 @@ func (b *statefulBubble) loadSources() tea.Cmd {
 	for _, p := range providers {
 		items = append(items, &listItem{
 			title:       p.Name,
-			description: "Built-in provider",
+			description: "Built-in provider " + icon.Get(icon.Go),
 			internal:    p,
 		})
 	}
@@ -140,7 +142,7 @@ func (b *statefulBubble) loadSources() tea.Cmd {
 		for _, p := range customProviders {
 			items = append(items, &listItem{
 				title:       p.Name,
-				description: "Custom provider",
+				description: "Custom provider " + icon.Get(icon.Lua),
 				internal:    p,
 			})
 		}

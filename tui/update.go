@@ -3,6 +3,7 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/metafates/mangal/provider"
 )
 
 func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -14,6 +15,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.forceQuit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keymap.back):
+			b.inputC.SetValue("")
 			b.previousState()
 			return b, nil
 		}
@@ -71,7 +73,11 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
-			return b, tea.Quit
+			// TODO: handle error as special state
+			s, _ := b.sourcesC.SelectedItem().(*listItem).internal.(*provider.Provider).CreateSource()
+			b.selectedSource = s
+			b.newState(searchState)
+			return b, nil
 		}
 	}
 

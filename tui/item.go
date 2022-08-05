@@ -9,6 +9,11 @@ type listItem struct {
 	title       string
 	description string
 	internal    interface{}
+	marked      bool
+}
+
+func (t *listItem) toggleMark() {
+	t.marked = !t.marked
 }
 
 func (t *listItem) Title() string {
