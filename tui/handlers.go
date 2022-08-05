@@ -79,7 +79,7 @@ func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 			b.errorChannel <- err
 		}
 
-		b.progressStatus = fmt.Sprintf("Converting to %s", viper.GetString(config.FormatsUse))
+		b.progressStatus = fmt.Sprintf("Converting %d pages to %s", len(pages), viper.GetString(config.FormatsUse))
 		path, err := conv.SaveTemp(chapter)
 		if err != nil {
 			b.errorChannel <- err
@@ -134,7 +134,7 @@ func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 			return nil
 		}
 
-		b.progressStatus = fmt.Sprintf("Converting to %s", viper.GetString(config.FormatsUse))
+		b.progressStatus = fmt.Sprintf("Converting %d pages to %s", len(pages), viper.GetString(config.FormatsUse))
 		conv, err := converter.Get(viper.GetString(config.FormatsUse))
 		if err != nil {
 			b.errorChannel <- err
