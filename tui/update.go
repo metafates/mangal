@@ -10,6 +10,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
+	"golang.org/x/exp/slices"
 	"path/filepath"
 	"time"
 )
@@ -351,7 +352,12 @@ func (b *statefulBubble) updateConfirm(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, b.keymap.confirm):
-			for chapter := range b.selectedChapters {
+			chapters := lo.Keys(b.selectedChapters)
+			slices.SortFunc(chapters, func(a, b *source.Chapter) bool {
+				return a.Index > b.Index
+			})
+
+			for _, chapter := range chapters {
 				b.chaptersToDownload.Push(chapter)
 			}
 			b.newState(downloadState)
