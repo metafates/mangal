@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var delay = time.Millisecond * 500
+
 func New() source.Source {
 	manganelo := Manganelo{
 		mangas:   make(map[string][]*source.Manga),
@@ -54,7 +56,7 @@ func New() source.Source {
 
 	_ = mangasCollector.Limit(&colly.LimitRule{
 		Parallelism: 50,
-		RandomDelay: 300 * time.Millisecond,
+		RandomDelay: delay,
 		DomainGlob:  "*",
 	})
 
@@ -86,7 +88,7 @@ func New() source.Source {
 	})
 	_ = chaptersCollector.Limit(&colly.LimitRule{
 		Parallelism: 50,
-		RandomDelay: 300 * time.Millisecond,
+		RandomDelay: delay,
 		DomainGlob:  "*",
 	})
 
@@ -116,7 +118,7 @@ func New() source.Source {
 	})
 	_ = pagesCollector.Limit(&colly.LimitRule{
 		Parallelism: 50,
-		RandomDelay: 300 * time.Millisecond,
+		RandomDelay: delay,
 		DomainGlob:  "*",
 	})
 
