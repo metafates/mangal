@@ -142,8 +142,6 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 		return to2(h(k.back, k.forceQuit))
 	case downloadDoneState:
 		return to2(h(k.back, k.quit, k.openFolder))
-	case exitState:
-		return to2(h(k.quit))
 	case errorState:
 		return to2(h(k.back, k.forceQuit))
 	default:

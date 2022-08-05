@@ -13,7 +13,7 @@ func init() {
 
 var sourcesCmd = &cobra.Command{
 	Use:     "sources",
-	Short:   "List available sources",
+	Short:   "List an available sources",
 	Example: "mangal sources",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		headerStyle := style.Combined(style.Bold, style.HiBlue)

@@ -59,7 +59,14 @@ func (b *statefulBubble) setState(s state) {
 
 func (b *statefulBubble) newState(s state) {
 	// Transitioning to these states is not allowed (it makes no sense)
-	if !lo.Contains([]state{loadingState, exitState, readState, downloadDoneState, downloadState, exitState, confirmState}, b.state) {
+	if !lo.Contains([]state{
+		idle,
+		loadingState,
+		readState,
+		downloadDoneState,
+		downloadState,
+		confirmState,
+	}, b.state) {
 		b.statesHistory.Push(b.state)
 	}
 

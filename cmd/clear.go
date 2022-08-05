@@ -19,7 +19,7 @@ func init() {
 
 var clearCmd = &cobra.Command{
 	Use:   "clear",
-	Short: "Clears sidelined files",
+	Short: "Clears a sidelined files",
 	Run: func(cmd *cobra.Command, args []string) {
 		doClearCache := lo.Must(cmd.Flags().GetBool("cache"))
 		doClearHistory := lo.Must(cmd.Flags().GetBool("history"))

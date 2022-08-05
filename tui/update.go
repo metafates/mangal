@@ -88,8 +88,6 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b.updateDownload(msg)
 	case downloadDoneState:
 		return b.updateDownloadDone(msg)
-	case exitState:
-		return b.updateExit(msg)
 	case errorState:
 		return b.updateError(msg)
 	}
@@ -429,10 +427,6 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return b, cmd
-}
-
-func (b *statefulBubble) updateExit(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return b, tea.Quit
 }
 
 func (b *statefulBubble) updateError(msg tea.Msg) (tea.Model, tea.Cmd) {

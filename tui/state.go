@@ -15,5 +15,4 @@ const (
 	readState
 	downloadState
 	downloadDoneState
-	exitState
 )

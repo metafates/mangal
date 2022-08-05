@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/style"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -16,19 +17,23 @@ func init() {
 
 var whereCmd = &cobra.Command{
 	Use:   "where",
-	Short: "Show the paths to the configuration",
+	Short: "Show the paths for a files related to the mangal",
 	Run: func(cmd *cobra.Command, args []string) {
+		headerStyle := style.Combined(style.Bold, style.HiBlue)
+
 		whereConfig, _ := cmd.Flags().GetBool("config")
 		whereSources, _ := cmd.Flags().GetBool("sources")
 
 		printConfigPath := func() {
+			cmd.Println(headerStyle("Configuration path:"))
 			for _, path := range lo.Must(config.Paths()) {
-				cmd.Println(path)
+				cmd.Println(" " + path)
 			}
 		}
 
 		printSourcesPath := func() {
-			cmd.Println(viper.GetString(config.SourcesPath))
+			cmd.Println(headerStyle("Sources path:"))
+			cmd.Println(" " + viper.GetString(config.SourcesPath))
 		}
 
 		if whereConfig {
@@ -40,12 +45,10 @@ var whereCmd = &cobra.Command{
 		}
 
 		if !whereConfig && !whereSources {
-			cmd.Println("Configuration path:")
 			printConfigPath()
 
 			cmd.Println()
 
-			cmd.Println("Sources path:")
 			printSourcesPath()
 		}
 	},

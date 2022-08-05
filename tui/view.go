@@ -26,8 +26,6 @@ func (b *statefulBubble) View() string {
 		return b.viewDownload()
 	case downloadDoneState:
 		return b.viewDownloadDone()
-	case exitState:
-		return b.viewExit()
 	case errorState:
 		return b.viewError()
 	}
@@ -77,10 +75,6 @@ func (b *statefulBubble) viewDownload() string {
 
 func (b *statefulBubble) viewDownloadDone() string {
 	return "Download done" + "\n" + b.helpC.View(b.keymap)
-}
-
-func (b *statefulBubble) viewExit() string {
-	return ""
 }
 
 func (b *statefulBubble) viewError() string {

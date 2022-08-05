@@ -24,8 +24,8 @@ var versionCmd = &cobra.Command{
 
 var versionLatestCmd = &cobra.Command{
 	Use:   "latest",
-	Short: "Print the latest version number of mangal",
-	Long:  `It will fetch the latest version from github and print it`,
+	Short: "Print the latest version number of the mangal",
+	Long:  `It will fetch the latest version from the github and print it`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		resp, err := http.Get("https://api.github.com/repos/metafates/mangal/releases/latest")
 		if err != nil {

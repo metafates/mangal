@@ -17,8 +17,8 @@ func init() {
 
 var miniCmd = &cobra.Command{
 	Use:   "mini",
-	Short: "Launch in mini mode",
-	Long:  `Launch in mini mode. Will use simple prompts instead of TUI.`,
+	Short: "Launch the in mini mode",
+	Long:  `Launch the in mini mode. Will use simple prompts instead of the TUI.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		options := mini.Options{
 			Download: lo.Must(cmd.Flags().GetBool("download")),
