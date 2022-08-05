@@ -33,7 +33,7 @@ var sourcesCmd = &cobra.Command{
 		}
 
 		for name := range custom {
-			name = "  " + name + " " + icon.Get(icon.Go)
+			name = "  " + name + " " + icon.Get(icon.Lua)
 			cmd.Println(name)
 		}
 
