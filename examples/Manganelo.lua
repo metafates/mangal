@@ -1,53 +1,38 @@
-local goquery = require("goquery")
+local html = require("html")
 local http = require("http")
 local client = http.client()
 
+local manganelo = "https://ww5.manganelo.tv"
+
+
 function SearchManga(query)
-  local request = http.request("GET", "https://ww5.manganelo.tv/search/" .. query)
+  local request = http.request("GET", manganelo .. "/search/" .. query)
   local result, err = client:do_request(request)
+  AssertFalse(err)
 
-  if err then
-    error(err)
-  end
-
-  if not(result.code == 200) then
-    error("code")
-  end
-
-  local doc, err = goquery.doc(result.body)
-
-  if err ~= nil then
-    error(err)
-  end
-
+  local doc = html.parse(result.body)
   local mangas = {}
 
   doc:find(".item-title"):each(function (i, s)
-    local manga = { name = s:text(), url = "https://ww5.manganelo.tv" .. s:attr("href") }
+    local manga = { name = s:text(), url = manganelo .. s:attr("href") }
     mangas[i+1] = manga
   end)
 
   return mangas
 end
 
+
 function MangaChapters(manga_url)
   local request = http.request("GET", manga_url)
   local result, err = client:do_request(request)
+  AssertFalse(err)
 
-  if err then
-    error(err)
-  end
-
-  local doc, err = goquery.doc(result.body)
-
-  if err then
-    error(err)
-  end
+  local doc = html.parse(result.body)
 
   local chapters = {}
 
   doc:find(".chapter-name"):each(function (i, s)
-    local chapter = { name = s:text(), url = "https://ww5.manganelo.tv" .. s:attr("href") }
+    local chapter = { name = s:text(), url = manganelo .. s:attr("href") }
     chapters[i+1] = chapter
   end)
 
@@ -60,11 +45,9 @@ end
 function ChapterPages(chapter_url)
   local request = http.request("GET", chapter_url)
   local result, err = client:do_request(request)
-  if err then
-    error(err)
-  end
+  AssertFalse(err)
 
-  local doc, err = goquery.doc(result.body)
+  local doc = html.parse(result.body)
 
   local pages = {}
 
@@ -76,6 +59,7 @@ function ChapterPages(chapter_url)
   return pages
 end
 
+
 function Reverse(t)
   local n = #t
   local i = 1
@@ -85,3 +69,9 @@ function Reverse(t)
     n = n - 1
   end
 end
+
+
+function AssertFalse(e)
+  if e then error(e) end
+end
+

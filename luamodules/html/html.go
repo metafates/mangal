@@ -1,26 +1,26 @@
-package goquery
+package html
 
 import (
 	lua "github.com/yuin/gopher-lua"
 	"net/http"
 )
 
-type Goquery struct{}
+type HTML struct{}
 type settings struct {
 	client *http.Client
 }
 
-func New() *Goquery {
-	return &Goquery{}
+func New() *HTML {
+	return &HTML{}
 }
 
-func (_ Goquery) Name() string {
-	return "goquery"
+func (_ HTML) Name() string {
+	return "html"
 }
 
-func (_ Goquery) Loader() lua.LGFunction {
+func (_ HTML) Loader() lua.LGFunction {
 	var exports = map[string]lua.LGFunction{
-		"doc": newDoc(),
+		"parse": parseHTML(),
 	}
 	return func(L *lua.LState) int {
 		mod := L.SetFuncs(L.NewTable(), exports)

@@ -105,7 +105,7 @@ func comicInfo(chapter *source.Chapter) string {
   <Series>` + chapter.Manga.Name + `</Series>
   <Genre>Web Comic</Genre>
   <Web>` + chapter.Manga.URL + `</Web>
-  <Manga>Yes</Manga>
+  <Manga>YesAndRightToLeft</Manga>
 </ComicInfo>`
 }
 

@@ -2,8 +2,8 @@ package luamodules
 
 import (
 	"github.com/metafates/mangal/luamodules/core"
-	"github.com/metafates/mangal/luamodules/goquery"
 	"github.com/metafates/mangal/luamodules/headless"
+	"github.com/metafates/mangal/luamodules/html"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -13,7 +13,7 @@ type LuaModule interface {
 }
 
 var modules = []LuaModule{
-	goquery.New(),
+	html.New(),
 	headless.New(),
 }
 

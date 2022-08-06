@@ -1,4 +1,4 @@
-package goquery
+package html
 
 import (
 	"github.com/PuerkitoBio/goquery"
@@ -8,13 +8,17 @@ import (
 const SelectionTypename = "selection"
 
 var selectionMethods = map[string]lua.LGFunction{
-	"find":   selectionFind,
-	"each":   selectionEach,
-	"attr":   selectionAttr,
-	"first":  selectionFirst,
-	"parent": selectionParent,
-	"text":   selectionText,
-	"html":   selectionHtml,
+	"find":     selectionFind,
+	"each":     selectionEach,
+	"attr":     selectionAttr,
+	"first":    selectionFirst,
+	"parent":   selectionParent,
+	"text":     selectionText,
+	"html":     selectionHtml,
+	"hasClass": selectionHasClass,
+	"is":       selectionIs,
+	"next":     selectionNext,
+	"prev":     selectionPrev,
 }
 
 func registerSelectionType(L *lua.LState) {
@@ -94,6 +98,34 @@ func selectionParent(L *lua.LState) int {
 func selectionAttr(L *lua.LState) int {
 	s := checkSelection(L)
 	attrName := L.ToString(2)
-	L.Push(lua.LString(s.AttrOr(attrName, "")))
+	attr, exists := s.Attr(attrName)
+	L.Push(lua.LString(attr))
+	L.Push(lua.LBool(exists))
+	return 2
+}
+
+func selectionHasClass(L *lua.LState) int {
+	s := checkSelection(L)
+	className := L.ToString(2)
+	L.Push(lua.LBool(s.HasClass(className)))
+	return 1
+}
+
+func selectionIs(L *lua.LState) int {
+	s := checkSelection(L)
+	selector := L.ToString(2)
+	L.Push(lua.LBool(s.Is(selector)))
+	return 1
+}
+
+func selectionNext(L *lua.LState) int {
+	s := checkSelection(L)
+	pushSelection(L, s.Next())
+	return 1
+}
+
+func selectionPrev(L *lua.LState) int {
+	s := checkSelection(L)
+	pushSelection(L, s.Prev())
 	return 1
 }

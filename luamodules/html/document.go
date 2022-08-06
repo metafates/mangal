@@ -1,4 +1,4 @@
-package goquery
+package html
 
 import (
 	"strings"
@@ -18,7 +18,7 @@ func registerDocumentType(L *lua.LState) {
 	L.SetField(mt, "__index", L.SetFuncs(L.NewTable(), documentMethods))
 }
 
-func newDoc() lua.LGFunction {
+func parseHTML() lua.LGFunction {
 	return func(L *lua.LState) int {
 		docData := L.ToString(1)
 		doc, err := goquery.NewDocumentFromReader(strings.NewReader(docData))
