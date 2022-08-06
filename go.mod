@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/bubbles v0.13.0
 	github.com/charmbracelet/bubbletea v0.22.0
 	github.com/charmbracelet/lipgloss v0.5.0
+	github.com/darylhjd/mangodex v0.0.0-20211231093527-e4a91c518fa0
 	github.com/go-rod/rod v0.108.2
 	github.com/gocolly/colly v1.2.0
 	github.com/ivanpirog/coloredcobra v1.0.1
@@ -39,7 +40,6 @@ require (
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.0 // indirect
 	github.com/containerd/console v1.0.3 // indirect
-	github.com/darylhjd/mangodex v0.0.0-20211231093527-e4a91c518fa0 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect

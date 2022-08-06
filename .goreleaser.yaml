@@ -1,0 +1,106 @@
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    image_templates:
+    - "metafates/mangal:latest"
+    skip_push: false
+    use: docker
+
+brews:
+  -
+    name: mangal
+
+    tap:
+      owner: metafates
+      name: homebrew-mangal
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: "https://github.com/metafates/mangal"
+    description: "The ultimate CLI manga downloader!"
+    license: "MIT"
+    skip_upload: true
+
+scoop:
+  bucket:
+    owner: metafates
+    name: scoop-mangal
+    branch: main
+    token: "{{ .Env.SCOOP_TAP_GITHUB_TOKEN }}"
+
+  folder: Scoops
+
+  commit_author:
+    name: goreleaserbot
+    email: bot@goreleaser.com
+
+  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+  homepage: "https://github.com/metafates/mangal"
+  description: "The ultimate CLI manga downloader"
+  license: MIT
+  skip_upload: true
+
+
+release:
+  # Repo in which the release will be created.
+  # Default is extracted from the origin remote URL or empty if its private hosted.
+  github:
+    owner: metafates
+    name: mangal
+
+  draft: true
+
+  # Header template for the release body.
+  # Defaults to empty.
+  # header: |
+  #   ## Some title ({{ .Date }})
+  #
+  #   Welcome to this new release!
+  #
+  # # Footer template for the release body.
+  # # Defaults to empty.
+  # footer: |
+  #   ## Thanks!
+  #   If you have any 
+  #
+  #   Those were the changes on {{ .Tag }}!
+
+  # You can change the name of the release.
+  # Default is `{{.Tag}}` on OSS and `{{.PrefixedTag}}` on Pro.
+  name_template: "{{.ProjectName}}-v{{.Version}}"
+
