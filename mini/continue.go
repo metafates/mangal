@@ -65,6 +65,7 @@ func continueReading() error {
 	manga := &source.Manga{
 		Name:     chap.MangaName,
 		URL:      chap.MangaURL,
+		ID:       chap.MangaID,
 		Index:    0,
 		SourceID: chap.SourceID,
 		Chapters: make([]*source.Chapter, 0),

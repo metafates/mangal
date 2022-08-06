@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
@@ -144,6 +145,8 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				chapter := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 				err := open.Run(chapter.URL)
 				if err != nil {
+					b.lastError = err
+					b.plot = randomPlot()
 					b.newState(errorState)
 				}
 			}
@@ -158,12 +161,16 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 			})
 
 			if !ok {
+				b.lastError = fmt.Errorf("provider %s not found", selected.SourceID)
+				b.plot = randomPlot()
 				b.newState(errorState)
 				return b, nil
 			}
 
 			src, err := p.CreateSource()
 			if err != nil {
+				b.lastError = fmt.Errorf("error creating source: %s", err)
+				b.plot = randomPlot()
 				b.newState(errorState)
 				return b, nil
 			}
@@ -175,9 +182,12 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				URL:      selected.MangaURL,
 				Index:    0,
 				SourceID: selected.SourceID,
+				ID:       selected.MangaID,
 			})
 
 			if err != nil {
+				b.lastError = fmt.Errorf("error getting chapters: %s", err)
+				b.plot = randomPlot()
 				b.newState(errorState)
 				return b, nil
 			}
@@ -222,6 +232,8 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 			s, err := b.sourcesC.SelectedItem().(*listItem).internal.(*provider.Provider).CreateSource()
 
 			if err != nil {
+				b.lastError = err
+				b.plot = randomPlot()
 				b.newState(errorState)
 			} else {
 				b.selectedSource = s
@@ -276,6 +288,8 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m, _ := b.mangasC.SelectedItem().(*listItem).internal.(*source.Manga)
 			err := open.Start(m.URL)
 			if err != nil {
+				b.lastError = err
+				b.plot = randomPlot()
 				b.newState(errorState)
 			}
 		}
@@ -315,6 +329,8 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
 			err := open.Start(chapter.URL)
 			if err != nil {
+				b.plot = randomPlot()
+				b.lastError = err
 				b.newState(errorState)
 			}
 		case key.Matches(msg, b.keymap.selectOne):
@@ -454,6 +470,8 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.openFolder):
 			err := open.Start(filepath.Dir(b.lastDownloadedChapterPath))
 			if err != nil {
+				b.plot = randomPlot()
+				b.lastError = err
 				b.newState(errorState)
 			}
 		}

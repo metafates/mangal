@@ -17,6 +17,8 @@ type SavedChapter struct {
 	MangaURL  string `json:"manga_url"`
 	Name      string `json:"name"`
 	URL       string `json:"url"`
+	ID        string `json:"id"`
+	MangaID   string `json:"manga_id"`
 }
 
 func Get() (map[string]*SavedChapter, error) {
@@ -64,6 +66,8 @@ func Save(chapter *source.Chapter) error {
 		MangaURL:  chapter.Manga.URL,
 		Name:      chapter.Name,
 		URL:       chapter.URL,
+		ID:        chapter.ID,
+		MangaID:   chapter.Manga.ID,
 	}
 
 	chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)] = &jsonChapter
