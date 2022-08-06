@@ -142,7 +142,7 @@ func (b *statefulBubble) viewDownloadDone() string {
 		[]string{
 			style.Title("Finish"),
 			"",
-			icon.Get(icon.Success) + " Download finished. *Beep-Boop-Boop*",
+			icon.Get(icon.Success) + " Download finished." + style.Italic(" *Beep-Boop-Boop*"),
 		},
 	)
 }
