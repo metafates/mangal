@@ -91,14 +91,18 @@ func (b *statefulBubble) previousState() {
 
 func (b *statefulBubble) resize(width, height int) {
 	x, y := paddingStyle.GetFrameSize()
+	xx, yy := listExtraPaddingStyle.GetFrameSize()
 
 	styledWidth := width - x
 	styledHeight := height - y
 
-	b.historyC.SetSize(width, height)
-	b.sourcesC.SetSize(width, height)
-	b.mangasC.SetSize(width, height)
-	b.chaptersC.SetSize(width, height)
+	listWidth := width - xx
+	listHeight := height - yy
+
+	b.historyC.SetSize(listWidth, listHeight)
+	b.sourcesC.SetSize(listWidth, listHeight)
+	b.mangasC.SetSize(listWidth, listHeight)
+	b.chaptersC.SetSize(listWidth, listHeight)
 	b.progressC.Width = styledWidth
 	b.width = styledWidth
 	b.height = styledHeight

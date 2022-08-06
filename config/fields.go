@@ -10,7 +10,8 @@ const (
 )
 
 const (
-	ReaderName = "reader.name"
+	ReaderName          = "reader.name"
+	ReaderReadInBrowser = "reader.read_in_browser"
 )
 
 const (

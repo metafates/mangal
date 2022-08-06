@@ -49,38 +49,46 @@ func (b *statefulBubble) viewLoading() string {
 	return b.renderLines(
 		true,
 		[]string{
-			b.spinnerC.View() + "Loading...",
+			style.Title("Loading"),
+			"",
+			b.spinnerC.View() + "Hacking the world...",
 		},
 	)
 }
 
 func (b *statefulBubble) viewHistory() string {
-	return b.historyC.View()
+	return listExtraPaddingStyle.Render(b.historyC.View())
 }
 
 func (b *statefulBubble) viewSources() string {
-	return b.sourcesC.View()
+	return listExtraPaddingStyle.Render(b.sourcesC.View())
 }
 
 func (b *statefulBubble) viewSearch() string {
 	return b.renderLines(
 		true,
-		[]string{b.inputC.View()},
+		[]string{
+			style.Title("Search Manga"),
+			"",
+			b.inputC.View(),
+		},
 	)
 }
 
 func (b *statefulBubble) viewMangas() string {
-	return b.mangasC.View()
+	return listExtraPaddingStyle.Render(b.mangasC.View())
 }
 
 func (b *statefulBubble) viewChapters() string {
-	return b.chaptersC.View()
+	return listExtraPaddingStyle.Render(b.chaptersC.View())
 }
 
 func (b *statefulBubble) viewConfirm() string {
 	return b.renderLines(
 		true,
 		[]string{
+			style.Title("Confirm"),
+			"",
 			fmt.Sprintf(icon.Get(icon.Question)+" Download %d chapters?", len(b.selectedChapters)),
 		},
 	)
@@ -97,7 +105,9 @@ func (b *statefulBubble) viewRead() string {
 	return b.renderLines(
 		true,
 		[]string{
-			style.Trim(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading chapter %s", style.Magenta(chapterName))),
+			style.Title("Reading"),
+			"",
+			style.Trim(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
 			"",
 			style.Trim(b.width)(b.spinnerC.View() + b.progressStatus),
 		},
@@ -115,7 +125,9 @@ func (b *statefulBubble) viewDownload() string {
 	return b.renderLines(
 		true,
 		[]string{
-			style.Trim(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading chapter %s", style.Magenta(chapterName))),
+			style.Title("Downloading"),
+			"",
+			style.Trim(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
 			"",
 			b.progressC.View(),
 			"",
@@ -127,7 +139,11 @@ func (b *statefulBubble) viewDownload() string {
 func (b *statefulBubble) viewDownloadDone() string {
 	return b.renderLines(
 		true,
-		[]string{icon.Get(icon.Success) + " Download finished. *Beep-Boop-Boop*"},
+		[]string{
+			style.Title("Finish"),
+			"",
+			icon.Get(icon.Success) + " Download finished. *Beep-Boop-Boop*",
+		},
 	)
 }
 
@@ -136,6 +152,8 @@ func (b *statefulBubble) viewError() string {
 	return b.renderLines(
 		true,
 		append([]string{
+			style.ErrorTitle("Error"),
+			"",
 			icon.Get(icon.Fail) + " Uggh, something went wrong. Maybe try again?",
 			"",
 			style.Italic(util.Wrap(b.plot, b.width)),
@@ -147,7 +165,8 @@ func (b *statefulBubble) viewError() string {
 }
 
 var (
-	paddingStyle = lipgloss.NewStyle().PaddingTop(1).PaddingLeft(2).PaddingRight(2)
+	listExtraPaddingStyle = lipgloss.NewStyle().PaddingTop(1)
+	paddingStyle          = lipgloss.NewStyle().PaddingTop(1).PaddingLeft(2).PaddingRight(2)
 )
 
 func (b *statefulBubble) renderLines(addHelp bool, lines []string) string {

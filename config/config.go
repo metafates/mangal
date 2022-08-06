@@ -85,7 +85,8 @@ func setDefaults() {
 		IconsVariant: "emoji",
 
 		// Reader
-		ReaderName: "",
+		ReaderName:          "",
+		ReaderReadInBrowser: false,
 
 		// History
 		HistorySaveOnRead:     true,
