@@ -27,7 +27,7 @@
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __Fast__ - yes.
-- __Monolith__ - ZERO runtime dependecies. Even Lua is built in.
+- __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 
 ## Installation
 
