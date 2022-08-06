@@ -52,15 +52,6 @@ func TerminalSize() (width, height int, err error) {
 	return term.GetSize(int(os.Stdout.Fd()))
 }
 
-// Capitalize will capitalize the first letter of a string.
-func Capitalize(s string) string {
-	if len(s) == 0 {
-		return s
-	}
-
-	return strings.ToUpper(s[:1]) + strings.ToLower(s[1:])
-}
-
 func FileStem(path string) string {
 	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }
@@ -73,7 +64,7 @@ func Wrap(s string, width int) string {
 			i = width
 		}
 		lines = append(lines, s[:i])
-		s = s[i+1:]
+		s = s[i:]
 	}
 	lines = append(lines, s)
 	return strings.Join(lines, "\n")

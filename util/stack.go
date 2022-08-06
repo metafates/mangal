@@ -22,7 +22,7 @@ func (s *Stack[T]) Pop() T {
 	return item
 }
 
-func (s *Stack[T]) Length() int {
+func (s *Stack[T]) Len() int {
 	return s.length
 }
 
