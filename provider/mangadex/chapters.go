@@ -3,7 +3,9 @@ package mangadex
 import (
 	"fmt"
 	"github.com/darylhjd/mangodex"
+	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/source"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"net/url"
 	"strconv"
@@ -12,9 +14,14 @@ import (
 func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	params := url.Values{}
 	params.Set("limit", strconv.Itoa(500))
-	ratings := []string{mangodex.Safe, mangodex.Suggestive, mangodex.Erotica}
+	ratings := []string{mangodex.Safe, mangodex.Suggestive}
 	for _, rating := range ratings {
 		params.Add("contentRating[]", rating)
+	}
+
+	if viper.GetBool(config.MangadexNSFW) {
+		params.Add("contentRating[]", mangodex.Porn)
+		params.Add("contentRating[]", mangodex.Erotica)
 	}
 
 	// scanlation group for the chapter
@@ -32,7 +39,8 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		}
 
 		for i, chapter := range list.Data {
-			if chapter.Attributes.TranslatedLanguage != "en" {
+			// skip chapters that are not in the current language
+			if chapter.Attributes.TranslatedLanguage != viper.GetString(config.MangadexLanguage) {
 				currOffset += 500
 				continue
 			}

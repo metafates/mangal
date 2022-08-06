@@ -90,6 +90,10 @@ func setDefaults() {
 		// History
 		HistorySaveOnRead:     true,
 		HistorySaveOnDownload: false,
+
+		// Mangadex
+		MangadexLanguage: "en",
+		MangadexNSFW:     false,
 	}
 
 	for field, value := range fields {

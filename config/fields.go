@@ -31,6 +31,11 @@ const (
 	IconsVariant = "icons.variant"
 )
 
+const (
+	MangadexLanguage = "mangadex.language"
+	MangadexNSFW     = "mangadex.nsfw"
+)
+
 var EnvExposed = []string{
 	// downloader
 	DownloaderPath,
