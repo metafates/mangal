@@ -3,7 +3,7 @@ package mangadex
 import "github.com/darylhjd/mangodex"
 
 const (
-	Name = "Mangadex"
+	Name = "Mangadex (Unstable)"
 	ID   = Name + " built-in"
 )
 
