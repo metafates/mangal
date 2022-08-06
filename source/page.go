@@ -50,6 +50,10 @@ func pageFromTable(table *lua.LTable, chapter *Chapter) (*Page, error) {
 }
 
 func (p *Page) Download() error {
+	if p.URL == "" {
+		return nil
+	}
+
 	req, err := http.NewRequest("GET", p.URL, nil)
 	if err != nil {
 		return err

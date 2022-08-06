@@ -49,8 +49,7 @@ func (s *LuaSource) Search(query string) ([]*Manga, error) {
 	}
 
 	table := s.state.CheckTable(-1)
-	var i uint
-	mangas := make([]*Manga, table.Len())
+	mangas := make([]*Manga, 0)
 
 	table.ForEach(func(k lua.LValue, v lua.LValue) {
 		if k.Type() != lua.LTNumber {
@@ -73,8 +72,8 @@ func (s *LuaSource) Search(query string) ([]*Manga, error) {
 		}
 
 		manga.SourceID = s.ID()
-		mangas[i] = manga
-		i++
+
+		mangas = append(mangas, manga)
 	})
 
 	return mangas, nil
@@ -88,8 +87,7 @@ func (s *LuaSource) ChaptersOf(manga *Manga) ([]*Chapter, error) {
 	}
 
 	table := s.state.CheckTable(-1)
-	var i uint
-	chapters := make([]*Chapter, table.Len())
+	chapters := make([]*Chapter, 0)
 
 	table.ForEach(func(k lua.LValue, v lua.LValue) {
 		if k.Type() != lua.LTNumber {
@@ -112,8 +110,7 @@ func (s *LuaSource) ChaptersOf(manga *Manga) ([]*Chapter, error) {
 		}
 
 		chapter.SourceID = s.ID()
-		chapters[i] = chapter
-		i++
+		chapters = append(chapters, chapter)
 	})
 
 	return chapters, nil
@@ -127,8 +124,7 @@ func (s *LuaSource) PagesOf(chapter *Chapter) ([]*Page, error) {
 	}
 
 	table := s.state.CheckTable(-1)
-	var i uint
-	pages := make([]*Page, table.Len())
+	pages := make([]*Page, 0)
 
 	table.ForEach(func(k lua.LValue, v lua.LValue) {
 		if k.Type() != lua.LTNumber {
@@ -146,8 +142,7 @@ func (s *LuaSource) PagesOf(chapter *Chapter) ([]*Page, error) {
 		}
 
 		page.SourceID = s.ID()
-		pages[i] = page
-		i++
+		pages = append(pages, page)
 	})
 
 	return pages, nil

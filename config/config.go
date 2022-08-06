@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+var EnvKeyReplacer = strings.NewReplacer(".", "_")
+
 // Setup initializes the configuration
 func Setup() error {
 	setName()
@@ -52,9 +54,9 @@ func setPaths() {
 // setEnvs sets the environment variables
 func setEnvs() {
 	viper.SetEnvPrefix(constant.Mangal)
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.SetEnvKeyReplacer(EnvKeyReplacer)
 
-	for _, env := range envFields {
+	for _, env := range EnvExposed {
 		viper.MustBindEnv(env)
 	}
 }

@@ -31,7 +31,7 @@ const (
 	IconsVariant = "icons.variant"
 )
 
-var envFields = []string{
+var EnvExposed = []string{
 	// downloader
 	DownloaderPath,
 	DownloaderChapterNameTemplate,

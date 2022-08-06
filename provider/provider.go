@@ -2,8 +2,10 @@ package provider
 
 import (
 	"errors"
+	"fmt"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/provider/mangadex"
 	"github.com/metafates/mangal/provider/manganelo"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -27,6 +29,13 @@ var defaultProviders = []*Provider{
 		Name: manganelo.Name,
 		CreateSource: func() (source.Source, error) {
 			return manganelo.New(), nil
+		},
+	},
+	{
+		ID:   mangadex.ID,
+		Name: mangadex.Name,
+		CreateSource: func() (source.Source, error) {
+			return mangadex.New(), nil
 		},
 	},
 }
@@ -62,10 +71,14 @@ func CustomProviders() (map[string]*Provider, error) {
 
 	for _, path := range paths {
 		name := util.FileStem(path)
+		path := path
 		providers[name] = &Provider{
-			ID:           source.IDfromName(name),
-			Name:         name,
-			CreateSource: func() (source.Source, error) { return source.LoadSource(path, true) },
+			ID:   source.IDfromName(name),
+			Name: name,
+			CreateSource: func() (source.Source, error) {
+				fmt.Println("Creating source:", name, path)
+				return source.LoadSource(path, true)
+			},
 		}
 	}
 
