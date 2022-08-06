@@ -20,10 +20,9 @@ func PadZero(s string, l int) string {
 
 // replacers is a list of regexp.Regexp pairs that will be used to sanitize filenames.
 var replacers = []lo.Tuple2[*regexp.Regexp, string]{
-	{regexp.MustCompile(`[\\/<>:"|?*\s]`), "_"},
+	{regexp.MustCompile(`[\\/<>:;"'|?!*{}#%&^+,~\s]`), "_"},
 	{regexp.MustCompile(`__+`), "_"},
-	{regexp.MustCompile(`^_+|_+$`), ""},
-	{regexp.MustCompile(`^\.+|\.+$`), ""},
+	{regexp.MustCompile(`^[_\-.]+|[_\-.]+$`), ""},
 }
 
 // SanitizeFilename will remove all invalid characters from a path.

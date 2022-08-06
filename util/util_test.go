@@ -109,8 +109,8 @@ func TestSanitizeFilename(t *testing.T) {
 	Convey("Given a string "+invalidFilename, t, func() {
 		Convey("When the string is sanitized", func() {
 			result := SanitizeFilename(invalidFilename)
-			Convey("Then the result should be '~C_invalid_file_name.txt'", func() {
-				So(result, ShouldEqual, "~C_invalid_file_name.txt")
+			Convey("Then the result should be 'C_invalid_file_name.txt'", func() {
+				So(result, ShouldEqual, "C_invalid_file_name.txt")
 			})
 		})
 	})
