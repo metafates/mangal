@@ -63,7 +63,7 @@ func (b *statefulBubble) waitForChapters() tea.Cmd {
 
 func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
-		b.progressStatus = fmt.Sprintf("Gettings pages of %s", chapter.Name)
+		b.progressStatus = "Gettings pages"
 		b.currentDownloadingChapter = chapter
 		pages, err := b.selectedSource.PagesOf(chapter)
 		if err != nil {
