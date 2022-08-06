@@ -20,6 +20,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case error:
+		b.plot = randomPlot()
 		b.newState(errorState)
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)

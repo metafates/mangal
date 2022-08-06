@@ -71,28 +71,48 @@ func (b *statefulBubble) viewChapters() string {
 func (b *statefulBubble) viewConfirm() string {
 	return b.renderLines(
 		true,
-		fmt.Sprintf("Download %d chapters?", len(b.selectedChapters)),
+		fmt.Sprintf(icon.Get(icon.Question)+" Download %d chapters?", len(b.selectedChapters)),
 	)
 }
 
 func (b *statefulBubble) viewRead() string {
+	var chapterName string
+
+	chapter := b.currentDownloadingChapter
+	if chapter != nil {
+		chapterName = chapter.Name
+	}
+
 	return b.renderLines(
 		true,
+		style.Trim(b.terminalWidth)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading chapter %s", style.Magenta(chapterName))),
+		"",
 		b.progressC.View(),
+		"",
 		b.spinnerC.View()+b.progressStatus,
 	)
 }
 
 func (b *statefulBubble) viewDownload() string {
+	var chapterName string
+
+	chapter := b.currentDownloadingChapter
+	if chapter != nil {
+		chapterName = chapter.Name
+	}
+
 	return b.renderLines(
 		true,
+		style.Trim(b.terminalWidth)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading chapter %s", style.Magenta(chapterName))),
+		"",
 		b.progressC.View(),
+		"",
 		b.spinnerC.View()+b.progressStatus,
 	)
 }
 
 func (b *statefulBubble) viewDownloadDone() string {
-	return b.renderLines(true, "Download finished")
+	return b.renderLines(true, icon.Get(icon.Success)+" Download finished")
 }
 
 func (b *statefulBubble) viewError() string {
@@ -100,7 +120,7 @@ func (b *statefulBubble) viewError() string {
 		true,
 		icon.Get(icon.Fail)+" Uggh, something went wrong. Maybe try again?",
 		"",
-		style.Italic(util.Wrap(randomPlot(), b.terminalWidth)),
+		style.Italic(util.Wrap(b.plot, b.terminalWidth)),
 		"",
 		style.Combined(style.Italic, style.Red)(b.lastError.Error()),
 	)
@@ -119,7 +139,7 @@ func randomPlot() string {
 	plots := []string{
 		"The universe is a dangerous place. There are many things that can go wrong. This is one of them:",
 		"Heroically fighting an endless army of errors and bugs Mangal died a hero. Their last words were:",
-		"I used to download manga without any errors, then I took an arrow to the knee.",
+		"I used to download stuff without any errors, then I took an arrow to the knee.",
 	}
 
 	return plots[rand.Intn(len(plots))]

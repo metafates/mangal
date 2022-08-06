@@ -65,6 +65,7 @@ func (b *statefulBubble) waitForChapters() tea.Cmd {
 func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
 		b.progressStatus = fmt.Sprintf("Gettings pages of %s", style.Trim(30)(chapter.Name))
+		b.currentDownloadingChapter = chapter
 		pages, err := b.selectedSource.PagesOf(chapter)
 		if err != nil {
 			b.errorChannel <- err
@@ -129,7 +130,8 @@ func (b *statefulBubble) waitForChapterRead() tea.Cmd {
 
 func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
-		b.progressStatus = fmt.Sprintf("Getting pages for %s", style.Trim(30)(chapter.Name))
+		b.currentDownloadingChapter = chapter
+		b.progressStatus = "Getting pages"
 		pages, err := b.selectedSource.PagesOf(chapter)
 		if err != nil {
 			b.errorChannel <- err

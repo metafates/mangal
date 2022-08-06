@@ -49,10 +49,12 @@ type statefulBubble struct {
 
 	chaptersToDownload util.Stack[*source.Chapter]
 
+	currentDownloadingChapter *source.Chapter
 	lastDownloadedChapterPath string
 	lastError                 error
 
 	terminalWidth, terminalHeight int
+	plot                          string
 }
 
 func (b *statefulBubble) setState(s state) {
