@@ -50,6 +50,9 @@ type statefulBubble struct {
 	chaptersToDownload util.Stack[*source.Chapter]
 
 	lastDownloadedChapterPath string
+	lastError                 error
+
+	terminalWidth, terminalHeight int
 }
 
 func (b *statefulBubble) setState(s state) {
@@ -58,6 +61,11 @@ func (b *statefulBubble) setState(s state) {
 }
 
 func (b *statefulBubble) newState(s state) {
+	// do not push state if it is the same as the current state
+	if b.state == s {
+		return
+	}
+
 	// Transitioning to these states is not allowed (it makes no sense)
 	if !lo.Contains([]state{
 		idle,
@@ -84,6 +92,8 @@ func (b *statefulBubble) resize(width, height int) {
 	b.sourcesC.SetSize(width, height)
 	b.mangasC.SetSize(width, height)
 	b.chaptersC.SetSize(width, height)
+	b.terminalWidth = width
+	b.terminalHeight = height
 }
 
 func (b *statefulBubble) startLoading() tea.Cmd {

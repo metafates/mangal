@@ -4,7 +4,6 @@ const (
 	SearchMangaFn   = "SearchManga"
 	MangaChaptersFn = "MangaChapters"
 	ChapterPagesFn  = "ChapterPages"
-	DebugFn         = "Debug"
 )
 
 var mustHave = []string{

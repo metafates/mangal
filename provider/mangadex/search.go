@@ -12,6 +12,10 @@ import (
 )
 
 func (m *Mangadex) Search(query string) ([]*source.Manga, error) {
+	if cached, ok := m.cachedMangas[query]; ok {
+		return cached, nil
+	}
+
 	params := url.Values{}
 	params.Set("limit", strconv.Itoa(100))
 
@@ -49,5 +53,6 @@ func (m *Mangadex) Search(query string) ([]*source.Manga, error) {
 		mangas = append(mangas, &m)
 	}
 
+	m.cachedMangas[query] = mangas
 	return mangas, nil
 }

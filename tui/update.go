@@ -19,6 +19,8 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case error:
+		b.newState(errorState)
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)
 	case tea.KeyMsg:
@@ -122,8 +124,6 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd = b.mangasC.SetItems(items)
 		b.newState(mangasState)
 		b.stopLoading()
-	case error:
-		b.newState(errorState)
 	}
 
 	b.spinnerC, cmd = b.spinnerC.Update(msg)
@@ -280,8 +280,6 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.newState(chaptersState)
 		b.stopLoading()
 		return b, cmd
-	case error:
-		b.newState(errorState)
 	}
 
 	b.mangasC, cmd = b.mangasC.Update(msg)
@@ -430,5 +428,15 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (b *statefulBubble) updateError(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return b, tea.Quit
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, b.keymap.quit):
+			return b, tea.Quit
+		}
+	}
+
+	return b, cmd
 }

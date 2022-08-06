@@ -31,6 +31,7 @@ func (b *statefulBubble) waitForMangas() tea.Cmd {
 		case found := <-b.foundMangasChannel:
 			return found
 		case err := <-b.errorChannel:
+			b.lastError = err
 			return err
 		}
 	}
@@ -55,6 +56,7 @@ func (b *statefulBubble) waitForChapters() tea.Cmd {
 		case found := <-b.foundChaptersChannel:
 			return found
 		case err := <-b.errorChannel:
+			b.lastError = err
 			return err
 		}
 	}
@@ -66,23 +68,27 @@ func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 		pages, err := b.selectedSource.PagesOf(chapter)
 		if err != nil {
 			b.errorChannel <- err
+			return nil
 		}
 
 		b.progressStatus = fmt.Sprintf("Downloading %d pages", len(pages))
 		err = chapter.DownloadPages()
 		if err != nil {
 			b.errorChannel <- err
+			return nil
 		}
 
 		conv, err := converter.Get(viper.GetString(config.FormatsUse))
 		if err != nil {
 			b.errorChannel <- err
+			return nil
 		}
 
 		b.progressStatus = fmt.Sprintf("Converting %d pages to %s", len(pages), viper.GetString(config.FormatsUse))
 		path, err := conv.SaveTemp(chapter)
 		if err != nil {
 			b.errorChannel <- err
+			return nil
 		}
 
 		if reader := viper.GetString(config.ReaderName); reader != "" {
@@ -90,12 +96,14 @@ func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 			err = open.RunWith(reader, path)
 			if err != nil {
 				b.errorChannel <- err
+				return nil
 			}
 		} else {
 			b.progressStatus = "Opening"
 			err = open.Run(path)
 			if err != nil {
 				b.errorChannel <- err
+				return nil
 			}
 		}
 
@@ -113,6 +121,7 @@ func (b *statefulBubble) waitForChapterRead() tea.Cmd {
 		case res := <-b.chapterReadChannel:
 			return res
 		case err := <-b.errorChannel:
+			b.lastError = err
 			return err
 		}
 	}
@@ -161,6 +170,7 @@ func (b *statefulBubble) waitForChapterDownload() tea.Cmd {
 		case res := <-b.chapterDownloadChannel:
 			return res
 		case err := <-b.errorChannel:
+			b.lastError = err
 			return err
 		}
 	}

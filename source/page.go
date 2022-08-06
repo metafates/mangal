@@ -81,5 +81,9 @@ func (p *Page) Close() error {
 }
 
 func (p *Page) Read(b []byte) (int, error) {
+	if p.Contents == nil {
+		return 0, errors.New("page not downloaded")
+	}
+
 	return p.Contents.Read(b)
 }

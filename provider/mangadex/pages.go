@@ -2,6 +2,7 @@ package mangadex
 
 import (
 	"bytes"
+	"errors"
 	"github.com/metafates/mangal/source"
 	"io"
 	"path/filepath"
@@ -15,11 +16,20 @@ func (m *Mangadex) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 
 	var pages []*source.Page
 
+	if len(downloader.Pages) == 0 {
+		return nil, errors.New("no pages found")
+	}
+
 	for i, name := range downloader.Pages {
 		image, err := downloader.GetChapterPage(name)
 		if err != nil {
 			return nil, err
 		}
+
+		if len(image) == 0 {
+			return nil, errors.New("empty image")
+		}
+
 		page := source.Page{
 			Index:     uint16(i),
 			Chapter:   chapter,

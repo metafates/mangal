@@ -64,3 +64,17 @@ func Capitalize(s string) string {
 func FileStem(path string) string {
 	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }
+
+func Wrap(s string, width int) string {
+	var lines []string
+	for len(s) > width {
+		i := strings.LastIndex(s[:width], " ")
+		if i == -1 {
+			i = width
+		}
+		lines = append(lines, s[:i])
+		s = s[i+1:]
+	}
+	lines = append(lines, s)
+	return strings.Join(lines, "\n")
+}

@@ -6,8 +6,11 @@ import (
 )
 
 type LuaSource struct {
-	name  string
-	state *lua.LState
+	name           string
+	state          *lua.LState
+	cachedMangas   map[string][]*Manga
+	cachedChapters map[string][]*Chapter
+	cachedPages    map[string][]*Page
 }
 
 func (s *LuaSource) Name() string {
@@ -16,8 +19,11 @@ func (s *LuaSource) Name() string {
 
 func newLuaSource(name string, state *lua.LState) (*LuaSource, error) {
 	return &LuaSource{
-		name:  name,
-		state: state,
+		name:           name,
+		state:          state,
+		cachedMangas:   make(map[string][]*Manga),
+		cachedChapters: make(map[string][]*Chapter),
+		cachedPages:    make(map[string][]*Page),
 	}, nil
 }
 
@@ -42,6 +48,10 @@ func (s *LuaSource) call(fn string, ret lua.LValueType, args ...lua.LValue) (lua
 }
 
 func (s *LuaSource) Search(query string) ([]*Manga, error) {
+	if cached, ok := s.cachedMangas[query]; ok {
+		return cached, nil
+	}
+
 	_, err := s.call(SearchMangaFn, lua.LTTable, lua.LString(query))
 
 	if err != nil {
@@ -76,10 +86,15 @@ func (s *LuaSource) Search(query string) ([]*Manga, error) {
 		mangas = append(mangas, manga)
 	})
 
+	s.cachedMangas[query] = mangas
 	return mangas, nil
 }
 
 func (s *LuaSource) ChaptersOf(manga *Manga) ([]*Chapter, error) {
+	if cached, ok := s.cachedChapters[manga.URL]; ok {
+		return cached, nil
+	}
+
 	_, err := s.call(MangaChaptersFn, lua.LTTable, lua.LString(manga.URL))
 
 	if err != nil {
@@ -113,10 +128,15 @@ func (s *LuaSource) ChaptersOf(manga *Manga) ([]*Chapter, error) {
 		chapters = append(chapters, chapter)
 	})
 
+	s.cachedChapters[manga.URL] = chapters
 	return chapters, nil
 }
 
 func (s *LuaSource) PagesOf(chapter *Chapter) ([]*Page, error) {
+	if cached, ok := s.cachedPages[chapter.URL]; ok {
+		return cached, nil
+	}
+
 	_, err := s.call(ChapterPagesFn, lua.LTTable, lua.LString(chapter.URL))
 
 	if err != nil {
@@ -145,12 +165,8 @@ func (s *LuaSource) PagesOf(chapter *Chapter) ([]*Page, error) {
 		pages = append(pages, page)
 	})
 
+	s.cachedPages[chapter.URL] = pages
 	return pages, nil
-}
-
-func (s *LuaSource) Debug() error {
-	_, err := s.call(DebugFn, lua.LTNil)
-	return err
 }
 
 func (s *LuaSource) ID() string {

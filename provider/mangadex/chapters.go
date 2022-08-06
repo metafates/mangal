@@ -12,6 +12,10 @@ import (
 )
 
 func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
+	if cached, ok := m.cachedChapters[manga.URL]; ok {
+		return cached, nil
+	}
+
 	params := url.Values{}
 	params.Set("limit", strconv.Itoa(500))
 	ratings := []string{mangodex.Safe, mangodex.Suggestive}
@@ -81,5 +85,6 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		return a.Index < b.Index
 	})
 
+	m.cachedChapters[manga.URL] = chapters
 	return chapters, nil
 }

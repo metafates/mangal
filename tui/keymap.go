@@ -143,7 +143,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case downloadDoneState:
 		return to2(h(k.back, k.quit, k.openFolder))
 	case errorState:
-		return to2(h(k.back, k.forceQuit))
+		return to2(h(k.back, k.quit))
 	default:
 		// unreachable
 		panic("unknown state")

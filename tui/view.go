@@ -1,6 +1,13 @@
 package tui
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/style"
+	"github.com/metafates/mangal/util"
+	"math/rand"
+	"strings"
+)
 
 func (b *statefulBubble) View() string {
 	switch b.state {
@@ -38,7 +45,7 @@ func (b *statefulBubble) viewIdle() string {
 }
 
 func (b *statefulBubble) viewLoading() string {
-	return fmt.Sprintf("%sSearching...", b.spinnerC.View())
+	return b.renderLines(true, b.spinnerC.View()+"Loading...")
 }
 
 func (b *statefulBubble) viewHistory() string {
@@ -50,7 +57,7 @@ func (b *statefulBubble) viewSources() string {
 }
 
 func (b *statefulBubble) viewSearch() string {
-	return b.inputC.View() + "\n" + b.helpC.View(b.keymap)
+	return b.renderLines(true, b.inputC.View())
 }
 
 func (b *statefulBubble) viewMangas() string {
@@ -62,21 +69,57 @@ func (b *statefulBubble) viewChapters() string {
 }
 
 func (b *statefulBubble) viewConfirm() string {
-	return fmt.Sprintf("Download %d chapters?\n%s", len(b.selectedChapters), b.helpC.View(b.keymap))
+	return b.renderLines(
+		true,
+		fmt.Sprintf("Download %d chapters?", len(b.selectedChapters)),
+	)
 }
 
 func (b *statefulBubble) viewRead() string {
-	return b.spinnerC.View() + b.progressStatus + "\n" + b.helpC.View(b.keymap)
+	return b.renderLines(
+		true,
+		b.progressC.View(),
+		b.spinnerC.View()+b.progressStatus,
+	)
 }
 
 func (b *statefulBubble) viewDownload() string {
-	return b.progressC.View() + "\n" + b.spinnerC.View() + b.progressStatus + "\n" + b.helpC.View(b.keymap)
+	return b.renderLines(
+		true,
+		b.progressC.View(),
+		b.spinnerC.View()+b.progressStatus,
+	)
 }
 
 func (b *statefulBubble) viewDownloadDone() string {
-	return "Download done" + "\n" + b.helpC.View(b.keymap)
+	return b.renderLines(true, "Download finished")
 }
 
 func (b *statefulBubble) viewError() string {
-	return "Error"
+	return b.renderLines(
+		true,
+		icon.Get(icon.Fail)+" Uggh, something went wrong. Maybe try again?",
+		"",
+		style.Italic(util.Wrap(randomPlot(), b.terminalWidth/2)),
+		"",
+		style.Combined(style.Italic, style.Red)(b.lastError.Error()),
+	)
+}
+
+func (b *statefulBubble) renderLines(addHelp bool, lines ...string) string {
+	l := strings.Join(lines, "\n")
+	if addHelp {
+		l += "\n\n" + b.helpC.View(b.keymap)
+	}
+
+	return l
+}
+
+func randomPlot() string {
+	plots := []string{
+		"The universe is a dangerous place. There are many things that can go wrong. This is one of them:",
+		"Heroically fighting an endless army of errors and bugs Mangal died a hero. Their last words were:",
+	}
+
+	return plots[rand.Intn(len(plots))]
 }
