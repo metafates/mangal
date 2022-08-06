@@ -43,6 +43,11 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		}
 
 		for i, chapter := range list.Data {
+			// Skip external chapters. Their pages cannot be downloaded.
+			if chapter.Attributes.ExternalURL != nil && !viper.GetBool(config.MangadexShowUnavailableChapters) {
+				continue
+			}
+
 			// skip chapters that are not in the current language
 			if chapter.Attributes.TranslatedLanguage != viper.GetString(config.MangadexLanguage) {
 				currOffset += 500

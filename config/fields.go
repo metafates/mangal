@@ -32,8 +32,9 @@ const (
 )
 
 const (
-	MangadexLanguage = "mangadex.language"
-	MangadexNSFW     = "mangadex.nsfw"
+	MangadexLanguage                = "mangadex.language"
+	MangadexNSFW                    = "mangadex.nsfw"
+	MangadexShowUnavailableChapters = "mangadex.show_unavailable_chapters"
 )
 
 var EnvExposed = []string{

@@ -163,7 +163,7 @@ func (b *statefulBubble) renderLines(addHelp bool, lines []string) string {
 func randomPlot() string {
 	plots := []string{
 		"The universe is a dangerous place. There are many things that can go wrong. This is one of them:",
-		"Heroically fighting an endless army of errors and bugs Mangal died a hero. Their last words were:",
+		"Fighting an endless army of errors and bugs Mangal died a hero. Their last words were:",
 		"I used to download stuff without any errors, then I took an arrow to the knee. By arrow I mean this:",
 	}
 
