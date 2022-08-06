@@ -100,7 +100,7 @@ func (b *statefulBubble) viewError() string {
 		true,
 		icon.Get(icon.Fail)+" Uggh, something went wrong. Maybe try again?",
 		"",
-		style.Italic(util.Wrap(randomPlot(), b.terminalWidth/2)),
+		style.Italic(util.Wrap(randomPlot(), b.terminalWidth)),
 		"",
 		style.Combined(style.Italic, style.Red)(b.lastError.Error()),
 	)
@@ -119,6 +119,7 @@ func randomPlot() string {
 	plots := []string{
 		"The universe is a dangerous place. There are many things that can go wrong. This is one of them:",
 		"Heroically fighting an endless army of errors and bugs Mangal died a hero. Their last words were:",
+		"I used to download manga without any errors, then I took an arrow to the knee.",
 	}
 
 	return plots[rand.Intn(len(plots))]

@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/provider/mangadex"
@@ -76,7 +75,6 @@ func CustomProviders() (map[string]*Provider, error) {
 			ID:   source.IDfromName(name),
 			Name: name,
 			CreateSource: func() (source.Source, error) {
-				fmt.Println("Creating source:", name, path)
 				return source.LoadSource(path, true)
 			},
 		}
