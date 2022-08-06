@@ -53,8 +53,8 @@ type statefulBubble struct {
 	lastDownloadedChapterPath string
 	lastError                 error
 
-	terminalWidth, terminalHeight int
-	plot                          string
+	width, height int
+	plot          string
 }
 
 func (b *statefulBubble) setState(s state) {
@@ -90,12 +90,18 @@ func (b *statefulBubble) previousState() {
 }
 
 func (b *statefulBubble) resize(width, height int) {
+	x, y := paddingStyle.GetFrameSize()
+
+	styledWidth := width - x
+	styledHeight := height - y
+
 	b.historyC.SetSize(width, height)
 	b.sourcesC.SetSize(width, height)
 	b.mangasC.SetSize(width, height)
 	b.chaptersC.SetSize(width, height)
-	b.terminalWidth = width
-	b.terminalHeight = height
+	b.progressC.Width = styledWidth
+	b.width = styledWidth
+	b.height = styledHeight
 }
 
 func (b *statefulBubble) startLoading() tea.Cmd {

@@ -7,7 +7,6 @@ import (
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/source"
-	"github.com/metafates/mangal/style"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
 )
@@ -64,7 +63,7 @@ func (b *statefulBubble) waitForChapters() tea.Cmd {
 
 func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
-		b.progressStatus = fmt.Sprintf("Gettings pages of %s", style.Trim(30)(chapter.Name))
+		b.progressStatus = fmt.Sprintf("Gettings pages of %s", chapter.Name)
 		b.currentDownloadingChapter = chapter
 		pages, err := b.selectedSource.PagesOf(chapter)
 		if err != nil {

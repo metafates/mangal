@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
@@ -85,11 +86,9 @@ func (b *statefulBubble) viewRead() string {
 
 	return b.renderLines(
 		true,
-		style.Trim(b.terminalWidth)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading chapter %s", style.Magenta(chapterName))),
+		style.Trim(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading chapter %s", style.Magenta(chapterName))),
 		"",
-		b.progressC.View(),
-		"",
-		b.spinnerC.View()+b.progressStatus,
+		style.Trim(b.width)(b.spinnerC.View()+b.progressStatus),
 	)
 }
 
@@ -103,11 +102,11 @@ func (b *statefulBubble) viewDownload() string {
 
 	return b.renderLines(
 		true,
-		style.Trim(b.terminalWidth)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading chapter %s", style.Magenta(chapterName))),
+		style.Trim(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading chapter %s", style.Magenta(chapterName))),
 		"",
 		b.progressC.View(),
 		"",
-		b.spinnerC.View()+b.progressStatus,
+		style.Trim(b.width)(b.spinnerC.View()+b.progressStatus),
 	)
 }
 
@@ -120,19 +119,24 @@ func (b *statefulBubble) viewError() string {
 		true,
 		icon.Get(icon.Fail)+" Uggh, something went wrong. Maybe try again?",
 		"",
-		style.Italic(util.Wrap(b.plot, b.terminalWidth)),
+		style.Italic(util.Wrap(b.plot, b.width)),
 		"",
 		style.Combined(style.Italic, style.Red)(b.lastError.Error()),
 	)
 }
 
+var (
+	paddingStyle = lipgloss.NewStyle().PaddingTop(1).PaddingLeft(2).PaddingRight(2)
+)
+
 func (b *statefulBubble) renderLines(addHelp bool, lines ...string) string {
+	h := len(lines)
 	l := strings.Join(lines, "\n")
 	if addHelp {
-		l += "\n\n" + b.helpC.View(b.keymap)
+		l += strings.Repeat("\n", b.height-h) + b.helpC.View(b.keymap)
 	}
 
-	return l
+	return paddingStyle.Render(l)
 }
 
 func randomPlot() string {

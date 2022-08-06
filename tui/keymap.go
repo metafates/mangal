@@ -39,7 +39,7 @@ func newStatefulKeymap() *statefulKeymap {
 		),
 		forceQuit: k(
 			keys("ctrl+c", "ctrl+d"),
-			help("ctrl+c", "force quit"),
+			help("ctrl+c", "quit"),
 		),
 		selectOne: k(
 			keys(" "),
@@ -135,7 +135,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case chaptersState:
 		return h(k.selectOne, k.selectAll, k.confirm, k.back), h(k.selectOne, k.selectAll, k.clearSelection, k.openURL, k.confirm, k.back)
 	case confirmState:
-		return to2(h(k.confirm, k.back, k.forceQuit))
+		return to2(h(k.confirm, k.back, k.quit))
 	case readState:
 		return to2(h(k.back, k.forceQuit))
 	case downloadState:
