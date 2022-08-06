@@ -215,6 +215,10 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.sourcesC.FilterState() == list.Filtering:
 			break
 		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
+			if b.sourcesC.SelectedItem() == nil {
+				break
+			}
+
 			s, err := b.sourcesC.SelectedItem().(*listItem).internal.(*provider.Provider).CreateSource()
 
 			if err != nil {
@@ -257,10 +261,18 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.mangasC.FilterState() == list.Filtering:
 			break
 		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
+			if b.mangasC.SelectedItem() == nil {
+				break
+			}
+
 			m, _ := b.mangasC.SelectedItem().(*listItem).internal.(*source.Manga)
 			b.selectedManga = m
 			return b, tea.Batch(b.getChapters(m), b.waitForChapters(), b.startLoading())
 		case key.Matches(msg, b.keymap.openURL):
+			if b.mangasC.SelectedItem() == nil {
+				break
+			}
+
 			m, _ := b.mangasC.SelectedItem().(*listItem).internal.(*source.Manga)
 			err := open.Start(m.URL)
 			if err != nil {
@@ -296,12 +308,20 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case b.chaptersC.FilterState() == list.Filtering:
 			break
 		case key.Matches(msg, b.keymap.openURL):
+			if b.chaptersC.SelectedItem() == nil {
+				break
+			}
+
 			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
 			err := open.Start(chapter.URL)
 			if err != nil {
 				b.newState(errorState)
 			}
 		case key.Matches(msg, b.keymap.selectOne):
+			if b.chaptersC.SelectedItem() == nil {
+				break
+			}
+
 			item := b.chaptersC.SelectedItem().(*listItem)
 			chapter := item.internal.(*source.Chapter)
 
@@ -313,6 +333,10 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case key.Matches(msg, b.keymap.selectAll):
 			items := b.chaptersC.Items()
+			if len(items) == 0 {
+				break
+			}
+
 			for _, item := range items {
 				item := item.(*listItem)
 				item.marked = true
@@ -321,6 +345,10 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case key.Matches(msg, b.keymap.clearSelection):
 			items := b.chaptersC.Items()
+			if len(items) == 0 {
+				break
+			}
+
 			for _, item := range items {
 				item := item.(*listItem)
 				item.marked = false
@@ -328,6 +356,10 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 				delete(b.selectedChapters, chapter)
 			}
 		case key.Matches(msg, b.keymap.read):
+			if b.chaptersC.SelectedItem() == nil {
+				break
+			}
+
 			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
 			b.newState(readState)
 			return b, tea.Batch(b.readChapter(chapter), b.waitForChapterRead(), b.startLoading())

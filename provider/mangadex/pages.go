@@ -17,7 +17,7 @@ func (m *Mangadex) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 	var pages []*source.Page
 
 	if len(downloader.Pages) == 0 {
-		return nil, errors.New("no pages found")
+		return nil, errors.New("there were no pages for this chapter")
 	}
 
 	for i, name := range downloader.Pages {
@@ -27,7 +27,7 @@ func (m *Mangadex) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 		}
 
 		if len(image) == 0 {
-			return nil, errors.New("empty image")
+			return nil, errors.New("image is empty")
 		}
 
 		page := source.Page{
