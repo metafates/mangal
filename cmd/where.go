@@ -27,13 +27,13 @@ var whereCmd = &cobra.Command{
 		printConfigPath := func() {
 			cmd.Println(headerStyle("Configuration path:"))
 			for _, path := range lo.Must(config.Paths()) {
-				cmd.Println(" " + path)
+				cmd.Println(style.Italic(path))
 			}
 		}
 
 		printSourcesPath := func() {
 			cmd.Println(headerStyle("Sources path:"))
-			cmd.Println(" " + viper.GetString(config.SourcesPath))
+			cmd.Println(style.Italic(viper.GetString(config.SourcesPath)))
 		}
 
 		if whereConfig {

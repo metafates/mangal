@@ -103,22 +103,27 @@ func setDefaults() {
 	}
 }
 
-// resolveAliases resolves the aliases for the downloader path
+// resolveAliases resolves the aliases for the paths
 func resolveAliases() {
 	home := lo.Must(os.UserHomeDir())
 	path := viper.GetString(DownloaderPath)
+	srcPath := viper.GetString(SourcesPath)
 
 	switch runtime.GOOS {
 	case "windows":
 		path = strings.ReplaceAll(path, "%USERPROFILE%", home)
+		srcPath = strings.ReplaceAll(srcPath, "%USERPROFILE%", home)
 	case "darwin", "linux":
 		path = strings.ReplaceAll(path, "$HOME", home)
+		srcPath = strings.ReplaceAll(srcPath, "$HOME", home)
 		path = strings.ReplaceAll(path, "~", home)
+		srcPath = strings.ReplaceAll(srcPath, "~", home)
 	default:
 		panic("unsupported OS: " + runtime.GOOS)
 	}
 
 	viper.Set(DownloaderPath, path)
+	viper.Set(SourcesPath, srcPath)
 }
 
 // Paths returns the paths to the config files
