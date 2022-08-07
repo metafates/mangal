@@ -165,8 +165,8 @@ func (b *statefulBubble) viewError() string {
 }
 
 var (
-	listExtraPaddingStyle = lipgloss.NewStyle().PaddingTop(1)
-	paddingStyle          = lipgloss.NewStyle().PaddingTop(1).PaddingLeft(2).PaddingRight(2)
+	listExtraPaddingStyle = lipgloss.NewStyle().Padding(1, 2, 1, 0)
+	paddingStyle          = lipgloss.NewStyle().Padding(1, 2)
 )
 
 func (b *statefulBubble) renderLines(addHelp bool, lines []string) string {
