@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
@@ -48,6 +49,7 @@ var rootCmd = &cobra.Command{
 		}
 		return tui.Run(&options)
 	},
+	Version: constant.Version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -63,7 +65,8 @@ func Execute() {
 		FlagsDataType: cc.Italic + cc.HiBlue,
 	})
 
-	if rootCmd.Execute() != nil {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
