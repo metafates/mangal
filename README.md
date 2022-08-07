@@ -30,13 +30,18 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Installation
 
+### Go (Any OS)
+
+Visit this link to install [Go](https://go.dev/doc/install)
+
+    go install -ldflags="-s -w" github.com/metafates/mangal@latest
+
+> `-ldflags="-s -w"` makes the binary smaller
+
+
 ### Linux
 
 Download the latest version from [GitHub release page](https://github.com/metafates/mangal/releases/latest)
-
-Or install it using [Go](https://go.dev/doc/install) 
-
-    go install github.com/metafates/mangal@latest
 
 ### macOS
 
@@ -49,7 +54,7 @@ Install using [Homebrew](https://brew.sh/)
 
 Install using [Scoop](https://scoop.sh/)
 
-    scoop install ...
+    scoop install https://raw.githubusercontent.com/metafates/scoop-mangal/main/mangal.json
 
 ### Docker
 
@@ -75,7 +80,7 @@ Run `mangal mini`
 
 ## Configuration
 
-Mangal uses [TOML](https://toml.io/en/) format for configuration under the `mangal.toml` filename.
+Mangal uses [TOML](https://toml.io) format for configuration under the `mangal.toml` filename.
 Config is expected to be either at the OS default config directory or under the home directory.
 For example, on Linux it would be `~/.config/mangal/mangal.toml` or `~/mangal.toml`.
 
@@ -91,9 +96,9 @@ Run `mangal config init` to generate a default config file
 [downloader]
 # Name template of the downloaded chapters
 # Available variables:
-# index        - index of the chapters
-# padded-index - same as index but padded with leading zeros
-# chapter      - name of the chapter
+# {index}        - index of the chapters
+# {padded-index} - same as index but padded with leading zeros
+# {chapter}      - name of the chapter
 chapter_name_template = '[{padded-index}] {chapter}'
 
 # Where to download manga
@@ -164,7 +169,7 @@ _Okay, so, how do I add a custom scraper?_
 
 1. Create a new lua file in the `mangal where --sources` folder
 2. Filename will be used as a source name
-3. Your script should contain __3 essential functions__
+3. Your script __must__ contain __3__ essential functions
    - `SearchManga(query)` - must return a table of tables each having 2 fields `name` and `url`
    - `MangaChapters(mangalUrl)` - must return a table of tables each having 2 fields `name` and `url` _(again)_
    - `ChapterPages(chapterUrl)` - must return a table of tables each having 2 fields `index` _(for ordering)_ and `url` _(to download image)_
