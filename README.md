@@ -10,8 +10,7 @@
     The most advanced CLI manga downloader in the entire universe!
 </h3>
 
-
-> Here should a video demonstrating something cool
+https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-a413-37cb07c1552e.mov
 
 
 ## Table of contents
