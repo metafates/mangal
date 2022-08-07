@@ -128,6 +128,9 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd = b.mangasC.SetItems(items)
 		b.newState(mangasState)
 		b.stopLoading()
+	case source.Source:
+		b.selectedSource = msg
+		b.newState(searchState)
 	}
 
 	b.spinnerC, cmd = b.spinnerC.Update(msg)
@@ -231,16 +234,9 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 				break
 			}
 
-			s, err := b.sourcesC.SelectedItem().(*listItem).internal.(*provider.Provider).CreateSource()
-
-			if err != nil {
-				b.lastError = err
-				b.plot = randomPlot()
-				b.newState(errorState)
-			} else {
-				b.selectedSource = s
-				b.newState(searchState)
-			}
+			p := b.sourcesC.SelectedItem().(*listItem).internal.(*provider.Provider)
+			b.newState(loadingState)
+			return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
 		}
 	}
 

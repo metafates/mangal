@@ -51,7 +51,7 @@ func (b *statefulBubble) viewLoading() string {
 		[]string{
 			style.Title("Loading"),
 			"",
-			b.spinnerC.View() + "Hacking the planet...",
+			b.spinnerC.View() + b.progressStatus,
 		},
 	)
 }

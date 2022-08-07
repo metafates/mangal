@@ -39,6 +39,7 @@ type statefulBubble struct {
 	selectedManga    *source.Manga
 	selectedChapters map[*source.Chapter]struct{} // mathematical set
 
+	sourceLoadedChannel    chan source.Source
 	foundMangasChannel     chan []*source.Manga
 	foundChaptersChannel   chan []*source.Chapter
 	chapterReadChannel     chan struct{}
@@ -127,6 +128,7 @@ func newBubble() *statefulBubble {
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
 
+		sourceLoadedChannel:    make(chan source.Source),
 		foundMangasChannel:     make(chan []*source.Manga),
 		foundChaptersChannel:   make(chan []*source.Chapter),
 		chapterReadChannel:     make(chan struct{}),

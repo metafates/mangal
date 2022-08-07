@@ -6,13 +6,42 @@ import (
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
+	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
 )
 
+func (b *statefulBubble) loadSource(p *provider.Provider) tea.Cmd {
+	return func() tea.Msg {
+		b.progressStatus = "Initializing source"
+		s, err := p.CreateSource()
+
+		if err != nil {
+			b.errorChannel <- err
+		} else {
+			b.sourceLoadedChannel <- s
+		}
+
+		return nil
+	}
+}
+
+func (b *statefulBubble) waitForSourceLoaded() tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case res := <-b.sourceLoadedChannel:
+			return res
+		case err := <-b.errorChannel:
+			b.lastError = err
+			return err
+		}
+	}
+}
+
 func (b *statefulBubble) searchManga(query string) tea.Cmd {
 	return func() tea.Msg {
+		b.progressStatus = "Searching"
 		mangas, err := b.selectedSource.Search(query)
 		if err != nil {
 			b.errorChannel <- err
