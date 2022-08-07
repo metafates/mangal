@@ -6,13 +6,12 @@ import (
 )
 
 var elementMethods = map[string]lua.LGFunction{
-	"input":         elementInput,
-	"click":         elementClick,
-	"text":          elementText,
-	"attribute":     elementAttribute,
-	"html":          elementHtml,
-	"selectAllText": elementSelectAllText,
-	"property":      elementProperty,
+	"input":     elementInput,
+	"click":     elementClick,
+	"text":      elementText,
+	"attribute": elementAttribute,
+	"html":      elementHtml,
+	"property":  elementProperty,
 }
 
 func registerElementType(L *lua.LState) {
@@ -67,13 +66,6 @@ func elementHtml(L *lua.LState) int {
 
 	L.Push(lua.LString(html))
 	return 1
-}
-
-func elementSelectAllText(L *lua.LState) int {
-	el := checkElement(L)
-	el.MustSelectAllText()
-
-	return 0
 }
 
 func elementProperty(L *lua.LState) int {

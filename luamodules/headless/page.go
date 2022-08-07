@@ -61,10 +61,10 @@ func pageNavigate(L *lua.LState) int {
 
 func pageElementByJS(L *lua.LState) int {
 	p := checkPage(L)
-	selector := L.CheckString(2)
+	js := L.CheckString(2)
 
 	ud := L.NewUserData()
-	ud.Value = p.MustElementByJS(selector)
+	ud.Value = p.MustElementByJS(js)
 	L.SetMetatable(ud, L.GetTypeMetatable("pageElement"))
 
 	L.Push(ud)
