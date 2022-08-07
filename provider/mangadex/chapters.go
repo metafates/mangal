@@ -69,7 +69,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 
 			chapters = append(chapters, &source.Chapter{
 				Name:     name,
-				Index:    n,
+				Index:    n + 1,
 				SourceID: ID,
 				ID:       chapter.ID,
 				URL:      fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),

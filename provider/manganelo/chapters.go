@@ -27,6 +27,7 @@ func (m *Manganelo) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	for i, chapter := range chapters {
 		reversed[len(chapters)-i-1] = chapter
 		chapter.Index = uint16(len(chapters) - i - 1)
+		chapter.Index++
 	}
 
 	return reversed, nil

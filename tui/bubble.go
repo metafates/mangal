@@ -150,6 +150,7 @@ func newBubble() *statefulBubble {
 			return bubble.keymap.FullHelp()[0]
 		}
 		listC.Title = title
+		listC.Styles.NoItems = paddingStyle
 
 		return listC
 	}
