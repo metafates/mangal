@@ -15,7 +15,8 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
-	"log"
+	"golang.org/x/exp/slices"
+	"strings"
 )
 
 type statefulBubble struct {
@@ -199,20 +200,32 @@ func (b *statefulBubble) loadSources() tea.Cmd {
 			internal:    p,
 		})
 	}
+	slices.SortFunc(items, func(a, b list.Item) bool {
+		// temporary workaround for placing mangadex second because it is not stable for now
+		// but, you know, there is nothing more permanent than a temporary solution
+		return strings.Compare(a.FilterValue(), b.FilterValue()) > 0
+	})
 
-	if err == nil {
-		for _, p := range customProviders {
-			items = append(items, &listItem{
-				title:       p.Name,
-				description: "Custom provider " + icon.Get(icon.Lua),
-				internal:    p,
-			})
-		}
-	} else {
-		log.Println(err)
+	if err != nil {
+		b.lastError = err
+		b.newState(errorState)
+		return nil
 	}
 
-	return b.sourcesC.SetItems(items)
+	var customItems []list.Item
+	for _, p := range customProviders {
+		customItems = append(customItems, &listItem{
+			title:       p.Name,
+			description: "Custom provider " + icon.Get(icon.Lua),
+			internal:    p,
+		})
+	}
+	slices.SortFunc(customItems, func(a, b list.Item) bool {
+		return strings.Compare(a.FilterValue(), b.FilterValue()) < 0
+	})
+
+	// built-in providers should come first
+	return b.sourcesC.SetItems(append(items, customItems...))
 }
 
 func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
