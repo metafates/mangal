@@ -32,9 +32,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ### Linux
 
-Download the latest version from [GitHub release page]()
-
-    curl ...
+Download the latest version from [GitHub release page](https://github.com/metafates/mangal/releases/latest)
 
 Or install it using [Go](https://go.dev/doc/install) 
 
@@ -55,17 +53,55 @@ Install using [Scoop](https://scoop.sh/)
 
 ### Docker
 
+Install using... well, you know.
+
     docker pull metafates/mangal
+
+To run
+
     docker run --rm -ti -e "TERM=xterm-256color" -v (PWD)/mangal/downloads:/downloads -v (PWD)/mangal/config:/config metafates/mangal
 
 ## Usage
 
-> ...
+### TUI
+
+Just run `mangal` and you're ready to go.
+
+### Mini
+
+There's also a `mini` mode that kinda resembles [ani-cli](https://github.com/pystardust/ani-cli)
+
+Run `mangal mini`
 
 ## Configuration
 
-> ...
+Mangal uses [TOML](https://toml.io/en/) format for configuration under the `mangal.toml` filename.
+Config is expected to be either at the OS default config directory or under the home directory.
+For example, on Linux it would be `~/.config/mangal/mangal.toml` or `~/mangal.toml`.
+
+Run `mangal where` to show expected config paths
+
+> "But what if I want to specify my own config path?"
+> 
+> Okay, fine, use env variable `MANGAL_CONFIG_PATH`
 
 ## Custom scrapers
 
-> ...
+This is where it gets interesting 😈
+
+Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
+
+Check the [defined modules](luamodules) for more information.
+For scraper examples, check the [examples](examples) folder. (feel free to contribute!)
+
+_Okay, so, how do I add a custom scraper?_
+
+1. Create a new lua file in the `mangal where --sources` folder
+2. Filename will be used as a source name
+3. Your script should contain __3 essential functions__
+   - `SearchManga(query)` - must return a table of tables each having 2 fields `name` and `url`
+   - `MangaChapters(mangalUrl)` - must return a table of tables each having 2 fields `name` and `url` _(again)_
+   - `ChapterPages(chapterUrl)` - must return a table of tables each having 2 fields `index` _(for ordering)_ and `url` _(to download image)_
+4. __That's it!__ You can test it by running `mangal run ...` where `...` is a filename
+
+New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)

@@ -44,6 +44,11 @@ func setFs() {
 
 // setPaths sets the paths to the config files
 func setPaths() {
+	envPath, defined := os.LookupEnv(constant.Mangal + "_CONFIG_PATH")
+	if defined {
+		viper.AddConfigPath(envPath)
+	}
+
 	paths := lo.Must(Paths())
 
 	for _, path := range paths {
