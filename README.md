@@ -27,6 +27,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __Fast__ - yes.
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
+- __Fancy__ - (ﾉ>ω<)ﾉ :｡･:*:･ﾟ’★,｡･:*:･ﾟ’☆
 
 ## Installation
 
