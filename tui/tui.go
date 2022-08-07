@@ -23,9 +23,5 @@ func Run(options *Options) error {
 		bubble.state = sourcesState
 	}
 
-	if err := tea.NewProgram(bubble, tea.WithAltScreen()).Start(); err != nil {
-		return err
-	}
-
-	return nil
+	return tea.NewProgram(bubble, tea.WithAltScreen()).Start()
 }

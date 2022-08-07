@@ -16,11 +16,11 @@ import (
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringP("format", "f", "", "output format")
+	rootCmd.Flags().StringP("format", "f", "", "output format")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return converter.Available(), cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(config.FormatsUse, rootCmd.PersistentFlags().Lookup("format")))
+	lo.Must0(viper.BindPFlag(config.FormatsUse, rootCmd.Flags().Lookup("format")))
 
 	rootCmd.PersistentFlags().StringP("icons", "i", "", "icons variant")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("icons", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -28,7 +28,7 @@ func init() {
 	}))
 	lo.Must0(viper.BindPFlag(config.IconsVariant, rootCmd.PersistentFlags().Lookup("icons")))
 
-	rootCmd.PersistentFlags().BoolP("history", "H", true, "write history of read chapters")
+	rootCmd.PersistentFlags().BoolP("history", "H", true, "write history of the read chapters")
 	lo.Must0(viper.BindPFlag(config.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("history")))
 
 	rootCmd.Flags().BoolP("continue", "c", false, "continue reading")

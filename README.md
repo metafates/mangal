@@ -85,9 +85,75 @@ Run `mangal where` to show expected config paths
 > 
 > Okay, fine, use env variable `MANGAL_CONFIG_PATH`
 
-## Custom scrapers
+Run `mangal config init` to generate a default config file
 
-This is where it gets interesting 😈
+```toml
+[downloader]
+# Name template of the downloaded chapters
+# Available variables:
+# index        - index of the chapters
+# padded-index - same as index but padded with leading zeros
+# chapter      - name of the chapter
+chapter_name_template = '[{padded-index}] {chapter}'
+
+# Where to download manga
+# Absolute or relative.
+#
+# You can also use home variable 
+# Linux/macOS = $HOME or ~
+# Windows = %USERPROFILE%
+path = '.'
+
+
+
+[formats]
+# Default format to export chapters
+# Available options are: pdf, zip, cbz, plain
+use = 'pdf'
+
+
+
+[history]
+# Save chapters to history when downloaded
+save_on_download = false
+# Save chapters to history on read
+save_on_read = true
+
+
+
+[icons]
+# Icons variant.
+# Available options are: emoji, kaomoji, plain, nerd (nerd-font)
+variant = 'emoji'
+
+
+
+[mangadex]
+# Preffered language
+language = 'en'
+# Show nsfw manga/chapters
+nsfw = false
+# Show chapters that cannot be read (because they are hosted on a different site)
+show_unavailable_chapters = false
+
+
+
+[mini]
+# Show bye message
+bye = true
+# Use vim binds to move
+vim_mode = true
+
+
+
+[reader]
+# Name of the app to use as a reader. Will use default OS app if empty
+name = ''
+# Will open chapter in the browser instead of downloading it
+read_in_browser = false
+```
+
+## Custom scrapers
 
 Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
 

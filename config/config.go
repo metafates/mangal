@@ -44,11 +44,6 @@ func setFs() {
 
 // setPaths sets the paths to the config files
 func setPaths() {
-	envPath, defined := os.LookupEnv(constant.Mangal + "_CONFIG_PATH")
-	if defined {
-		viper.AddConfigPath(envPath)
-	}
-
 	paths := lo.Must(Paths())
 
 	for _, path := range paths {
@@ -128,18 +123,24 @@ func resolveAliases() {
 
 // Paths returns the paths to the config files
 func Paths() ([]string, error) {
+	var paths []string
+
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return nil, err
 	}
+	paths = append(paths, filepath.Join(configDir, constant.Mangal))
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
+	paths = append(paths, homeDir)
 
-	return []string{
-		homeDir,
-		filepath.Join(configDir, constant.Mangal),
-	}, nil
+	envPath, defined := os.LookupEnv(strings.ToUpper(constant.Mangal) + "_CONFIG_PATH")
+	if defined {
+		paths = append(paths, envPath)
+	}
+
+	return paths, nil
 }
