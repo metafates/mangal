@@ -93,6 +93,8 @@ Run `mangal where` to show expected config paths
 Run `mangal config init` to generate a default config file
 
 ```toml
+# mangal.toml
+
 [downloader]
 # Name template of the downloaded chapters
 # Available variables:
