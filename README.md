@@ -61,7 +61,7 @@ Install using [Homebrew](https://brew.sh/)
 
 Install using [Scoop](https://scoop.sh/)
 
-    scoop bucket add metafates
+    scoop bucket add metafates https://github.com/metafates/scoop-metafates
     scoop install mangal
 
 ### Docker
