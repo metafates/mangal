@@ -19,6 +19,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [Custom scrapers](#custom-scrapers)
+- [Anilist](#anilist)
 
 ## Features
 
@@ -29,6 +30,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 - __Fancy__ - (ﾉ>ω<)ﾉ :｡･:*:･ﾟ’★,｡･:*:･ﾟ’☆
 - __Cross-Platform__ - Linux, macOS, Windows. Sorry, FreeBSD users...
+- __Anilist integration__ - Track your manga progress on Anilist when reading with Mangal.
 
 ## Installation
 
@@ -190,3 +192,13 @@ _Okay, so, how do I add a custom scraper?_
 4. __That's it!__ You can test it by running `mangal run ...` where `...` is a filename
 
 New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
+
+## Anilist
+
+Mangal also supports integration with anilist.
+
+It will mark chapters as read on Anilsit when you read them inside mangal.
+
+For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist-Integration)
+
+> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/)

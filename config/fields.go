@@ -39,6 +39,13 @@ const (
 )
 
 const (
+	AnilistEnable = "anilist.enable"
+	AnilistID     = "anilist.id"
+	AnilistSecret = "anilist.secret"
+	AnilistCode   = "anilist.code"
+)
+
+const (
 	LogsWrite = "logs.write"
 	LogsPath  = "logs.path"
 	LogsLevel = "logs.level"
@@ -73,4 +80,10 @@ var EnvExposed = []string{
 	LogsWrite,
 	LogsPath,
 	LogsLevel,
+
+	// Anilist
+	AnilistEnable,
+	AnilistID,
+	AnilistSecret,
+	AnilistCode,
 }

@@ -101,6 +101,9 @@ func setDefaults() {
 		LogsPath:  filepath.Join(configDir, constant.Mangal, "logs"),
 		LogsWrite: false,
 		LogsLevel: "info",
+
+		// Anilist
+		AnilistEnable: false,
 	}
 
 	for field, value := range fields {
