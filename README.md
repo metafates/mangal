@@ -160,6 +160,15 @@ vim_mode = true
 name = ''
 # Will open chapter in the browser instead of downloading it
 read_in_browser = false
+
+[logs]
+# write logs?
+write = false
+# logs path
+path = "..."
+# Available options are: (from less to most verbose)
+# panic, fatal, error, warn, info, debug, trace
+level = "info"
 ```
 
 ## Custom scrapers
