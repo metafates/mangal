@@ -181,7 +181,11 @@ level = "info"
 Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
 
 Check the [defined modules](luamodules) for more information.
-For scraper examples, check the [examples](examples) folder. (feel free to contribute!)
+For scraper examples, check the
+[custom scrapers discussion](https://github.com/metafates/mangal/discussions/7)
+or
+[examples](examples) folder.
+(feel free to contribute!)
 
 _Okay, so, how do I add a custom scraper?_
 
