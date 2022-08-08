@@ -57,8 +57,16 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			viper.Set(config.AnilistEnable, response)
 			err = viper.WriteConfig()
 			if err != nil {
-				log.Error(err)
-				return err
+				switch err.(type) {
+				case viper.ConfigFileNotFoundError:
+					err = viper.SafeWriteConfig()
+					if err != nil {
+						return err
+					}
+				default:
+					log.Error(err)
+					return err
+				}
 			}
 		}
 

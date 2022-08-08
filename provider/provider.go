@@ -8,7 +8,6 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
-	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 )
@@ -49,11 +48,7 @@ func DefaultProviders() map[string]*Provider {
 }
 
 func CustomProviders() (map[string]*Provider, error) {
-	if exists := lo.Must(filesystem.Get().Exists(viper.GetString(config.SourcesPath))); !exists {
-		return make(map[string]*Provider), nil
-	}
-
-	files, err := filesystem.Get().ReadDir(viper.GetString(config.SourcesPath))
+	files, err := filesystem.Get().ReadDir(config.SourcesPath())
 
 	if err != nil {
 		return nil, err
@@ -62,7 +57,7 @@ func CustomProviders() (map[string]*Provider, error) {
 	providers := make(map[string]*Provider)
 	paths := lo.FilterMap(files, func(f os.FileInfo, _ int) (string, bool) {
 		if filepath.Ext(f.Name()) == customProviderExtension {
-			return filepath.Join(viper.GetString(config.SourcesPath), f.Name()), true
+			return filepath.Join(config.SourcesPath(), f.Name()), true
 		}
 		return "", false
 	})

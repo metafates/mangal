@@ -34,7 +34,13 @@ var configInitCmd = &cobra.Command{
 		}
 
 		if lo.Must(cmd.Flags().GetBool("force")) {
-			return viper.WriteConfig()
+			err := viper.WriteConfig()
+			switch err.(type) {
+			case viper.ConfigFileNotFoundError:
+				return viper.SafeWriteConfig()
+			default:
+				return err
+			}
 		}
 		return viper.SafeWriteConfig()
 	},

@@ -22,19 +22,18 @@ func Setup() error {
 		return nil
 	}
 
-	logsPath := viper.GetString(config.LogsPath)
+	logsPath := config.LogsPath()
 
 	if logsPath == "" {
 		return errors.New("logs path is not set")
 	}
 
 	today := time.Now().Format("2006-01-02")
-	logsPath = filepath.Join(logsPath, fmt.Sprintf("%s.log", today))
-	if !lo.Must(filesystem.Get().Exists(logsPath)) {
-		lo.Must0(filesystem.Get().MkdirAll(filepath.Dir(logsPath), os.ModePerm))
-		lo.Must(filesystem.Get().Create(logsPath))
+	logFilePath := filepath.Join(logsPath, fmt.Sprintf("%s.log", today))
+	if !lo.Must(filesystem.Get().Exists(logFilePath)) {
+		lo.Must(filesystem.Get().Create(logFilePath))
 	}
-	logFile, err := filesystem.Get().OpenFile(logsPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err := filesystem.Get().OpenFile(logFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}
