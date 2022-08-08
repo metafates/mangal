@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - '*'
 
 permissions:
   contents: write
@@ -14,6 +12,7 @@ permissions:
 
 jobs:
   goreleaser:
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       -
