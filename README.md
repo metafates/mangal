@@ -41,7 +41,9 @@ Visit this link to install [Go](https://go.dev/doc/install)
     go install -ldflags="-s -w" github.com/metafates/mangal@latest
 
 > `-ldflags="-s -w"` makes the binary smaller
-> Use this method if others are not working for some reason
+> 
+> Use this method if others are not working for some reason.
+> And please open an issue if so
 
 
 ### Linux
@@ -59,7 +61,8 @@ Install using [Homebrew](https://brew.sh/)
 
 Install using [Scoop](https://scoop.sh/)
 
-    scoop install https://raw.githubusercontent.com/metafates/scoop-mangal/main/mangal.json
+    scoop bucket add metafates
+    scoop install mangal
 
 ### Docker
 
