@@ -34,11 +34,12 @@ body:
   - type: dropdown
     attributes:
       label: "Operating System"
-      description: "What operating system are you using?"
+      description: "Which operating system are you using?"
       options:
         - macOS
         - Windows
         - Linux
+        - Other
     validations:
       required: true
   - type: markdown
