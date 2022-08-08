@@ -162,12 +162,14 @@ func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 			log.Info("opened without errors")
 		}
 
-		log.Info("saving history")
-		err = history.Save(chapter)
-		if err != nil {
-			log.Warn(err)
-		} else {
-			log.Info("history saved")
+		if viper.GetBool(config.HistorySaveOnRead) {
+			log.Info("saving history")
+			err = history.Save(chapter)
+			if err != nil {
+				log.Warn(err)
+			} else {
+				log.Info("history saved")
+			}
 		}
 
 		b.progressStatus = "Done"
@@ -225,6 +227,16 @@ func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 			log.Error(err)
 			b.errorChannel <- err
 			return nil
+		}
+
+		if viper.GetBool(config.HistorySaveOnDownload) {
+			log.Info("saving history")
+			err = history.Save(chapter)
+			if err != nil {
+				log.Warn(err)
+			} else {
+				log.Info("history saved")
+			}
 		}
 
 		log.Info("downloaded without errors")
