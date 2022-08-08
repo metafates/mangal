@@ -102,6 +102,31 @@ func (b *statefulBubble) waitForChapters() tea.Cmd {
 
 func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
+		defer func() {
+			if viper.GetBool(config.HistorySaveOnRead) {
+				go func() {
+					log.Info("saving history")
+					err := history.Save(chapter)
+					if err != nil {
+						log.Warn(err)
+					} else {
+						log.Info("history saved")
+					}
+				}()
+			}
+		}()
+
+		if viper.GetBool(config.ReaderReadInBrowser) {
+			err := open.Start(chapter.URL)
+			if err != nil {
+				b.errorChannel <- err
+			} else {
+				b.chapterReadChannel <- struct{}{}
+			}
+
+			return nil
+		}
+
 		log.Info("downloading " + chapter.Name + " from " + chapter.Manga.Name + " for reading. Provider is " + b.selectedSource.ID())
 		b.progressStatus = "Gettings pages"
 		b.currentDownloadingChapter = chapter
@@ -160,18 +185,6 @@ func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 				return nil
 			}
 			log.Info("opened without errors")
-		}
-
-		if viper.GetBool(config.HistorySaveOnRead) {
-			go func() {
-				log.Info("saving history")
-				err = history.Save(chapter)
-				if err != nil {
-					log.Warn(err)
-				} else {
-					log.Info("history saved")
-				}
-			}()
 		}
 
 		b.progressStatus = "Done"

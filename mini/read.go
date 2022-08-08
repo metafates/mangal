@@ -6,6 +6,7 @@ import (
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
+	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
@@ -44,6 +45,21 @@ func read() error {
 }
 
 func readChapter(src source.Source, chapter *source.Chapter) error {
+	defer func() {
+		if viper.GetBool(config.HistorySaveOnRead) {
+			go func() {
+				err := history.Save(chapter)
+				if err != nil {
+					log.Error(err)
+				}
+			}()
+		}
+	}()
+
+	if viper.GetBool(config.ReaderReadInBrowser) {
+		return open.Start(chapter.URL)
+	}
+
 	pages, err := src.PagesOf(chapter)
 	if err != nil {
 		return err
@@ -71,17 +87,16 @@ func readChapter(src source.Source, chapter *source.Chapter) error {
 		return err
 	}
 
-	if viper.GetBool(config.HistorySaveOnRead) {
-		s.Suffix = " Writing history"
-		_ = history.Save(chapter)
-	}
-
 	if reader := viper.GetString(config.ReaderName); reader != "" {
 		s.Suffix = fmt.Sprintf(" Opening \"%s\"", reader)
 		err = open.StartWith(path, reader)
 	} else {
 		s.Suffix = " Opening"
 		err = open.Start(path)
+	}
+
+	if err != nil {
+		return err
 	}
 
 	if err != nil {

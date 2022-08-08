@@ -6,13 +6,11 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
-	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"path/filepath"
 	"time"
@@ -375,17 +373,6 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
-
-			if viper.GetBool(config.ReaderReadInBrowser) {
-				err := open.Start(chapter.URL)
-				if err != nil {
-					b.plot = randomPlot()
-					b.lastError = err
-					b.newState(errorState)
-				}
-				break
-			}
-
 			b.newState(readState)
 			return b, tea.Batch(b.readChapter(chapter), b.waitForChapterRead(), b.startLoading())
 		case key.Matches(msg, b.keymap.confirm):
