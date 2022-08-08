@@ -54,7 +54,7 @@ brews:
     homepage: "https://github.com/metafates/mangal"
     description: "The ultimate CLI manga downloader!"
     license: "MIT"
-    skip_upload: true
+    skip_upload: false
 
 scoop:
   bucket:
@@ -73,7 +73,7 @@ scoop:
   homepage: "https://github.com/metafates/mangal"
   description: "The ultimate CLI manga downloader"
   license: MIT
-  skip_upload: true
+  skip_upload: false
 
 
 release:
@@ -83,7 +83,7 @@ release:
     owner: metafates
     name: mangal
 
-  draft: true
+  draft: false
 
   # Header template for the release body.
   # Defaults to empty.
