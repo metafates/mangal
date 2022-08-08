@@ -67,7 +67,7 @@ func setDefaults() {
 		DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
 
 		// Formats
-		FormatsUse: "plain",
+		FormatsUse: "pdf",
 
 		// Mini-mode
 		MiniVimMode: false,
