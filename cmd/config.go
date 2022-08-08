@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"github.com/metafates/mangal/filesystem"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
 )
 
 func init() {
@@ -23,6 +26,13 @@ var configInitCmd = &cobra.Command{
 	Short: "Initialize config",
 	Long:  `Initialize default config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		configDir := lo.Must(os.UserConfigDir())
+
+		mangalDir := filepath.Join(configDir, "mangal")
+		if !lo.Must(filesystem.Get().Exists(mangalDir)) {
+			_ = filesystem.Get().MkdirAll(mangalDir, os.ModePerm)
+		}
+
 		if lo.Must(cmd.Flags().GetBool("force")) {
 			return viper.WriteConfig()
 		}
