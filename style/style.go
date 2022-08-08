@@ -19,7 +19,7 @@ func Padding(padding ...int) Style {
 	}
 }
 
-func Trim(max int) Style {
+func Truncate(max int) Style {
 	return func(s string) string {
 		if len(s) <= max {
 			return s

@@ -54,7 +54,7 @@ func download() error {
 	for _, chapter := range selected {
 		counter++
 
-		s.Suffix = fmt.Sprintf(" [%d/%d] Getting pages of %s", counter, len(selected), style.Trim(40)(chapter.Name))
+		s.Suffix = fmt.Sprintf(" [%d/%d] Getting pages of %s", counter, len(selected), style.Truncate(40)(chapter.Name))
 		_, err = src.PagesOf(chapter)
 		if err != nil {
 			return err

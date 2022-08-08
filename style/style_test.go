@@ -9,14 +9,14 @@ func TestTrim(t *testing.T) {
 	Convey("Given a string", t, func() {
 		s := "lorem ipsum dolor sit amet"
 		Convey("When trimming with a max of 10", func() {
-			result := Trim(10)(s)
+			result := Truncate(10)(s)
 			Convey("Then the result should be 'lorem ipsu…'", func() {
 				So(result, ShouldEqual, "lorem ips…")
 			})
 		})
 
 		Convey("When trimming with a max of 30h", func() {
-			result := Trim(30)(s)
+			result := Truncate(30)(s)
 			Convey("Then the result should be lorem ipsum dolor sit amet", func() {
 				So(result, ShouldEqual, "lorem ipsum dolor sit amet")
 			})

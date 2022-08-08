@@ -78,7 +78,7 @@ func selectManga(mangas []*source.Manga) (*source.Manga, error) {
 	var m = make(map[string]*source.Manga)
 
 	for _, manga := range mangas {
-		m[style.Trim(trimAt)(manga.Name)] = manga
+		m[style.Truncate(trimAt)(manga.Name)] = manga
 	}
 
 	options := lo.Keys(m)
@@ -109,7 +109,7 @@ func selectChapter(chapters []*source.Chapter, offset int) (*source.Chapter, err
 
 	var c = make(map[string]*source.Chapter)
 	for _, chapter := range chapters {
-		c[style.Trim(trimAt)(chapter.Name)] = chapter
+		c[style.Truncate(trimAt)(chapter.Name)] = chapter
 	}
 
 	options := lo.Keys(c)
@@ -141,7 +141,7 @@ func selectChapters(chapters []*source.Chapter) ([]*source.Chapter, error) {
 
 	var c = make(map[string]*source.Chapter)
 	for _, chapter := range chapters {
-		c[style.Trim(trimAt)(chapter.Name)] = chapter
+		c[style.Truncate(trimAt)(chapter.Name)] = chapter
 	}
 
 	options := lo.Keys(c)

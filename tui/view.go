@@ -107,9 +107,9 @@ func (b *statefulBubble) viewRead() string {
 		[]string{
 			style.Title("Reading"),
 			"",
-			style.Trim(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
+			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
 			"",
-			style.Trim(b.width)(b.spinnerC.View() + b.progressStatus),
+			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
 		},
 	)
 }
@@ -127,11 +127,11 @@ func (b *statefulBubble) viewDownload() string {
 		[]string{
 			style.Title("Downloading"),
 			"",
-			style.Trim(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
+			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
 			"",
 			b.progressC.View(),
 			"",
-			style.Trim(b.width)(b.spinnerC.View() + b.progressStatus),
+			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
 		},
 	)
 }
