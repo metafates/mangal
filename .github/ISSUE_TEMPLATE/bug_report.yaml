@@ -1,7 +1,6 @@
 name: Bug Report
 description: File a bug report
 labels: ["bug"]
-assignees: "metafates"
 body:
   - type: textarea
     attributes:
@@ -40,15 +39,8 @@ body:
         - macOS
         - Windows
         - Linux
-        - Other
     validations:
       required: true
-  - type: checkboxes
-    attributes:
-      label: Checks
-      options:
-        - label: "I've used `mangal doctor` and it didn't help"
-          required: true
   - type: markdown
     attributes:
       value: |
