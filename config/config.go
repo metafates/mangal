@@ -96,6 +96,11 @@ func setDefaults() {
 		MangadexLanguage:                "en",
 		MangadexNSFW:                    false,
 		MangadexShowUnavailableChapters: false,
+
+		// Logs
+		LogsPath:  filepath.Join(configDir, constant.Mangal, "logs"),
+		LogsWrite: false,
+		LogsLevel: "info",
 	}
 
 	for field, value := range fields {
@@ -106,18 +111,24 @@ func setDefaults() {
 // resolveAliases resolves the aliases for the paths
 func resolveAliases() {
 	home := lo.Must(os.UserHomeDir())
+
 	path := viper.GetString(DownloaderPath)
 	srcPath := viper.GetString(SourcesPath)
+	logsPath := viper.GetString(LogsPath)
 
 	switch runtime.GOOS {
 	case "windows":
 		path = strings.ReplaceAll(path, "%USERPROFILE%", home)
 		srcPath = strings.ReplaceAll(srcPath, "%USERPROFILE%", home)
+		logsPath = strings.ReplaceAll(logsPath, "%USERPROFILE%", home)
 	case "darwin", "linux":
 		path = strings.ReplaceAll(path, "$HOME", home)
 		srcPath = strings.ReplaceAll(srcPath, "$HOME", home)
+		logsPath = strings.ReplaceAll(logsPath, "$HOME", home)
+
 		path = strings.ReplaceAll(path, "~", home)
 		srcPath = strings.ReplaceAll(srcPath, "~", home)
+		logsPath = strings.ReplaceAll(logsPath, "~", home)
 	default:
 		panic("unsupported OS: " + runtime.GOOS)
 	}

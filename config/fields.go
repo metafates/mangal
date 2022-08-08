@@ -38,6 +38,12 @@ const (
 	MangadexShowUnavailableChapters = "mangadex.show_unavailable_chapters"
 )
 
+const (
+	LogsWrite = "logs.write"
+	LogsPath  = "logs.path"
+	LogsLevel = "logs.level"
+)
+
 var EnvExposed = []string{
 	// downloader
 	DownloaderPath,
@@ -62,4 +68,9 @@ var EnvExposed = []string{
 
 	// Icons
 	IconsVariant,
+
+	// Logs
+	LogsWrite,
+	LogsPath,
+	LogsLevel,
 }

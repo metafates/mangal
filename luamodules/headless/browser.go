@@ -2,6 +2,7 @@ package headless
 
 import (
 	"github.com/go-rod/rod"
+	"github.com/metafates/mangal/log"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -10,11 +11,13 @@ var browserMethods = map[string]lua.LGFunction{
 }
 
 func newBrowser() lua.LGFunction {
+	log.Info("creating browser")
 	return func(L *lua.LState) int {
 		browser := rod.New()
 		err := browser.Connect()
 
 		if err != nil {
+			log.Error(err)
 			L.Push(lua.LNil)
 			L.Push(lua.LString(err.Error()))
 			return 2
@@ -40,6 +43,8 @@ func checkBrowser(L *lua.LState) *rod.Browser {
 	if v, ok := ud.Value.(*rod.Browser); ok {
 		return v
 	}
+
+	log.Error("browser expected")
 	L.ArgError(1, "browser expected")
 	return nil
 }
@@ -47,6 +52,8 @@ func checkBrowser(L *lua.LState) *rod.Browser {
 func browserPage(L *lua.LState) int {
 	browser := checkBrowser(L)
 	url := L.ToString(2)
+
+	log.Info("opening page " + url)
 	p := browser.MustPage(url)
 
 	ud := L.NewUserData()

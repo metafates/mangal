@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	"os"
@@ -22,20 +23,26 @@ type SavedChapter struct {
 }
 
 func Get() (map[string]*SavedChapter, error) {
+	log.Info("Getting history location")
 	historyFile, err := Location()
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
 	// decode json into slice of structs
+	log.Info("Reading history file")
 	var chapters map[string]*SavedChapter
 	contents, err := filesystem.Get().ReadFile(historyFile)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
+	log.Info("Decoding history from json")
 	err = json.Unmarshal(contents, &chapters)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -43,20 +50,27 @@ func Get() (map[string]*SavedChapter, error) {
 }
 
 func Save(chapter *source.Chapter) error {
+	log.Info("Saving chapter to history")
+
 	historyFile, err := Location()
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
 	// decode json into slice of structs
 	var chapters map[string]*SavedChapter
+	log.Info("Reading history file")
 	contents, err := filesystem.Get().ReadFile(historyFile)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
+	log.Info("Decoding history from json")
 	err = json.Unmarshal(contents, &chapters)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -73,14 +87,18 @@ func Save(chapter *source.Chapter) error {
 	chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)] = &jsonChapter
 
 	// encode json
+	log.Info("Encoding history to json")
 	encoded, err := json.Marshal(chapters)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
 	// write to file
+	log.Info("Writing history to file")
 	err = filesystem.Get().WriteFile(historyFile, encoded, os.ModePerm)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 

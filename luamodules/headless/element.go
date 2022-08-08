@@ -2,6 +2,7 @@ package headless
 
 import (
 	"github.com/go-rod/rod"
+	"github.com/metafates/mangal/log"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -24,13 +25,15 @@ func checkElement(L *lua.LState) *rod.Element {
 	if v, ok := ud.Value.(*rod.Element); ok {
 		return v
 	}
-	L.ArgError(1, "pageElement expected")
+	log.Error("element expected")
+	L.ArgError(1, "element expected")
 	return nil
 }
 
 func elementInput(L *lua.LState) int {
 	el := checkElement(L)
 	value := L.ToString(2)
+	log.Info("inputting " + value)
 	el.MustInput(value)
 
 	return 0
@@ -38,6 +41,7 @@ func elementInput(L *lua.LState) int {
 
 func elementClick(L *lua.LState) int {
 	el := checkElement(L)
+	log.Info("clicking")
 	el.MustClick()
 
 	return 0
@@ -45,6 +49,7 @@ func elementClick(L *lua.LState) int {
 
 func elementText(L *lua.LState) int {
 	el := checkElement(L)
+	log.Info("getting text")
 	text := el.MustText()
 
 	L.Push(lua.LString(text))
@@ -54,6 +59,7 @@ func elementText(L *lua.LState) int {
 func elementAttribute(L *lua.LState) int {
 	el := checkElement(L)
 	name := L.ToString(2)
+	log.Info("getting attribute " + name)
 	value := el.MustAttribute(name)
 
 	L.Push(lua.LString(*value))
@@ -62,6 +68,7 @@ func elementAttribute(L *lua.LState) int {
 
 func elementHtml(L *lua.LState) int {
 	el := checkElement(L)
+	log.Info("getting html")
 	html := el.MustHTML()
 
 	L.Push(lua.LString(html))
@@ -71,6 +78,7 @@ func elementHtml(L *lua.LState) int {
 func elementProperty(L *lua.LState) int {
 	el := checkElement(L)
 	name := L.ToString(2)
+	log.Info("getting property " + name)
 	value := el.MustProperty(name)
 
 	L.Push(lua.LString(value.Str()))
