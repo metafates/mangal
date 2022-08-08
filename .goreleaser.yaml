@@ -59,11 +59,11 @@ brews:
 scoop:
   bucket:
     owner: metafates
-    name: scoop-mangal
+    name: scoop-metafates
     branch: main
     token: "{{ .Env.SCOOP_TAP_GITHUB_TOKEN }}"
 
-  folder: Scoops
+  folder: bucket
 
   commit_author:
     name: goreleaserbot
@@ -71,7 +71,7 @@ scoop:
 
   commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
   homepage: "https://github.com/metafates/mangal"
-  description: "The ultimate CLI manga downloader"
+  description: "The ultimate CLI manga downloader!"
   license: MIT
   skip_upload: false
 
