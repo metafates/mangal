@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"errors"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/provider/mangadex"
@@ -51,7 +50,7 @@ func DefaultProviders() map[string]*Provider {
 
 func CustomProviders() (map[string]*Provider, error) {
 	if exists := lo.Must(filesystem.Get().Exists(viper.GetString(config.SourcesPath))); !exists {
-		return nil, errors.New("sources directory does not exist")
+		return make(map[string]*Provider), nil
 	}
 
 	files, err := filesystem.Get().ReadDir(viper.GetString(config.SourcesPath))
