@@ -44,11 +44,7 @@ func setFs() {
 
 // setPaths sets the paths to the config files
 func setPaths() {
-	paths := lo.Must(Paths())
-
-	for _, path := range paths {
-		viper.AddConfigPath(path)
-	}
+	viper.AddConfigPath(Path())
 }
 
 // setEnvs sets the environment variables
@@ -64,7 +60,6 @@ func setEnvs() {
 // setDefaults sets the default values
 func setDefaults() {
 	viper.SetTypeByDefaultValue(true)
-	configDir := lo.Must(os.UserConfigDir())
 
 	fields := map[string]any{
 		// Downloader
@@ -73,9 +68,6 @@ func setDefaults() {
 
 		// Formats
 		FormatsUse: "plain",
-
-		// Sources
-		SourcesPath: filepath.Join(configDir, constant.Mangal, "sources"),
 
 		// Mini-mode
 		MiniVimMode: false,
@@ -98,7 +90,6 @@ func setDefaults() {
 		MangadexShowUnavailableChapters: false,
 
 		// Logs
-		LogsPath:  filepath.Join(configDir, constant.Mangal, "logs"),
 		LogsWrite: false,
 		LogsLevel: "info",
 
@@ -114,52 +105,48 @@ func setDefaults() {
 // resolveAliases resolves the aliases for the paths
 func resolveAliases() {
 	home := lo.Must(os.UserHomeDir())
-
 	path := viper.GetString(DownloaderPath)
-	srcPath := viper.GetString(SourcesPath)
-	logsPath := viper.GetString(LogsPath)
 
 	switch runtime.GOOS {
 	case "windows":
 		path = strings.ReplaceAll(path, "%USERPROFILE%", home)
-		srcPath = strings.ReplaceAll(srcPath, "%USERPROFILE%", home)
-		logsPath = strings.ReplaceAll(logsPath, "%USERPROFILE%", home)
 	case "darwin", "linux":
 		path = strings.ReplaceAll(path, "$HOME", home)
-		srcPath = strings.ReplaceAll(srcPath, "$HOME", home)
-		logsPath = strings.ReplaceAll(logsPath, "$HOME", home)
-
 		path = strings.ReplaceAll(path, "~", home)
-		srcPath = strings.ReplaceAll(srcPath, "~", home)
-		logsPath = strings.ReplaceAll(logsPath, "~", home)
 	default:
 		panic("unsupported OS: " + runtime.GOOS)
 	}
-
-	viper.Set(DownloaderPath, path)
-	viper.Set(SourcesPath, srcPath)
 }
 
-// Paths returns the paths to the config files
-func Paths() ([]string, error) {
-	var paths []string
-
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return nil, err
-	}
-	paths = append(paths, filepath.Join(configDir, constant.Mangal))
-
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-	paths = append(paths, homeDir)
-
-	envPath, defined := os.LookupEnv(strings.ToUpper(constant.Mangal) + "_CONFIG_PATH")
-	if defined {
-		paths = append(paths, envPath)
+func init() {
+	paths := []string{
+		Path(),
+		SourcesPath(),
+		LogsPath(),
 	}
 
-	return paths, nil
+	for _, path := range paths {
+		lo.Must0(filesystem.Get().MkdirAll(path, os.ModePerm))
+	}
+}
+
+func Path() string {
+	var path string
+
+	customDir, present := os.LookupEnv("MANGAL_CONFIG_DIR")
+	if present {
+		path = customDir
+	} else {
+		path = filepath.Join(lo.Must(os.UserConfigDir()), constant.Mangal)
+	}
+
+	return path
+}
+
+func SourcesPath() string {
+	return filepath.Join(Path(), "sources")
+}
+
+func LogsPath() string {
+	return filepath.Join(Path(), "logs")
 }

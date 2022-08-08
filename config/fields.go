@@ -20,10 +20,6 @@ const (
 )
 
 const (
-	SourcesPath = "sources.path"
-)
-
-const (
 	MiniVimMode = "mini.vim_mode"
 	MiniBye     = "mini.bye"
 )
@@ -47,7 +43,6 @@ const (
 
 const (
 	LogsWrite = "logs.write"
-	LogsPath  = "logs.path"
 	LogsLevel = "logs.level"
 )
 
@@ -66,9 +61,6 @@ var EnvExposed = []string{
 	HistorySaveOnRead,
 	HistorySaveOnDownload,
 
-	// sources
-	SourcesPath,
-
 	// mini
 	MiniVimMode,
 	MiniBye,
@@ -78,7 +70,6 @@ var EnvExposed = []string{
 
 	// Logs
 	LogsWrite,
-	LogsPath,
 	LogsLevel,
 
 	// Anilist

@@ -3,9 +3,7 @@ package cmd
 import (
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/style"
-	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func init() {
@@ -26,14 +24,12 @@ var whereCmd = &cobra.Command{
 
 		printConfigPath := func() {
 			cmd.Println(headerStyle("Configuration path:"))
-			for _, path := range lo.Must(config.Paths()) {
-				cmd.Println(style.Italic(path))
-			}
+			cmd.Println(config.Path())
 		}
 
 		printSourcesPath := func() {
 			cmd.Println(headerStyle("Sources path:"))
-			cmd.Println(style.Italic(viper.GetString(config.SourcesPath)))
+			cmd.Println(style.Italic(config.SourcesPath()))
 		}
 
 		if whereConfig {

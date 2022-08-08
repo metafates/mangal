@@ -89,8 +89,8 @@ Run `mangal mini`
 ## Configuration
 
 Mangal uses [TOML](https://toml.io) format for configuration under the `mangal.toml` filename.
-Config is expected to be either at the OS default config directory or under the home directory.
-For example, on Linux it would be `~/.config/mangal/mangal.toml` or `~/mangal.toml`.
+Config is expected to be at the OS default config directory.
+For example, on Linux it would be `~/.config/mangal/mangal.toml`.
 
 Run `mangal where` to show expected config paths
 
@@ -171,8 +171,6 @@ read_in_browser = false
 [logs]
 # write logs?
 write = false
-# logs path
-path = "..."
 # Available options are: (from less to most verbose)
 # panic, fatal, error, warn, info, debug, trace
 level = "info"
