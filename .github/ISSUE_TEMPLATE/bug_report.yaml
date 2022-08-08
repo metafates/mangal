@@ -39,7 +39,6 @@ body:
         - macOS
         - Windows
         - Linux
-        - Other
     validations:
       required: true
   - type: markdown
