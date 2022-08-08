@@ -97,6 +97,7 @@ Run `mangal where` to show expected config paths
 
 Run `mangal config init` to generate a default config file
 
+> This is not a complete config, just an example.
 ```toml
 # mangal.toml
 
@@ -201,4 +202,4 @@ It will mark chapters as read on Anilsit when you read them inside mangal.
 
 For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist-Integration)
 
-> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/)
+> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open to suggestions!
