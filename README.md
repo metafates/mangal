@@ -25,9 +25,10 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - __LUAAAA SCRAPPEERRRSS!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__.
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
-- __Fast__ - yes.
+- __Fast__ - yes. 
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 - __Fancy__ - (ﾉ>ω<)ﾉ :｡･:*:･ﾟ’★,｡･:*:･ﾟ’☆
+- __Cross-Platform__ - Linux, macOS, Windows. Sorry, FreeBSD users...
 
 ## Installation
 
