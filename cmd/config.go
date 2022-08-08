@@ -24,7 +24,13 @@ var configInitCmd = &cobra.Command{
 	Long:  `Initialize default config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if lo.Must(cmd.Flags().GetBool("force")) {
-			return viper.WriteConfig()
+			err := viper.WriteConfig()
+			switch err.(type) {
+			case viper.ConfigFileNotFoundError:
+				return viper.SafeWriteConfig()
+			default:
+				return err
+			}
 		}
 		return viper.SafeWriteConfig()
 	},
