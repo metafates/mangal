@@ -2,24 +2,30 @@ package style
 
 import "github.com/charmbracelet/lipgloss"
 
-var (
-	Common    = lipgloss.NewStyle().Padding(1)
-	Accent    = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	Secondary = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"})
-	Bold      = lipgloss.NewStyle().Bold(true)
-	Italic    = lipgloss.NewStyle().Italic(true)
-	Success   = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575"))
-	Fail      = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+type Style func(string) string
 
-	InputPrompt    = Accent.Copy().Bold(true)
-	InputTitle     = InputPrompt.Copy()
-	List           = lipgloss.NewStyle().Padding(1, 1, 1, 0)
-	MangaListTitle = lipgloss.NewStyle().
-			Background(lipgloss.Color("#9f86c0")).
-			Foreground(lipgloss.Color("#231942")).
-			Padding(0, 1)
-	ChaptersListTitle = lipgloss.NewStyle().
-				Background(lipgloss.Color("#e0b1cb")).
-				Foreground(lipgloss.Color("#231942")).
-				Padding(0, 1)
-)
+func Combined(styles ...func(string) string) func(string) string {
+	return func(s string) string {
+		for _, style := range styles {
+			s = style(s)
+		}
+		return s
+	}
+}
+
+func Padding(padding ...int) Style {
+	return func(s string) string {
+		return lipgloss.NewStyle().Padding(padding...).Render(s)
+	}
+}
+
+func Truncate(max int) Style {
+	return func(s string) string {
+		if len(s) <= max {
+			return s
+		}
+
+		// Minus one for the ellipsis
+		return s[:max-1] + "…"
+	}
+}

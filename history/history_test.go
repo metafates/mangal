@@ -2,57 +2,46 @@ package history
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/scraper"
+	"github.com/metafates/mangal/source"
 	. "github.com/smartystreets/goconvey/convey"
-	"github.com/spf13/afero"
 	"testing"
 )
 
 func init() {
-	filesystem.Set(afero.NewMemMapFs())
-	config.Initialize("", false)
+	filesystem.SetMemMapFs()
 }
 
 func TestHistory(t *testing.T) {
-	t.Skip("skipping history test because it's not implemented yet properly")
-
-	Convey("Given a sample chapter url", t, func() {
-		chapter := &scraper.URL{
-			Relation: &scraper.URL{
-				Address: "https://example.com",
-				Info:    "Test manga",
-				Index:   0,
-			},
-			Scraper: &scraper.Scraper{Source: &scraper.Source{Name: "Test source"}},
-			Address: "https://example.com",
-			Info:    "Test chapter",
-			Index:   0,
+	Convey("Given a chapter", t, func() {
+		chapter := source.Chapter{
+			Name:     "adwad",
+			URL:      "dwaofa",
+			Index:    42069,
+			SourceID: "fwaiog",
+			ID:       "fawfa",
+			Pages:    nil,
 		}
+		manga := source.Manga{
+			Name:     "dawf",
+			URL:      "fwa",
+			Index:    1337,
+			SourceID: "sajfioaw",
+			ID:       "wjakfkawgjj",
+			Chapters: []*source.Chapter{&chapter},
+		}
+		chapter.Manga = &manga
 
-		Convey("When writeHistory is called", func() {
-			err := WriteHistory(chapter)
-
-			Convey("Then the history should be written", func() {
+		Convey("When saving the chapter", func() {
+			err := Save(&chapter)
+			Convey("Then the error should be nil", func() {
 				So(err, ShouldBeNil)
 
-				Convey("And history file should contain the correct data", func() {
-					history, err := ReadHistory()
+				Convey("And the chapter should be saved", func() {
+					chapters, err := Get()
 					So(err, ShouldBeNil)
-					So(len(history), ShouldEqual, 1)
-
-					_, hasKey := history["https://example.com"]
-					fmt.Printf("HELLO %+v", history)
-					So(hasKey, ShouldBeTrue)
-
-					So(history["https://example.com"].Chapter.Address, ShouldEqual, "https://example.com")
-					So(history["https://example.com"].Chapter.Info, ShouldEqual, "Test chapter")
-					So(history["https://example.com"].Chapter.Index, ShouldEqual, 0)
-					So(history["https://example.com"].Manga.Address, ShouldEqual, "https://example.com")
-					So(history["https://example.com"].Manga.Info, ShouldEqual, "Test manga")
-					So(history["https://example.com"].Manga.Index, ShouldEqual, 0)
-					So(history["https://example.com"].Manga.Scraper.Source.Name, ShouldEqual, "Test source")
+					So(len(chapters), ShouldBeGreaterThan, 0)
+					So(chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)].Name, ShouldEqual, chapter.Name)
 				})
 			})
 		})

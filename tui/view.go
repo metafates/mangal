@@ -2,103 +2,189 @@ package tui
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/config"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
-	"golang.org/x/exp/slices"
-	"log"
-	"strconv"
+	"math/rand"
+	"strings"
 )
 
-// View handles how the Bubble should be rendered
-func (b *Bubble) View() string {
-	var view string
-
-	template := viewTemplates[b.state]
-
+func (b *statefulBubble) View() string {
 	switch b.state {
-	case ResumeState:
-		view = fmt.Sprintf(template, b.ResumeList.View())
-	case SearchState:
-		if config.UserConfig.UI.Title == "" {
-			view = b.input.View()
-		} else {
-			view = fmt.Sprintf(template, style.InputTitle.Render(config.UserConfig.UI.Title), b.input.View())
-		}
-	case LoadingState:
-		view = fmt.Sprintf(template, b.spinner.View())
-	case MangaState:
-		view = fmt.Sprintf(template, b.mangaList.View())
-	case ChaptersState:
-		view = fmt.Sprintf(template, b.chaptersList.View())
-	case ConfirmState:
-		// Should be unreachable
-		if len(b.selectedChapters) == 0 {
-			log.Fatal("No chapters selected")
-		}
-
-		mangaName := b.chaptersList.Items()[0].(*listItem).url.Relation.Info
-		chaptersToDownload := len(b.selectedChapters)
-		view = fmt.Sprintf(
-			template,
-			style.Accent.Render(strconv.Itoa(chaptersToDownload)),
-			util.Plural("chapter", chaptersToDownload),
-			style.Accent.Render(util.PrettyTrim(mangaName, 40)),
-		)
-	case DownloadingState:
-
-		var header string
-
-		// It shouldn't be nil at this stage but it panics TODO: FIX THIS
-		if b.chaptersDownloadProgressInfo.Current != nil {
-			mangaName := b.chaptersDownloadProgressInfo.Current.Info
-			header = fmt.Sprintf("Downloading %s", util.PrettyTrim(style.Accent.Render(mangaName), 40))
-		} else {
-			header = "Preparing for download..."
-		}
-
-		if config.UserConfig.UI.Icons {
-			header = "羽" + header
-		}
-
-		subheader := b.chapterDownloadProgressInfo.Message
-		view = fmt.Sprintf("%s\n\n%s\n\n%s %s", header, b.progress.View(), b.spinner.View(), subheader)
-	case ExitPromptState:
-		succeeded := b.chaptersDownloadProgressInfo.Succeeded
-		failed := b.chaptersDownloadProgressInfo.Failed
-
-		succeededRendered := style.Success.Render(strconv.Itoa(len(succeeded)))
-		failedRendered := style.Fail.Render(strconv.Itoa(len(failed)))
-
-		if config.UserConfig.UI.Icons {
-			template = "\uF633 " + template
-		}
-
-		view = fmt.Sprintf(template, succeededRendered, util.Plural("chapter", len(succeeded)), failedRendered)
-
-		// show failed chapters
-		for _, chapter := range failed {
-			view += fmt.Sprintf("\n\n%s %s", style.Fail.Render("Failed"), chapter.Info)
-		}
+	case idle:
+		return b.viewIdle()
+	case loadingState:
+		return b.viewLoading()
+	case historyState:
+		return b.viewHistory()
+	case sourcesState:
+		return b.viewSources()
+	case searchState:
+		return b.viewSearch()
+	case mangasState:
+		return b.viewMangas()
+	case chaptersState:
+		return b.viewChapters()
+	case confirmState:
+		return b.viewConfirm()
+	case readState:
+		return b.viewRead()
+	case downloadState:
+		return b.viewDownload()
+	case downloadDoneState:
+		return b.viewDownloadDone()
+	case errorState:
+		return b.viewError()
 	}
 
-	// Do not add help Bubble at these states, since they already have one
-	if slices.Contains([]bubbleState{MangaState, ChaptersState, ResumeState}, b.state) {
-		return style.List.Render(view)
-	}
-
-	// Add help view
-	return style.Common.Render(fmt.Sprintf("%s\n\n%s", view, b.help.View(b.keyMap)))
+	panic("unknown state")
 }
 
-// viewTemplates is a map of the templates for the different states
-var viewTemplates = map[bubbleState]string{
-	ResumeState:      "%s",
-	SearchState:      "%s\n\n%s",
-	LoadingState:     "%s Searching...",
-	MangaState:       "%s",
-	ChaptersState:    "%s",
-	ConfirmState:     "Download %s %s of %s ?",
-	DownloadingState: "%s\n\n%s\n\n%s %s",
-	ExitPromptState:  "Done. %s %s downloaded, %s failed",
+func (b *statefulBubble) viewIdle() string {
+	return ""
+}
+
+func (b *statefulBubble) viewLoading() string {
+	return b.renderLines(
+		true,
+		[]string{
+			style.Title("Loading"),
+			"",
+			b.spinnerC.View() + b.progressStatus,
+		},
+	)
+}
+
+func (b *statefulBubble) viewHistory() string {
+	return listExtraPaddingStyle.Render(b.historyC.View())
+}
+
+func (b *statefulBubble) viewSources() string {
+	return listExtraPaddingStyle.Render(b.sourcesC.View())
+}
+
+func (b *statefulBubble) viewSearch() string {
+	return b.renderLines(
+		true,
+		[]string{
+			style.Title("Search Manga"),
+			"",
+			b.inputC.View(),
+		},
+	)
+}
+
+func (b *statefulBubble) viewMangas() string {
+	return listExtraPaddingStyle.Render(b.mangasC.View())
+}
+
+func (b *statefulBubble) viewChapters() string {
+	return listExtraPaddingStyle.Render(b.chaptersC.View())
+}
+
+func (b *statefulBubble) viewConfirm() string {
+	return b.renderLines(
+		true,
+		[]string{
+			style.Title("Confirm"),
+			"",
+			fmt.Sprintf(icon.Get(icon.Question)+" Download %d chapters?", len(b.selectedChapters)),
+		},
+	)
+}
+
+func (b *statefulBubble) viewRead() string {
+	var chapterName string
+
+	chapter := b.currentDownloadingChapter
+	if chapter != nil {
+		chapterName = chapter.Name
+	}
+
+	return b.renderLines(
+		true,
+		[]string{
+			style.Title("Reading"),
+			"",
+			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
+			"",
+			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
+		},
+	)
+}
+
+func (b *statefulBubble) viewDownload() string {
+	var chapterName string
+
+	chapter := b.currentDownloadingChapter
+	if chapter != nil {
+		chapterName = chapter.Name
+	}
+
+	return b.renderLines(
+		true,
+		[]string{
+			style.Title("Downloading"),
+			"",
+			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
+			"",
+			b.progressC.View(),
+			"",
+			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
+		},
+	)
+}
+
+func (b *statefulBubble) viewDownloadDone() string {
+	return b.renderLines(
+		true,
+		[]string{
+			style.Title("Finish"),
+			"",
+			icon.Get(icon.Success) + " Download finished." + style.Italic(" *Beep-Boop-Boop*"),
+		},
+	)
+}
+
+func (b *statefulBubble) viewError() string {
+	errorMsg := util.Wrap(style.Combined(style.Italic, style.Red)(b.lastError.Error()), b.width)
+	return b.renderLines(
+		true,
+		append([]string{
+			style.ErrorTitle("Error"),
+			"",
+			icon.Get(icon.Fail) + " Uggh, something went wrong. Maybe try again?",
+			"",
+			style.Italic(util.Wrap(b.plot, b.width)),
+			"",
+		},
+			strings.Split(errorMsg, "\n")...,
+		),
+	)
+}
+
+var (
+	listExtraPaddingStyle = lipgloss.NewStyle().Padding(1, 2, 1, 0)
+	paddingStyle          = lipgloss.NewStyle().Padding(1, 2)
+)
+
+func (b *statefulBubble) renderLines(addHelp bool, lines []string) string {
+	h := len(lines)
+	l := strings.Join(lines, "\n")
+	if addHelp {
+		l += strings.Repeat("\n", b.height-h) + b.helpC.View(b.keymap)
+	}
+
+	return paddingStyle.Render(l)
+}
+
+func randomPlot() string {
+	plots := []string{
+		"The universe is a dangerous place. There are many things that can go wrong. This is one of them:",
+		"Fighting an endless army of errors and bugs Mangal died a hero. Their last words were:",
+		"I used to download stuff without any errors, then I took an arrow to the knee. By arrow I mean this:",
+	}
+
+	return plots[rand.Intn(len(plots))]
 }

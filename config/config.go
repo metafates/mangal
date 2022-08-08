@@ -1,237 +1,165 @@
 package config
 
 import (
-	"errors"
-	"fmt"
-	"github.com/metafates/mangal/common"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/scraper"
-	"github.com/metafates/mangal/style"
-	"github.com/metafates/mangal/util"
-	"github.com/pelletier/go-toml/v2"
-	"github.com/spf13/afero"
-	"golang.org/x/exp/slices"
+	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 )
 
-type Config struct {
-	Scrapers   []*scraper.Scraper
-	Formats    *FormatsConfig
-	UI         *UIConfig
-	Downloader *DownloaderConfig
-	Anilist    struct {
-		Client         *scraper.AnilistClient
-		Enabled        bool
-		MarkDownloaded bool
+var EnvKeyReplacer = strings.NewReplacer(".", "_")
+
+// Setup initializes the configuration
+func Setup() error {
+	setName()
+	setFs()
+	setEnvs()
+	setDefaults()
+	setPaths()
+
+	err := viper.ReadInConfig()
+
+	switch err.(type) {
+	case viper.ConfigFileNotFoundError:
+		// Use defaults then
+		return nil
+	default:
+		resolveAliases()
+		return err
 	}
-	Reader        *ReaderConfig
-	HistoryMode   bool
-	IncognitoMode bool
 }
 
-// DefaultConfig makes default config
-func DefaultConfig() *Config {
-	conf, _ := ParseConfig(DefaultConfigBytes)
-	return conf
+func setName() {
+	viper.SetConfigName(constant.Mangal)
+	viper.SetConfigType("toml")
 }
 
-// UserConfig is a global variable that stores user config
-var UserConfig *Config
-
-// GetConfig returns user config or default config if it doesn't exist
-// If path is empty string then default config will be returned
-func GetConfig(path string) *Config {
-	var (
-		configPath string
-		err        error
-	)
-
-	// If path is empty string then default config will be used
-	if path == "" {
-		configPath, err = util.UserConfigFile()
-	} else {
-		configPath = path
-	}
-
-	if err != nil {
-		return DefaultConfig()
-	}
-
-	// If config file doesn't exist then default config will be used
-
-	configExists, err := afero.Exists(filesystem.Get(), configPath)
-	if err != nil || !configExists {
-		return DefaultConfig()
-	}
-
-	// Read config file
-	contents, err := afero.ReadFile(filesystem.Get(), configPath)
-	if err != nil {
-		return DefaultConfig()
-	}
-
-	// Parse config
-	config, err := ParseConfig(contents)
-	if err != nil {
-		return DefaultConfig()
-	}
-
-	return config
+func setFs() {
+	viper.SetFs(filesystem.Get())
 }
 
-// ParseConfig parses config from given string
-func ParseConfig(configString []byte) (*Config, error) {
-	// tempConfig is a temporary config that will be used to store parsed config
-	type tempConfig struct {
-		Formats         FormatsConfig `toml:"formats"`
-		UI              UIConfig      `toml:"ui"`
-		UseCustomReader bool          `toml:"use_custom_reader"`
-		CustomReader    string        `toml:"custom_reader"`
-		Sources         []*scraper.Source
-		Downloader      DownloaderConfig
-		Reader          ReaderConfig
-		Anilist         struct {
-			Enabled        bool   `toml:"enabled"`
-			ID             string `toml:"id"`
-			Secret         string `toml:"secret"`
-			MarkDownloaded bool   `toml:"mark_downloaded"`
-		}
+// setPaths sets the paths to the config files
+func setPaths() {
+	paths := lo.Must(Paths())
+
+	for _, path := range paths {
+		viper.AddConfigPath(path)
+	}
+}
+
+// setEnvs sets the environment variables
+func setEnvs() {
+	viper.SetEnvPrefix(constant.Mangal)
+	viper.SetEnvKeyReplacer(EnvKeyReplacer)
+
+	for _, env := range EnvExposed {
+		viper.MustBindEnv(env)
+	}
+}
+
+// setDefaults sets the default values
+func setDefaults() {
+	viper.SetTypeByDefaultValue(true)
+	configDir := lo.Must(os.UserConfigDir())
+
+	fields := map[string]any{
+		// Downloader
+		DownloaderPath:                ".",
+		DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
+
+		// Formats
+		FormatsUse: "plain",
+
+		// Sources
+		SourcesPath: filepath.Join(configDir, constant.Mangal, "sources"),
+
+		// Mini-mode
+		MiniVimMode: false,
+		MiniBye:     true,
+
+		// Icons
+		IconsVariant: "emoji",
+
+		// Reader
+		ReaderName:          "",
+		ReaderReadInBrowser: false,
+
+		// History
+		HistorySaveOnRead:     true,
+		HistorySaveOnDownload: false,
+
+		// Mangadex
+		MangadexLanguage:                "en",
+		MangadexNSFW:                    false,
+		MangadexShowUnavailableChapters: false,
+
+		// Logs
+		LogsPath:  filepath.Join(configDir, constant.Mangal, "logs"),
+		LogsWrite: false,
+		LogsLevel: "info",
+
+		// Anilist
+		AnilistEnable: false,
 	}
 
-	var (
-		tempConf tempConfig
-		conf     Config
-	)
-	err := toml.Unmarshal(configString, &tempConf)
+	for field, value := range fields {
+		viper.SetDefault(field, value)
+	}
+}
 
+// resolveAliases resolves the aliases for the paths
+func resolveAliases() {
+	home := lo.Must(os.UserHomeDir())
+
+	path := viper.GetString(DownloaderPath)
+	srcPath := viper.GetString(SourcesPath)
+	logsPath := viper.GetString(LogsPath)
+
+	switch runtime.GOOS {
+	case "windows":
+		path = strings.ReplaceAll(path, "%USERPROFILE%", home)
+		srcPath = strings.ReplaceAll(srcPath, "%USERPROFILE%", home)
+		logsPath = strings.ReplaceAll(logsPath, "%USERPROFILE%", home)
+	case "darwin", "linux":
+		path = strings.ReplaceAll(path, "$HOME", home)
+		srcPath = strings.ReplaceAll(srcPath, "$HOME", home)
+		logsPath = strings.ReplaceAll(logsPath, "$HOME", home)
+
+		path = strings.ReplaceAll(path, "~", home)
+		srcPath = strings.ReplaceAll(srcPath, "~", home)
+		logsPath = strings.ReplaceAll(logsPath, "~", home)
+	default:
+		panic("unsupported OS: " + runtime.GOOS)
+	}
+
+	viper.Set(DownloaderPath, path)
+	viper.Set(SourcesPath, srcPath)
+}
+
+// Paths returns the paths to the config files
+func Paths() ([]string, error) {
+	var paths []string
+
+	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return nil, err
 	}
+	paths = append(paths, filepath.Join(configDir, constant.Mangal))
 
-	conf.Downloader = &tempConf.Downloader
-	if conf.Downloader.ChapterNameTemplate == "" {
-		conf.Downloader.ChapterNameTemplate = "[%d] %s"
-	}
-
-	if strings.Contains(conf.Downloader.Path, "$HOME") {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return nil, err
-		}
-		conf.Downloader.Path = strings.ReplaceAll(conf.Downloader.Path, "$HOME", home)
-	}
-
-	// Convert sources listed in tempConfig to Scrapers
-	for _, source := range tempConf.Sources {
-		if source.Enabled {
-			// Create scraper for this source
-			s := scraper.MakeSourceScraper(source)
-			conf.Scrapers = append(conf.Scrapers, s)
-		}
-	}
-
-	conf.UI = &tempConf.UI
-	if tempConf.UI.ChapterNameTemplate == "" {
-		tempConf.UI.ChapterNameTemplate = "[%d] %s"
-	}
-
-	// Default format is pdf
-	conf.Formats = &tempConf.Formats
-	if format, ok := os.LookupEnv(common.EnvDefaultFormat); ok {
-		conf.Formats.Default = common.FormatType(format)
-	} else if conf.Formats.Default == "" {
-		conf.Formats.Default = common.PDF
-	}
-
-	conf.Reader = &tempConf.Reader
-	conf.HistoryMode = false
-	conf.IncognitoMode = false
-
-	if customReader := os.Getenv(common.EnvCustomReader); customReader != "" {
-		conf.Reader.UseCustomReader = true
-		conf.Reader.CustomReader = customReader
-	}
-
-	if tempConf.Anilist.Enabled {
-		id, secret := tempConf.Anilist.ID, tempConf.Anilist.Secret
-		conf.Anilist.Client, err = scraper.NewAnilistClient(id, secret)
-
-		if err != nil {
-			return nil, err
-		}
-
-		conf.Anilist.Enabled = true
-		conf.Anilist.MarkDownloaded = tempConf.Anilist.MarkDownloaded
-	}
-
-	if v, ok := os.LookupEnv(common.EnvDownloadPath); ok {
-		conf.Downloader.Path = v
-	}
-
-	return &conf, err
-}
-
-// ValidateConfig checks if config is valid and returns error if it is not
-func ValidateConfig(config *Config) error {
-	// check if any source is used
-	if len(config.Scrapers) == 0 {
-		return errors.New("no manga sources listed")
-	}
-
-	// check if chapter name template is valid
-	// chapter name template should contain %d or %s placeholder
-	validateChapterNameTemplate := func(template string) error {
-		if !strings.Contains(template, "%d") &&
-			!strings.Contains(template, "%s") &&
-			!strings.Contains(template, "%0d") {
-			return errors.New("chapter name template should contain at least one %d, %0d or %s placeholder")
-		}
-		return nil
-	}
-
-	err := validateChapterNameTemplate(config.Downloader.ChapterNameTemplate)
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return err
+		return nil, err
+	}
+	paths = append(paths, homeDir)
+
+	envPath, defined := os.LookupEnv(strings.ToUpper(constant.Mangal) + "_CONFIG_PATH")
+	if defined {
+		paths = append(paths, envPath)
 	}
 
-	err = validateChapterNameTemplate(config.UI.ChapterNameTemplate)
-	if err != nil {
-		return err
-	}
-
-	// check if anilist is properly configured
-	if config.Anilist.Enabled {
-		if config.Anilist.Client.ID == "" || config.Anilist.Client.Secret == "" {
-			return errors.New("anilist is enabled but id or secret is not set")
-		}
-	}
-
-	// check if custom reader is properly configured
-	if config.Reader.UseCustomReader && config.Reader.CustomReader == "" {
-		return errors.New("use_custom_reader is set to true but reader isn't specified")
-	}
-
-	// Check if format is valid
-	if !slices.Contains(common.AvailableFormats, config.Formats.Default) {
-		msg := fmt.Sprintf(
-			`unknown format '%s'
-type %s to show available formats`,
-			string(config.Formats.Default),
-			style.Accent.Render(strings.ToLower(common.Mangal)+" formats"),
-		)
-		return errors.New(msg)
-	}
-
-	// Check if scrapers are valid
-	for _, s := range config.Scrapers {
-		if s.Source == nil {
-			return errors.New("internal error: scraper source is nil")
-		}
-		if err := scraper.ValidateSource(s.Source); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return paths, nil
 }

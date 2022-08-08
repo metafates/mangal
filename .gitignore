@@ -68,9 +68,9 @@ go.work
 # .idea/artifacts
 # .idea/compiler.xml
 # .idea/jarRepositories.xml
-# .idea/modules.xml
+# .idea/luamodules.xml
 # .idea/*.iml
-# .idea/modules
+# .idea/luamodules
 # *.iml
 # *.ipr
 
@@ -292,8 +292,6 @@ cython_debug/
 .AppleDouble
 .LSOverride
 
-# Icon must end with two \r
-Icon
 
 # Thumbnails
 ._*
@@ -313,3 +311,5 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+dist/

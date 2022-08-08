@@ -1,36 +1,36 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/metafates/mangal/common"
+	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 )
+
+func init() {
+	rootCmd.AddCommand(envCmd)
+}
 
 var envCmd = &cobra.Command{
 	Use:   "env",
-	Short: "Show environment variables",
-	Long:  "Show environment variables and their values",
+	Short: "Show available environment variables",
+	Long:  `Show available environment variables.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(style.Bold.Render("Available environment variables"))
-		fmt.Println()
+		for _, env := range config.EnvExposed {
+			env = strings.ToUpper(constant.Mangal + "_" + config.EnvKeyReplacer.Replace(env))
+			value, present := os.LookupEnv(env)
 
-		for envVar, description := range common.AvailableEnvVars {
-			value, isSet := os.LookupEnv(envVar)
-			fmt.Printf("%s - %s\n", style.Accent.Render(envVar), description)
+			cmd.Println(style.Combined(style.Bold, style.Magenta)(env))
 
-			if isSet {
-				fmt.Printf("%s - %s\n", "Value", value)
+			if present && value != "" {
+				cmd.Println(style.Green(value))
 			} else {
-				fmt.Printf("%s - %s\n", "Value", style.Fail.Render("Not set"))
+				cmd.Println(style.Red("unset"))
 			}
 
-			fmt.Println()
+			cmd.Println()
 		}
 	},
-}
-
-func init() {
-	mangalCmd.AddCommand(envCmd)
 }

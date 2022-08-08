@@ -2,129 +2,141 @@ package history
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/scraper"
-	"github.com/metafates/mangal/util"
-	"github.com/spf13/afero"
+	"github.com/metafates/mangal/integration"
+	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/source"
+	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 )
 
-type Entry struct {
-	Manga      *scraper.URL
-	Chapter    *scraper.URL
-	SourceName string
+type SavedChapter struct {
+	SourceID  string `json:"source_id"`
+	MangaName string `json:"manga_name"`
+	MangaURL  string `json:"manga_url"`
+	Name      string `json:"name"`
+	URL       string `json:"url"`
+	ID        string `json:"id"`
+	MangaID   string `json:"manga_id"`
 }
 
-func (h *Entry) Title() string {
-	if config.UserConfig.UI.Icons {
-		return "\uF5B9 " + h.Manga.Info
-	}
-	return h.Manga.Info
-}
-
-func (h *Entry) Description() string {
-	// replace according to the name description
-	description := strings.ReplaceAll(config.UserConfig.UI.ChapterNameTemplate, "%0d", util.PadZeros(h.Chapter.Index, 4))
-	description = strings.ReplaceAll(description, "%d", strconv.Itoa(h.Chapter.Index))
-	description = strings.ReplaceAll(description, "%s", "\""+h.Chapter.Info+"\"")
-
-	if config.UserConfig.UI.Icons {
-		return "\uF129 " + description
-	}
-	return description
-}
-
-func (h *Entry) FilterValue() string {
-	return h.Manga.Info
-}
-
-func WriteHistory(chapter *scraper.URL) error {
-	historyFile, err := util.HistoryFilePath()
-
+func Get() (map[string]*SavedChapter, error) {
+	log.Info("Getting history location")
+	historyFile, err := Location()
 	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	// decode json into slice of structs
+	log.Info("Reading history file")
+	var chapters map[string]*SavedChapter
+	contents, err := filesystem.Get().ReadFile(historyFile)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	log.Info("Decoding history from json")
+	err = json.Unmarshal(contents, &chapters)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	return chapters, nil
+}
+
+func Save(chapter *source.Chapter) error {
+	if viper.GetBool(config.AnilistEnable) {
+		defer func() {
+			log.Info("Saving chapter to anilist")
+			err := integration.Anilist.MarkRead(chapter)
+			if err != nil {
+				log.Error("Saving chapter to anilist failed: " + err.Error())
+			}
+		}()
+	}
+
+	log.Info("Saving chapter to history")
+
+	historyFile, err := Location()
+	if err != nil {
+		log.Error(err)
 		return err
 	}
 
-	history, err := ReadHistory()
-
+	// decode json into slice of structs
+	var chapters map[string]*SavedChapter
+	log.Info("Reading history file")
+	contents, err := filesystem.Get().ReadFile(historyFile)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
-	history[chapter.Relation.Address] = &Entry{
-		Manga:      chapter.Relation,
-		Chapter:    chapter,
-		SourceName: chapter.Scraper.Source.Name,
-	}
-
-	historyJSON, err := json.Marshal(history)
-
+	log.Info("Decoding history from json")
+	err = json.Unmarshal(contents, &chapters)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
-	// create the file if it doesn't exist
-	if exists, err := afero.Exists(filesystem.Get(), historyFile); err != nil {
-		return err
-	} else if !exists {
-		if err = filesystem.Get().MkdirAll(filepath.Dir(historyFile), os.ModePerm); err != nil {
-			return err
-		}
+	jsonChapter := SavedChapter{
+		SourceID:  chapter.SourceID,
+		MangaName: chapter.Manga.Name,
+		MangaURL:  chapter.Manga.URL,
+		Name:      chapter.Name,
+		URL:       chapter.URL,
+		ID:        chapter.ID,
+		MangaID:   chapter.Manga.ID,
 	}
 
-	err = afero.WriteFile(filesystem.Get(), historyFile, historyJSON, os.ModePerm)
+	chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)] = &jsonChapter
 
+	// encode json
+	log.Info("Encoding history to json")
+	encoded, err := json.Marshal(chapters)
 	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// write to file
+	log.Info("Writing history to file")
+	err = filesystem.Get().WriteFile(historyFile, encoded, os.ModePerm)
+	if err != nil {
+		log.Error(err)
 		return err
 	}
 
 	return nil
 }
 
-func ReadHistory() (map[string]*Entry, error) {
-	historyFile, err := util.HistoryFilePath()
-
+func Location() (string, error) {
+	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constant.CachePrefix)
+	err := filesystem.Get().MkdirAll(filepath.Dir(cacheDir), os.ModePerm)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	// check if exists
-	if exists, err := afero.Exists(filesystem.Get(), historyFile); err != nil {
-		return nil, err
-	} else if !exists {
-		return make(map[string]*Entry), nil
-	}
-
-	history, err := afero.ReadFile(filesystem.Get(), historyFile)
-
+	historyFile := filepath.Join(cacheDir, constant.History+".json")
+	exists, err := filesystem.Get().Exists(historyFile)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	var historyEntries map[string]*Entry
-
-	err = json.Unmarshal(history, &historyEntries)
-
-	for k, entry := range historyEntries {
-		s, ok := util.Find(config.UserConfig.Scrapers, func(s *scraper.Scraper) bool {
-			return s.Source.Name == entry.SourceName
-		})
-
-		if !ok {
-			delete(historyEntries, k)
+	if !exists {
+		err = filesystem.Get().WriteFile(historyFile, []byte("{}"), os.ModePerm)
+		if err != nil {
+			return "", err
 		}
-
-		entry.Manga.Scraper = s
-		entry.Chapter.Scraper = s
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	return historyEntries, nil
+	return historyFile, nil
 }

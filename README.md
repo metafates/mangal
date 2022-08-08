@@ -1,433 +1,205 @@
-<h1 align="center">Mangal</h1>
-<p align="center">
-    <img width="200" src="assets/logo.png" alt="logo">
-</p>
-
-<h3 align="center">The Ultimate CLI Manga Downloader</h3>
+<h1 align="center">Mangal 3 📜</h1>
 
 <p align="center">
-  <a href="https://goreportcard.com/report/github.com/metafates/mangal">
-    <img src="https://goreportcard.com/badge/github.com/metafates/mangal">
-  </a>
-
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg">
-  </a>
+    <img alt="Linux" src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black">
+    <img alt="macOS" src="https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0">
+    <img alt="Windows" src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white">
 </p>
 
-https://user-images.githubusercontent.com/62389790/174501320-119474c3-c745-4f95-8e7d-fbf5bd40920b.mov
+<h3 align="center">
+    The most advanced CLI manga downloader in the entire universe!
+</h3>
 
-## Table of Contents
+https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-a413-37cb07c1552e.mov
 
-- [About](#about)
-- [Fixing Errors](#fixing-errors)
-- [Examples](#examples)
-- [Config](#config)
-- [Commands](#commands)
-- [Install](#install)
-- [Build](#build)
-- [Anilist Integration](#anilist-integration)
-- [Limitations](#limitations)
 
-## About
+## Table of contents
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Custom scrapers](#custom-scrapers)
+- [Anilist](#anilist)
 
-✨ __Mangal__ is a feature rich, configurable manga browser & downloader
-written in Go with support for different formats
+## Features
 
-⚙️ User defined scrapers support
- (see [config](#config) & [limitations](#limitations))
+- __LUAAAA SCRAPPEERRRSS!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__.
+- __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
+- __4 Different export formats__ - PDF, CBZ, ZIP and plain images
+- __Fast__ - yes. 
+- __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
+- __Fancy__ - (ﾉ>ω<)ﾉ :｡･:*:･ﾟ’★,｡･:*:･ﾟ’☆
+- __Cross-Platform__ - Linux, macOS, Windows. Sorry, FreeBSD users...
+- __Anilist integration__ - Track your manga progress on Anilist when reading with Mangal.
 
-🦎 TUI & Inline modes. Use it as a standalone app or integrate with scripts
+## Installation
 
-🚀 It's fast. Mangal uses multithreading to speed up the process
+### Go (Any OS)
 
-🍥 Integration with Anilist! __BETA__
+Visit this link to install [Go](https://go.dev/doc/install)
 
-⏳ History mode
+    go install -ldflags="-s -w" github.com/metafates/mangal@latest
 
-🍿 This app is inspired by __awesome__ [ani-cli](https://github.com/pystardust/ani-cli). Check it out!
+> `-ldflags="-s -w"` makes the binary smaller
+> Use this method if others are not working for some reason
 
 
-Currently, Mangal supports these formats
-- PDF
-- ePub
-- CBZ
-- ZIP
-- Plain
+### Linux
 
-> Type `mangal formats` for more info
+Download the latest version from [GitHub release page](https://github.com/metafates/mangal/releases/latest)
 
-## Fixing Errors
-
-If something is not working run `mangal doctor` and follow instructions
-
-If you still have problems,
-please [open an issue](https://github.com/metafates/mangal/issues/new?assignees=metafates&labels=bug&template=bug_report.yaml) 🙏
-
-## Examples
-
-### TUI usage example
-
-https://user-images.githubusercontent.com/62389790/174574562-011f9c30-db6f-45a9-9ce2-03973564ace0.mov
-
-### Inline mode usage example
-
-> For more information about inline mode type `mangal inline --help`
-
-```bash
-# Search manga. Returns a list of found manga
-mangal inline --query "death note"
-
-# Search manga. Returns a JSON list of found manga
-mangal inline --query "death note" --json
-
-# Get chapters of the first manga in the list
-mangal inline --query "death note" --manga 1
-
-# Download first chapter of the first manga in the list
-mangal inline --query "death note" --manga 1 --chapter 1
-```
-
-## Config
-
-> TLDR: Use `mangal config where` to show where config should be located
-> and `mangal config init` to create default config
-
-
-<details>
-<summary>
-Config is located at the OS default config directory.
-</summary>
-
-- __Unix__ - `$XDG_CONFIG_HOME/mangal/config.toml` if `$XDG_CONFIG_HOME` exists, else `$HOME/.config/mangal/config.toml`
-- __Darwin__ (macOS) - `$HOME/Library/Application\ Support/mangal/config.toml`
-- __Windows__ - `%AppData%\mangal\config.toml`
-</details>
-
-
-You can load config from custom path by using `--config` flag or
-by setting `MANGAL_CONFIG_PATH` environment variable.
-
-> Type `mangal env` to show all supported environment variables
-
-
-By default, Mangal uses [manganelo](https://m.manganelo.com/www) as a source
-
-<details>
-<summary>Click here to show config example</summary>
-
-```toml
-[reader]
-# If false, then OS default reader will be used
-use_custom_reader = false
-custom_reader = "zathura"
-
-
-
-
-[formats]
-# Type "mangal formats" to show more information about formats
-default = "pdf"
-
-# Add ComicInfo.xml to CBZ files
-comicinfo = true
-
-
-
-
-[downloader]
-# Custom download path, can be either relative (to the current directory) or absolute
-path = '.'
-
-# How chapters should be named when downloaded
-# Use %d to specify chapter number and %s to specify chapter title
-# If you want to pad chapter number with zeros for natural sorting (e.g. 0001, 0123) use %0d instead of %d
-chapter_name_template = "[%0d] %s"
-
-# Add images to cache
-# If set to true mangal could crash when trying to redownload something quickly
-# Usually happens on slow machines
-cache_images = false
-
-
-
-
-[anilist]
-# Enable Anilist integration (BETA)
-# See https://github.com/metafates/mangal/wiki/Anilist-Integration for more information
-enabled = false
-
-# Anilist client ID
-id = ""
-
-# Anilist client secret
-secret = ""
-
-# Will mark downloaded chapters as read on Anilist
-mark_downloaded = false
-
-
-
-
-[ui]
-# How to display chapters in TUI mode
-# Use %d to specify chapter number and %s to specify chapter title
-chapter_name_template = "%d %s"
-
-# Fullscreen mode 
-fullscreen = true
-
-# Input prompt symbol
-prompt = ">"
-
-# Input placeholder
-placeholder = "What shall we look for?"
-
-# Selected chapter mark
-mark = "*"
-
-# Search window title
-title = "Mangal"
-
-
-
-
-[[sources]]
-# Should this source be used
-enabled = true
-
-# Source name
-name = "manganelo"
-
-# Base url
-base = 'https://m.manganelo.com'
-
-# Search endpoint. Put %s where the query should be
-search = 'https://m.manganelo.com/search/story/%s'
-
-# Selector of entry anchor (<a></a>) on search page
-manga_anchor = '.search-story-item a.item-title'
-
-# Selector of entry title on search page
-manga_title = '.search-story-item a.item-title'
-
-# Manga chapters anchors selector
-chapter_anchor = 'li.a-h a.chapter-name'
-
-# Manga chapters titles selector
-chapter_title = 'li.a-h a.chapter-name'
-
-# Reader page images selector
-reader_page = '.container-chapter-reader img'
-
-# Random delay between requests
-random_delay_ms = 500 # ms
-
-# Are chapters listed in reversed order on that source?
-# reversed order -> from newest chapter to oldest
-reversed_chapters_order = true
-
-# With what character should the whitespace in query be replaced?
-whitespace_escape = "_"
-```
-</details>
-
-## Commands
-
-```
-Usage:
-  mangal [flags]
-  mangal [command]
-
-Available Commands:
-  cleanup     Remove cached and temp files
-  completion  Generate the autocompletion script for the specified shell
-  config      Config actions
-  doctor      Run this in case of any errors
-  env         Show environment variables
-  formats     Information about available formats
-  help        Help about any command
-  inline      Search & Download manga in inline mode
-  latest      Check if latest version of Mangal is used
-  version     Show version
-
-Flags:
-  -c, --config string   use config from path
-  -f, --format string   use custom format
-  -h, --help            help for mangal
-  -i, --incognito       do not save history
-  -r, --resume          resume reading
-
-Use "mangal [command] --help" for more information about a command.
-```
-
-## Install
-
-- [Go (Cross Platform)](#go)
-- [MacOS](#macos)
-- [Windows](#windows)
-- [Debian](#debian)
-- [Docker](#docker)
-
-
-### Go
-
-You will need [Go installed](https://go.dev/doc/install)
-
-```bash
-go install -ldflags="-s -w" github.com/metafates/mangal@latest
-```
-
-> `-ldflags="-s -w"` - just makes the binary smaller
-
-<details>
-<summary>Update / Uninstall</summary>
-
-#### Update
-
-```bash
-go install -ldflags="-s -w" github.com/metafates/mangal@latest
-```
-
-#### Uninstall
-
-To uninstall just delete the binary file
-
-- Bash / zsh - `rm $(which mangal)`
-- Fish - `rm (which mangal)`
-- Powershell - `rm $(where.exe mangal)`
-
-</details>
-
-### MacOS
+### macOS
 
 Install using [Homebrew](https://brew.sh/)
 
-```bash
-brew install metafates/mangal/mangal
-```
-
-<details>
-<summary>Update & Uninstall</summary>
-
-#### Update
-
-```bash
-brew upgrade mangal
-```
-
-#### Uninstall
-
-```bash
-brew uninstall mangal
-```
-
-</details>
+    brew tap metafates/mangal
+    brew install mangal
 
 ### Windows
 
 Install using [Scoop](https://scoop.sh/)
 
-```powershell
-scoop install https://raw.githubusercontent.com/metafates/scoop-mangal/main/mangal.json
-```
-
-<details>
-<summary>Update & Uninstall</summary>
-
-#### Update
-
-```powershell
-scoop update mangal
-```
-
-#### Uninstall
-
-```powershell
-scoop uninstall mangal
-```
-</details>
-
-### Debian
-
-To install download the latest .deb file from [GitHub Release](https://github.com/metafates/mangal/releases) page
-
-Then run 
-
-```bash
-sudo dpkg -i [FILE YOU DOWNLOADED].deb
-```
-
-<details>
-<summary>Update & Uninstall</summary>
-
-#### Update
-
-To update you will need to uninstall
-and install from the new .deb file in
-the [GitHub Release](https://github.com/metafates/mangal/releases) page
-
-#### Uninstall
-
-```bash
-sudo dpkg -r mangal
-```
-
-</details>
+    scoop install https://raw.githubusercontent.com/metafates/scoop-mangal/main/mangal.json
 
 ### Docker
 
-> Thanks to @ArabCoders
+Install using... well, you know.
 
-Docker image is available at [Docker Hub](https://hub.docker.com/repository/docker/metafates/mangal)
+    docker pull metafates/mangal
 
-You can run it by using
+To run
 
-```bash
-docker pull metafates/mangal
+    docker run --rm -ti -e "TERM=xterm-256color" -v (PWD)/mangal/downloads:/downloads -v (PWD)/mangal/config:/config metafates/mangal
 
-docker run --rm -ti -e "TERM=xterm-256color" -v (PWD)/mangal/downloads:/downloads -v (PWD)/mangal/config:/config metafates/mangal
-```
+## Usage
 
-This will create `mangal` directory in the current directory and will download manga to `mangal/downloads`
+### TUI
 
-## Build
+Just run `mangal` and you're ready to go.
 
-```bash
-git clone https://github.com/metafates/mangal.git
-cd mangal
-go build -ldflags="-s -w"
-```
+### Mini
 
-> You can also cross build for windows, linux & macos
-> by running `cross-compile.py` (you will need Python 3)
+There's also a `mini` mode that kinda resembles [ani-cli](https://github.com/pystardust/ani-cli)
+
+Run `mangal mini`
+
+## Configuration
+
+Mangal uses [TOML](https://toml.io) format for configuration under the `mangal.toml` filename.
+Config is expected to be either at the OS default config directory or under the home directory.
+For example, on Linux it would be `~/.config/mangal/mangal.toml` or `~/mangal.toml`.
+
+Run `mangal where` to show expected config paths
+
+> "But what if I want to specify my own config path?"
 > 
-> Built binaries and generated packages
-> will be stored in the `bin` folder
+> Okay, fine, use env variable `MANGAL_CONFIG_PATH`
 
-## Anilist Integration
+Run `mangal config init` to generate a default config file
 
-See [Wiki Page](https://github.com/metafates/mangal/wiki/Anilist-Integration)
-for more information
+> This is not a complete config, just an example.
+```toml
+# mangal.toml
 
-## Limitations
+[downloader]
+# Name template of the downloaded chapters
+# Available variables:
+# {index}        - index of the chapters
+# {padded-index} - same as index but padded with leading zeros
+# {chapter}      - name of the chapter
+chapter_name_template = '[{padded-index}] {chapter}'
 
-Even though many manga sites will work,
-there exist some (serious) limitations to which sites could be added
+# Where to download manga
+# Absolute or relative.
+#
+# You can also use home variable 
+# Linux/macOS = $HOME or ~
+# Windows = %USERPROFILE%
+path = '.'
 
-- Navigation layout should follow this model
-    - Each manga have a separate page
-    - Manga page should have some form of chapters list (not lazy loaded)
-    - Each chapter should have a separate reader page with all the images
 
 
-Some sites that work well
+[formats]
+# Default format to export chapters
+# Available options are: pdf, zip, cbz, plain
+use = 'pdf'
 
-- https://m.manganelo.com
-- https://manganato.com
 
-See [examples of scrapers](https://github.com/metafates/mangal/discussions/7)
 
----
+[history]
+# Save chapters to history when downloaded
+save_on_download = false
+# Save chapters to history on read
+save_on_read = true
 
-Logo taken from [here](https://www.flaticon.com/free-icon/parchment_1391306)
+
+
+[icons]
+# Icons variant.
+# Available options are: emoji, kaomoji, plain, nerd (nerd-font)
+variant = 'emoji'
+
+
+
+[mangadex]
+# Preffered language
+language = 'en'
+# Show nsfw manga/chapters
+nsfw = false
+# Show chapters that cannot be read (because they are hosted on a different site)
+show_unavailable_chapters = false
+
+
+
+[mini]
+# Show bye message
+bye = true
+# Use vim binds to move
+vim_mode = true
+
+
+
+[reader]
+# Name of the app to use as a reader. Will use default OS app if empty
+name = ''
+# Will open chapter in the browser instead of downloading it
+read_in_browser = false
+
+[logs]
+# write logs?
+write = false
+# logs path
+path = "..."
+# Available options are: (from less to most verbose)
+# panic, fatal, error, warn, info, debug, trace
+level = "info"
+```
+
+## Custom scrapers
+
+Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
+
+Check the [defined modules](luamodules) for more information.
+For scraper examples, check the [examples](examples) folder. (feel free to contribute!)
+
+_Okay, so, how do I add a custom scraper?_
+
+1. Create a new lua file in the `mangal where --sources` folder
+2. Filename will be used as a source name
+3. Your script __must__ contain __3__ essential functions
+   - `SearchManga(query)` - must return a table of tables each having 2 fields `name` and `url`
+   - `MangaChapters(mangalUrl)` - must return a table of tables each having 2 fields `name` and `url` _(again)_
+   - `ChapterPages(chapterUrl)` - must return a table of tables each having 2 fields `index` _(for ordering)_ and `url` _(to download image)_
+4. __That's it!__ You can test it by running `mangal run ...` where `...` is a filename
+
+New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
+
+## Anilist
+
+Mangal also supports integration with anilist.
+
+It will mark chapters as read on Anilsit when you read them inside mangal.
+
+For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist-Integration)
+
+> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open to suggestions!

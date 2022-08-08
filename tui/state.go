@@ -1,14 +1,18 @@
 package tui
 
-type bubbleState int
+type state int
 
 const (
-	ResumeState bubbleState = iota + 1
-	SearchState
-	LoadingState
-	MangaState
-	ChaptersState
-	ConfirmState
-	DownloadingState
-	ExitPromptState
+	idle state = iota + 1
+	errorState
+	loadingState
+	historyState
+	sourcesState
+	searchState
+	mangasState
+	chaptersState
+	confirmState
+	readState
+	downloadState
+	downloadDoneState
 )
