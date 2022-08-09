@@ -48,6 +48,8 @@ Visit this link to install [Go](https://go.dev/doc/install)
 
 ### Linux
 
+[AUR package](https://aur.archlinux.org/packages/mangal-bin) (by @balajsra)
+
 Download the latest version from [GitHub release page](https://github.com/metafates/mangal/releases/latest)
 
 ### macOS
