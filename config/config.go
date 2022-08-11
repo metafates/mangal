@@ -74,7 +74,7 @@ func setDefaults() {
 		MiniBye:     true,
 
 		// Icons
-		IconsVariant: "emoji",
+		IconsVariant: "plain",
 
 		// Reader
 		ReaderName:          "",
