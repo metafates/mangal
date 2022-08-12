@@ -53,7 +53,7 @@ func (c *Chapter) DownloadPages() error {
 
 	var err error
 	for _, page := range c.Pages {
-		go func(page *Page) {
+		d := func(page *Page) {
 			defer wg.Done()
 
 			// if at any point, an error is encountered, stop downloading other pages
@@ -62,7 +62,13 @@ func (c *Chapter) DownloadPages() error {
 			}
 
 			err = page.Download()
-		}(page)
+		}
+
+		if viper.GetBool(config.DownloaderAsync) {
+			go d(page)
+		} else {
+			d(page)
+		}
 	}
 
 	wg.Wait()
@@ -71,7 +77,6 @@ func (c *Chapter) DownloadPages() error {
 
 func (c *Chapter) FormattedName() (name string) {
 	template := viper.GetString(config.DownloaderChapterNameTemplate)
-
 	name = strings.ReplaceAll(template, "{manga}", c.Manga.Name)
 	name = strings.ReplaceAll(name, "{chapter}", c.Name)
 	name = strings.ReplaceAll(name, "{index}", fmt.Sprintf("%d", c.Index))

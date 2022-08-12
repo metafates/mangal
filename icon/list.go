@@ -42,8 +42,8 @@ var icons = map[Icon]*iconDef{
 	Mark: {
 		emoji:   "🦐",
 		nerd:    style.Green("\uF6D9"),
-		plain:   style.Green("*"),
-		kaomoji: style.Red("炎"),
+		plain:   style.Combined(style.Green, style.Bold)("*"),
+		kaomoji: style.Combined(style.Red, style.Bold)("炎"),
 	},
 	Question: {
 		emoji:   "🤨",

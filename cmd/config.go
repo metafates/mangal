@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -13,6 +15,8 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configInitCmd)
 	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
+
+	configCmd.AddCommand(configRemoveCmd)
 }
 
 var configCmd = &cobra.Command{
@@ -26,22 +30,26 @@ var configInitCmd = &cobra.Command{
 	Short: "Initialize config",
 	Long:  `Initialize default config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		configDir := lo.Must(os.UserConfigDir())
-
-		mangalDir := filepath.Join(configDir, "mangal")
+		mangalDir := where.Config()
 		if !lo.Must(filesystem.Get().Exists(mangalDir)) {
 			_ = filesystem.Get().MkdirAll(mangalDir, os.ModePerm)
 		}
 
-		if lo.Must(cmd.Flags().GetBool("force")) {
-			err := viper.WriteConfig()
-			switch err.(type) {
-			case viper.ConfigFileNotFoundError:
-				return viper.SafeWriteConfig()
-			default:
-				return err
-			}
-		}
 		return viper.SafeWriteConfig()
+	},
+}
+
+var configRemoveCmd = &cobra.Command{
+	Use:   "remove",
+	Short: "Removes config file",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		mangalDir := where.Config()
+		configPath := filepath.Join(mangalDir, constant.Mangal+".toml")
+
+		if lo.Must(filesystem.Get().Exists(configPath)) {
+			return filesystem.Get().Remove(configPath)
+		}
+
+		return nil
 	},
 }

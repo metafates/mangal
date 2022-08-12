@@ -71,6 +71,10 @@ func (p *Page) Download() error {
 		return errors.New("http error: " + resp.Status)
 	}
 
+	if resp.ContentLength == 0 {
+		return errors.New("http error: nothing was returned")
+	}
+
 	p.Contents = resp.Body
 
 	return nil

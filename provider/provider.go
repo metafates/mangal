@@ -1,12 +1,12 @@
 package provider
 
 import (
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/provider/mangadex"
 	"github.com/metafates/mangal/provider/manganelo"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"os"
 	"path/filepath"
@@ -48,7 +48,7 @@ func DefaultProviders() map[string]*Provider {
 }
 
 func CustomProviders() (map[string]*Provider, error) {
-	files, err := filesystem.Get().ReadDir(config.SourcesPath())
+	files, err := filesystem.Get().ReadDir(where.Sources())
 
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func CustomProviders() (map[string]*Provider, error) {
 	providers := make(map[string]*Provider)
 	paths := lo.FilterMap(files, func(f os.FileInfo, _ int) (string, bool) {
 		if filepath.Ext(f.Name()) == customProviderExtension {
-			return filepath.Join(config.SourcesPath(), f.Name()), true
+			return filepath.Join(where.Sources(), f.Name()), true
 		}
 		return "", false
 	})

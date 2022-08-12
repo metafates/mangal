@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -22,7 +23,7 @@ func Setup() error {
 		return nil
 	}
 
-	logsPath := config.LogsPath()
+	logsPath := where.Logs()
 
 	if logsPath == "" {
 		return errors.New("logs path is not set")
