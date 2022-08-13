@@ -35,3 +35,17 @@ func Sources() string {
 func Logs() string {
 	return mkdir(filepath.Join(Config(), "logs"))
 }
+
+func History() string {
+	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constant.CachePrefix)
+	lo.Must0(filesystem.Get().MkdirAll(filepath.Dir(cacheDir), os.ModePerm))
+
+	path := filepath.Join(mkdir(cacheDir), "history.json")
+
+	exists := lo.Must(filesystem.Get().Exists(path))
+	if !exists {
+		lo.Must0(filesystem.Get().WriteFile(path, []byte("{}"), os.ModePerm))
+	}
+
+	return path
+}

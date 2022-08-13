@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -25,6 +26,7 @@ const (
 	chapterSelectState
 	chapterReadState
 	chaptersDownloadState
+	historySelectState
 	quitState
 )
 
@@ -242,6 +244,11 @@ func (m *mini) handleChapterReadState() error {
 		}
 
 		path, err := conv.SaveTemp(chapter)
+		defer func(chapter *source.Chapter) {
+			if viper.GetBool(config.HistorySaveOnRead) {
+				_ = history.Save(chapter)
+			}
+		}(chapter)
 		erase()
 
 		if err != nil {
@@ -365,6 +372,11 @@ func (m *mini) handleChaptersDownloadState() error {
 		}
 
 		_, err = conv.Save(chapter)
+		defer func(chapter *source.Chapter) {
+			if viper.GetBool(config.HistorySaveOnDownload) {
+				_ = history.Save(chapter)
+			}
+		}(chapter)
 		erase()
 
 		if err != nil {
@@ -397,5 +409,72 @@ func (m *mini) handleChaptersDownloadState() error {
 		m.newState(quitState)
 	}
 
+	return nil
+}
+
+func (m *mini) handleHistorySelectState() error {
+	h, err := history.Get()
+	if err != nil {
+		return err
+	}
+
+	chapters := lo.Values(h)
+
+	title("History Results >>")
+	b, c, err := menu(chapters)
+	if err != nil {
+		return err
+	}
+
+	switch b {
+	case quit:
+		m.newState(quitState)
+		return nil
+	}
+
+	defaultProviders := provider.DefaultProviders()
+	customProviders, _ := provider.CustomProviders()
+
+	var providers = make([]*provider.Provider, 0)
+
+	for _, p := range defaultProviders {
+		providers = append(providers, p)
+	}
+
+	for _, p := range customProviders {
+		providers = append(providers, p)
+	}
+
+	p, _ := lo.Find(providers, func(p *provider.Provider) bool {
+		return p.ID == c.SourceID
+	})
+
+	erase := progress("Initializing Source..")
+	s, err := p.CreateSource()
+	if err != nil {
+		return err
+	}
+	m.selectedSource = s
+	erase()
+
+	erase = progress("Fetching Chapters..")
+	manga := &source.Manga{
+		Name:     c.MangaName,
+		URL:      c.MangaURL,
+		Index:    0,
+		SourceID: c.SourceID,
+		ID:       c.MangaID,
+	}
+	chaps, err := m.selectedSource.ChaptersOf(manga)
+	erase()
+
+	if err != nil {
+		return err
+	}
+
+	m.cachedChapters[manga.URL] = chaps
+	m.selectedChapters = chaps[c.Index:]
+
+	m.newState(chapterReadState)
 	return nil
 }

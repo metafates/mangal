@@ -4,34 +4,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/metafates/mangal/config"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/integration"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
-	"github.com/samber/lo"
+	"github.com/metafates/mangal/where"
 	"github.com/spf13/viper"
 	"os"
-	"path/filepath"
 )
 
 type SavedChapter struct {
-	SourceID  string `json:"source_id"`
-	MangaName string `json:"manga_name"`
-	MangaURL  string `json:"manga_url"`
-	Name      string `json:"name"`
-	URL       string `json:"url"`
-	ID        string `json:"id"`
-	MangaID   string `json:"manga_id"`
+	SourceID           string `json:"source_id"`
+	MangaName          string `json:"manga_name"`
+	MangaURL           string `json:"manga_url"`
+	MangaChaptersTotal int    `json:"manga_chapters_total"`
+	Name               string `json:"name"`
+	URL                string `json:"url"`
+	ID                 string `json:"id"`
+	Index              int    `json:"index"`
+	MangaID            string `json:"manga_id"`
+}
+
+func (c *SavedChapter) String() string {
+	return fmt.Sprintf("%s : %d / %d", c.MangaName, c.Index, c.MangaChaptersTotal)
 }
 
 func Get() (map[string]*SavedChapter, error) {
 	log.Info("Getting history location")
-	historyFile, err := Location()
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
+	historyFile := where.History()
 
 	// decode json into slice of structs
 	log.Info("Reading history file")
@@ -65,11 +65,7 @@ func Save(chapter *source.Chapter) error {
 
 	log.Info("Saving chapter to history")
 
-	historyFile, err := Location()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+	historyFile := where.History()
 
 	// decode json into slice of structs
 	var chapters map[string]*SavedChapter
@@ -88,13 +84,15 @@ func Save(chapter *source.Chapter) error {
 	}
 
 	jsonChapter := SavedChapter{
-		SourceID:  chapter.SourceID,
-		MangaName: chapter.Manga.Name,
-		MangaURL:  chapter.Manga.URL,
-		Name:      chapter.Name,
-		URL:       chapter.URL,
-		ID:        chapter.ID,
-		MangaID:   chapter.Manga.ID,
+		SourceID:           chapter.SourceID,
+		MangaName:          chapter.Manga.Name,
+		MangaURL:           chapter.Manga.URL,
+		Name:               chapter.Name,
+		URL:                chapter.URL,
+		ID:                 chapter.ID,
+		MangaID:            chapter.Manga.ID,
+		MangaChaptersTotal: len(chapter.Manga.Chapters),
+		Index:              int(chapter.Index),
 	}
 
 	chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)] = &jsonChapter
@@ -116,27 +114,4 @@ func Save(chapter *source.Chapter) error {
 	}
 
 	return nil
-}
-
-func Location() (string, error) {
-	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constant.CachePrefix)
-	err := filesystem.Get().MkdirAll(filepath.Dir(cacheDir), os.ModePerm)
-	if err != nil {
-		return "", err
-	}
-
-	historyFile := filepath.Join(cacheDir, constant.History+".json")
-	exists, err := filesystem.Get().Exists(historyFile)
-	if err != nil {
-		return "", err
-	}
-
-	if !exists {
-		err = filesystem.Get().WriteFile(historyFile, []byte("{}"), os.ModePerm)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	return historyFile, nil
 }

@@ -6,7 +6,7 @@ type bind lo.Tuple2[string, string]
 
 var (
 	quit   = &bind{A: "q", B: "quit"}
-	prev   = &bind{A: "p", B: "prev"}
+	prev   = &bind{A: "p", B: "previous"}
 	next   = &bind{A: "n", B: "next"}
 	reread = &bind{A: "r", B: "reread"}
 	back   = &bind{A: "b", B: "back"}

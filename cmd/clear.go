@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/history"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"os"
@@ -63,11 +63,6 @@ func clearTemp() {
 }
 
 func clearHistory() {
-	historyFile, _ := history.Location()
-	exists, _ := filesystem.Get().Exists(historyFile)
-	if !exists {
-		return
-	}
-
+	historyFile := where.History()
 	_ = filesystem.Get().Remove(historyFile)
 }

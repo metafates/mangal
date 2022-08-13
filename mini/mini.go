@@ -76,6 +76,10 @@ func Run(options *Options) error {
 
 	m := newMini()
 	m.state = sourceSelectState
+	if options.Continue {
+		m.state = historySelectState
+	}
+
 	m.download = options.Download
 
 	if w, h, err := util.TerminalSize(); err == nil {
@@ -94,6 +98,8 @@ func Run(options *Options) error {
 
 func (m *mini) handleState() error {
 	switch m.state {
+	case historySelectState:
+		return m.handleHistorySelectState()
 	case sourceSelectState:
 		return m.handleSourceSelectState()
 	case mangasSearchState:
