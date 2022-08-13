@@ -9,13 +9,13 @@ import (
 	"strings"
 )
 
-func printErasable(msg string) (eraser func()) {
+func progress(msg string) (eraser func()) {
+	msg = style.Blue(msg)
 	fmt.Printf("\r%s", msg)
-	eraser = func() {
+
+	return func() {
 		_, _ = fmt.Fprintf(os.Stdout, "\r%s\r", strings.Repeat(" ", len(msg)))
 	}
-
-	return eraser
 }
 
 func title(t string) {

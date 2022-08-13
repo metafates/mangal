@@ -6,7 +6,7 @@ import (
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
-	"github.com/metafates/mangal/style"
+	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
@@ -59,7 +59,7 @@ func (m *mini) handleSourceSelectState() error {
 		return nil
 	}
 
-	erase := printErasable(style.Blue("Initializing Source..."))
+	erase := progress("Initializing Source...")
 	m.selectedSource, err = p.CreateSource()
 	erase()
 
@@ -82,7 +82,7 @@ func (m *mini) handleMangaSearchState() error {
 
 		query := in.value
 
-		erase := printErasable(style.Blue("Searching Query..."))
+		erase := progress("Searching Query...")
 		m.cachedMangas[query], err = m.selectedSource.Search(query)
 		erase()
 
@@ -120,7 +120,7 @@ func (m *mini) handleMangaSelectState() error {
 func (m *mini) handleChapterSelectState() error {
 	var err error
 
-	erase := printErasable(style.Magenta("Searching Chapters..."))
+	erase := progress("Searching Chapters...")
 	m.cachedChapters[m.selectedManga.URL], err = m.selectedSource.ChaptersOf(m.selectedManga)
 	erase()
 	if err != nil {
@@ -168,7 +168,7 @@ func (m *mini) handleChapterSelectState() error {
 
 			return 0 < a && int(a) <= len(chapters)
 		default:
-			return false
+			return s == "q"
 		}
 	})
 
@@ -188,6 +188,9 @@ func (m *mini) handleChapterSelectState() error {
 	case oneChapterInput.MatchString(in.value):
 		num := lo.Must(strconv.ParseInt(in.value, 10, 16))
 		m.selectedChapters = append(m.selectedChapters, chapters[num-1])
+	case in.value == "q":
+		m.newState(quitState)
+		return nil
 	}
 
 	if m.download {
@@ -200,86 +203,176 @@ func (m *mini) handleChapterSelectState() error {
 }
 
 func (m *mini) handleChapterReadState() error {
+	type controls struct {
+		next chan struct{}
+		prev chan struct{}
+		stop chan struct{}
+		err  chan error
+	}
+
 	var (
 		err      error
-		readLoop func(*source.Chapter) (bool, error)
+		readLoop func(*source.Chapter, *controls, bool, bool)
 	)
 
-	readLoop = func(chapter *source.Chapter) (bool, error) {
-		erase := printErasable(style.Blue("Loading Chapter..."))
+	readLoop = func(chapter *source.Chapter, c *controls, hasPrev, hasNext bool) {
+		util.ClearScreen()
+		erase := progress("Loading Chapter...")
 		m.cachedPages[chapter.URL], err = m.selectedSource.PagesOf(chapter)
 		erase()
 		if err != nil {
-			return false, err
+			c.err <- err
+			return
 		}
 
-		erase = printErasable(style.Blue("Downloading Pages..."))
+		erase = progress("Downloading Pages...")
 		err = chapter.DownloadPages()
 		erase()
 
 		if err != nil {
-			return false, err
+			c.err <- err
+			return
 		}
 
-		erase = printErasable(style.Blue("Converting..."))
+		erase = progress("Converting...")
 		conv, err := converter.Get(viper.GetString(config.FormatsUse))
 		if err != nil {
-			return false, err
+			c.err <- err
+			return
 		}
 
 		path, err := conv.SaveTemp(chapter)
 		erase()
 
 		if err != nil {
-			return false, err
+			c.err <- err
+			return
 		}
 
-		erase = printErasable(style.Blue("Opening..."))
+		erase = progress("Opening...")
 
 		if reader := viper.GetString(config.ReaderName); reader != "" {
 			err = open.RunWith(path, reader)
 			if err != nil {
-				return false, err
+				c.err <- err
+				return
 			}
 		} else {
 			err = open.Run(path)
 			if err != nil {
-				return false, err
+				c.err <- err
+				return
 			}
 		}
 
 		erase()
 
 		title(fmt.Sprintf("Currently reading %s", chapter.Name))
-		b, _, err := menu([]*source.Chapter{}, &next, &reread, &back)
+
+		var options []*bind
+		if hasPrev {
+			options = append(options, &prev)
+		}
+		if hasNext {
+			options = append(options, &next)
+		}
+
+		options = append(options, &reread, &selectt)
+
+		b, _, err := menu([]*source.Chapter{}, options...)
 		if err != nil {
-			return false, err
+			c.err <- err
+			return
 		}
 
 		switch b {
 		case &next:
-			return false, nil
+			c.next <- struct{}{}
 		case &reread:
-			return readLoop(chapter)
-		case &back:
+			readLoop(chapter, c, hasPrev, hasNext)
+		case &selectt:
 			m.newState(chapterSelectState)
-			return false, nil
+			c.stop <- struct{}{}
 		case &quit:
 			m.newState(quitState)
-			return true, nil
-		default:
-			return false, nil
+			c.stop <- struct{}{}
 		}
 	}
 
-	for _, chapter := range m.selectedChapters {
-		q, err := readLoop(chapter)
+	c := &controls{
+		next: make(chan struct{}),
+		prev: make(chan struct{}),
+		stop: make(chan struct{}),
+		err:  make(chan error),
+	}
+
+	var i int
+
+	for {
+		var (
+			hasPrev = i > 0
+			hasNext = i+1 < len(m.selectedChapters)
+		)
+
+		go readLoop(m.selectedChapters[i], c, hasPrev, hasNext)
+
+		select {
+		case <-c.next:
+			i++
+		case <-c.prev:
+			i--
+		case <-c.stop:
+			return nil
+		case err := <-c.err:
+			return err
+		}
+	}
+}
+
+func (m *mini) handleChaptersDownloadState() error {
+	var (
+		err          error
+		downloadLoop func(*source.Chapter) error
+	)
+
+	downloadLoop = func(chapter *source.Chapter) error {
+		util.ClearScreen()
+
+		erase := progress("Loading Chapter...")
+		m.cachedPages[chapter.URL], err = m.selectedSource.PagesOf(chapter)
+		erase()
 		if err != nil {
 			return err
 		}
 
-		if q {
-			return nil
+		erase = progress("Downloading Pages...")
+		err = chapter.DownloadPages()
+		erase()
+
+		if err != nil {
+			return err
+		}
+
+		erase = progress("Converting...")
+		conv, err := converter.Get(viper.GetString(config.FormatsUse))
+		if err != nil {
+			return err
+		}
+
+		_, err = conv.SaveTemp(chapter)
+		erase()
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	for _, chapter := range m.selectedChapters {
+		err = downloadLoop(chapter)
+		if err != nil {
+			return err
 		}
 	}
 
