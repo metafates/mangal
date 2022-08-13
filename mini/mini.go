@@ -105,7 +105,7 @@ func (m *mini) handleState() error {
 	case chapterReadState:
 		return m.handleChapterReadState()
 	case chaptersDownloadState:
-		return nil
+		return m.handleChaptersDownloadState()
 	case quitState:
 		os.Exit(0)
 	}

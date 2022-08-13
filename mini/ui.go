@@ -10,7 +10,7 @@ import (
 )
 
 func progress(msg string) (eraser func()) {
-	msg = style.Blue(msg)
+	msg = style.Combined(style.Blue, style.Truncate(truncateAt))(msg)
 	fmt.Printf("\r%s", msg)
 
 	return func() {
@@ -19,17 +19,18 @@ func progress(msg string) (eraser func()) {
 }
 
 func title(t string) {
-	fmt.Println(style.Combined(style.Magenta, style.Bold)(t))
+	fmt.Println(style.Combined(style.Magenta, style.Bold, style.Truncate(truncateAt))(t))
 }
 
 func fail(t string) {
-	fmt.Println(style.Combined(style.Red, style.Bold)(t))
+	fmt.Println(style.Combined(style.Red, style.Bold, style.Truncate(truncateAt))(t))
 }
 
 func menu[T fmt.Stringer](items []T, options ...*bind) (*bind, T, error) {
 	styles := map[int]func(string) string{
-		0: style.Yellow,
-		1: style.Cyan,
+		0: style.Combined(style.Yellow, style.Truncate(truncateAt)),
+		1: style.Combined(style.Cyan, style.Truncate(truncateAt)),
+		2: style.Combined(style.Bold, style.Red, style.Truncate(truncateAt)),
 	}
 
 	for i, item := range items {
@@ -37,13 +38,13 @@ func menu[T fmt.Stringer](items []T, options ...*bind) (*bind, T, error) {
 		fmt.Println(styles[i%2](s))
 	}
 
-	options = append(options, &quit)
+	options = append(options, quit)
 	for i, option := range options {
 		s := fmt.Sprintf("(%s) %s", option.A, option.B)
 		s = style.Truncate(truncateAt)(s)
 
-		if option == &quit {
-			fmt.Println(style.Red(s))
+		if option == quit {
+			fmt.Println(styles[2](s))
 		} else {
 			fmt.Println(styles[i%2](s))
 		}

@@ -59,7 +59,7 @@ func (m *mini) handleSourceSelectState() error {
 		return nil
 	}
 
-	erase := progress("Initializing Source...")
+	erase := progress("Initializing Source..")
 	m.selectedSource, err = p.CreateSource()
 	erase()
 
@@ -82,7 +82,7 @@ func (m *mini) handleMangaSearchState() error {
 
 		query := in.value
 
-		erase := progress("Searching Query...")
+		erase := progress("Searching Query..")
 		m.cachedMangas[query], err = m.selectedSource.Search(query)
 		erase()
 
@@ -120,7 +120,7 @@ func (m *mini) handleMangaSelectState() error {
 func (m *mini) handleChapterSelectState() error {
 	var err error
 
-	erase := progress("Searching Chapters...")
+	erase := progress("Searching Chapters..")
 	m.cachedChapters[m.selectedManga.URL], err = m.selectedSource.ChaptersOf(m.selectedManga)
 	erase()
 	if err != nil {
@@ -136,7 +136,7 @@ func (m *mini) handleChapterSelectState() error {
 		return nil
 	}
 
-	title(fmt.Sprintf("To specify a range, use: start_number end_number (Episodes: 1-%d)", len(chapters)))
+	title(fmt.Sprintf("To specify a range, use: start_number end_number (Chapters: 1-%d)", len(chapters)))
 	oneChapterInput := regexp.MustCompile(`^\d+$`)
 	rangeInput := regexp.MustCompile(`^\d+ \d+$`)
 	in, err := getInput(func(s string) bool {
@@ -217,7 +217,7 @@ func (m *mini) handleChapterReadState() error {
 
 	readLoop = func(chapter *source.Chapter, c *controls, hasPrev, hasNext bool) {
 		util.ClearScreen()
-		erase := progress("Loading Chapter...")
+		erase := progress("Loading Chapter..")
 		m.cachedPages[chapter.URL], err = m.selectedSource.PagesOf(chapter)
 		erase()
 		if err != nil {
@@ -225,7 +225,7 @@ func (m *mini) handleChapterReadState() error {
 			return
 		}
 
-		erase = progress("Downloading Pages...")
+		erase = progress("Downloading Pages..")
 		err = chapter.DownloadPages()
 		erase()
 
@@ -234,7 +234,7 @@ func (m *mini) handleChapterReadState() error {
 			return
 		}
 
-		erase = progress("Converting...")
+		erase = progress("Converting..")
 		conv, err := converter.Get(viper.GetString(config.FormatsUse))
 		if err != nil {
 			c.err <- err
@@ -249,7 +249,7 @@ func (m *mini) handleChapterReadState() error {
 			return
 		}
 
-		erase = progress("Opening...")
+		erase = progress("Opening..")
 
 		if reader := viper.GetString(config.ReaderName); reader != "" {
 			err = open.RunWith(path, reader)
@@ -271,29 +271,32 @@ func (m *mini) handleChapterReadState() error {
 
 		var options []*bind
 		if hasPrev {
-			options = append(options, &prev)
+			options = append(options, prev)
 		}
 		if hasNext {
-			options = append(options, &next)
+			options = append(options, next)
 		}
 
-		options = append(options, &reread, &selectt)
+		options = append(options, reread, back, search)
 
-		b, _, err := menu([]*source.Chapter{}, options...)
+		b, _, err := menu([]fmt.Stringer{}, options...)
 		if err != nil {
 			c.err <- err
 			return
 		}
 
 		switch b {
-		case &next:
+		case next:
 			c.next <- struct{}{}
-		case &reread:
+		case reread:
 			readLoop(chapter, c, hasPrev, hasNext)
-		case &selectt:
-			m.newState(chapterSelectState)
+		case back:
+			m.previousState()
 			c.stop <- struct{}{}
-		case &quit:
+		case search:
+			m.newState(mangasSearchState)
+			c.stop <- struct{}{}
+		case quit:
 			m.newState(quitState)
 			c.stop <- struct{}{}
 		}
@@ -338,14 +341,16 @@ func (m *mini) handleChaptersDownloadState() error {
 	downloadLoop = func(chapter *source.Chapter) error {
 		util.ClearScreen()
 
-		erase := progress("Loading Chapter...")
+		erase := progress("Fetching pages links..")
 		m.cachedPages[chapter.URL], err = m.selectedSource.PagesOf(chapter)
 		erase()
 		if err != nil {
 			return err
 		}
 
-		erase = progress("Downloading Pages...")
+		title(fmt.Sprintf("Currently downloading %s %s (%s)", chapter.Manga.Name, chapter.Name, m.selectedSource.Name()))
+
+		erase = progress(fmt.Sprintf("Downloading %d Pages..", len(m.cachedPages[chapter.URL])))
 		err = chapter.DownloadPages()
 		erase()
 
@@ -353,13 +358,13 @@ func (m *mini) handleChaptersDownloadState() error {
 			return err
 		}
 
-		erase = progress("Converting...")
+		erase = progress("Converting..")
 		conv, err := converter.Get(viper.GetString(config.FormatsUse))
 		if err != nil {
 			return err
 		}
 
-		_, err = conv.SaveTemp(chapter)
+		_, err = conv.Save(chapter)
 		erase()
 
 		if err != nil {
@@ -374,6 +379,22 @@ func (m *mini) handleChaptersDownloadState() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	util.ClearScreen()
+	title(fmt.Sprintf("%s downloaded.", util.Quantity(len(m.selectedChapters), "chapter")))
+	b, _, err := menu([]fmt.Stringer{}, back, search)
+	if err != nil {
+		return err
+	}
+
+	switch b {
+	case back:
+		m.previousState()
+	case search:
+		m.newState(mangasSearchState)
+	case quit:
+		m.newState(quitState)
 	}
 
 	return nil
