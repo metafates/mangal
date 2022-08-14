@@ -144,7 +144,17 @@ func newBubble() *statefulBubble {
 	}()
 
 	makeList := func(title string) list.Model {
-		listC := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+		delegate := list.NewDefaultDelegate()
+		delegate.Styles.SelectedTitle = lipgloss.NewStyle().
+			Border(lipgloss.ThickBorder(), false, false, false, true).
+			BorderForeground(lipgloss.Color("5")).
+			Foreground(lipgloss.Color("5")).
+			Padding(0, 0, 0, 1)
+		delegate.Styles.NormalTitle = delegate.Styles.NormalTitle.Copy().Foreground(lipgloss.Color("7"))
+
+		delegate.Styles.SelectedDesc = delegate.Styles.SelectedTitle.Copy()
+
+		listC := list.New([]list.Item{}, delegate, 0, 0)
 		listC.KeyMap = bubble.keymap.forList()
 		listC.AdditionalShortHelpKeys = bubble.keymap.ShortHelp
 		listC.AdditionalFullHelpKeys = func() []key.Binding {
