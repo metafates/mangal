@@ -21,6 +21,10 @@ type Chapter struct {
 	Pages    []*Page
 }
 
+func (c *Chapter) String() string {
+	return c.Name
+}
+
 func chapterFromTable(table *lua.LTable, manga *Manga, index uint16) (*Chapter, error) {
 	name := table.RawGetString("name")
 

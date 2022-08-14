@@ -71,8 +71,7 @@ func setDefaults() {
 		FormatsUse: "pdf",
 
 		// Mini-mode
-		MiniVimMode: false,
-		MiniBye:     true,
+		MiniSearchLimit: 20,
 
 		// Icons
 		IconsVariant: "plain",

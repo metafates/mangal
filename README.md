@@ -84,9 +84,13 @@ Just run `mangal` and you're ready to go.
 
 ### Mini
 
-There's also a `mini` mode that kinda resembles [ani-cli](https://github.com/pystardust/ani-cli)
+There's also a `mini` mode that tries to mimic [ani-cli](https://github.com/pystardust/ani-cli)
 
-Run `mangal mini`
+To run: `mangal mini`
+
+### Other
+
+See `mangal help` for more information
 
 ## Configuration
 

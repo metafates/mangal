@@ -18,6 +18,10 @@ type Provider struct {
 	CreateSource func() (source.Source, error)
 }
 
+func (p Provider) String() string {
+	return p.Name
+}
+
 var customProviderExtension = ".lua"
 
 var defaultProviders = []*Provider{
