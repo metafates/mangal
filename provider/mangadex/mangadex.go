@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	Name = "Mangadex (Unstable)"
+	Name = "Mangadex"
 	ID   = Name + " built-in"
 )
 

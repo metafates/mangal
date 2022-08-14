@@ -23,7 +23,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Features
 
-- __LUAAAA SCRAPPEERRRSS!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__.
+- __LUAAAA SCRAPPEERRRSS!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __Fast__ - yes. 
@@ -40,7 +40,7 @@ Visit this link to install [Go](https://go.dev/doc/install)
 
     go install -ldflags="-s -w" github.com/metafates/mangal@latest
 
-> `-ldflags="-s -w"` makes the binary smaller
+> **Note** `-ldflags="-s -w"` makes the binary smaller
 > 
 > Use this method if others are not working for some reason.
 > And please open an issue if so
@@ -84,9 +84,15 @@ Just run `mangal` and you're ready to go.
 
 ### Mini
 
-There's also a `mini` mode that kinda resembles [ani-cli](https://github.com/pystardust/ani-cli)
+There's also a `mini` mode that tries to mimic [ani-cli](https://github.com/pystardust/ani-cli)
 
-Run `mangal mini`
+To run: `mangal mini`
+
+<img width="254" alt="Screenshot 2022-08-14 at 09 37 14" src="https://user-images.githubusercontent.com/62389790/184524070-88fd36f7-9875-4a41-904c-04caad110549.png">
+
+### Other
+
+See `mangal help` for more information
 
 ## Configuration
 
@@ -122,6 +128,10 @@ chapter_name_template = '[{padded-index}] {chapter}'
 # Windows = %USERPROFILE%
 path = '.'
 
+# Use asynchronous downloader (faster)
+# Do no turn it off unless you have some issues
+async = true
+
 
 
 [formats]
@@ -141,7 +151,7 @@ save_on_read = true
 
 [icons]
 # Icons variant.
-# Available options are: emoji, kaomoji, plain, nerd (nerd-font)
+# Available options are: emoji, kaomoji, plain, squares, nerd (nerd-font)
 variant = 'emoji'
 
 
@@ -157,10 +167,8 @@ show_unavailable_chapters = false
 
 
 [mini]
-# Show bye message
-bye = true
-# Use vim binds to move
-vim_mode = true
+# Limit number of search page entries
+search_limit = 20
 
 
 

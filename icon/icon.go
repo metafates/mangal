@@ -10,10 +10,11 @@ const (
 	nerd    = "nerd"
 	plain   = "plain"
 	kaomoji = "kaomoji"
+	squares = "squares"
 )
 
 func AvailableVariants() []string {
-	return []string{emoji, nerd, plain, kaomoji}
+	return []string{emoji, nerd, plain, kaomoji, squares}
 }
 
 type iconDef struct {
@@ -21,6 +22,7 @@ type iconDef struct {
 	nerd    string
 	plain   string
 	kaomoji string
+	squares string
 }
 
 func (i *iconDef) Get() string {
@@ -33,6 +35,8 @@ func (i *iconDef) Get() string {
 		return i.plain
 	case kaomoji:
 		return i.kaomoji
+	case squares:
+		return i.squares
 	default:
 		return ""
 	}

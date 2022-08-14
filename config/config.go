@@ -3,10 +3,10 @@ package config
 import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -44,7 +44,7 @@ func setFs() {
 
 // setPaths sets the paths to the config files
 func setPaths() {
-	viper.AddConfigPath(Path())
+	viper.AddConfigPath(where.Config())
 }
 
 // setEnvs sets the environment variables
@@ -65,16 +65,16 @@ func setDefaults() {
 		// Downloader
 		DownloaderPath:                ".",
 		DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
+		DownloaderAsync:               true,
 
 		// Formats
 		FormatsUse: "pdf",
 
 		// Mini-mode
-		MiniVimMode: false,
-		MiniBye:     true,
+		MiniSearchLimit: 20,
 
 		// Icons
-		IconsVariant: "emoji",
+		IconsVariant: "plain",
 
 		// Reader
 		ReaderName:          "",
@@ -116,37 +116,4 @@ func resolveAliases() {
 	default:
 		panic("unsupported OS: " + runtime.GOOS)
 	}
-}
-
-func init() {
-	paths := []string{
-		Path(),
-		SourcesPath(),
-		LogsPath(),
-	}
-
-	for _, path := range paths {
-		lo.Must0(filesystem.Get().MkdirAll(path, os.ModePerm))
-	}
-}
-
-func Path() string {
-	var path string
-
-	customDir, present := os.LookupEnv("MANGAL_CONFIG_DIR")
-	if present {
-		path = customDir
-	} else {
-		path = filepath.Join(lo.Must(os.UserConfigDir()), constant.Mangal)
-	}
-
-	return path
-}
-
-func SourcesPath() string {
-	return filepath.Join(Path(), "sources")
-}
-
-func LogsPath() string {
-	return filepath.Join(Path(), "logs")
 }

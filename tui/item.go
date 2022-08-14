@@ -1,6 +1,9 @@
 package tui
 
-import "github.com/metafates/mangal/icon"
+import (
+	"fmt"
+	"github.com/metafates/mangal/icon"
+)
 
 type listItem struct {
 	title       string
@@ -16,7 +19,7 @@ func (t *listItem) toggleMark() {
 func (t *listItem) Title() string {
 	if t.title != "" {
 		if t.marked {
-			return icon.Get(icon.Mark) + " " + t.title
+			return fmt.Sprintf("%s %s", t.title, icon.Get(icon.Mark))
 		} else {
 			return t.title
 		}

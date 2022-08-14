@@ -3,6 +3,7 @@ package config
 const (
 	DownloaderPath                = "downloader.path"
 	DownloaderChapterNameTemplate = "downloader.chapter_name_template"
+	DownloaderAsync               = "downloader.async"
 )
 
 const (
@@ -20,8 +21,7 @@ const (
 )
 
 const (
-	MiniVimMode = "mini.vim_mode"
-	MiniBye     = "mini.bye"
+	MiniSearchLimit = "mini.search_limit"
 )
 
 const (
@@ -60,13 +60,6 @@ var EnvExposed = []string{
 	// history
 	HistorySaveOnRead,
 	HistorySaveOnDownload,
-
-	// mini
-	MiniVimMode,
-	MiniBye,
-
-	// Icons
-	IconsVariant,
 
 	// Logs
 	LogsWrite,
