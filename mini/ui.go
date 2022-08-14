@@ -10,7 +10,7 @@ import (
 )
 
 func progress(msg string) (eraser func()) {
-	msg = style.Combined(style.Blue, style.Truncate(truncateAt))(msg)
+	msg = style.Combined(style.Truncate(truncateAt), style.Blue)(msg)
 	fmt.Printf("\r%s", msg)
 
 	return func() {
@@ -19,18 +19,18 @@ func progress(msg string) (eraser func()) {
 }
 
 func title(t string) {
-	fmt.Println(style.Combined(style.Magenta, style.Bold, style.Truncate(truncateAt))(t))
+	fmt.Println(style.Combined(style.Truncate(truncateAt), style.Magenta, style.Bold)(t))
 }
 
 func fail(t string) {
-	fmt.Println(style.Combined(style.Red, style.Bold, style.Truncate(truncateAt))(t))
+	fmt.Println(style.Combined(style.Truncate(truncateAt), style.Red, style.Bold)(t))
 }
 
 func menu[T fmt.Stringer](items []T, options ...*bind) (*bind, T, error) {
 	styles := map[int]func(string) string{
-		0: style.Combined(style.Yellow, style.Truncate(truncateAt)),
-		1: style.Combined(style.Cyan, style.Truncate(truncateAt)),
-		2: style.Combined(style.Bold, style.Red, style.Truncate(truncateAt)),
+		0: style.Combined(style.Truncate(truncateAt), style.Yellow),
+		1: style.Combined(style.Truncate(truncateAt), style.Cyan),
+		2: style.Combined(style.Truncate(truncateAt), style.Bold, style.Red),
 	}
 
 	for i, item := range items {

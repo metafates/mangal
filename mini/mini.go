@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	truncateAt = 30
+	truncateAt = 100
 )
 
 type Options struct {
@@ -84,7 +84,7 @@ func Run(options *Options) error {
 
 	if w, h, err := util.TerminalSize(); err == nil {
 		m.width, m.height = w, h
-		truncateAt = lo.Max([]int{truncateAt, w - 10})
+		truncateAt = w
 	}
 
 	var err error
