@@ -86,6 +86,8 @@ func (m *mini) handleMangaSearchState() error {
 
 		erase := progress("Searching Query..")
 		m.cachedMangas[query], err = m.selectedSource.Search(query)
+		max := lo.Min([]int{len(m.cachedMangas[query]), viper.GetInt(config.MiniSearchLimit)})
+		m.cachedMangas[query] = m.cachedMangas[query][:max]
 		erase()
 
 		if len(m.cachedMangas[query]) == 0 {
@@ -244,7 +246,7 @@ func (m *mini) handleChapterReadState() error {
 		}
 
 		path, err := conv.SaveTemp(chapter)
-		defer func(chapter *source.Chapter) {
+		go func(chapter *source.Chapter) {
 			if viper.GetBool(config.HistorySaveOnRead) {
 				_ = history.Save(chapter)
 			}
@@ -372,7 +374,7 @@ func (m *mini) handleChaptersDownloadState() error {
 		}
 
 		_, err = conv.Save(chapter)
-		defer func(chapter *source.Chapter) {
+		go func(chapter *source.Chapter) {
 			if viper.GetBool(config.HistorySaveOnDownload) {
 				_ = history.Save(chapter)
 			}
@@ -473,7 +475,7 @@ func (m *mini) handleHistorySelectState() error {
 	}
 
 	m.cachedChapters[manga.URL] = chaps
-	m.selectedChapters = chaps[c.Index:]
+	m.selectedChapters = chaps[c.Index-1:]
 
 	m.newState(chapterReadState)
 	return nil

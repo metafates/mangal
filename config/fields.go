@@ -21,8 +21,7 @@ const (
 )
 
 const (
-	MiniVimMode = "mini.vim_mode"
-	MiniBye     = "mini.bye"
+	MiniSearchLimit = "mini.search_limit"
 )
 
 const (
