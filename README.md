@@ -40,7 +40,7 @@ Visit this link to install [Go](https://go.dev/doc/install)
 
     go install -ldflags="-s -w" github.com/metafates/mangal@latest
 
-> **Info** `-ldflags="-s -w"` makes the binary smaller
+> **Note** `-ldflags="-s -w"` makes the binary smaller
 > 
 > Use this method if others are not working for some reason.
 > And please open an issue if so
