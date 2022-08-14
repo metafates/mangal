@@ -88,6 +88,8 @@ There's also a `mini` mode that tries to mimic [ani-cli](https://github.com/pyst
 
 To run: `mangal mini`
 
+<img width="254" alt="Screenshot 2022-08-14 at 09 37 14" src="https://user-images.githubusercontent.com/62389790/184524070-88fd36f7-9875-4a41-904c-04caad110549.png">
+
 ### Other
 
 See `mangal help` for more information
