@@ -9,7 +9,6 @@ const (
 const (
 	TempPrefix  = Mangal + "Temp_"
 	CachePrefix = Mangal + "Cache_"
-	History     = Mangal + "History"
 )
 
 const AssciiArtLogo = `
