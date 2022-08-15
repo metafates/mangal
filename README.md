@@ -104,7 +104,7 @@ Run `mangal where` to show expected config paths
 
 > "But what if I want to specify my own config path?"
 > 
-> Okay, fine, use env variable `MANGAL_CONFIG_PATH`
+> Use env variable `MANGAL_CONFIG_PATH`
 
 Run `mangal config init` to generate a default config file
 
@@ -187,6 +187,10 @@ level = "info"
 ```
 
 ## Custom scrapers
+
+TLDR; To browse and install a custom scraper from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) run
+
+    mangal install
 
 Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
 

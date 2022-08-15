@@ -273,6 +273,10 @@ func (b *statefulBubble) loadScrapers() (tea.Cmd, error) {
 		return nil, err
 	}
 
+	slices.SortFunc(scrapers, func(a, b *installer.Scraper) bool {
+		return strings.Compare(a.Name, b.Name) < 0
+	})
+
 	var items []list.Item
 	for _, s := range scrapers {
 		items = append(items, &listItem{
