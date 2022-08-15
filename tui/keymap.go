@@ -10,6 +10,7 @@ type statefulKeymap struct {
 
 	quit, forceQuit,
 	selectOne, selectAll, clearSelection,
+	remove,
 	confirm,
 	openURL,
 	read,
@@ -40,6 +41,10 @@ func newStatefulKeymap() *statefulKeymap {
 		forceQuit: k(
 			keys("ctrl+c", "ctrl+d"),
 			help("ctrl+c", "quit"),
+		),
+		remove: k(
+			keys("d"),
+			help("d", "remove"),
 		),
 		selectOne: k(
 			keys(" "),
@@ -127,7 +132,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case loadingState:
 		return to2(h(k.forceQuit, k.back))
 	case historyState:
-		return to2(h(k.selectOne, k.back, k.openURL))
+		return to2(h(k.selectOne, k.remove, k.back, k.openURL))
 	case sourcesState:
 		return to2(h(k.selectOne))
 	case searchState:

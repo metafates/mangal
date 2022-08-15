@@ -191,6 +191,17 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 					b.newState(errorState)
 				}
 			}
+		case key.Matches(msg, b.keymap.remove):
+			if b.historyC.SelectedItem() != nil {
+				chapter := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+				_ = history.Remove(chapter)
+				cmd, err := b.loadHistory()
+				if err != nil {
+					return nil, nil
+				}
+
+				return b, cmd
+			}
 		case key.Matches(msg, b.keymap.selectOne, b.keymap.confirm):
 			selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 			providers := lo.Map(b.sourcesC.Items(), func(i list.Item, _ int) *provider.Provider {
