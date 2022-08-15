@@ -11,12 +11,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"golang.org/x/exp/slices"
 	"strings"
+	"time"
 )
 
 type statefulBubble struct {
@@ -27,25 +29,27 @@ type statefulBubble struct {
 	keymap *statefulKeymap
 
 	// components
-	spinnerC  spinner.Model
-	inputC    textinput.Model
-	historyC  list.Model
-	sourcesC  list.Model
-	mangasC   list.Model
-	chaptersC list.Model
-	progressC progress.Model
-	helpC     help.Model
+	spinnerC         spinner.Model
+	inputC           textinput.Model
+	scrapersInstallC list.Model
+	historyC         list.Model
+	sourcesC         list.Model
+	mangasC          list.Model
+	chaptersC        list.Model
+	progressC        progress.Model
+	helpC            help.Model
 
 	selectedSource   source.Source
 	selectedManga    *source.Manga
 	selectedChapters map[*source.Chapter]struct{} // mathematical set
 
-	sourceLoadedChannel    chan source.Source
-	foundMangasChannel     chan []*source.Manga
-	foundChaptersChannel   chan []*source.Chapter
-	chapterReadChannel     chan struct{}
-	chapterDownloadChannel chan struct{}
-	errorChannel           chan error
+	scraperInstalledChannel chan *installer.Scraper
+	sourceLoadedChannel     chan source.Source
+	foundMangasChannel      chan []*source.Manga
+	foundChaptersChannel    chan []*source.Chapter
+	chapterReadChannel      chan struct{}
+	chapterDownloadChannel  chan struct{}
+	errorChannel            chan error
 
 	progressStatus string
 
@@ -101,6 +105,7 @@ func (b *statefulBubble) resize(width, height int) {
 	listWidth := width - xx
 	listHeight := height - yy
 
+	b.scrapersInstallC.SetSize(listWidth, listHeight)
 	b.historyC.SetSize(listWidth, listHeight)
 	b.sourcesC.SetSize(listWidth, listHeight)
 	b.mangasC.SetSize(listWidth, listHeight)
@@ -129,12 +134,13 @@ func newBubble() *statefulBubble {
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
 
-		sourceLoadedChannel:    make(chan source.Source),
-		foundMangasChannel:     make(chan []*source.Manga),
-		foundChaptersChannel:   make(chan []*source.Chapter),
-		chapterReadChannel:     make(chan struct{}),
-		chapterDownloadChannel: make(chan struct{}),
-		errorChannel:           make(chan error),
+		scraperInstalledChannel: make(chan *installer.Scraper),
+		sourceLoadedChannel:     make(chan source.Source),
+		foundMangasChannel:      make(chan []*source.Manga),
+		foundChaptersChannel:    make(chan []*source.Chapter),
+		chapterReadChannel:      make(chan struct{}),
+		chapterDownloadChannel:  make(chan struct{}),
+		errorChannel:            make(chan error),
 
 		selectedChapters:   make(map[*source.Chapter]struct{}),
 		chaptersToDownload: util.Stack[*source.Chapter]{},
@@ -162,6 +168,7 @@ func newBubble() *statefulBubble {
 		}
 		listC.Title = title
 		listC.Styles.NoItems = paddingStyle
+		listC.StatusMessageLifetime = time.Second * 5
 
 		return listC
 	}
@@ -178,7 +185,11 @@ func newBubble() *statefulBubble {
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 
+	bubble.scrapersInstallC = makeList("Scrapers")
+	bubble.scrapersInstallC.SetStatusBarItemName("scraper", "scrapers")
+
 	bubble.historyC = makeList("History")
+	bubble.sourcesC.SetStatusBarItemName("chapter", "chapters")
 
 	bubble.sourcesC = makeList("Sources")
 	bubble.sourcesC.SetStatusBarItemName("source", "sources")
@@ -254,4 +265,22 @@ func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
 	}
 
 	return tea.Batch(b.historyC.SetItems(items), b.loadSources()), nil
+}
+
+func (b *statefulBubble) loadScrapers() (tea.Cmd, error) {
+	scrapers, err := installer.Scrapers()
+	if err != nil {
+		return nil, err
+	}
+
+	var items []list.Item
+	for _, s := range scrapers {
+		items = append(items, &listItem{
+			title:       s.Name,
+			description: s.GithubURL(),
+			internal:    s,
+		})
+	}
+
+	return b.scrapersInstallC.SetItems(items), nil
 }

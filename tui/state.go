@@ -4,6 +4,7 @@ type state int
 
 const (
 	idle state = iota + 1
+	scrapersInstallState
 	errorState
 	loadingState
 	historyState

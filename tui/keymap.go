@@ -122,6 +122,8 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	switch k.state {
 	case idle:
 		return to2(h(k.forceQuit))
+	case scrapersInstallState:
+		return to2(h(k.confirm, k.openURL))
 	case loadingState:
 		return to2(h(k.forceQuit, k.back))
 	case historyState:

@@ -6,12 +6,41 @@ import (
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
+	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
 )
+
+func (b *statefulBubble) installScraper(s *installer.Scraper) tea.Cmd {
+	return func() tea.Msg {
+		b.progressStatus = fmt.Sprintf("Installing %s", s.Name)
+		err := s.Install()
+		if err != nil {
+			log.Error(err)
+			b.errorChannel <- err
+		} else {
+			log.Info("scraper " + s.Name + " installed")
+			b.scraperInstalledChannel <- s
+		}
+
+		return nil
+	}
+}
+
+func (b *statefulBubble) waitForScraperInstallation() tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case res := <-b.scraperInstalledChannel:
+			return res
+		case err := <-b.errorChannel:
+			b.lastError = err
+			return err
+		}
+	}
+}
 
 func (b *statefulBubble) loadSource(p *provider.Provider) tea.Cmd {
 	return func() tea.Msg {
