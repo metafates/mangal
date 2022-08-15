@@ -11,7 +11,7 @@ func init() {
 
 var installCmd = &cobra.Command{
 	Use:   "install",
-	Short: "Browser and install custom scrapers",
+	Short: "Browse and install custom scrapers",
 	Long: `Browse and install custom scrapers from official GitHub repo.
 https://github.com/metafates/mangal-scrapers`,
 	RunE: func(cmd *cobra.Command, args []string) error {
