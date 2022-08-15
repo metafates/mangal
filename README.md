@@ -108,7 +108,6 @@ Run `mangal where` to show expected config paths
 
 Run `mangal config init` to generate a default config file
 
-> This is not a complete config, just an example.
 ```toml
 # mangal.toml
 
