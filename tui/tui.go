@@ -14,11 +14,6 @@ func Run(options *Options) error {
 	bubble := newBubble()
 
 	if options.Install {
-		_, err := bubble.loadScrapers()
-		if err != nil {
-			return err
-		}
-
 		bubble.setState(scrapersInstallState)
 	} else if options.Continue {
 		_, err := bubble.loadHistory()

@@ -115,6 +115,11 @@ func (b *statefulBubble) updateIdle(_ tea.Msg) (tea.Model, tea.Cmd) {
 func (b *statefulBubble) updateScrapersInstall(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
+	if len(b.scrapersInstallC.Items()) == 0 {
+		b.newState(loadingState)
+		return b, tea.Batch(b.startLoading(), b.loadScrapers(), b.waitForScrapersLoaded())
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -147,6 +152,9 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.back):
 			b.previousState()
 		}
+	case []*installer.Scraper:
+		b.newState(scrapersInstallState)
+		return b, b.stopLoading()
 	case *installer.Scraper:
 		b.newState(scrapersInstallState)
 		b.scrapersInstallC.NewStatusMessage(fmt.Sprintf("Installed %s", msg.Name))

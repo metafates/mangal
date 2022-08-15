@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/converter"
@@ -12,7 +13,51 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
+	"strings"
 )
+
+func (b *statefulBubble) loadScrapers() tea.Cmd {
+	return func() tea.Msg {
+		b.progressStatus = "Loading scrapers"
+		scrapers, err := installer.Scrapers()
+		if err != nil {
+			log.Error(err)
+			b.errorChannel <- err
+			return nil
+		}
+		b.progressStatus = "Scrapers Loaded"
+
+		slices.SortFunc(scrapers, func(a, b *installer.Scraper) bool {
+			return strings.Compare(a.Name, b.Name) < 0
+		})
+
+		var items []list.Item
+		for _, s := range scrapers {
+			items = append(items, &listItem{
+				title:       s.Name,
+				description: s.GithubURL(),
+				internal:    s,
+			})
+		}
+
+		cmd := b.scrapersInstallC.SetItems(items)
+		b.scrapersLoadedChannel <- scrapers
+		return cmd
+	}
+}
+
+func (b *statefulBubble) waitForScrapersLoaded() tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case res := <-b.scrapersLoadedChannel:
+			return res
+		case err := <-b.errorChannel:
+			b.lastError = err
+			return err
+		}
+	}
+}
 
 func (b *statefulBubble) installScraper(s *installer.Scraper) tea.Cmd {
 	return func() tea.Msg {

@@ -43,6 +43,7 @@ type statefulBubble struct {
 	selectedManga    *source.Manga
 	selectedChapters map[*source.Chapter]struct{} // mathematical set
 
+	scrapersLoadedChannel   chan []*installer.Scraper
 	scraperInstalledChannel chan *installer.Scraper
 	sourceLoadedChannel     chan source.Source
 	foundMangasChannel      chan []*source.Manga
@@ -134,6 +135,7 @@ func newBubble() *statefulBubble {
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
 
+		scrapersLoadedChannel:   make(chan []*installer.Scraper),
 		scraperInstalledChannel: make(chan *installer.Scraper),
 		sourceLoadedChannel:     make(chan source.Source),
 		foundMangasChannel:      make(chan []*source.Manga),
@@ -185,13 +187,13 @@ func newBubble() *statefulBubble {
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 
-	bubble.scrapersInstallC = makeList("Scrapers")
+	bubble.scrapersInstallC = makeList("Install Scrapers")
 	bubble.scrapersInstallC.SetStatusBarItemName("scraper", "scrapers")
 
 	bubble.historyC = makeList("History")
 	bubble.sourcesC.SetStatusBarItemName("chapter", "chapters")
 
-	bubble.sourcesC = makeList("Sources")
+	bubble.sourcesC = makeList("Select Source")
 	bubble.sourcesC.SetStatusBarItemName("source", "sources")
 
 	bubble.mangasC = makeList("Mangas")
@@ -265,26 +267,4 @@ func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
 	}
 
 	return tea.Batch(b.historyC.SetItems(items), b.loadSources()), nil
-}
-
-func (b *statefulBubble) loadScrapers() (tea.Cmd, error) {
-	scrapers, err := installer.Scrapers()
-	if err != nil {
-		return nil, err
-	}
-
-	slices.SortFunc(scrapers, func(a, b *installer.Scraper) bool {
-		return strings.Compare(a.Name, b.Name) < 0
-	})
-
-	var items []list.Item
-	for _, s := range scrapers {
-		items = append(items, &listItem{
-			title:       s.Name,
-			description: s.GithubURL(),
-			internal:    s,
-		})
-	}
-
-	return b.scrapersInstallC.SetItems(items), nil
 }
