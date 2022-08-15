@@ -91,10 +91,14 @@ func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
 		return "", err
 	}
 
-	mangaDir = filepath.Join(
-		absDownloaderPath,
-		util.SanitizeFilename(manga.Name),
-	)
+	if viper.GetBool(config.DownloaderCreateMangaDir) {
+		mangaDir = filepath.Join(
+			absDownloaderPath,
+			util.SanitizeFilename(manga.Name),
+		)
+	} else {
+		mangaDir = absDownloaderPath
+	}
 
 	if err = filesystem.Get().MkdirAll(mangaDir, os.ModePerm); err != nil {
 		return "", err

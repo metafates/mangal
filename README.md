@@ -132,6 +132,9 @@ path = '.'
 # Do no turn it off unless you have some issues
 async = true
 
+# Create a subdirectory for each manga
+create_manga_dir = true
+
 
 
 [formats]
