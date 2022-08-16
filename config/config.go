@@ -7,7 +7,6 @@ import (
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
 	"os"
-	"runtime"
 	"strings"
 )
 
@@ -108,13 +107,8 @@ func resolveAliases() {
 	home := lo.Must(os.UserHomeDir())
 	path := viper.GetString(DownloaderPath)
 
-	switch runtime.GOOS {
-	case "windows":
-		path = strings.ReplaceAll(path, "%USERPROFILE%", home)
-	case "darwin", "linux":
-		path = strings.ReplaceAll(path, "$HOME", home)
-		path = strings.ReplaceAll(path, "~", home)
-	default:
-		panic("unsupported OS: " + runtime.GOOS)
-	}
+	path = strings.ReplaceAll(path, "$HOME", home)
+	path = strings.ReplaceAll(path, "~", home)
+
+	viper.Set(DownloaderPath, path)
 }
