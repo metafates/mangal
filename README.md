@@ -124,8 +124,7 @@ chapter_name_template = '[{padded-index}] {chapter}'
 # Absolute or relative.
 #
 # You can also use home variable 
-# Linux/macOS = $HOME or ~
-# Windows = %USERPROFILE%
+# path = "~/..." or "$HOME/..."
 path = '.'
 
 # Use asynchronous downloader (faster)
