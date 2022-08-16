@@ -66,6 +66,7 @@ func setDefaults() {
 		DownloaderPath:                ".",
 		DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
 		DownloaderAsync:               true,
+		DownloaderCreateMangaDir:      true,
 
 		// Formats
 		FormatsUse: "pdf",

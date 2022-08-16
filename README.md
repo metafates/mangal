@@ -28,7 +28,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __Fast__ - yes. 
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
-- __Fancy__ - (ﾉ>ω<)ﾉ :｡･:*:･ﾟ’★,｡･:*:･ﾟ’☆
+- __Fancy__ - (ﾉ>ω<)ﾉ :｡･::･ﾟ’★,｡･:･ﾟ’☆
 - __Cross-Platform__ - Linux, macOS, Windows. Sorry, FreeBSD users...
 - __Anilist integration__ - Track your manga progress on Anilist when reading with Mangal.
 
@@ -48,7 +48,7 @@ Visit this link to install [Go](https://go.dev/doc/install)
 
 ### Linux
 
-[AUR package](https://aur.archlinux.org/packages/mangal-bin) (by @balajsra)
+[AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
 
 Download the latest version from [GitHub release page](https://github.com/metafates/mangal/releases/latest)
 
@@ -74,7 +74,7 @@ Install using... well, you know.
 
 To run
 
-    docker run --rm -ti -e "TERM=xterm-256color" -v (PWD)/mangal/downloads:/downloads -v (PWD)/mangal/config:/config metafates/mangal
+    docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
 
 ## Usage
 
@@ -104,11 +104,10 @@ Run `mangal where` to show expected config paths
 
 > "But what if I want to specify my own config path?"
 > 
-> Okay, fine, use env variable `MANGAL_CONFIG_PATH`
+> Use env variable `MANGAL_CONFIG_PATH`
 
 Run `mangal config init` to generate a default config file
 
-> This is not a complete config, just an example.
 ```toml
 # mangal.toml
 
@@ -118,6 +117,7 @@ Run `mangal config init` to generate a default config file
 # {index}        - index of the chapters
 # {padded-index} - same as index but padded with leading zeros
 # {chapter}      - name of the chapter
+# {manga}        - name of the manga
 chapter_name_template = '[{padded-index}] {chapter}'
 
 # Where to download manga
@@ -132,6 +132,8 @@ path = '.'
 # Do no turn it off unless you have some issues
 async = true
 
+# Create a subdirectory for each manga
+create_manga_dir = true
 
 
 [formats]
@@ -187,6 +189,10 @@ level = "info"
 ```
 
 ## Custom scrapers
+
+TLDR; To browse and install a custom scraper from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) run
+
+    mangal install
 
 Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
 

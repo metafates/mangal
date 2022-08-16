@@ -75,10 +75,19 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 
 // prepareMangaDir will create manga direcotry if it doesn't exist
 func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
-	mangaDir = filepath.Join(
-		viper.GetString(config.DownloaderPath),
-		util.SanitizeFilename(manga.Name),
-	)
+	absDownloaderPath, err := filepath.Abs(viper.GetString(config.DownloaderPath))
+	if err != nil {
+		return "", err
+	}
+
+	if viper.GetBool(config.DownloaderCreateMangaDir) {
+		mangaDir = filepath.Join(
+			absDownloaderPath,
+			util.SanitizeFilename(manga.Name),
+		)
+	} else {
+		mangaDir = absDownloaderPath
+	}
 
 	if err = filesystem.Get().MkdirAll(mangaDir, os.ModePerm); err != nil {
 		return "", err

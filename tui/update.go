@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/history"
+	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
@@ -61,6 +62,11 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					b.sourcesC, cmd = b.sourcesC.Update(msg)
 					return b, cmd
 				}
+			case scrapersInstallState:
+				if b.scrapersInstallC.FilterState() != list.Unfiltered {
+					b.scrapersInstallC, cmd = b.scrapersInstallC.Update(msg)
+					return b, cmd
+				}
 			}
 
 			b.previousState()
@@ -92,6 +98,8 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b.updateDownload(msg)
 	case downloadDoneState:
 		return b.updateDownloadDone(msg)
+	case scrapersInstallState:
+		return b.updateScrapersInstall(msg)
 	case errorState:
 		return b.updateError(msg)
 	}
@@ -99,9 +107,40 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	panic("unreachable")
 }
 
-func (b *statefulBubble) updateIdle(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *statefulBubble) updateIdle(_ tea.Msg) (tea.Model, tea.Cmd) {
 	panic("idle state must not be reached")
 	return b, nil
+}
+
+func (b *statefulBubble) updateScrapersInstall(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	if len(b.scrapersInstallC.Items()) == 0 {
+		b.newState(loadingState)
+		return b, tea.Batch(b.startLoading(), b.loadScrapers(), b.waitForScrapersLoaded())
+	}
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case b.scrapersInstallC.FilterState() == list.Filtering:
+			break
+		case key.Matches(msg, b.keymap.openURL):
+			url := b.scrapersInstallC.SelectedItem().(*listItem).internal.(*installer.Scraper).GithubURL()
+			err := open.Run(url)
+			if err != nil {
+				b.lastError = err
+				b.newState(errorState)
+			}
+		case key.Matches(msg, b.keymap.selectOne, b.keymap.confirm):
+			scraper := b.scrapersInstallC.SelectedItem().(*listItem).internal.(*installer.Scraper)
+			b.newState(loadingState)
+			return b, tea.Batch(b.startLoading(), b.installScraper(scraper), b.waitForScraperInstallation())
+		}
+	}
+
+	b.scrapersInstallC, cmd = b.scrapersInstallC.Update(msg)
+	return b, cmd
 }
 
 func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -113,6 +152,13 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.back):
 			b.previousState()
 		}
+	case []*installer.Scraper:
+		b.newState(scrapersInstallState)
+		return b, b.stopLoading()
+	case *installer.Scraper:
+		b.newState(scrapersInstallState)
+		b.scrapersInstallC.NewStatusMessage(fmt.Sprintf("Installed %s", msg.Name))
+		return b, b.stopLoading()
 	case []*source.Manga:
 		items := make([]list.Item, len(msg))
 		for i, m := range msg {
@@ -152,6 +198,17 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 					b.plot = randomPlot()
 					b.newState(errorState)
 				}
+			}
+		case key.Matches(msg, b.keymap.remove):
+			if b.historyC.SelectedItem() != nil {
+				chapter := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+				_ = history.Remove(chapter)
+				cmd, err := b.loadHistory()
+				if err != nil {
+					return nil, nil
+				}
+
+				return b, cmd
 			}
 		case key.Matches(msg, b.keymap.selectOne, b.keymap.confirm):
 			selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)

@@ -6,21 +6,24 @@ import (
 
 type Options struct {
 	Continue bool
+	Install  bool
 }
 
 func Run(options *Options) error {
 
 	bubble := newBubble()
 
-	if options.Continue {
+	if options.Install {
+		bubble.setState(scrapersInstallState)
+	} else if options.Continue {
 		_, err := bubble.loadHistory()
 		if err != nil {
 			return err
 		}
 
-		bubble.state = historyState
+		bubble.setState(historyState)
 	} else {
-		bubble.state = sourcesState
+		bubble.setState(sourcesState)
 	}
 
 	return tea.NewProgram(bubble, tea.WithAltScreen()).Start()

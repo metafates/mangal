@@ -77,30 +77,10 @@ scoop:
 
 
 release:
-  # Repo in which the release will be created.
-  # Default is extracted from the origin remote URL or empty if its private hosted.
   github:
     owner: metafates
     name: mangal
 
   draft: false
-
-  # Header template for the release body.
-  # Defaults to empty.
-  # header: |
-  #   ## Some title ({{ .Date }})
-  #
-  #   Welcome to this new release!
-  #
-  # # Footer template for the release body.
-  # # Defaults to empty.
-  # footer: |
-  #   ## Thanks!
-  #   If you have any 
-  #
-  #   Those were the changes on {{ .Tag }}!
-
-  # You can change the name of the release.
-  # Default is `{{.Tag}}` on OSS and `{{.PrefixedTag}}` on Pro.
   name_template: "{{.ProjectName}} v{{.Version}}"
 

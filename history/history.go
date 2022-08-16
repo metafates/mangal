@@ -29,6 +29,7 @@ func (c *SavedChapter) String() string {
 	return fmt.Sprintf("%s : %d / %d", c.MangaName, c.Index, c.MangaChaptersTotal)
 }
 
+// Get returns all chapters from the history file
 func Get() (map[string]*SavedChapter, error) {
 	log.Info("Getting history location")
 	historyFile := where.History()
@@ -52,6 +53,7 @@ func Get() (map[string]*SavedChapter, error) {
 	return chapters, nil
 }
 
+// Save saves the chapter to the history file
 func Save(chapter *source.Chapter) error {
 	if viper.GetBool(config.AnilistEnable) {
 		defer func() {
@@ -96,6 +98,49 @@ func Save(chapter *source.Chapter) error {
 	}
 
 	chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)] = &jsonChapter
+
+	// encode json
+	log.Info("Encoding history to json")
+	encoded, err := json.Marshal(chapters)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	// write to file
+	log.Info("Writing history to file")
+	err = filesystem.Get().WriteFile(historyFile, encoded, os.ModePerm)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+// Remove removes the chapter from the history file
+func Remove(chapter *SavedChapter) error {
+	log.Info("Removing chapter from history")
+
+	historyFile := where.History()
+
+	// decode json into slice of structs
+	var chapters map[string]*SavedChapter
+	log.Info("Reading history file")
+	contents, err := filesystem.Get().ReadFile(historyFile)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	log.Info("Decoding history from json")
+	err = json.Unmarshal(contents, &chapters)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	delete(chapters, fmt.Sprintf("%s (%s)", chapter.MangaName, chapter.SourceID))
 
 	// encode json
 	log.Info("Encoding history to json")

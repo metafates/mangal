@@ -11,12 +11,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"golang.org/x/exp/slices"
 	"strings"
+	"time"
 )
 
 type statefulBubble struct {
@@ -27,25 +29,28 @@ type statefulBubble struct {
 	keymap *statefulKeymap
 
 	// components
-	spinnerC  spinner.Model
-	inputC    textinput.Model
-	historyC  list.Model
-	sourcesC  list.Model
-	mangasC   list.Model
-	chaptersC list.Model
-	progressC progress.Model
-	helpC     help.Model
+	spinnerC         spinner.Model
+	inputC           textinput.Model
+	scrapersInstallC list.Model
+	historyC         list.Model
+	sourcesC         list.Model
+	mangasC          list.Model
+	chaptersC        list.Model
+	progressC        progress.Model
+	helpC            help.Model
 
 	selectedSource   source.Source
 	selectedManga    *source.Manga
 	selectedChapters map[*source.Chapter]struct{} // mathematical set
 
-	sourceLoadedChannel    chan source.Source
-	foundMangasChannel     chan []*source.Manga
-	foundChaptersChannel   chan []*source.Chapter
-	chapterReadChannel     chan struct{}
-	chapterDownloadChannel chan struct{}
-	errorChannel           chan error
+	scrapersLoadedChannel   chan []*installer.Scraper
+	scraperInstalledChannel chan *installer.Scraper
+	sourceLoadedChannel     chan source.Source
+	foundMangasChannel      chan []*source.Manga
+	foundChaptersChannel    chan []*source.Chapter
+	chapterReadChannel      chan struct{}
+	chapterDownloadChannel  chan struct{}
+	errorChannel            chan error
 
 	progressStatus string
 
@@ -101,6 +106,7 @@ func (b *statefulBubble) resize(width, height int) {
 	listWidth := width - xx
 	listHeight := height - yy
 
+	b.scrapersInstallC.SetSize(listWidth, listHeight)
 	b.historyC.SetSize(listWidth, listHeight)
 	b.sourcesC.SetSize(listWidth, listHeight)
 	b.mangasC.SetSize(listWidth, listHeight)
@@ -129,12 +135,14 @@ func newBubble() *statefulBubble {
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
 
-		sourceLoadedChannel:    make(chan source.Source),
-		foundMangasChannel:     make(chan []*source.Manga),
-		foundChaptersChannel:   make(chan []*source.Chapter),
-		chapterReadChannel:     make(chan struct{}),
-		chapterDownloadChannel: make(chan struct{}),
-		errorChannel:           make(chan error),
+		scrapersLoadedChannel:   make(chan []*installer.Scraper),
+		scraperInstalledChannel: make(chan *installer.Scraper),
+		sourceLoadedChannel:     make(chan source.Source),
+		foundMangasChannel:      make(chan []*source.Manga),
+		foundChaptersChannel:    make(chan []*source.Chapter),
+		chapterReadChannel:      make(chan struct{}),
+		chapterDownloadChannel:  make(chan struct{}),
+		errorChannel:            make(chan error),
 
 		selectedChapters:   make(map[*source.Chapter]struct{}),
 		chaptersToDownload: util.Stack[*source.Chapter]{},
@@ -144,7 +152,17 @@ func newBubble() *statefulBubble {
 	}()
 
 	makeList := func(title string) list.Model {
-		listC := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+		delegate := list.NewDefaultDelegate()
+		delegate.Styles.SelectedTitle = lipgloss.NewStyle().
+			Border(lipgloss.ThickBorder(), false, false, false, true).
+			BorderForeground(lipgloss.Color("5")).
+			Foreground(lipgloss.Color("5")).
+			Padding(0, 0, 0, 1)
+		delegate.Styles.NormalTitle = delegate.Styles.NormalTitle.Copy().Foreground(lipgloss.Color("7"))
+
+		delegate.Styles.SelectedDesc = delegate.Styles.SelectedTitle.Copy()
+
+		listC := list.New([]list.Item{}, delegate, 0, 0)
 		listC.KeyMap = bubble.keymap.forList()
 		listC.AdditionalShortHelpKeys = bubble.keymap.ShortHelp
 		listC.AdditionalFullHelpKeys = func() []key.Binding {
@@ -152,6 +170,7 @@ func newBubble() *statefulBubble {
 		}
 		listC.Title = title
 		listC.Styles.NoItems = paddingStyle
+		listC.StatusMessageLifetime = time.Second * 5
 
 		return listC
 	}
@@ -168,9 +187,13 @@ func newBubble() *statefulBubble {
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 
-	bubble.historyC = makeList("History")
+	bubble.scrapersInstallC = makeList("Install Scrapers")
+	bubble.scrapersInstallC.SetStatusBarItemName("scraper", "scrapers")
 
-	bubble.sourcesC = makeList("Sources")
+	bubble.historyC = makeList("History")
+	bubble.sourcesC.SetStatusBarItemName("chapter", "chapters")
+
+	bubble.sourcesC = makeList("Select Source")
 	bubble.sourcesC.SetStatusBarItemName("source", "sources")
 
 	bubble.mangasC = makeList("Mangas")

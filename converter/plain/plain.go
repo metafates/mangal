@@ -78,11 +78,19 @@ func prepareChapterDir(chapter *source.Chapter) (chapterDir string, err error) {
 	if err != nil {
 		return "", err
 	}
-	chapterDir = filepath.Join(
-		absDownloaderPath,
-		util.SanitizeFilename(chapter.Manga.Name),
-		util.SanitizeFilename(chapter.FormattedName()),
-	)
+
+	if viper.GetBool(config.DownloaderCreateMangaDir) {
+		chapterDir = filepath.Join(
+			absDownloaderPath,
+			util.SanitizeFilename(chapter.Manga.Name),
+			util.SanitizeFilename(chapter.FormattedName()),
+		)
+	} else {
+		chapterDir = filepath.Join(
+			absDownloaderPath,
+			util.SanitizeFilename(chapter.FormattedName()),
+		)
+	}
 
 	if err = filesystem.Get().MkdirAll(chapterDir, os.ModePerm); err != nil {
 		return "", err
