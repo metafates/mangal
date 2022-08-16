@@ -51,6 +51,7 @@ var EnvExposed = []string{
 	// downloader
 	DownloaderPath,
 	DownloaderChapterNameTemplate,
+	DownloaderCreateMangaDir,
 
 	// formats
 	FormatsUse,
