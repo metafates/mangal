@@ -117,6 +117,7 @@ Run `mangal config init` to generate a default config file
 # {index}        - index of the chapters
 # {padded-index} - same as index but padded with leading zeros
 # {chapter}      - name of the chapter
+# {manga}        - name of the manga
 chapter_name_template = '[{padded-index}] {chapter}'
 
 # Where to download manga
