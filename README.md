@@ -136,7 +136,6 @@ async = true
 create_manga_dir = true
 
 
-
 [formats]
 # Default format to export chapters
 # Available options are: pdf, zip, cbz, plain

@@ -32,7 +32,7 @@ func getInput(validator func(string) bool) (*input, error) {
 	if in == "" {
 		in = "1"
 	}
-
+  
 	if !validator(in) {
 		fmt.Println(style.Red("Invalid choice entered"))
 		return getInput(validator)
