@@ -52,7 +52,7 @@ Visit this link to install [Go](https://go.dev/doc/install)
 
 Download the latest version from [GitHub release page](https://github.com/metafates/mangal/releases/latest)
 
-### macOS
+### macOS / Linux
 
 Install using [Homebrew](https://brew.sh/)
 

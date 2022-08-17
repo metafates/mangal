@@ -29,27 +29,24 @@ var whereCmd = &cobra.Command{
 		whereSources := lo.Must(cmd.Flags().GetBool("sources"))
 		wherLogs := lo.Must(cmd.Flags().GetBool("logs"))
 
-		printConfigPath := func(header bool) {
-			if header {
-				cmd.Println(headerStyle("Configuration path:"))
+		title := func(do bool, what, arg string) {
+			if do {
+				cmd.Printf("%s %s\n", headerStyle(what+"?"), style.Yellow(arg))
 			}
+		}
 
+		printConfigPath := func(header bool) {
+			title(header, "Configuration", "--config")
 			cmd.Println(where.Config())
 		}
 
 		printSourcesPath := func(header bool) {
-			if header {
-				cmd.Println(headerStyle("Sources path:"))
-			}
-
+			title(header, "Sources", "--sources")
 			cmd.Println(where.Sources())
 		}
 
 		printLogsPath := func(header bool) {
-			if header {
-				cmd.Println(headerStyle("Logs path:"))
-			}
-
+			title(header, "Logs", "--logs")
 			cmd.Println(where.Logs())
 		}
 
