@@ -30,42 +30,55 @@ const (
 )
 
 func (m *mini) handleSourceSelectState() error {
-	defaultProviders := provider.DefaultProviders()
-	customProviders := lo.Must(provider.CustomProviders())
-
-	var providers = make([]*provider.Provider, 0)
-
-	for _, p := range defaultProviders {
-		providers = append(providers, p)
-	}
-
-	for _, p := range customProviders {
-		providers = append(providers, p)
-	}
-
-	slices.SortFunc(providers, func(a *provider.Provider, b *provider.Provider) bool {
-		return strings.Compare(a.String(), b.String()) < 0
-	})
-
 	var err error
 
-	title("Select Source")
-	b, p, err := menu(providers)
+	if name := viper.GetString(config.DownloaderDefaultSource); name != "" {
+		p, ok := provider.Get(name)
+		if !ok {
+			return fmt.Errorf("unknown source \"%s\"", name)
+		}
+
+		m.selectedSource, err = p.CreateSource()
+	} else {
+		defaultProviders := provider.DefaultProviders()
+		customProviders := lo.Must(provider.CustomProviders())
+
+		var providers = make([]*provider.Provider, 0)
+
+		for _, p := range defaultProviders {
+			providers = append(providers, p)
+		}
+
+		for _, p := range customProviders {
+			providers = append(providers, p)
+		}
+
+		slices.SortFunc(providers, func(a *provider.Provider, b *provider.Provider) bool {
+			return strings.Compare(a.String(), b.String()) < 0
+		})
+
+		title("Select Source")
+		b, p, err := menu(providers)
+		if err != nil {
+			return err
+		}
+
+		if quit.eq(b) {
+			m.newState(quitState)
+			return nil
+		}
+
+		erase := progress("Initializing Source..")
+		m.selectedSource, err = p.CreateSource()
+		erase()
+	}
+
 	if err != nil {
 		return err
 	}
 
-	if quit.eq(b) {
-		m.newState(quitState)
-		return nil
-	}
-
-	erase := progress("Initializing Source..")
-	m.selectedSource, err = p.CreateSource()
-	erase()
-
 	m.newState(mangasSearchState)
-	return err
+	return nil
 }
 
 func (m *mini) handleMangaSearchState() error {

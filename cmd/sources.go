@@ -17,22 +17,20 @@ var sourcesCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		headerStyle := style.Combined(style.Bold, style.HiBlue)
 
-		cmd.Println(headerStyle("Builtin sources:"))
+		cmd.Println(headerStyle("Builtin:"))
 		for name := range provider.DefaultProviders() {
-			name = "  " + name
 			cmd.Println(name)
 		}
 
 		cmd.Println()
 
-		cmd.Println(headerStyle("Custom sources:"))
+		cmd.Println(headerStyle("Custom:"))
 		custom, err := provider.CustomProviders()
 		if err != nil {
 			return err
 		}
 
 		for name := range custom {
-			name = "  " + name
 			cmd.Println(name)
 		}
 

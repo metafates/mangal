@@ -126,6 +126,10 @@ Run `mangal config init` to generate a default config file
 # mangal.toml
 
 [downloader]
+# Default source to use
+# Will prompt to choose if empty
+default_source = ''
+
 # Name template of the downloaded chapters
 # Available variables:
 # {index}        - index of the chapters
