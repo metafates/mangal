@@ -5,7 +5,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
-type LuaSource struct {
+type luaSource struct {
 	name           string
 	state          *lua.LState
 	cachedMangas   map[string][]*source.Manga
@@ -13,12 +13,12 @@ type LuaSource struct {
 	cachedPages    map[string][]*source.Page
 }
 
-func (s *LuaSource) Name() string {
+func (s *luaSource) Name() string {
 	return s.name
 }
 
-func newLuaSource(name string, state *lua.LState) (*LuaSource, error) {
-	return &LuaSource{
+func newLuaSource(name string, state *lua.LState) (*luaSource, error) {
+	return &luaSource{
 		name:           name,
 		state:          state,
 		cachedMangas:   make(map[string][]*source.Manga),
@@ -27,7 +27,7 @@ func newLuaSource(name string, state *lua.LState) (*LuaSource, error) {
 	}, nil
 }
 
-func (s *LuaSource) call(fn string, ret lua.LValueType, args ...lua.LValue) (lua.LValue, error) {
+func (s *luaSource) call(fn string, ret lua.LValueType, args ...lua.LValue) (lua.LValue, error) {
 	err := s.state.CallByParam(lua.P{
 		Fn:      s.state.GetGlobal(fn),
 		NRet:    1,
@@ -47,6 +47,6 @@ func (s *LuaSource) call(fn string, ret lua.LValueType, args ...lua.LValue) (lua
 	return val, nil
 }
 
-func (s *LuaSource) ID() string {
+func (s *luaSource) ID() string {
 	return IDfromName(s.name)
 }

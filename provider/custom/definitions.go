@@ -1,13 +1,13 @@
 package custom
 
 const (
-	SearchMangaFn   = "SearchManga"
-	MangaChaptersFn = "MangaChapters"
-	ChapterPagesFn  = "ChapterPages"
+	searchMangaFn   = "SearchManga"
+	mangaChaptersFn = "MangaChapters"
+	chapterPagesFn  = "ChapterPages"
 )
 
 var mustHave = []string{
-	SearchMangaFn,
-	MangaChaptersFn,
-	ChapterPagesFn,
+	searchMangaFn,
+	mangaChaptersFn,
+	chapterPagesFn,
 }
