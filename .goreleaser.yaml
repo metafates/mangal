@@ -33,7 +33,7 @@ dockers:
     goarch: amd64
     image_templates:
     - "metafates/mangal:latest"
-    skip_push: false
+    skip_push: true
     use: docker
 
 brews:
@@ -54,7 +54,7 @@ brews:
     homepage: "https://github.com/metafates/mangal"
     description: "The ultimate CLI manga downloader!"
     license: "MIT"
-    skip_upload: false
+    skip_upload: true
 
 scoop:
   bucket:
@@ -73,7 +73,7 @@ scoop:
   homepage: "https://github.com/metafates/mangal"
   description: "The ultimate CLI manga downloader!"
   license: MIT
-  skip_upload: false
+  skip_upload: true
 
 
 release:
@@ -81,6 +81,24 @@ release:
     owner: metafates
     name: mangal
 
-  draft: false
+  draft: true
   name_template: "{{.ProjectName}} v{{.Version}}"
 
+nfpms:
+  -
+    file_name_template: "{{ .ConventionalFileName }}"
+    homepage: https://github.com/metafates/mangal
+    maintainer: metafates <fates@duck.com>
+    description: |-
+      The most advanced cli manga downloader in the entire universe!
+
+    license: MIT
+    formats:
+      - deb
+      - rpm
+
+    bindir: /usr/bin
+
+    rpm:
+      group: Unspecified
+      compression: lzma
