@@ -81,3 +81,24 @@ func CustomProviders() (map[string]*Provider, error) {
 
 	return providers, nil
 }
+
+func Get(name string) (*Provider, bool) {
+	for _, provider := range defaultProviders {
+		if provider.Name == name {
+			return provider, true
+		}
+	}
+
+	c, err := CustomProviders()
+	if err != nil {
+		return nil, false
+	}
+
+	for _, provider := range c {
+		if provider.Name == name {
+			return provider, true
+		}
+	}
+
+	return nil, false
+}

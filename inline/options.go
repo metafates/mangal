@@ -16,6 +16,7 @@ type (
 )
 
 type Options struct {
+	Source        source.Source
 	Download      bool
 	Query         string
 	MangaPicker   MangaPicker
@@ -28,7 +29,7 @@ func ParseMangaPicker(description string) (MangaPicker, error) {
 		last  = "last"
 	)
 
-	pattern := fmt.Sprintf(`%s|%s|\\d+`, first, last)
+	pattern := fmt.Sprintf(`%s|%s|\d+`, first, last)
 	mangaPickerRegex := regexp.MustCompile(pattern)
 
 	if !mangaPickerRegex.MatchString(description) {
@@ -61,7 +62,7 @@ func ParseChaptersFilter(description string) (ChapterFilter, error) {
 		all   = "all"
 	)
 
-	pattern := fmt.Sprintf(`%s|%s|%s|(?P<From>\\d+)(-(?P<To>\\d+))?`, first, last, all)
+	pattern := fmt.Sprintf(`%s|%s|%s|(?P<From>\d+)(-(?P<To>\d+))?`, first, last, all)
 	mangaPickerRegex := regexp.MustCompile(pattern)
 
 	if !mangaPickerRegex.MatchString(description) {
