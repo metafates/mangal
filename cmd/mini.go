@@ -26,8 +26,8 @@ func init() {
 
 var miniCmd = &cobra.Command{
 	Use:   "mini",
-	Short: "Launch the in mini mode",
-	Long: `Launch mangal the in mini mode.
+	Short: "Launch in the mini mode",
+	Long: `Launch mangal in the mini mode.
 Will try to mimic ani-cli.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		options := mini.Options{
