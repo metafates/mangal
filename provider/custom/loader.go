@@ -1,9 +1,10 @@
-package source
+package custom
 
 import (
 	"errors"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/luamodules"
+	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/afero"
 	lua "github.com/yuin/gopher-lua"
@@ -14,7 +15,7 @@ func IDfromName(name string) string {
 	return name + " custom"
 }
 
-func LoadSource(path string, validate bool) (Source, error) {
+func LoadSource(path string, validate bool) (source.Source, error) {
 	proto, err := Compile(path)
 	if err != nil {
 		return nil, err
@@ -37,17 +38,17 @@ func LoadSource(path string, validate bool) (Source, error) {
 			defined := state.GetGlobal(fn)
 
 			if defined.Type() != lua.LTFunction {
-				return nil, errors.New("required function " + fn + " is not defined in the source " + name)
+				return nil, errors.New("required function " + fn + " is not defined in the luaSource " + name)
 			}
 		}
 	}
 
-	source, err := newLuaSource(name, state)
+	luaSource, err := newLuaSource(name, state)
 	if err != nil {
 		return nil, err
 	}
 
-	return source, nil
+	return luaSource, nil
 }
 
 func Compile(path string) (*lua.FunctionProto, error) {

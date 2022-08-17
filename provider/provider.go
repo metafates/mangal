@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/provider/custom"
 	"github.com/metafates/mangal/provider/mangadex"
 	"github.com/metafates/mangal/provider/manganelo"
 	"github.com/metafates/mangal/source"
@@ -70,10 +71,10 @@ func CustomProviders() (map[string]*Provider, error) {
 		name := util.FileStem(path)
 		path := path
 		providers[name] = &Provider{
-			ID:   source.IDfromName(name),
+			ID:   custom.IDfromName(name),
 			Name: name,
 			CreateSource: func() (source.Source, error) {
-				return source.LoadSource(path, true)
+				return custom.LoadSource(path, true)
 			},
 		}
 	}

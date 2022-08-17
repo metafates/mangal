@@ -1,4 +1,4 @@
-package source
+package custom
 
 const (
 	SearchMangaFn   = "SearchManga"
