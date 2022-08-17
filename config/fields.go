@@ -5,6 +5,7 @@ const (
 	DownloaderChapterNameTemplate = "downloader.chapter_name_template"
 	DownloaderAsync               = "downloader.async"
 	DownloaderCreateMangaDir      = "downloader.create_manga_dir"
+	DownloaderDefaultSource       = "downloader.default_source"
 )
 
 const (
@@ -52,6 +53,7 @@ var EnvExposed = []string{
 	DownloaderPath,
 	DownloaderChapterNameTemplate,
 	DownloaderCreateMangaDir,
+	DownloaderDefaultSource,
 
 	// formats
 	FormatsUse,

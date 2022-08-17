@@ -3,13 +3,12 @@ package mini
 import (
 	"fmt"
 	"github.com/metafates/mangal/config"
-	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
-	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"regexp"
@@ -31,42 +30,55 @@ const (
 )
 
 func (m *mini) handleSourceSelectState() error {
-	defaultProviders := provider.DefaultProviders()
-	customProviders := lo.Must(provider.CustomProviders())
-
-	var providers = make([]*provider.Provider, 0)
-
-	for _, p := range defaultProviders {
-		providers = append(providers, p)
-	}
-
-	for _, p := range customProviders {
-		providers = append(providers, p)
-	}
-
-	slices.SortFunc(providers, func(a *provider.Provider, b *provider.Provider) bool {
-		return strings.Compare(a.String(), b.String()) < 0
-	})
-
 	var err error
 
-	title("Select Source")
-	b, p, err := menu(providers)
+	if name := viper.GetString(config.DownloaderDefaultSource); name != "" {
+		p, ok := provider.Get(name)
+		if !ok {
+			return fmt.Errorf("unknown source \"%s\"", name)
+		}
+
+		m.selectedSource, err = p.CreateSource()
+	} else {
+		defaultProviders := provider.DefaultProviders()
+		customProviders := lo.Must(provider.CustomProviders())
+
+		var providers = make([]*provider.Provider, 0)
+
+		for _, p := range defaultProviders {
+			providers = append(providers, p)
+		}
+
+		for _, p := range customProviders {
+			providers = append(providers, p)
+		}
+
+		slices.SortFunc(providers, func(a *provider.Provider, b *provider.Provider) bool {
+			return strings.Compare(a.String(), b.String()) < 0
+		})
+
+		title("Select Source")
+		b, p, err := menu(providers)
+		if err != nil {
+			return err
+		}
+
+		if quit.eq(b) {
+			m.newState(quitState)
+			return nil
+		}
+
+		erase := progress("Initializing Source..")
+		m.selectedSource, err = p.CreateSource()
+		erase()
+	}
+
 	if err != nil {
 		return err
 	}
 
-	if quit.eq(b) {
-		m.newState(quitState)
-		return nil
-	}
-
-	erase := progress("Initializing Source..")
-	m.selectedSource, err = p.CreateSource()
-	erase()
-
 	m.newState(mangasSearchState)
-	return err
+	return nil
 }
 
 func (m *mini) handleMangaSearchState() error {
@@ -221,57 +233,16 @@ func (m *mini) handleChapterReadState() error {
 
 	readLoop = func(chapter *source.Chapter, c *controls, hasPrev, hasNext bool) {
 		util.ClearScreen()
-		erase := progress("Loading Chapter..")
-		m.cachedPages[chapter.URL], err = m.selectedSource.PagesOf(chapter)
-		erase()
-		if err != nil {
-			c.err <- err
-			return
-		}
+		var erase = func() {}
 
-		erase = progress("Downloading Pages..")
-		err = chapter.DownloadPages()
-		erase()
+		err = downloader.Read(m.selectedSource, chapter, func(s string) {
+			erase()
+			erase = progress(s)
+		})
 
 		if err != nil {
 			c.err <- err
 			return
-		}
-
-		erase = progress("Converting..")
-		conv, err := converter.Get(viper.GetString(config.FormatsUse))
-		if err != nil {
-			c.err <- err
-			return
-		}
-
-		path, err := conv.SaveTemp(chapter)
-		go func(chapter *source.Chapter) {
-			if viper.GetBool(config.HistorySaveOnRead) {
-				_ = history.Save(chapter)
-			}
-		}(chapter)
-		erase()
-
-		if err != nil {
-			c.err <- err
-			return
-		}
-
-		erase = progress("Opening..")
-
-		if reader := viper.GetString(config.ReaderName); reader != "" {
-			err = open.RunWith(path, reader)
-			if err != nil {
-				c.err <- err
-				return
-			}
-		} else {
-			err = open.Run(path)
-			if err != nil {
-				c.err <- err
-				return
-			}
 		}
 
 		erase()
@@ -349,38 +320,16 @@ func (m *mini) handleChaptersDownloadState() error {
 
 	downloadLoop = func(chapter *source.Chapter) error {
 		util.ClearScreen()
-
-		erase := progress("Fetching pages links..")
-		m.cachedPages[chapter.URL], err = m.selectedSource.PagesOf(chapter)
-		erase()
-		if err != nil {
-			return err
-		}
+		var erase = func() {}
 
 		title(fmt.Sprintf("Currently downloading %s %s (%s)", chapter.Manga.Name, chapter.Name, m.selectedSource.Name()))
 
-		erase = progress(fmt.Sprintf("Downloading %d Pages..", len(m.cachedPages[chapter.URL])))
-		err = chapter.DownloadPages()
+		_, err := downloader.Download(m.selectedSource, chapter, func(s string) {
+			erase()
+			erase = progress(s)
+		})
+
 		erase()
-
-		if err != nil {
-			return err
-		}
-
-		erase = progress("Converting..")
-		conv, err := converter.Get(viper.GetString(config.FormatsUse))
-		if err != nil {
-			return err
-		}
-
-		_, err = conv.Save(chapter)
-		go func(chapter *source.Chapter) {
-			if viper.GetBool(config.HistorySaveOnDownload) {
-				_ = history.Save(chapter)
-			}
-		}(chapter)
-		erase()
-
 		if err != nil {
 			return err
 		}

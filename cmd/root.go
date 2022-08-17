@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/tui"
 	"github.com/samber/lo"
@@ -16,13 +17,13 @@ import (
 )
 
 func init() {
-	rootCmd.Flags().StringP("format", "f", "", "output format")
+	rootCmd.PersistentFlags().StringP("format", "F", "", "output format")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return converter.Available(), cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(config.FormatsUse, rootCmd.Flags().Lookup("format")))
+	lo.Must0(viper.BindPFlag(config.FormatsUse, rootCmd.PersistentFlags().Lookup("format")))
 
-	rootCmd.PersistentFlags().StringP("icons", "i", "", "icons variant")
+	rootCmd.PersistentFlags().StringP("icons", "I", "", "icons variant")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("icons", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return icon.AvailableVariants(), cobra.ShellCompDirectiveDefault
 	}))
@@ -30,6 +31,18 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolP("history", "H", true, "write history of the read chapters")
 	lo.Must0(viper.BindPFlag(config.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("history")))
+
+	rootCmd.PersistentFlags().StringP("source", "S", "", "source")
+	lo.Must0(rootCmd.RegisterFlagCompletionFunc("source", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		d := lo.Keys(provider.DefaultProviders())
+
+		if c, err := provider.CustomProviders(); err == nil {
+			d = append(d, lo.Keys(c)...)
+		}
+
+		return d, cobra.ShellCompDirectiveDefault
+	}))
+	lo.Must0(viper.BindPFlag(config.DownloaderDefaultSource, rootCmd.PersistentFlags().Lookup("source")))
 
 	rootCmd.Flags().BoolP("continue", "c", false, "continue reading")
 

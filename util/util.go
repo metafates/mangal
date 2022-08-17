@@ -90,3 +90,18 @@ func ClearScreen() {
 		_ = run("cls")
 	}
 }
+
+// ReGroups parses url with the given regular expression and returns the
+// group values defined in the expression.
+func ReGroups(pattern *regexp.Regexp, str string) map[string]string {
+
+	match := pattern.FindStringSubmatch(str)
+
+	groups := make(map[string]string)
+	for i, name := range pattern.SubexpNames() {
+		if i > 0 && i <= len(match) {
+			groups[name] = match[i]
+		}
+	}
+	return groups
+}

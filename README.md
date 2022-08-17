@@ -26,6 +26,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - __LUAAAA SCRAPPEERRRSS!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
+- __3 Different modes__ - TUI, Mini and Inline
 - __Fast__ - yes. 
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 - __Fancy__ - (ﾉ>ω<)ﾉ :｡･::･ﾟ’★,｡･:･ﾟ’☆
@@ -52,7 +53,7 @@ Visit this link to install [Go](https://go.dev/doc/install)
 
 Download the latest version from [GitHub release page](https://github.com/metafates/mangal/releases/latest)
 
-### macOS
+### macOS / Linux
 
 Install using [Homebrew](https://brew.sh/)
 
@@ -84,11 +85,24 @@ Just run `mangal` and you're ready to go.
 
 ### Mini
 
-There's also a `mini` mode that tries to mimic [ani-cli](https://github.com/pystardust/ani-cli)
+Mini mode tries to mimic [ani-cli](https://github.com/pystardust/ani-cli)
 
 To run: `mangal mini`
 
 <img width="254" alt="Screenshot 2022-08-14 at 09 37 14" src="https://user-images.githubusercontent.com/62389790/184524070-88fd36f7-9875-4a41-904c-04caad110549.png">
+
+### Inline
+
+Inline mode is intended for use with other scripts.
+
+Example of usage:
+
+    mangal inline --source Manganelo --query "death note" --manga first --chapters "@Vol.1 @"  -d
+
+> This will download the first volume of "Death Note" from Mangalelo.
+
+Type `mangal help inline` for more information
+
 
 ### Other
 
@@ -112,6 +126,11 @@ Run `mangal config init` to generate a default config file
 # mangal.toml
 
 [downloader]
+# Default source to use
+# Will prompt to choose if empty
+# Type `mangal sources` for available sources
+default_source = ''
+
 # Name template of the downloaded chapters
 # Available variables:
 # {index}        - index of the chapters
@@ -199,7 +218,7 @@ Check the [defined modules](luamodules) for more information.
 
 For scraper examples, check the [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 
-_Okay, so, how do I add a custom scraper?_
+### Creating a custom scraper
 
 1. Create a new lua file in the `mangal where --sources` folder
 2. Filename will be used as a source name
@@ -209,7 +228,7 @@ _Okay, so, how do I add a custom scraper?_
    - `ChapterPages(chapterUrl)` - must return a table of tables each having 2 fields `index` _(for ordering)_ and `url` _(to download image)_
 4. __That's it!__ You can test it by running `mangal run ...` where `...` is a filename
 
-New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
+> New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
 
 ## Anilist
 

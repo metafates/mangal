@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
 	"github.com/spf13/cobra"
@@ -18,22 +17,20 @@ var sourcesCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		headerStyle := style.Combined(style.Bold, style.HiBlue)
 
-		cmd.Println(headerStyle("Builtin sources:"))
+		cmd.Println(headerStyle("Builtin:"))
 		for name := range provider.DefaultProviders() {
-			name = "  " + name + " " + icon.Get(icon.Go)
 			cmd.Println(name)
 		}
 
 		cmd.Println()
 
-		cmd.Println(headerStyle("Custom sources:"))
+		cmd.Println(headerStyle("Custom:"))
 		custom, err := provider.CustomProviders()
 		if err != nil {
 			return err
 		}
 
 		for name := range custom {
-			name = "  " + name + " " + icon.Get(icon.Lua)
 			cmd.Println(name)
 		}
 

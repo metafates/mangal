@@ -84,3 +84,21 @@ release:
   draft: false
   name_template: "{{.ProjectName}} v{{.Version}}"
 
+nfpms:
+  -
+    file_name_template: "{{ .ConventionalFileName }}"
+    homepage: https://github.com/metafates/mangal
+    maintainer: metafates <fates@duck.com>
+    description: |-
+      The most advanced cli manga downloader in the entire universe!
+
+    license: MIT
+    formats:
+      - deb
+      - rpm
+
+    bindir: /usr/bin
+
+    rpm:
+      group: Unspecified
+      compression: lzma
