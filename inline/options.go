@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type (
@@ -29,7 +30,7 @@ func ParseMangaPicker(description string) (MangaPicker, error) {
 		last  = "last"
 	)
 
-	pattern := fmt.Sprintf(`%s|%s|\d+`, first, last)
+	pattern := fmt.Sprintf(`^(%s|%s|\d+)$`, first, last)
 	mangaPickerRegex := regexp.MustCompile(pattern)
 
 	if !mangaPickerRegex.MatchString(description) {
@@ -60,9 +61,14 @@ func ParseChaptersFilter(description string) (ChapterFilter, error) {
 		first = "first"
 		last  = "last"
 		all   = "all"
+		from  = "From"
+		to    = "To"
+		sub   = "Sub"
 	)
 
-	pattern := fmt.Sprintf(`%s|%s|%s|(?P<From>\d+)(-(?P<To>\d+))?`, first, last, all)
+	// TODO: add regex for chapter filter
+	// like this: *[Official]* to match substring
+	pattern := fmt.Sprintf(`^(%s|%s|%s|(?P<%s>\d+)(-(?P<%s>\d+))?|@(?P<%s>.+)@)$`, first, last, all, from, to, sub)
 	mangaPickerRegex := regexp.MustCompile(pattern)
 
 	if !mangaPickerRegex.MatchString(description) {
@@ -86,8 +92,14 @@ func ParseChaptersFilter(description string) (ChapterFilter, error) {
 		default:
 			groups := util.ReGroups(mangaPickerRegex, description)
 
-			from := lo.Must(strconv.ParseUint(groups["From"], 10, 16))
-			to := lo.Must(strconv.ParseUint(groups["To"], 10, 16))
+			if sub, ok := groups[sub]; ok {
+				return lo.Filter(chapters, func(a *source.Chapter, _ int) bool {
+					return strings.Contains(a.Name, sub)
+				})
+			}
+
+			from := lo.Must(strconv.ParseUint(groups[from], 10, 16))
+			to := lo.Must(strconv.ParseUint(groups[to], 10, 16))
 
 			return chapters[from:to]
 		}

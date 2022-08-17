@@ -13,7 +13,7 @@ func init() {
 
 	inlineCmd.Flags().String("source", "", "source to use. see `mangal sources` for available sources")
 	inlineCmd.Flags().String("query", "", "query to search for")
-	inlineCmd.Flags().String("manga", "", "manga selector. first|last|[number]")
+	inlineCmd.Flags().String("manga", "", "manga selector. first|last|[number]|@[substring]@")
 	inlineCmd.Flags().String("chapters", "", "chapter selector. first|last|all|[number]|[number]-[number]")
 	inlineCmd.Flags().BoolP("download", "d", false, "download chapters")
 
@@ -24,9 +24,10 @@ func init() {
 }
 
 var inlineCmd = &cobra.Command{
-	Use:   "inline",
-	Short: "Inline mode for scripting",
-	Long:  "Inline mode for scripting",
+	Use:     "inline",
+	Short:   "Inline mode for scripting",
+	Long:    "Inline mode for scripting",
+	Example: "mangal inline --source Manganelo --query \"death note\" --manga first --chapters \"@Vol.1 @\" -d",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sourceName := lo.Must(cmd.Flags().GetString("source"))
 		p, ok := provider.Get(sourceName)
