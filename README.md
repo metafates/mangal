@@ -128,6 +128,7 @@ Run `mangal config init` to generate a default config file
 [downloader]
 # Default source to use
 # Will prompt to choose if empty
+# Type `mangal sources` for available sources
 default_source = ''
 
 # Name template of the downloaded chapters
@@ -217,7 +218,7 @@ Check the [defined modules](luamodules) for more information.
 
 For scraper examples, check the [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 
-_Okay, so, how do I add a custom scraper?_
+### Creating a custom scraper
 
 1. Create a new lua file in the `mangal where --sources` folder
 2. Filename will be used as a source name
@@ -227,7 +228,7 @@ _Okay, so, how do I add a custom scraper?_
    - `ChapterPages(chapterUrl)` - must return a table of tables each having 2 fields `index` _(for ordering)_ and `url` _(to download image)_
 4. __That's it!__ You can test it by running `mangal run ...` where `...` is a filename
 
-New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
+> New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
 
 ## Anilist
 
