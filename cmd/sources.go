@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
 	"github.com/spf13/cobra"
@@ -20,7 +19,7 @@ var sourcesCmd = &cobra.Command{
 
 		cmd.Println(headerStyle("Builtin sources:"))
 		for name := range provider.DefaultProviders() {
-			name = "  " + name + " " + icon.Get(icon.Go)
+			name = "  " + name
 			cmd.Println(name)
 		}
 
@@ -33,7 +32,7 @@ var sourcesCmd = &cobra.Command{
 		}
 
 		for name := range custom {
-			name = "  " + name + " " + icon.Get(icon.Lua)
+			name = "  " + name
 			cmd.Println(name)
 		}
 
