@@ -22,14 +22,18 @@ func Setup() error {
 
 	err := viper.ReadInConfig()
 
-	switch err.(type) {
-	case viper.ConfigFileNotFoundError:
-		// Use defaults then
-		return nil
-	default:
-		resolveAliases()
-		return err
+	if err != nil {
+		switch err.(type) {
+		case viper.ConfigFileNotFoundError:
+			// Use defaults then
+			return nil
+		default:
+			return err
+		}
 	}
+
+	resolveAliases()
+	return nil
 }
 
 func setName() {

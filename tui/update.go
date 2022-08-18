@@ -187,7 +187,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case b.sourcesC.FilterState() == list.Filtering:
+		case b.historyC.FilterState() == list.Filtering:
 			break
 		case key.Matches(msg, b.keymap.openURL):
 			if b.historyC.SelectedItem() != nil {
