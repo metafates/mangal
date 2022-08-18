@@ -3,6 +3,7 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/metafates/mangal/style"
 )
 
 type statefulKeymap struct {
@@ -68,7 +69,7 @@ func newStatefulKeymap() *statefulKeymap {
 		),
 		read: k(
 			keys("r"),
-			help("r", "read"),
+			help(style.Yellow("r"), style.Yellow("read")),
 		),
 		openFolder: k(
 			keys("o"),
