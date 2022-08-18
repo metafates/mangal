@@ -2,6 +2,7 @@ package source
 
 import (
 	"fmt"
+	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
@@ -61,4 +62,22 @@ func (c *Chapter) FormattedName() (name string) {
 	name = strings.ReplaceAll(name, "{padded-index}", util.PadZero(fmt.Sprintf("%d", c.Index), 4))
 
 	return
+}
+
+func (c *Chapter) Size() uint64 {
+	var n uint64
+
+	for _, page := range c.Pages {
+		n += page.Size
+	}
+
+	return n
+}
+
+func (c *Chapter) SizeHuman() string {
+	if size := c.Size(); size == 0 {
+		return "Unknown size"
+	} else {
+		return humanize.Bytes(size)
+	}
 }

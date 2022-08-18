@@ -3,6 +3,7 @@ package source
 import (
 	"errors"
 	"github.com/metafates/mangal/constant"
+	"github.com/samber/lo"
 	"io"
 	"net/http"
 )
@@ -12,6 +13,7 @@ type Page struct {
 	Index     uint16 `json:"index"`
 	Extension string `json:"extension"`
 	SourceID  string `json:"source_id"`
+	Size      uint64
 	Contents  io.ReadCloser
 	Chapter   *Chapter
 }
@@ -43,6 +45,7 @@ func (p *Page) Download() error {
 	}
 
 	p.Contents = resp.Body
+	p.Size = lo.Max([]uint64{uint64(resp.ContentLength), 0})
 
 	return nil
 }

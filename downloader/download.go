@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/spf13/viper"
 )
 
@@ -29,7 +30,12 @@ func Download(src source.Source, chapter *source.Chapter, progress func(string))
 	}
 
 	log.Info("gettings " + viper.GetString(config.FormatsUse) + " converter")
-	progress(fmt.Sprintf("Converting %d pages to %s", len(pages), viper.GetString(config.FormatsUse)))
+	progress(fmt.Sprintf(
+		"Converting %d pages to %s %s",
+		len(pages),
+		style.Yellow(viper.GetString(config.FormatsUse)),
+		style.Faint(chapter.SizeHuman())),
+	)
 	conv, err := converter.Get(viper.GetString(config.FormatsUse))
 	if err != nil {
 		log.Error(err)

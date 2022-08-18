@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
 )
@@ -55,7 +56,12 @@ func Read(src source.Source, chapter *source.Chapter, progress func(string)) err
 	}
 
 	log.Info("converting " + viper.GetString(config.FormatsUse))
-	progress(fmt.Sprintf("Converting %d pages to %s", len(pages), viper.GetString(config.FormatsUse)))
+	progress(fmt.Sprintf(
+		"Converting %d pages to %s %s",
+		len(pages),
+		style.Yellow(viper.GetString(config.FormatsUse)),
+		style.Faint(chapter.SizeHuman())),
+	)
 	path, err := conv.SaveTemp(chapter)
 	if err != nil {
 		log.Error(err)
