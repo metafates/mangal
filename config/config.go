@@ -69,7 +69,8 @@ func setDefaults() {
 		DownloaderDefaultSource:       "",
 
 		// Formats
-		FormatsUse: "pdf",
+		FormatsUse:                   "pdf",
+		FormatsSkipUnsupportedImages: false,
 
 		// Mini-mode
 		MiniSearchLimit: 20,

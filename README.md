@@ -165,6 +165,10 @@ create_manga_dir = true
 # Default format to export chapters
 # Available options are: pdf, zip, cbz, plain
 use = 'pdf'
+# Will skip images that can't be converted to the specified format 
+# Example: if you want to export to pdf, but some images are gifs, they will be skipped
+skip_unsupported_images = false
+
 
 
 

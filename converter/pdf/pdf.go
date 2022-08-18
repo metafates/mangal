@@ -7,6 +7,8 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
+	"github.com/pdfcpu/pdfcpu/pkg/log"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"io"
@@ -59,7 +61,7 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 		readers[i] = page
 	}
 
-	err = api.ImportImages(nil, pdfFile, readers, nil, nil)
+	err = imagesToPDF(pdfFile, readers)
 	if err != nil {
 		return "", err
 	}
@@ -88,4 +90,64 @@ func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
 	}
 
 	return mangaDir, nil
+}
+
+// imagesToPDF will convert images to PDF and write to w
+func imagesToPDF(w io.Writer, images []io.Reader) error {
+	conf := pdfcpu.NewDefaultConfiguration()
+	conf.Cmd = pdfcpu.IMPORTIMAGES
+	imp := pdfcpu.DefaultImportConfig()
+
+	var (
+		ctx *pdfcpu.Context
+		err error
+	)
+
+	ctx, err = pdfcpu.CreateContextWithXRefTable(conf, imp.PageDim)
+	if err != nil {
+		return err
+	}
+
+	pagesIndRef, err := ctx.Pages()
+	if err != nil {
+		return err
+	}
+
+	// This is the page tree root.
+	pagesDict, err := ctx.DereferenceDict(*pagesIndRef)
+	if err != nil {
+		return err
+	}
+
+	for _, r := range images {
+		indRef, err := pdfcpu.NewPageForImage(ctx.XRefTable, r, pagesIndRef, imp)
+
+		if err != nil {
+			if viper.GetBool(config.FormatsSkipUnsupportedImages) {
+				continue
+			}
+
+			return err
+		}
+
+		if err = pdfcpu.AppendPageTree(indRef, 1, pagesDict); err != nil {
+			return err
+		}
+
+		ctx.PageCount++
+	}
+
+	if conf.ValidationMode != pdfcpu.ValidationNone {
+		if err = api.ValidateContext(ctx); err != nil {
+			return err
+		}
+	}
+
+	if err = api.WriteContext(ctx, w); err != nil {
+		return err
+	}
+
+	log.Stats.Printf("XRefTable:\n%s\n", ctx)
+
+	return nil
 }

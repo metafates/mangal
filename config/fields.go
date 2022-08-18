@@ -9,7 +9,8 @@ const (
 )
 
 const (
-	FormatsUse = "formats.use"
+	FormatsUse                   = "formats.use"
+	FormatsSkipUnsupportedImages = "formats.skip_unsupported_images"
 )
 
 const (
