@@ -46,12 +46,19 @@ Visit this link to install [Go](https://go.dev/doc/install)
 > Use this method if others are not working for some reason.
 > And please open an issue if so
 
+### Bash script
+
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/run | bash
+
+> **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
+> It's purpose is to try mangal in action or use within scripts
 
 ### Linux
 
 [AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
 
-Download the latest version from [GitHub release page](https://github.com/metafates/mangal/releases/latest)
+Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
+and copy them to the desired location.
 
 ### macOS / Linux
 
