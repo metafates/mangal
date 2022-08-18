@@ -91,6 +91,11 @@ func setDefaults() {
 		MangadexNSFW:                    false,
 		MangadexShowUnavailableChapters: false,
 
+		// Installer
+		InstallerUser:   "metafates",
+		InstallerRepo:   "mangal-scrapers",
+		InstallerBranch: "main",
+
 		// Logs
 		LogsWrite: false,
 		LogsLevel: "info",

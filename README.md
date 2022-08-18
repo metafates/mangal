@@ -207,6 +207,16 @@ read_in_browser = false
 
 
 
+[installer]
+# Custom scrapers repository (github only)
+repo = 'mangal-scrapers'
+# Custom scrapers repository owner
+user = 'metafates'
+# Custom scrapers repository branch
+branch = 'main'
+
+
+
 [logs]
 # write logs?
 write = false

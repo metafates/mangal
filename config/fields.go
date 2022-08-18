@@ -45,6 +45,12 @@ const (
 )
 
 const (
+	InstallerUser   = "installer.user"
+	InstallerRepo   = "installer.repo"
+	InstallerBranch = "installer.branch"
+)
+
+const (
 	LogsWrite = "logs.write"
 	LogsLevel = "logs.level"
 )
