@@ -22,10 +22,31 @@ snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
+  use: github
+  groups:
+    - title: Dependency updates
+      regexp: "^.*feat\\(deps\\)*:+.*$"
+      order: 300
+    - title: 'New Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 100
+    - title: 'Bug fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 200
+    - title: 'Documentation updates'
+      regexp: "^.*docs[(\\w)]*:+.*$"
+      order: 400
+    - title: Other work
+      order: 9999
   filters:
     exclude:
-      - '^docs:'
       - '^test:'
+      - '^chore'
+      - 'merge conflict'
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+      - go mod tidy
 
 dockers:
   -
@@ -55,6 +76,15 @@ brews:
     description: "The ultimate CLI manga downloader!"
     license: "MIT"
     skip_upload: false
+
+    test: |
+      system "#{bin}/mangal -v"
+
+    install: |-
+      bin.install "mangal"
+      bash_completion.install "completions/mangal.bash" => "mangal"
+      zsh_completion.install "completions/mangal.zsh" => "_mangal"
+      fish_completion.install "completions/mangal.fish"
 
 scoop:
   bucket:
@@ -98,7 +128,22 @@ nfpms:
       - rpm
 
     bindir: /usr/bin
+    section: utils
 
-    rpm:
-      group: Unspecified
-      compression: lzma
+    contents:
+      - src: ./completions/mangal.bash
+        dst: /usr/share/bash-completion/completions/mangal
+        file_info:
+          mode: 0644
+      - src: ./completions/mangal.fish
+        dst: /usr/share/fish/completions/mangal.fish
+        file_info:
+          mode: 0644
+      - src: ./completions/mangal.zsh
+        dst:  /usr/share/zsh/vendor-completions/_mangal
+        file_info:
+          mode: 0644
+    deb:
+      lintian_overrides:
+        - statically-linked-binary
+        - changelog-file-missing-in-native-package
