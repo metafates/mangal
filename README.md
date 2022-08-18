@@ -137,7 +137,6 @@ Run `mangal config init` to generate a default config file
 # Will prompt to choose if empty
 # Type `mangal sources` for available sources
 default_source = ''
-
 # Name template of the downloaded chapters
 # Available variables:
 # {index}        - index of the chapters
@@ -145,20 +144,18 @@ default_source = ''
 # {chapter}      - name of the chapter
 # {manga}        - name of the manga
 chapter_name_template = '[{padded-index}] {chapter}'
-
 # Where to download manga
 # Absolute or relative.
 #
 # You can also use home variable 
 # path = "~/..." or "$HOME/..."
 path = '.'
-
 # Use asynchronous downloader (faster)
 # Do no turn it off unless you have some issues
 async = true
-
 # Create a subdirectory for each manga
 create_manga_dir = true
+
 
 
 [formats]
@@ -168,7 +165,6 @@ use = 'pdf'
 # Will skip images that can't be converted to the specified format 
 # Example: if you want to export to pdf, but some images are gifs, they will be skipped
 skip_unsupported_images = false
-
 
 
 
@@ -208,6 +204,8 @@ search_limit = 20
 name = ''
 # Will open chapter in the browser instead of downloading it
 read_in_browser = false
+
+
 
 [logs]
 # write logs?
