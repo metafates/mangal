@@ -76,7 +76,7 @@ Install using [Scoop](https://scoop.sh/)
 
 ### Docker
 
-Install using... well, you know.
+Install using... well, you know. (thanks to [@ArabCoders](https://github.com/ArabCoders) for reference)
 
     docker pull metafates/mangal
 
