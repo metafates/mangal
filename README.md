@@ -121,11 +121,9 @@ Mangal uses [TOML](https://toml.io) format for configuration under the `mangal.t
 Config is expected to be at the OS default config directory.
 For example, on Linux it would be `~/.config/mangal/mangal.toml`.
 
-Run `mangal where` to show expected config paths
+Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
 
-> "But what if I want to specify my own config path?"
-> 
-> Use env variable `MANGAL_CONFIG_PATH`
+Run `mangal where` to show expected config paths
 
 Run `mangal config init` to generate a default config file
 
@@ -164,7 +162,7 @@ create_manga_dir = true
 use = 'pdf'
 # Will skip images that can't be converted to the specified format 
 # Example: if you want to export to pdf, but some images are gifs, they will be skipped
-skip_unsupported_images = false
+skip_unsupported_images = true
 
 
 
@@ -179,7 +177,7 @@ save_on_read = true
 [icons]
 # Icons variant.
 # Available options are: emoji, kaomoji, plain, squares, nerd (nerd-font)
-variant = 'emoji'
+variant = 'plain'
 
 
 
