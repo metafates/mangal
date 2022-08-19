@@ -18,6 +18,7 @@ var envCmd = &cobra.Command{
 	Short: "Show available environment variables",
 	Long:  `Show available environment variables.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		config.EnvExposed = append(config.EnvExposed, "MANGAL_CONFIG_PATH")
 		for _, env := range config.EnvExposed {
 			env = strings.ToUpper(constant.Mangal + "_" + config.EnvKeyReplacer.Replace(env))
 			value, present := os.LookupEnv(env)
