@@ -33,7 +33,7 @@ func Read(src source.Source, chapter *source.Chapter, progress func(string)) err
 
 	log.Info("downloading " + chapter.Name + " from " + chapter.Manga.Name + " for reading. Provider is " + src.ID())
 	log.Info("getting pages of " + chapter.Name)
-	progress("Gettings pages")
+	progress("Getting pages")
 	pages, err := src.PagesOf(chapter)
 	if err != nil {
 		log.Error(err)

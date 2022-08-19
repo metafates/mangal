@@ -29,7 +29,7 @@ func Download(src source.Source, chapter *source.Chapter, progress func(string))
 		return "", err
 	}
 
-	log.Info("gettings " + viper.GetString(config.FormatsUse) + " converter")
+	log.Info("getting " + viper.GetString(config.FormatsUse) + " converter")
 	progress(fmt.Sprintf(
 		"Converting %d pages to %s %s",
 		len(pages),
