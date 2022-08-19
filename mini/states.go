@@ -332,7 +332,8 @@ func (m *mini) handleChaptersDownloadState() error {
 		})
 
 		erase()
-		if err != nil {
+
+		if err != nil && viper.GetBool(config.DownloaderStopOnError) {
 			return err
 		}
 

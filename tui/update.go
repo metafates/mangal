@@ -10,6 +10,7 @@ import (
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
 	"golang.org/x/exp/slices"
@@ -22,7 +23,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case error:
-		b.plot = randomPlot()
+		b.errorPlot = randomPlot()
 		b.newState(errorState)
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)
@@ -71,6 +72,8 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			b.previousState()
 			b.stopLoading()
+			b.failedChapters = make([]*source.Chapter, 0)
+			b.succededChapters = make([]*source.Chapter, 0)
 			return b, nil
 		}
 	}
@@ -198,7 +201,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				err := open.Run(chapter.URL)
 				if err != nil {
 					b.lastError = err
-					b.plot = randomPlot()
+					b.errorPlot = randomPlot()
 					b.newState(errorState)
 				}
 			}
@@ -225,7 +228,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if !ok {
 				b.lastError = fmt.Errorf("provider %s not found", selected.SourceID)
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.newState(errorState)
 				return b, nil
 			}
@@ -233,7 +236,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 			src, err := p.CreateSource()
 			if err != nil {
 				b.lastError = fmt.Errorf("error creating source: %s", err)
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.newState(errorState)
 				return b, nil
 			}
@@ -250,7 +253,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if err != nil {
 				b.lastError = fmt.Errorf("error getting chapters: %s", err)
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.newState(errorState)
 				return b, nil
 			}
@@ -345,7 +348,7 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 			err := open.Start(m.URL)
 			if err != nil {
 				b.lastError = err
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.newState(errorState)
 			}
 		}
@@ -385,7 +388,7 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
 			err := open.Start(chapter.URL)
 			if err != nil {
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.lastError = err
 				b.newState(errorState)
 			}
@@ -526,10 +529,23 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.openFolder):
 			err := open.Start(filepath.Dir(b.lastDownloadedChapterPath))
 			if err != nil {
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.lastError = err
 				b.newState(errorState)
 			}
+		case key.Matches(msg, b.keymap.redownloadFailed):
+			if len(b.failedChapters) == 0 {
+				break
+			}
+
+			b.chaptersToDownload = util.Stack[*source.Chapter]{}
+			for _, chapter := range b.failedChapters {
+				b.chaptersToDownload.Push(chapter)
+			}
+			b.failedChapters = make([]*source.Chapter, 0)
+			b.succededChapters = make([]*source.Chapter, 0)
+			b.newState(downloadState)
+			return b, tea.Batch(b.startLoading(), b.downloadChapter(b.chaptersToDownload.Pop()), b.waitForChapterDownload(), b.progressC.SetPercent(0))
 		}
 	}
 

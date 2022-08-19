@@ -71,6 +71,7 @@ func setDefaults() {
 		DownloaderAsync:               true,
 		DownloaderCreateMangaDir:      true,
 		DownloaderDefaultSource:       "",
+		DownloaderStopOnError:         false,
 
 		// Formats
 		FormatsUse:                   "pdf",

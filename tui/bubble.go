@@ -61,7 +61,10 @@ type statefulBubble struct {
 	lastError                 error
 
 	width, height int
-	plot          string
+	errorPlot     string
+
+	failedChapters   []*source.Chapter
+	succededChapters []*source.Chapter
 }
 
 func (b *statefulBubble) setState(s state) {
@@ -146,6 +149,9 @@ func newBubble() *statefulBubble {
 
 		selectedChapters:   make(map[*source.Chapter]struct{}),
 		chaptersToDownload: util.Stack[*source.Chapter]{},
+
+		failedChapters:   make([]*source.Chapter, 0),
+		succededChapters: make([]*source.Chapter, 0),
 	}
 
 	defer func() {

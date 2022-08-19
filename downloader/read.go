@@ -13,19 +13,6 @@ import (
 )
 
 func Read(src source.Source, chapter *source.Chapter, progress func(string)) error {
-	if viper.GetBool(config.HistorySaveOnRead) {
-		defer func() {
-			go func() {
-				log.Info("saving history")
-				err := history.Save(chapter)
-				if err != nil {
-					log.Warn(err)
-				} else {
-					log.Info("history saved")
-				}
-			}()
-		}()
-	}
 
 	if viper.GetBool(config.ReaderReadInBrowser) {
 		return open.Start(chapter.URL)
@@ -71,6 +58,17 @@ func Read(src source.Source, chapter *source.Chapter, progress func(string)) err
 	err = openRead(path, progress)
 	if err != nil {
 		return err
+	}
+
+	if viper.GetBool(config.HistorySaveOnRead) {
+		go func() {
+			err := history.Save(chapter)
+			if err != nil {
+				log.Warn(err)
+			} else {
+				log.Info("history saved")
+			}
+		}()
 	}
 
 	progress("Done")

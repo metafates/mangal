@@ -51,7 +51,6 @@ func Download(src source.Source, chapter *source.Chapter, progress func(string))
 
 	if viper.GetBool(config.HistorySaveOnDownload) {
 		go func() {
-			log.Info("saving history")
 			err = history.Save(chapter)
 			if err != nil {
 				log.Warn(err)

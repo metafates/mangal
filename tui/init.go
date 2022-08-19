@@ -14,7 +14,7 @@ func (b *statefulBubble) Init() tea.Cmd {
 		p, ok := provider.Get(name)
 		if !ok {
 			b.lastError = fmt.Errorf("provider %s not found", name)
-			b.plot = randomPlot()
+			b.errorPlot = randomPlot()
 			b.newState(errorState)
 			return nil
 		}
