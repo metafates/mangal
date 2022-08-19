@@ -96,10 +96,10 @@ func openRead(path string, progress func(string)) error {
 	if reader != "" {
 		log.Info("opening with " + reader)
 		progress(fmt.Sprintf("Opening %s", reader))
-		err = open.RunWith(reader, path)
+		err = open.RunWith(path, reader)
 		if err != nil {
 			log.Error(err)
-			return fmt.Errorf("could not open %s with %s: %s", filepath.Base(path), reader, err.Error())
+			return fmt.Errorf("could not open %s with %s: %s", path, reader, err.Error())
 		}
 		log.Info("opened without errors")
 	} else {
