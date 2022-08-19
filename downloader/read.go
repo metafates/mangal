@@ -10,6 +10,7 @@ import (
 	"github.com/metafates/mangal/style"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
+	"path/filepath"
 )
 
 func Read(src source.Source, chapter *source.Chapter, progress func(string)) error {
@@ -98,7 +99,7 @@ func openRead(path string, progress func(string)) error {
 		err = open.RunWith(reader, path)
 		if err != nil {
 			log.Error(err)
-			return err
+			return fmt.Errorf("could not open %s with %s: %s", filepath.Base(path), reader, err.Error())
 		}
 		log.Info("opened without errors")
 	} else {
@@ -107,7 +108,7 @@ func openRead(path string, progress func(string)) error {
 		err = open.Run(path)
 		if err != nil {
 			log.Error(err)
-			return err
+			return fmt.Errorf("error opening %s: %s", filepath.Base(path), err.Error())
 		}
 		log.Info("opened without errors")
 	}
