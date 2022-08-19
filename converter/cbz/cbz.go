@@ -22,11 +22,11 @@ func New() *CBZ {
 	return &CBZ{}
 }
 
-func (_ *CBZ) Save(chapter *source.Chapter) (string, error) {
+func (*CBZ) Save(chapter *source.Chapter) (string, error) {
 	return save(chapter, false)
 }
 
-func (_ *CBZ) SaveTemp(chapter *source.Chapter) (string, error) {
+func (*CBZ) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 

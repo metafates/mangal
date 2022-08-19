@@ -22,11 +22,11 @@ func New() *PDF {
 	return &PDF{}
 }
 
-func (_ *PDF) Save(chapter *source.Chapter) (string, error) {
+func (*PDF) Save(chapter *source.Chapter) (string, error) {
 	return save(chapter, false)
 }
 
-func (_ *PDF) SaveTemp(chapter *source.Chapter) (string, error) {
+func (*PDF) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 

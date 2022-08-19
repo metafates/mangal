@@ -2,23 +2,19 @@ package html
 
 import (
 	lua "github.com/yuin/gopher-lua"
-	"net/http"
 )
 
 type HTML struct{}
-type settings struct {
-	client *http.Client
-}
 
 func New() *HTML {
 	return &HTML{}
 }
 
-func (_ HTML) Name() string {
+func (HTML) Name() string {
 	return "html"
 }
 
-func (_ HTML) Loader() lua.LGFunction {
+func (HTML) Loader() lua.LGFunction {
 	var exports = map[string]lua.LGFunction{
 		"parse": parseHTML(),
 	}
@@ -32,5 +28,3 @@ func (_ HTML) Loader() lua.LGFunction {
 		return 1
 	}
 }
-
-type Option func(*settings)

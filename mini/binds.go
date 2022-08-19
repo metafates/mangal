@@ -13,10 +13,6 @@ var (
 	search = &bind{A: "s", B: "search"}
 )
 
-func (b *bind) matches(a string) bool {
-	return b.A == a
-}
-
 func (b *bind) eq(other *bind) bool {
 	return other != nil && b.A == other.A
 }

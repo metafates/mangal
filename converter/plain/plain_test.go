@@ -84,7 +84,7 @@ func SampleChapter(t *testing.T) *source.Chapter {
 		// ../../assets/testdata
 		// I wish windows used a normal path separator instead of whatever this \ is
 		filepath.Join(filepath.Dir(filepath.Dir(lo.Must(filepath.Abs(".")))), filepath.Join("assets", "testdata")),
-		func(path string, info fs.FileInfo, err error) error {
+		func(path string, info fs.FileInfo, _ error) error {
 			if lo.Must(filesystem.Get().IsDir(path)) || filepath.Ext(path) != ".jpg" {
 				return nil
 			}

@@ -16,11 +16,11 @@ type Mangadex struct {
 	cachedChapters map[string][]*source.Chapter
 }
 
-func (m *Mangadex) Name() string {
+func (*Mangadex) Name() string {
 	return Name
 }
 
-func (m *Mangadex) ID() string {
+func (*Mangadex) ID() string {
 	return ID
 }
 

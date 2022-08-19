@@ -1,7 +1,6 @@
 package converter
 
 import (
-	"errors"
 	"fmt"
 	"github.com/metafates/mangal/converter/cbz"
 	"github.com/metafates/mangal/converter/pdf"
@@ -43,5 +42,5 @@ func Get(name string) (Converter, error) {
 		return converter, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("unkown format \"%s\"", name))
+	return nil, fmt.Errorf("unkown format \"%s\"", name)
 }

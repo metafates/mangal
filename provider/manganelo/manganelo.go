@@ -20,10 +20,10 @@ type Manganelo struct {
 	pages    map[string][]*source.Page
 }
 
-func (_ *Manganelo) Name() string {
+func (*Manganelo) Name() string {
 	return Name
 }
 
-func (m *Manganelo) ID() string {
+func (*Manganelo) ID() string {
 	return ID
 }

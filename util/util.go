@@ -37,10 +37,7 @@ func SanitizeFilename(filename string) string {
 }
 
 func Quantity(count int, thing string) string {
-	if strings.HasSuffix(thing, "s") {
-		thing = thing[:len(thing)-1]
-	}
-
+	thing = strings.TrimSuffix(thing, "s")
 	if count == 1 {
 		return fmt.Sprintf("%d %s", count, thing)
 	}

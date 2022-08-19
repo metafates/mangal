@@ -20,11 +20,11 @@ func New() *Plain {
 	return &Plain{}
 }
 
-func (_ *Plain) Save(chapter *source.Chapter) (string, error) {
+func (*Plain) Save(chapter *source.Chapter) (string, error) {
 	return save(chapter, false)
 }
 
-func (_ *Plain) SaveTemp(chapter *source.Chapter) (string, error) {
+func (*Plain) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 

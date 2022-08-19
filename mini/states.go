@@ -39,6 +39,9 @@ func (m *mini) handleSourceSelectState() error {
 		}
 
 		m.selectedSource, err = p.CreateSource()
+		if err != nil {
+			return err
+		}
 	} else {
 		defaultProviders := provider.DefaultProviders()
 		customProviders := lo.Must(provider.CustomProviders())
@@ -70,11 +73,10 @@ func (m *mini) handleSourceSelectState() error {
 
 		erase := progress("Initializing Source..")
 		m.selectedSource, err = p.CreateSource()
+		if err != nil {
+			return err
+		}
 		erase()
-	}
-
-	if err != nil {
-		return err
 	}
 
 	m.newState(mangasSearchState)

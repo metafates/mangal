@@ -144,7 +144,10 @@ func (b *statefulBubble) updateScrapersInstall(msg tea.Msg) (tea.Model, tea.Cmd)
 }
 
 func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds = make([]tea.Cmd, 0)
+	)
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -169,7 +172,7 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-		cmd = b.mangasC.SetItems(items)
+		cmds = append(cmds, b.mangasC.SetItems(items))
 		b.newState(mangasState)
 		b.stopLoading()
 	case source.Source:
@@ -178,7 +181,7 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	b.spinnerC, cmd = b.spinnerC.Update(msg)
-	return b, cmd
+	return b, tea.Batch(append(cmds, cmd)...)
 }
 
 func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
