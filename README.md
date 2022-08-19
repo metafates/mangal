@@ -200,8 +200,12 @@ search_limit = 20
 
 
 [reader]
-# Name of the app to use as a reader. Will use default OS app if empty
-name = ''
+# Name of the app to use as a reader for each format.
+# Will use default OS app if empty
+pdf = '' # e.g. pdf = 'zathura'
+cbz = ''
+zip = ''
+plain = ''
 # Will open chapter in the browser instead of downloading it
 read_in_browser = false
 

@@ -14,7 +14,10 @@ const (
 )
 
 const (
-	ReaderName          = "reader.name"
+	ReaderPDF           = "reader.pdf"
+	ReaderCBZ           = "reader.cbz"
+	ReaderZIP           = "reader.zip"
+	RaderPlain          = "reader.plain"
 	ReaderReadInBrowser = "reader.read_in_browser"
 )
 
@@ -66,7 +69,10 @@ var EnvExposed = []string{
 	FormatsUse,
 
 	// reader
-	ReaderName,
+	ReaderCBZ,
+	ReaderPDF,
+	ReaderZIP,
+	RaderPlain,
 
 	// history
 	HistorySaveOnRead,

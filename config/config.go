@@ -83,7 +83,10 @@ func setDefaults() {
 		IconsVariant: "plain",
 
 		// Reader
-		ReaderName:          "",
+		ReaderPDF:           "",
+		ReaderCBZ:           "",
+		ReaderZIP:           "",
+		RaderPlain:          "",
 		ReaderReadInBrowser: false,
 
 		// History
