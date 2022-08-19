@@ -8,16 +8,25 @@ import (
 	"net/http"
 )
 
+// Page represents a page in a chapter
 type Page struct {
-	URL       string `json:"url"`
-	Index     uint16 `json:"index"`
-	Extension string `json:"extension"`
-	SourceID  string `json:"source_id"`
-	Size      uint64
-	Contents  io.ReadCloser
-	Chapter   *Chapter
+	// URL of the page. Used to download the page.
+	URL string
+	// Index of the page in the chapter.
+	Index uint16
+	// Extension of the page image.
+	Extension string
+	// SourceID of the source the page is from.
+	SourceID string
+	// Size of the page in bytes
+	Size uint64
+	// Contents of the page
+	Contents io.ReadCloser
+	// Chapter that the page belongs to.
+	Chapter *Chapter
 }
 
+// Download Page contents.
 func (p *Page) Download() error {
 	if p.URL == "" {
 		return nil
@@ -50,10 +59,12 @@ func (p *Page) Download() error {
 	return nil
 }
 
+// Close closes the page contents.
 func (p *Page) Close() error {
 	return p.Contents.Close()
 }
 
+// Read reads from the page contents.
 func (p *Page) Read(b []byte) (int, error) {
 	if p.Contents == nil {
 		return 0, errors.New("page not downloaded")

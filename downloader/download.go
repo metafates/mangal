@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Download the chapter using given source.
 func Download(src source.Source, chapter *source.Chapter, progress func(string)) (string, error) {
 	log.Info("downloading " + chapter.Name)
 	progress("Getting pages")

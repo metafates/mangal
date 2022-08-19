@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// PadZero pads a number with leading zeros.
 func PadZero(s string, l int) string {
 	for l > len(s) {
 		s = "0" + s
@@ -36,6 +37,11 @@ func SanitizeFilename(filename string) string {
 	return filename
 }
 
+// Quantity returns formatted quantity.
+// Example:
+//
+//	Quantity(1, "manga") -> "1 manga"
+//	Quantity(2, "manga") -> "2 mangas"
 func Quantity(count int, thing string) string {
 	thing = strings.TrimSuffix(thing, "s")
 	if count == 1 {
@@ -50,10 +56,13 @@ func TerminalSize() (width, height int, err error) {
 	return term.GetSize(int(os.Stdout.Fd()))
 }
 
+// FileStem returns the file name without the extension.
 func FileStem(path string) string {
 	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }
 
+// Wrap wraps a string with the given width.
+// Will break lines at word boundaries.
 func Wrap(s string, width int) string {
 	var lines []string
 	for len(s) > width {
@@ -68,6 +77,7 @@ func Wrap(s string, width int) string {
 	return strings.Join(lines, "\n")
 }
 
+// ClearScreen clears the terminal screen.
 func ClearScreen() {
 	run := func(name string, args ...string) error {
 		command := exec.Command(name, args...)
