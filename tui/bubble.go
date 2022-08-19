@@ -219,7 +219,7 @@ func newBubble() *statefulBubble {
 
 func (b *statefulBubble) loadSources() tea.Cmd {
 	providers := provider.DefaultProviders()
-	customProviders, err := provider.CustomProviders()
+	customProviders := provider.CustomProviders()
 
 	var items []list.Item
 	for _, p := range providers {
@@ -234,12 +234,6 @@ func (b *statefulBubble) loadSources() tea.Cmd {
 		// but, you know, there is nothing more permanent than a temporary solution
 		return strings.Compare(a.FilterValue(), b.FilterValue()) > 0
 	})
-
-	if err != nil {
-		b.lastError = err
-		b.newState(errorState)
-		return nil
-	}
 
 	var customItems []list.Item
 	for _, p := range customProviders {

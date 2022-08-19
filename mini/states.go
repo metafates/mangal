@@ -44,7 +44,7 @@ func (m *mini) handleSourceSelectState() error {
 		}
 	} else {
 		defaultProviders := provider.DefaultProviders()
-		customProviders := lo.Must(provider.CustomProviders())
+		customProviders := provider.CustomProviders()
 
 		var providers = make([]*provider.Provider, 0)
 
@@ -387,7 +387,7 @@ func (m *mini) handleHistorySelectState() error {
 	}
 
 	defaultProviders := provider.DefaultProviders()
-	customProviders, _ := provider.CustomProviders()
+	customProviders := provider.CustomProviders()
 
 	var providers = make([]*provider.Provider, 0)
 
