@@ -28,18 +28,19 @@ var inlineCmd = &cobra.Command{
 	Short: "Launch in the inline mode",
 	Long: `Launch in the inline mode for scripting
 
-Manga selectors: 
-	first - first manga in the list
-	last - last manga in the list
-	[number] - select manga by index
+Manga selectors:
+  first - first manga in the list
+  last - last manga in the list
+  [number] - select manga by index
 
 Chapter selectors:
-	first - first chapter in the list
-	last - last chapter in the list
-	all - all chapters in the list
-	[number] - select chapter by index
-	[from]-[to] - select chapters by range
-	@[substring]@ - select chapters by name substring`,
+  first - first chapter in the list
+  last - last chapter in the list
+  all - all chapters in the list
+  [number] - select chapter by index
+  [from]-[to] - select chapters by range
+  @[substring]@ - select chapters by name substring`,
+
 	Example: "mangal inline --source Manganelo --query \"death note\" --manga first --chapters \"@Vol.1 @\" -d",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sourceName := lo.Must(cmd.Flags().GetString("source"))
