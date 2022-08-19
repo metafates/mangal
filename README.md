@@ -12,6 +12,10 @@
 
 https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-a413-37cb07c1552e.mov
 
+## Try it!
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/run | bash
+
+> **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
 
 ## Table of contents
 - [Features](#features)
@@ -46,12 +50,6 @@ Visit this link to install [Go](https://go.dev/doc/install)
 > Use this method if others are not working for some reason.
 > And please open an issue if so
 
-### Bash script
-
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/run | bash
-
-> **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
-> It's purpose is to try mangal in action or use within scripts
 
 ### Linux
 
@@ -60,12 +58,16 @@ Visit this link to install [Go](https://go.dev/doc/install)
 Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
 and copy them to the desired location.
 
-### macOS / Linux
+### Linux / macOS
 
 Install using [Homebrew](https://brew.sh/)
 
     brew tap metafates/mangal
     brew install mangal
+
+Install using [this bash script](https://raw.githubusercontent.com/metafates/mangal/main/install)
+
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/install | bash
 
 ### Windows
 
