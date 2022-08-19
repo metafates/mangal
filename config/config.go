@@ -74,7 +74,7 @@ func setDefaults() {
 
 		// Formats
 		FormatsUse:                   "pdf",
-		FormatsSkipUnsupportedImages: false,
+		FormatsSkipUnsupportedImages: true,
 
 		// Mini-mode
 		MiniSearchLimit: 20,
