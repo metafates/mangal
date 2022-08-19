@@ -27,17 +27,24 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Features
 
-- __LUAAAA SCRAPPEERRRSS!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __3 Different modes__ - TUI, Mini and Inline
 - __Fast__ - yes. 
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 - __Fancy__ - (ﾉ>ω<)ﾉ :｡･::･ﾟ’★,｡･:･ﾟ’☆
-- __Cross-Platform__ - Linux, macOS, Windows. Sorry, FreeBSD users...
+- __Cross-Platform__ - Linux, macOS, Windows. Sorry, *BSD users...
 - __Anilist integration__ - Track your manga progress on Anilist when reading with Mangal.
 
 ## Installation
+
+- [Go](#go-any-os)
+- [Linux](#linux)
+- [Linux / macOS](#linux--macos)
+- [Windows](#windows)
+- [Docker](#docker)
+- [Manual](#manual)
 
 ### Go (Any OS)
 
@@ -54,9 +61,6 @@ Visit this link to install [Go](https://go.dev/doc/install)
 ### Linux
 
 [AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
-
-Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
-and copy them to the desired location.
 
 ### Linux / macOS
 
@@ -85,6 +89,11 @@ Install using... well, you know. (thanks to [@ArabCoders](https://github.com/Ara
 To run
 
     docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
+
+### Manual
+
+Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
+and copy them to the desired location.
 
 ## Usage
 
