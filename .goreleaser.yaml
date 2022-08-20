@@ -16,11 +16,6 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
-    format_overrides:
-      - goos: windows
-        format: zip
-    files:
-      - completions/*
 
 checksum:
   name_template: 'checksums.txt'
@@ -90,9 +85,6 @@ brews:
 
     install: |-
       bin.install "mangal"
-      bash_completion.install "completions/mangal.bash" => "mangal"
-      zsh_completion.install "completions/mangal.zsh" => "_mangal"
-      fish_completion.install "completions/mangal.fish"
 
 scoop:
   bucket:
@@ -138,19 +130,6 @@ nfpms:
     bindir: /usr/bin
     section: utils
 
-    contents:
-      - src: ./completions/mangal.bash
-        dst: /usr/share/bash-completion/completions/mangal
-        file_info:
-          mode: 0644
-      - src: ./completions/mangal.fish
-        dst: /usr/share/fish/completions/mangal.fish
-        file_info:
-          mode: 0644
-      - src: ./completions/mangal.zsh
-        dst:  /usr/share/zsh/vendor-completions/_mangal
-        file_info:
-          mode: 0644
     deb:
       lintian_overrides:
         - statically-linked-binary
