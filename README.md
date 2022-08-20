@@ -31,7 +31,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __3 Different modes__ - TUI, Mini and Inline
-- __Fast__ - yes. 
+- __Fast?__ - YES.
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 - __Fancy__ - (ﾉ>ω<)ﾉ :｡･::･ﾟ’★,｡･:･ﾟ’☆
 - __Cross-Platform__ - Linux, macOS, Windows. Sorry, *BSD users...
@@ -39,8 +39,10 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Installation
 
-- [Go](#go-any-os)
-- [Linux](#linux)
+- [Go (any OS)](#go-any-os)
+- [Arch](#arch-linux)
+- [Debian / Ubuntu](#debian--ubuntu)
+- [Fedora](#fedora)
 - [Linux / macOS](#linux--macos)
 - [Windows](#windows)
 - [Docker](#docker)
@@ -58,7 +60,7 @@ Visit this link to install [Go](https://go.dev/doc/install)
 > And please open an issue if so
 
 
-### Linux
+### Arch Linux
 
 [AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
 
@@ -92,8 +94,21 @@ To run
 
 ### Manual
 
+
+### Pre-compiled
+
 Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
 and copy them to the desired location.
+
+### From source
+
+You will need [Go](https://go.dev/doc/install) (and git)
+
+```bash
+git clone --depth 1 https://github.com/metafates/mangal.git
+cd mangal
+go install -ldflags="-s -w"
+```
 
 ## Usage
 
@@ -133,6 +148,7 @@ Config is expected to be at the OS default config directory.
 For example, on Linux it would be `~/.config/mangal/mangal.toml`.
 
 Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
+> See `mangal env` to show all available env variables.
 
 Run `mangal where` to show expected config paths
 
@@ -193,7 +209,7 @@ variant = 'plain'
 
 
 [mangadex]
-# Preffered language
+# Preferred language
 language = 'en'
 # Show nsfw manga/chapters
 nsfw = false
