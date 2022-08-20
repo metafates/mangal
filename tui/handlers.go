@@ -236,3 +236,17 @@ func (b *statefulBubble) waitForChapterDownload() tea.Cmd {
 		}
 	}
 }
+
+func (b *statefulBubble) selectChapterBy(f func(chapter *source.Chapter) bool) tea.Cmd {
+	return func() tea.Msg {
+		for i, item := range b.chaptersC.Items() {
+			chapter := item.(*listItem).internal.(*source.Chapter)
+			if f(chapter) {
+				b.chaptersC.Select(i)
+				return nil
+			}
+		}
+
+		return nil
+	}
+}

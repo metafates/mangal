@@ -22,6 +22,24 @@ func (s *Stack[T]) Pop() T {
 	return item
 }
 
+func (s *Stack[T]) Peek() T {
+	if s.length < 1 {
+		var t T
+		return t
+	}
+
+	return s.items[s.length-1]
+}
+
+func (s *Stack[T]) Peek2() T {
+	if s.length < 2 {
+		var t T
+		return t
+	}
+
+	return s.items[s.length-2]
+}
+
 func (s *Stack[T]) Len() int {
 	return s.length
 }

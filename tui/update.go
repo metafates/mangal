@@ -178,9 +178,27 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, b.mangasC.SetItems(items))
 		b.newState(mangasState)
 		b.stopLoading()
+	case []*source.Chapter:
+		if b.statesHistory.Peek() == historyState {
+			b.newState(historyState)
+			b.stopLoading()
+			cmds = append(cmds, func() tea.Msg {
+				return msg
+			})
+		}
 	case source.Source:
 		b.selectedSource = msg
-		b.newState(searchState)
+
+		if b.statesHistory.Peek() == historyState {
+			b.newState(historyState)
+			b.stopLoading()
+			cmds = append(cmds, func() tea.Msg {
+				return msg
+			})
+		} else {
+			b.stopLoading()
+			b.newState(searchState)
+		}
 	}
 
 	b.spinnerC, cmd = b.spinnerC.Update(msg)
@@ -191,6 +209,44 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case source.Source:
+		b.selectedSource = msg
+		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+
+		manga := &source.Manga{
+			Name:     selected.MangaName,
+			URL:      selected.MangaURL,
+			Index:    0,
+			SourceID: selected.SourceID,
+			ID:       selected.MangaID,
+		}
+
+		b.selectedManga = manga
+		b.newState(loadingState)
+		return b, tea.Batch(
+			b.startLoading(),
+			b.getChapters(manga),
+			b.waitForChapters(),
+		)
+	case []*source.Chapter:
+		items := make([]list.Item, len(msg))
+		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+
+		for i, c := range msg {
+			items[i] = &listItem{
+				internal:    c,
+				title:       c.Name,
+				description: c.URL,
+			}
+		}
+
+		cmd = b.chaptersC.SetItems(items)
+		b.newState(chaptersState)
+		b.stopLoading()
+		selectCmd := b.selectChapterBy(func(chapter *source.Chapter) bool {
+			return chapter.URL == selected.URL
+		})
+		return b, tea.Batch(cmd, selectCmd)
 	case tea.KeyMsg:
 		switch {
 		case b.historyC.FilterState() == list.Filtering:
@@ -233,48 +289,9 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return b, nil
 			}
 
-			src, err := p.CreateSource()
-			if err != nil {
-				b.lastError = fmt.Errorf("error creating source: %s", err)
-				b.errorPlot = randomPlot()
-				b.newState(errorState)
-				return b, nil
-			}
+			b.newState(loadingState)
+			return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
 
-			b.selectedSource = src
-
-			chapters, err := src.ChaptersOf(&source.Manga{
-				Name:     selected.MangaName,
-				URL:      selected.MangaURL,
-				Index:    0,
-				SourceID: selected.SourceID,
-				ID:       selected.MangaID,
-			})
-
-			if err != nil {
-				b.lastError = fmt.Errorf("error getting chapters: %s", err)
-				b.errorPlot = randomPlot()
-				b.newState(errorState)
-				return b, nil
-			}
-
-			_, index, _ := lo.FindIndexOf(chapters, func(c *source.Chapter) bool {
-				return c.URL == selected.URL
-			})
-
-			items := make([]list.Item, len(chapters))
-			for i, c := range chapters {
-				items[i] = &listItem{
-					internal:    c,
-					title:       c.Name,
-					description: c.URL,
-				}
-			}
-
-			cmd = b.chaptersC.SetItems(items)
-			b.chaptersC.Select(index)
-			b.newState(chaptersState)
-			return b, cmd
 		}
 	}
 
