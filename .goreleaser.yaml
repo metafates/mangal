@@ -16,10 +16,18 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - completions/*
+
 checksum:
   name_template: 'checksums.txt'
+
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
+
 changelog:
   sort: asc
   use: github
