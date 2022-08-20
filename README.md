@@ -41,8 +41,6 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 - [Go (any OS)](#go-any-os)
 - [Arch](#arch-linux)
-- [Debian / Ubuntu](#debian--ubuntu)
-- [Fedora](#fedora)
 - [Linux / macOS](#linux--macos)
 - [Windows](#windows)
 - [Docker](#docker)
