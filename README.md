@@ -13,9 +13,12 @@
 https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-a413-37cb07c1552e.mov
 
 ## Try it!
+
     curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/run | bash
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
+> 
+> Linux / macOS only
 
 ## Table of contents
 - [Features](#features)
