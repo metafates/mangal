@@ -25,10 +25,7 @@ var sourcesCmd = &cobra.Command{
 		cmd.Println()
 
 		cmd.Println(headerStyle("Custom:"))
-		custom, err := provider.CustomProviders()
-		if err != nil {
-			return err
-		}
+		custom := provider.CustomProviders()
 
 		for name := range custom {
 			cmd.Println(name)

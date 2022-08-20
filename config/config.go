@@ -22,14 +22,18 @@ func Setup() error {
 
 	err := viper.ReadInConfig()
 
-	switch err.(type) {
-	case viper.ConfigFileNotFoundError:
-		// Use defaults then
-		return nil
-	default:
-		resolveAliases()
-		return err
+	if err != nil {
+		switch err.(type) {
+		case viper.ConfigFileNotFoundError:
+			// Use defaults then
+			return nil
+		default:
+			return err
+		}
 	}
+
+	resolveAliases()
+	return nil
 }
 
 func setName() {
@@ -67,9 +71,11 @@ func setDefaults() {
 		DownloaderAsync:               true,
 		DownloaderCreateMangaDir:      true,
 		DownloaderDefaultSource:       "",
+		DownloaderStopOnError:         false,
 
 		// Formats
-		FormatsUse: "pdf",
+		FormatsUse:                   "pdf",
+		FormatsSkipUnsupportedImages: true,
 
 		// Mini-mode
 		MiniSearchLimit: 20,
@@ -78,7 +84,10 @@ func setDefaults() {
 		IconsVariant: "plain",
 
 		// Reader
-		ReaderName:          "",
+		ReaderPDF:           "",
+		ReaderCBZ:           "",
+		ReaderZIP:           "",
+		RaderPlain:          "",
 		ReaderReadInBrowser: false,
 
 		// History
@@ -89,6 +98,11 @@ func setDefaults() {
 		MangadexLanguage:                "en",
 		MangadexNSFW:                    false,
 		MangadexShowUnavailableChapters: false,
+
+		// Installer
+		InstallerUser:   "metafates",
+		InstallerRepo:   "mangal-scrapers",
+		InstallerBranch: "main",
 
 		// Logs
 		LogsWrite: false,

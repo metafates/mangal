@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"strings"
 )
@@ -207,8 +209,14 @@ func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 		})
 
 		if err != nil {
-			b.errorChannel <- err
+			if viper.GetBool(config.DownloaderStopOnError) {
+				b.errorChannel <- err
+			} else {
+				b.failedChapters = append(b.failedChapters, chapter)
+				b.chapterDownloadChannel <- struct{}{}
+			}
 		} else {
+			b.succededChapters = append(b.succededChapters, chapter)
 			b.chapterDownloadChannel <- struct{}{}
 			b.lastDownloadedChapterPath = path
 		}
@@ -226,5 +234,19 @@ func (b *statefulBubble) waitForChapterDownload() tea.Cmd {
 			b.lastError = err
 			return err
 		}
+	}
+}
+
+func (b *statefulBubble) selectChapterBy(f func(chapter *source.Chapter) bool) tea.Cmd {
+	return func() tea.Msg {
+		for i, item := range b.chaptersC.Items() {
+			chapter := item.(*listItem).internal.(*source.Chapter)
+			if f(chapter) {
+				b.chaptersC.Select(i)
+				return nil
+			}
+		}
+
+		return nil
 	}
 }

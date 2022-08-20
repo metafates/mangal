@@ -12,6 +12,13 @@
 
 https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-a413-37cb07c1552e.mov
 
+## Try it!
+
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/run | bash
+
+> **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
+> 
+> Linux / macOS only
 
 ## Table of contents
 - [Features](#features)
@@ -23,17 +30,24 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Features
 
-- __LUAAAA SCRAPPEERRRSS!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __3 Different modes__ - TUI, Mini and Inline
-- __Fast__ - yes. 
+- __Fast?__ - YES.
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 - __Fancy__ - (ﾉ>ω<)ﾉ :｡･::･ﾟ’★,｡･:･ﾟ’☆
-- __Cross-Platform__ - Linux, macOS, Windows. Sorry, FreeBSD users...
+- __Cross-Platform__ - Linux, macOS, Windows. Sorry, *BSD users...
 - __Anilist integration__ - Track your manga progress on Anilist when reading with Mangal.
 
 ## Installation
+
+- [Go (any OS)](#go-any-os)
+- [Arch](#arch-linux)
+- [Linux / macOS](#linux--macos)
+- [Windows](#windows)
+- [Docker](#docker)
+- [Manual](#manual)
 
 ### Go (Any OS)
 
@@ -46,26 +60,21 @@ Visit this link to install [Go](https://go.dev/doc/install)
 > Use this method if others are not working for some reason.
 > And please open an issue if so
 
-### Bash script
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/run | bash
-
-> **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
-> It's purpose is to try mangal in action or use within scripts
-
-### Linux
+### Arch Linux
 
 [AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
 
-Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
-and copy them to the desired location.
-
-### macOS / Linux
+### Linux / macOS
 
 Install using [Homebrew](https://brew.sh/)
 
     brew tap metafates/mangal
     brew install mangal
+
+Install using [this bash script](https://raw.githubusercontent.com/metafates/mangal/main/install)
+
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/install | bash
 
 ### Windows
 
@@ -83,6 +92,24 @@ Install using... well, you know. (thanks to [@ArabCoders](https://github.com/Ara
 To run
 
     docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
+
+### Manual
+
+
+### Pre-compiled
+
+Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
+and copy them to the desired location.
+
+### From source
+
+You will need [Go](https://go.dev/doc/install) (and git)
+
+```bash
+git clone --depth 1 https://github.com/metafates/mangal.git
+cd mangal
+go install -ldflags="-s -w"
+```
 
 ## Usage
 
@@ -121,11 +148,10 @@ Mangal uses [TOML](https://toml.io) format for configuration under the `mangal.t
 Config is expected to be at the OS default config directory.
 For example, on Linux it would be `~/.config/mangal/mangal.toml`.
 
-Run `mangal where` to show expected config paths
+Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
+> See `mangal env` to show all available env variables.
 
-> "But what if I want to specify my own config path?"
-> 
-> Use env variable `MANGAL_CONFIG_PATH`
+Run `mangal where` to show expected config paths
 
 Run `mangal config init` to generate a default config file
 
@@ -137,7 +163,6 @@ Run `mangal config init` to generate a default config file
 # Will prompt to choose if empty
 # Type `mangal sources` for available sources
 default_source = ''
-
 # Name template of the downloaded chapters
 # Available variables:
 # {index}        - index of the chapters
@@ -145,26 +170,30 @@ default_source = ''
 # {chapter}      - name of the chapter
 # {manga}        - name of the manga
 chapter_name_template = '[{padded-index}] {chapter}'
-
 # Where to download manga
 # Absolute or relative.
 #
 # You can also use home variable 
 # path = "~/..." or "$HOME/..."
 path = '.'
-
 # Use asynchronous downloader (faster)
 # Do no turn it off unless you have some issues
 async = true
-
 # Create a subdirectory for each manga
 create_manga_dir = true
+# Stop downloading other chapters on error
+stop_on_error = false
+
+
 
 
 [formats]
 # Default format to export chapters
 # Available options are: pdf, zip, cbz, plain
 use = 'pdf'
+# Will skip images that can't be converted to the specified format 
+# Example: if you want to export to pdf, but some images are gifs, they will be skipped
+skip_unsupported_images = true
 
 
 
@@ -179,12 +208,12 @@ save_on_read = true
 [icons]
 # Icons variant.
 # Available options are: emoji, kaomoji, plain, squares, nerd (nerd-font)
-variant = 'emoji'
+variant = 'plain'
 
 
 
 [mangadex]
-# Preffered language
+# Preferred language
 language = 'en'
 # Show nsfw manga/chapters
 nsfw = false
@@ -200,10 +229,26 @@ search_limit = 20
 
 
 [reader]
-# Name of the app to use as a reader. Will use default OS app if empty
-name = ''
+# Name of the app to use as a reader for each format.
+# Will use default OS app if empty
+pdf = '' # e.g. pdf = 'zathura'
+cbz = ''
+zip = ''
+plain = ''
 # Will open chapter in the browser instead of downloading it
 read_in_browser = false
+
+
+
+[installer]
+# Custom scrapers repository (github only)
+repo = 'mangal-scrapers'
+# Custom scrapers repository owner
+user = 'metafates'
+# Custom scrapers repository branch
+branch = 'main'
+
+
 
 [logs]
 # write logs?

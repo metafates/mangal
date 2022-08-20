@@ -7,24 +7,15 @@ import (
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
+	"path/filepath"
 )
 
+// Read the chapter by downloading it with the given source
+// and opening it with the configured reader.
 func Read(src source.Source, chapter *source.Chapter, progress func(string)) error {
-	defer func() {
-		if viper.GetBool(config.HistorySaveOnRead) {
-			go func() {
-				log.Info("saving history")
-				err := history.Save(chapter)
-				if err != nil {
-					log.Warn(err)
-				} else {
-					log.Info("history saved")
-				}
-			}()
-		}
-	}()
 
 	if viper.GetBool(config.ReaderReadInBrowser) {
 		return open.Start(chapter.URL)
@@ -32,7 +23,7 @@ func Read(src source.Source, chapter *source.Chapter, progress func(string)) err
 
 	log.Info("downloading " + chapter.Name + " from " + chapter.Manga.Name + " for reading. Provider is " + src.ID())
 	log.Info("getting pages of " + chapter.Name)
-	progress("Gettings pages")
+	progress("Getting pages")
 	pages, err := src.PagesOf(chapter)
 	if err != nil {
 		log.Error(err)
@@ -55,21 +46,62 @@ func Read(src source.Source, chapter *source.Chapter, progress func(string)) err
 	}
 
 	log.Info("converting " + viper.GetString(config.FormatsUse))
-	progress(fmt.Sprintf("Converting %d pages to %s", len(pages), viper.GetString(config.FormatsUse)))
+	progress(fmt.Sprintf(
+		"Converting %d pages to %s %s",
+		len(pages),
+		style.Yellow(viper.GetString(config.FormatsUse)),
+		style.Faint(chapter.SizeHuman())),
+	)
 	path, err := conv.SaveTemp(chapter)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	log.Info("downloaded without errors. Opening " + path)
-	if reader := viper.GetString(config.ReaderName); reader != "" {
+	err = openRead(path, progress)
+	if err != nil {
+		return err
+	}
+
+	if viper.GetBool(config.HistorySaveOnRead) {
+		go func() {
+			err := history.Save(chapter)
+			if err != nil {
+				log.Warn(err)
+			} else {
+				log.Info("history saved")
+			}
+		}()
+	}
+
+	progress("Done")
+	return nil
+}
+
+func openRead(path string, progress func(string)) error {
+	var (
+		reader string
+		err    error
+	)
+
+	switch viper.GetString(config.FormatsUse) {
+	case "pdf":
+		reader = viper.GetString(config.ReaderPDF)
+	case "cbz":
+		reader = viper.GetString(config.ReaderCBZ)
+	case "zip":
+		reader = viper.GetString(config.ReaderZIP)
+	case "plain":
+		reader = viper.GetString(config.RaderPlain)
+	}
+
+	if reader != "" {
 		log.Info("opening with " + reader)
 		progress(fmt.Sprintf("Opening %s", reader))
-		err = open.RunWith(reader, path)
+		err = open.RunWith(path, reader)
 		if err != nil {
 			log.Error(err)
-			return err
+			return fmt.Errorf("could not open %s with %s: %s", path, reader, err.Error())
 		}
 		log.Info("opened without errors")
 	} else {
@@ -78,11 +110,10 @@ func Read(src source.Source, chapter *source.Chapter, progress func(string)) err
 		err = open.Run(path)
 		if err != nil {
 			log.Error(err)
-			return err
+			return fmt.Errorf("error opening %s: %s", filepath.Base(path), err.Error())
 		}
 		log.Info("opened without errors")
 	}
 
-	progress("Done")
 	return nil
 }

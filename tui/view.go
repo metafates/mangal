@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"math/rand"
+	"strconv"
 	"strings"
 )
 
@@ -139,12 +140,26 @@ func (b *statefulBubble) viewDownload() string {
 }
 
 func (b *statefulBubble) viewDownloadDone() string {
+	failed := len(b.failedChapters)
+	succeded := len(b.succededChapters)
+
+	var msg string
+
+	{
+		temp := strings.Split(util.Quantity(succeded, "chapter"), " ")
+		temp[0] = style.Green(temp[0])
+		s := strings.Join(temp, " ") + " downloaded"
+		f := fmt.Sprintf("%s failed", style.Red(strconv.Itoa(failed)))
+
+		msg = fmt.Sprintf("%s, %s", s, f)
+	}
+
 	return b.renderLines(
 		true,
 		[]string{
 			style.Title("Finish"),
 			"",
-			icon.Get(icon.Success) + " Download finished." + style.Italic(" *Beep-Boop-Boop*"),
+			msg,
 		},
 	)
 }
@@ -158,7 +173,7 @@ func (b *statefulBubble) viewError() string {
 			"",
 			icon.Get(icon.Fail) + " Uggh, something went wrong. Maybe try again?",
 			"",
-			style.Italic(util.Wrap(b.plot, b.width)),
+			style.Italic(util.Wrap(b.errorPlot, b.width)),
 			"",
 		},
 			strings.Split(errorMsg, "\n")...,

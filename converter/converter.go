@@ -1,7 +1,6 @@
 package converter
 
 import (
-	"errors"
 	"fmt"
 	"github.com/metafates/mangal/converter/cbz"
 	"github.com/metafates/mangal/converter/pdf"
@@ -10,6 +9,7 @@ import (
 	"github.com/metafates/mangal/source"
 )
 
+// Converter is the interface that all converters must implement.
 type Converter interface {
 	Save(chapter *source.Chapter) (string, error)
 	SaveTemp(chapter *source.Chapter) (string, error)
@@ -29,6 +29,7 @@ var converters = map[string]Converter{
 	ZIP:   zip.New(),
 }
 
+// Available returns a list of available converters.
 func Available() []string {
 	return []string{
 		Plain,
@@ -38,10 +39,12 @@ func Available() []string {
 	}
 }
 
+// Get returns a converter by name.
+// If the converter is not available, an error is returned.
 func Get(name string) (Converter, error) {
 	if converter, ok := converters[name]; ok {
 		return converter, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("unkown format \"%s\"", name))
+	return nil, fmt.Errorf("unkown format \"%s\"", name)
 }

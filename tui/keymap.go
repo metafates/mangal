@@ -3,6 +3,7 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/metafates/mangal/style"
 )
 
 type statefulKeymap struct {
@@ -11,6 +12,7 @@ type statefulKeymap struct {
 	quit, forceQuit,
 	selectOne, selectAll, clearSelection,
 	remove,
+	redownloadFailed,
 	confirm,
 	openURL,
 	read,
@@ -68,7 +70,11 @@ func newStatefulKeymap() *statefulKeymap {
 		),
 		read: k(
 			keys("r"),
-			help("r", "read"),
+			help(style.Yellow("r"), style.Yellow("read")),
+		),
+		redownloadFailed: k(
+			keys("r"),
+			help("r", "redownload failed"),
 		),
 		openFolder: k(
 			keys("o"),
@@ -148,7 +154,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case downloadState:
 		return to2(h(k.back, k.forceQuit))
 	case downloadDoneState:
-		return to2(h(k.back, k.quit, k.openFolder))
+		return to2(h(k.back, k.quit, k.openFolder, k.redownloadFailed))
 	case errorState:
 		return to2(h(k.back, k.quit))
 	default:

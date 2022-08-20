@@ -10,6 +10,7 @@ import (
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/skratchdot/open-golang/open"
 	"golang.org/x/exp/slices"
@@ -22,7 +23,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case error:
-		b.plot = randomPlot()
+		b.errorPlot = randomPlot()
 		b.newState(errorState)
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)
@@ -71,6 +72,8 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			b.previousState()
 			b.stopLoading()
+			b.failedChapters = make([]*source.Chapter, 0)
+			b.succededChapters = make([]*source.Chapter, 0)
 			return b, nil
 		}
 	}
@@ -144,7 +147,10 @@ func (b *statefulBubble) updateScrapersInstall(msg tea.Msg) (tea.Model, tea.Cmd)
 }
 
 func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds = make([]tea.Cmd, 0)
+	)
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -169,25 +175,81 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-		cmd = b.mangasC.SetItems(items)
+		cmds = append(cmds, b.mangasC.SetItems(items))
 		b.newState(mangasState)
 		b.stopLoading()
+	case []*source.Chapter:
+		if b.statesHistory.Peek() == historyState {
+			b.newState(historyState)
+			b.stopLoading()
+			cmds = append(cmds, func() tea.Msg {
+				return msg
+			})
+		}
 	case source.Source:
 		b.selectedSource = msg
-		b.newState(searchState)
+
+		if b.statesHistory.Peek() == historyState {
+			b.newState(historyState)
+			b.stopLoading()
+			cmds = append(cmds, func() tea.Msg {
+				return msg
+			})
+		} else {
+			b.stopLoading()
+			b.newState(searchState)
+		}
 	}
 
 	b.spinnerC, cmd = b.spinnerC.Update(msg)
-	return b, cmd
+	return b, tea.Batch(append(cmds, cmd)...)
 }
 
 func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case source.Source:
+		b.selectedSource = msg
+		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+
+		manga := &source.Manga{
+			Name:     selected.MangaName,
+			URL:      selected.MangaURL,
+			Index:    0,
+			SourceID: selected.SourceID,
+			ID:       selected.MangaID,
+		}
+
+		b.selectedManga = manga
+		b.newState(loadingState)
+		return b, tea.Batch(
+			b.startLoading(),
+			b.getChapters(manga),
+			b.waitForChapters(),
+		)
+	case []*source.Chapter:
+		items := make([]list.Item, len(msg))
+		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+
+		for i, c := range msg {
+			items[i] = &listItem{
+				internal:    c,
+				title:       c.Name,
+				description: c.URL,
+			}
+		}
+
+		cmd = b.chaptersC.SetItems(items)
+		b.newState(chaptersState)
+		b.stopLoading()
+		selectCmd := b.selectChapterBy(func(chapter *source.Chapter) bool {
+			return chapter.URL == selected.URL
+		})
+		return b, tea.Batch(cmd, selectCmd)
 	case tea.KeyMsg:
 		switch {
-		case b.sourcesC.FilterState() == list.Filtering:
+		case b.historyC.FilterState() == list.Filtering:
 			break
 		case key.Matches(msg, b.keymap.openURL):
 			if b.historyC.SelectedItem() != nil {
@@ -195,7 +257,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				err := open.Run(chapter.URL)
 				if err != nil {
 					b.lastError = err
-					b.plot = randomPlot()
+					b.errorPlot = randomPlot()
 					b.newState(errorState)
 				}
 			}
@@ -222,53 +284,14 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			if !ok {
 				b.lastError = fmt.Errorf("provider %s not found", selected.SourceID)
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.newState(errorState)
 				return b, nil
 			}
 
-			src, err := p.CreateSource()
-			if err != nil {
-				b.lastError = fmt.Errorf("error creating source: %s", err)
-				b.plot = randomPlot()
-				b.newState(errorState)
-				return b, nil
-			}
+			b.newState(loadingState)
+			return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
 
-			b.selectedSource = src
-
-			chapters, err := src.ChaptersOf(&source.Manga{
-				Name:     selected.MangaName,
-				URL:      selected.MangaURL,
-				Index:    0,
-				SourceID: selected.SourceID,
-				ID:       selected.MangaID,
-			})
-
-			if err != nil {
-				b.lastError = fmt.Errorf("error getting chapters: %s", err)
-				b.plot = randomPlot()
-				b.newState(errorState)
-				return b, nil
-			}
-
-			_, index, _ := lo.FindIndexOf(chapters, func(c *source.Chapter) bool {
-				return c.URL == selected.URL
-			})
-
-			items := make([]list.Item, len(chapters))
-			for i, c := range chapters {
-				items[i] = &listItem{
-					internal:    c,
-					title:       c.Name,
-					description: c.URL,
-				}
-			}
-
-			cmd = b.chaptersC.SetItems(items)
-			b.chaptersC.Select(index)
-			b.newState(chaptersState)
-			return b, cmd
 		}
 	}
 
@@ -342,7 +365,7 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 			err := open.Start(m.URL)
 			if err != nil {
 				b.lastError = err
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.newState(errorState)
 			}
 		}
@@ -382,7 +405,7 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
 			err := open.Start(chapter.URL)
 			if err != nil {
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.lastError = err
 				b.newState(errorState)
 			}
@@ -523,10 +546,23 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.openFolder):
 			err := open.Start(filepath.Dir(b.lastDownloadedChapterPath))
 			if err != nil {
-				b.plot = randomPlot()
+				b.errorPlot = randomPlot()
 				b.lastError = err
 				b.newState(errorState)
 			}
+		case key.Matches(msg, b.keymap.redownloadFailed):
+			if len(b.failedChapters) == 0 {
+				break
+			}
+
+			b.chaptersToDownload = util.Stack[*source.Chapter]{}
+			for _, chapter := range b.failedChapters {
+				b.chaptersToDownload.Push(chapter)
+			}
+			b.failedChapters = make([]*source.Chapter, 0)
+			b.succededChapters = make([]*source.Chapter, 0)
+			b.newState(downloadState)
+			return b, tea.Batch(b.startLoading(), b.downloadChapter(b.chaptersToDownload.Pop()), b.waitForChapterDownload(), b.progressC.SetPercent(0))
 		}
 	}
 

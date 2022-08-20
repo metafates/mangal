@@ -8,11 +8,11 @@ func New() *Headless {
 	return &Headless{}
 }
 
-func (_ Headless) Name() string {
+func (Headless) Name() string {
 	return "headless"
 }
 
-func (_ Headless) Loader() lua.LGFunction {
+func (Headless) Loader() lua.LGFunction {
 	var exports = map[string]lua.LGFunction{
 		"browser": newBrowser(),
 	}

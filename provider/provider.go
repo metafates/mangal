@@ -52,11 +52,11 @@ func DefaultProviders() map[string]*Provider {
 	return providers
 }
 
-func CustomProviders() (map[string]*Provider, error) {
+func CustomProviders() map[string]*Provider {
 	files, err := filesystem.Get().ReadDir(where.Sources())
 
 	if err != nil {
-		return nil, err
+		return make(map[string]*Provider)
 	}
 
 	providers := make(map[string]*Provider)
@@ -79,7 +79,7 @@ func CustomProviders() (map[string]*Provider, error) {
 		}
 	}
 
-	return providers, nil
+	return providers
 }
 
 func Get(name string) (*Provider, bool) {
@@ -89,12 +89,7 @@ func Get(name string) (*Provider, bool) {
 		}
 	}
 
-	c, err := CustomProviders()
-	if err != nil {
-		return nil, false
-	}
-
-	for _, provider := range c {
+	for _, provider := range CustomProviders() {
 		if provider.Name == name {
 			return provider, true
 		}

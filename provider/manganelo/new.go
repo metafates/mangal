@@ -103,13 +103,14 @@ func New() source.Source {
 	// Get pages
 	pagesCollector.OnHTML(".container-chapter-reader img", func(e *colly.HTMLElement) {
 		link := e.Attr("data-src")
+		ext := filepath.Ext(link)
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		chapter := e.Request.Ctx.GetAny("chapter").(*source.Chapter)
 		page := source.Page{
 			URL:       link,
 			Index:     uint16(e.Index),
 			Chapter:   chapter,
-			Extension: ".jpg",
+			Extension: ext,
 			SourceID:  manganelo.ID(),
 		}
 		chapter.Pages = append(chapter.Pages, &page)

@@ -6,14 +6,19 @@ const (
 	DownloaderAsync               = "downloader.async"
 	DownloaderCreateMangaDir      = "downloader.create_manga_dir"
 	DownloaderDefaultSource       = "downloader.default_source"
+	DownloaderStopOnError         = "downloader.stop_on_error"
 )
 
 const (
-	FormatsUse = "formats.use"
+	FormatsUse                   = "formats.use"
+	FormatsSkipUnsupportedImages = "formats.skip_unsupported_images"
 )
 
 const (
-	ReaderName          = "reader.name"
+	ReaderPDF           = "reader.pdf"
+	ReaderCBZ           = "reader.cbz"
+	ReaderZIP           = "reader.zip"
+	RaderPlain          = "reader.plain"
 	ReaderReadInBrowser = "reader.read_in_browser"
 )
 
@@ -44,6 +49,12 @@ const (
 )
 
 const (
+	InstallerUser   = "installer.user"
+	InstallerRepo   = "installer.repo"
+	InstallerBranch = "installer.branch"
+)
+
+const (
 	LogsWrite = "logs.write"
 	LogsLevel = "logs.level"
 )
@@ -59,7 +70,10 @@ var EnvExposed = []string{
 	FormatsUse,
 
 	// reader
-	ReaderName,
+	ReaderCBZ,
+	ReaderPDF,
+	ReaderZIP,
+	RaderPlain,
 
 	// history
 	HistorySaveOnRead,

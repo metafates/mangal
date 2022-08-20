@@ -56,6 +56,11 @@ func (a *Anilist) MarkRead(chapter *source.Chapter) error {
 		bytes.NewBuffer(jsonBody),
 	)
 
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
 	// set headers
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+a.token)

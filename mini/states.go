@@ -39,9 +39,12 @@ func (m *mini) handleSourceSelectState() error {
 		}
 
 		m.selectedSource, err = p.CreateSource()
+		if err != nil {
+			return err
+		}
 	} else {
 		defaultProviders := provider.DefaultProviders()
-		customProviders := lo.Must(provider.CustomProviders())
+		customProviders := provider.CustomProviders()
 
 		var providers = make([]*provider.Provider, 0)
 
@@ -70,11 +73,10 @@ func (m *mini) handleSourceSelectState() error {
 
 		erase := progress("Initializing Source..")
 		m.selectedSource, err = p.CreateSource()
+		if err != nil {
+			return err
+		}
 		erase()
-	}
-
-	if err != nil {
-		return err
 	}
 
 	m.newState(mangasSearchState)
@@ -330,7 +332,8 @@ func (m *mini) handleChaptersDownloadState() error {
 		})
 
 		erase()
-		if err != nil {
+
+		if err != nil && viper.GetBool(config.DownloaderStopOnError) {
 			return err
 		}
 
@@ -384,7 +387,7 @@ func (m *mini) handleHistorySelectState() error {
 	}
 
 	defaultProviders := provider.DefaultProviders()
-	customProviders, _ := provider.CustomProviders()
+	customProviders := provider.CustomProviders()
 
 	var providers = make([]*provider.Provider, 0)
 

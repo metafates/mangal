@@ -17,6 +17,8 @@ test -z "$VERSION" && {
 
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 
+
+
 TAR_NAME="${FILE_BASENAME}_${VERSION:1}_$(uname -s)_$(uname -m).tar.gz"
 TAR_FILE="$TMPDIR/${TAR_NAME}"
 
@@ -25,7 +27,6 @@ export TAR_FILE
 
 (
   cd "$TMPDIR"
-
   echo "Downloading Mangal $VERSION..."
   curl -sfLo "$TAR_FILE" \
     "$RELEASES_URL/download/$VERSION/${TAR_NAME}"
@@ -42,4 +43,39 @@ export TAR_FILE
 )
 
 tar -xf "$TAR_FILE" -C "$TMPDIR"
-"${TMPDIR}/${FILE_BASENAME}" "$@"
+
+echo "Installing..."
+case $(uname) in
+Darwin)
+  echo "macOS detected. Checking if brew is installed..."
+  if command -v brew &>/dev/null; then
+    OUT="$(brew --prefix)/bin/"
+    echo "Brew is installed. Moving to ${OUT}"
+    echo "But I would recommend installing it with brew directly"
+    cp "${TMPDIR}/${FILE_BASENAME}" "${OUT}"
+  else
+    OUT="/usr/local/bin/"
+    echo "Brew is not installed. Moving to ${OUT}"
+    sudo cp "${TMPDIR}/${FILE_BASENAME}" "${OUT}"
+  fi
+  ;;
+
+*)
+  OUT="/usr/local/bin/"
+  echo "Linux detected. Moving to ${OUT}"
+  sudo cp "${TMPDIR}/${FILE_BASENAME}" "${OUT}"
+  ;;
+esac
+
+echo "Checking if it's available in the PATH..."
+if ! command -v mangal &>/dev/null; then
+  echo "Looks like it's not :("
+
+  cp "${TMPDIR}/${FILE_BASENAME}" ./
+  echo "I've moved mangal to your current directory, try installing it manually"
+  exit 1
+fi
+
+echo "Mangal is now installed. You can run this script again to update it"
+rm "${TMPDIR}/${FILE_BASENAME}"
+exit 0

@@ -22,11 +22,11 @@ func New() *ZIP {
 	return &ZIP{}
 }
 
-func (_ *ZIP) Save(chapter *source.Chapter) (string, error) {
+func (*ZIP) Save(chapter *source.Chapter) (string, error) {
 	return save(chapter, false)
 }
 
-func (_ *ZIP) SaveTemp(chapter *source.Chapter) (string, error) {
+func (*ZIP) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 

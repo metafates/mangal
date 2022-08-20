@@ -2,6 +2,7 @@ package source
 
 import (
 	"fmt"
+	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
@@ -9,14 +10,22 @@ import (
 	"sync"
 )
 
+// Chapter is a struct that represents a chapter of a manga.
 type Chapter struct {
-	Name     string
-	URL      string
-	Index    uint16
+	// Name of the chapter
+	Name string
+	// URL of the chapter
+	URL string
+	// Index of the chapter in the manga.
+	Index uint16
+	// SourceID of the source the chapter is from.
 	SourceID string
-	ID       string
-	Manga    *Manga
-	Pages    []*Page
+	// ID of the chapter in the source.
+	ID string
+	// Manga that the chapter belongs to.
+	Manga *Manga
+	// Pages of the chapter.
+	Pages []*Page
 }
 
 func (c *Chapter) String() string {
@@ -53,6 +62,7 @@ func (c *Chapter) DownloadPages() error {
 	return err
 }
 
+// FormattedName of the chapter according to the template in the config.
 func (c *Chapter) FormattedName() (name string) {
 	template := viper.GetString(config.DownloaderChapterNameTemplate)
 	name = strings.ReplaceAll(template, "{manga}", c.Manga.Name)
@@ -61,4 +71,24 @@ func (c *Chapter) FormattedName() (name string) {
 	name = strings.ReplaceAll(name, "{padded-index}", util.PadZero(fmt.Sprintf("%d", c.Index), 4))
 
 	return
+}
+
+// Size of the chapter in bytes.
+func (c *Chapter) Size() uint64 {
+	var n uint64
+
+	for _, page := range c.Pages {
+		n += page.Size
+	}
+
+	return n
+}
+
+// SizeHuman is the same as Size but returns a human readable string.
+func (c *Chapter) SizeHuman() string {
+	if size := c.Size(); size == 0 {
+		return "Unknown size"
+	} else {
+		return humanize.Bytes(size)
+	}
 }

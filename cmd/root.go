@@ -35,10 +35,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("source", "S", "", "source")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("source", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		d := lo.Keys(provider.DefaultProviders())
-
-		if c, err := provider.CustomProviders(); err == nil {
-			d = append(d, lo.Keys(c)...)
-		}
+		d = append(d, lo.Keys(provider.CustomProviders())...)
 
 		return d, cobra.ShellCompDirectiveDefault
 	}))

@@ -30,5 +30,6 @@ func (m *Manganelo) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		chapter.Index++
 	}
 
+	m.chapters[manga.URL] = reversed
 	return reversed, nil
 }

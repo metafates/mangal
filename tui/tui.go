@@ -14,16 +14,16 @@ func Run(options *Options) error {
 	bubble := newBubble()
 
 	if options.Install {
-		bubble.setState(scrapersInstallState)
+		bubble.newState(scrapersInstallState)
 	} else if options.Continue {
 		_, err := bubble.loadHistory()
 		if err != nil {
 			return err
 		}
 
-		bubble.setState(historyState)
+		bubble.newState(historyState)
 	} else {
-		bubble.setState(sourcesState)
+		bubble.newState(sourcesState)
 	}
 
 	return tea.NewProgram(bubble, tea.WithAltScreen()).Start()

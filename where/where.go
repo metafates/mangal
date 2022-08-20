@@ -10,11 +10,14 @@ import (
 
 const EnvConfigPath = "MANGAL_CONFIG_PATH"
 
+// mkdir creates a directory and all parent directories if they don't exist
+// will return the path of the directory
 func mkdir(path string) string {
 	lo.Must0(filesystem.Get().MkdirAll(path, os.ModePerm))
 	return path
 }
 
+// Config path
 func Config() string {
 	var path string
 
@@ -28,14 +31,17 @@ func Config() string {
 	return mkdir(path)
 }
 
+// Sources path
 func Sources() string {
 	return mkdir(filepath.Join(Config(), "sources"))
 }
 
+// Logs path
 func Logs() string {
 	return mkdir(filepath.Join(Config(), "logs"))
 }
 
+// History path to the file
 func History() string {
 	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constant.CachePrefix)
 	lo.Must0(filesystem.Get().MkdirAll(filepath.Dir(cacheDir), os.ModePerm))
