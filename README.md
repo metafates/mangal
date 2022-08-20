@@ -181,6 +181,9 @@ path = '.'
 async = true
 # Create a subdirectory for each manga
 create_manga_dir = true
+# Stop downloading other chapters on error
+stop_on_error = false
+
 
 
 
