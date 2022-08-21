@@ -34,8 +34,6 @@ func newStatefulKeymap() *statefulKeymap {
 	help := key.WithHelp
 
 	return &statefulKeymap{
-		state: idle,
-
 		quit: k(
 			keys("q"),
 			help("q", "quit"),
@@ -131,8 +129,6 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	}
 
 	switch k.state {
-	case idle:
-		return to2(h(k.forceQuit))
 	case scrapersInstallState:
 		return to2(h(k.confirm, k.openURL))
 	case loadingState:
@@ -158,8 +154,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case errorState:
 		return to2(h(k.back, k.quit))
 	default:
-		// unreachable
-		panic("unknown state")
+		return to2(h())
 	}
 }
 

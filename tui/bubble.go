@@ -67,6 +67,12 @@ type statefulBubble struct {
 	succededChapters []*source.Chapter
 }
 
+func (b *statefulBubble) raiseError(err error) {
+	b.lastError = err
+	b.errorPlot = randomPlot()
+	b.newState(errorState)
+}
+
 func (b *statefulBubble) setState(s state) {
 	b.state = s
 	b.keymap.setState(s)
@@ -80,7 +86,6 @@ func (b *statefulBubble) newState(s state) {
 
 	// Transitioning to these states is not allowed (it makes no sense)
 	if !lo.Contains([]state{
-		idle,
 		loadingState,
 		readState,
 		downloadDoneState,
@@ -146,7 +151,6 @@ func (b *statefulBubble) stopLoading() tea.Cmd {
 func newBubble() *statefulBubble {
 	keymap := newStatefulKeymap()
 	bubble := statefulBubble{
-		state:         idle,
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
 

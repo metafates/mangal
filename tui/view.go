@@ -13,8 +13,6 @@ import (
 
 func (b *statefulBubble) View() string {
 	switch b.state {
-	case idle:
-		return b.viewIdle()
 	case scrapersInstallState:
 		return b.viewScrapersInstallState()
 	case loadingState:
@@ -42,10 +40,6 @@ func (b *statefulBubble) View() string {
 	}
 
 	panic("unknown state")
-}
-
-func (b *statefulBubble) viewIdle() string {
-	return ""
 }
 
 func (b *statefulBubble) viewLoading() string {
