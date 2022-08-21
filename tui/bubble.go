@@ -110,13 +110,25 @@ func (b *statefulBubble) resize(width, height int) {
 	listHeight := height - yy
 
 	b.scrapersInstallC.SetSize(listWidth, listHeight)
+	b.scrapersInstallC.Help.Width = listWidth
+
 	b.historyC.SetSize(listWidth, listHeight)
+	b.historyC.Help.Width = listWidth
+
 	b.sourcesC.SetSize(listWidth, listHeight)
+	b.sourcesC.Help.Width = listWidth
+
 	b.mangasC.SetSize(listWidth, listHeight)
+	b.mangasC.Help.Width = listWidth
+
 	b.chaptersC.SetSize(listWidth, listHeight)
-	b.progressC.Width = styledWidth
+	b.chaptersC.Help.Width = listWidth
+
+	b.progressC.Width = listWidth
+
 	b.width = styledWidth
 	b.height = styledHeight
+	b.helpC.Width = styledWidth
 }
 
 func (b *statefulBubble) startLoading() tea.Cmd {
