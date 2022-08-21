@@ -136,11 +136,11 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case historyState:
 		return to2(h(k.selectOne, k.remove, k.back, k.openURL))
 	case sourcesState:
-		return to2(h(k.selectOne))
+		return to2(h(k.confirm))
 	case searchState:
 		return to2(h(k.confirm, k.forceQuit))
 	case mangasState:
-		return to2(h(k.selectOne, k.back, k.openURL))
+		return to2(h(k.confirm, k.back, k.openURL))
 	case chaptersState:
 		return h(k.read, k.selectOne, k.selectAll, k.confirm, k.back), h(k.read, k.selectOne, k.selectAll, k.clearSelection, k.openURL, k.confirm, k.back)
 	case confirmState:
