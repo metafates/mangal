@@ -71,11 +71,23 @@ func pageFromTable(table *lua.LTable, chapter *source.Chapter) (*source.Page, er
 		return nil, errors.New("index must be an unsigned 16 bit integer")
 	}
 
+	extension := table.RawGetString("extension")
+
+	if extension.Type() != lua.LTNil && extension.Type() != lua.LTString {
+		return nil, errors.New("type of field \"extension\" should be string")
+	}
+
+	if extension.String() == "" {
+		extension = lua.LString(".jpg")
+	} else if !strings.HasPrefix(extension.String(), ".") {
+		return nil, errors.New("extension must start with a dot")
+	}
+
 	page := &source.Page{
 		URL:       strings.TrimSpace(url.String()),
 		Index:     uint16(num),
 		Chapter:   chapter,
-		Extension: ".jpg",
+		Extension: extension.String(),
 	}
 
 	chapter.Pages = append(chapter.Pages, page)

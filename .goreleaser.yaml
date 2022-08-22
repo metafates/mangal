@@ -2,6 +2,7 @@ before:
   hooks:
     - go mod tidy
     - go generate ./...
+
 builds:
   - env:
       - CGO_ENABLED=0
@@ -9,13 +10,30 @@ builds:
       - linux
       - windows
       - darwin
+    goarch:
+      - "386"
+      - amd64
+      - arm
+      - arm64
+    flags:
+      - -trimpath
+
 archives:
-  - replacements:
+  -
+    replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
       386: i386
       amd64: x86_64
+    format_overrides:
+    -
+      goos: windows
+      format: zip
+    files:
+      - completions/*
+      - README.md
+      - LICENSE
 
 checksum:
   name_template: 'checksums.txt'
@@ -43,8 +61,10 @@ changelog:
       order: 9999
   filters:
     exclude:
-      - '^test:'
+      - '^test'
       - '^chore'
+      - '^refactor'
+      - '^build'
       - 'merge conflict'
       - Merge pull request
       - Merge remote-tracking branch
@@ -57,7 +77,7 @@ dockers:
     goarch: amd64
     image_templates:
     - "metafates/mangal:latest"
-    skip_push: false
+    skip_push: true
     use: docker
 
 brews:
@@ -78,13 +98,16 @@ brews:
     homepage: "https://github.com/metafates/mangal"
     description: "The ultimate CLI manga downloader!"
     license: "MIT"
-    skip_upload: false
+    skip_upload: true
 
     test: |
       system "#{bin}/mangal -v"
 
     install: |-
       bin.install "mangal"
+      bash_completion.install "completions/mangal.bash" => "mangal"
+      zsh_completion.install "completions/mangal.zsh" => "_mangal"
+      fish_completion.install "completions/mangal.fish"
 
 scoop:
   bucket:
@@ -103,7 +126,7 @@ scoop:
   homepage: "https://github.com/metafates/mangal"
   description: "The ultimate CLI manga downloader!"
   license: MIT
-  skip_upload: false
+  skip_upload: true
 
 
 release:
@@ -111,8 +134,14 @@ release:
     owner: metafates
     name: mangal
 
-  draft: false
+  draft: true
   name_template: "{{.ProjectName}} v{{.Version}}"
+  footer: |
+    **Full Changelog**: https://github.com/metafates/mangal/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+    ---
+
+    Bugs? Suggestions? [Open an issue](https://github.com/metafates/mangal/issues/new/choose)
 
 nfpms:
   -
@@ -134,3 +163,21 @@ nfpms:
       lintian_overrides:
         - statically-linked-binary
         - changelog-file-missing-in-native-package
+
+    contents:
+      - src: ./completions/mangal.bash
+        dst: /usr/share/bash-completion/completions/mangal
+        file_info:
+          mode: 0644
+      - src: ./completions/mangal.fish
+        dst: /usr/share/fish/completions/mangal.fish
+        file_info:
+          mode: 0644
+      - src: ./completions/mangal.zsh
+        dst:  /usr/share/zsh/vendor-completions/_mangal
+        file_info:
+          mode: 0644
+      - src: ./LICENSE
+        dst: /usr/share/doc/mangal/copyright
+        file_info:
+          mode: 0644

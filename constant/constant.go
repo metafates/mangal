@@ -19,3 +19,36 @@ const AssciiArtLogo = `
 \/    \/\__,_|_| |_|\__, |\__,_|_| |____/
                     |___/
 `
+
+const (
+	SearchMangaFn   = "SearchManga"
+	MangaChaptersFn = "MangaChapters"
+	ChapterPagesFn  = "ChapterPages"
+)
+
+const SourceTemplate = `-- {{ .Name }}
+-- {{ .URL }} 
+
+-- Searches for manga with given query
+-- Must return a table of tables with the following fields:
+-- name: name of the manga
+-- url: url of the manga
+function {{ .SearchMangaFn }}(query)
+end
+
+
+-- Gets the list of all manga chapters
+-- Returns a table of tables with the following fields:
+-- name: name of the chapter
+-- url: url of the chapter
+function {{ .MangaChaptersFn }}(manga_url)
+end
+
+
+-- Gets the list of all pages of a chapter
+-- Returns a table of tables with the following fields:
+-- url: url of the page
+-- index: index of the page
+function {{ .ChapterPagesFn }}(chapter_url)
+end
+`

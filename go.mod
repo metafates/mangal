@@ -6,9 +6,10 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.5
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/charmbracelet/bubbles v0.13.0
-	github.com/charmbracelet/bubbletea v0.22.0
+	github.com/charmbracelet/bubbletea v0.22.1
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/darylhjd/mangodex v0.0.0-20211231093527-e4a91c518fa0
+	github.com/dustin/go-humanize v1.0.0
 	github.com/go-rod/rod v0.109.1
 	github.com/gocolly/colly v1.2.0
 	github.com/ivanpirog/coloredcobra v1.0.1
@@ -35,14 +36,13 @@ require (
 	github.com/antchfx/xmlquery v1.3.12 // indirect
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
-	github.com/aws/aws-sdk-go v1.44.78 // indirect
+	github.com/aws/aws-sdk-go v1.44.81 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cbroglie/mustache v1.4.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.0 // indirect
 	github.com/containerd/console v1.0.3 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
@@ -63,6 +63,7 @@ require (
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
@@ -96,7 +97,7 @@ require (
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7 // indirect
 	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539 // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
-	golang.org/x/sys v0.0.0-20220817070843-5a390386f1f2 // indirect
+	golang.org/x/sys v0.0.0-20220818161305-2296e01440c6 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect

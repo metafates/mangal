@@ -1,13 +1,9 @@
 package custom
 
-const (
-	searchMangaFn   = "SearchManga"
-	mangaChaptersFn = "MangaChapters"
-	chapterPagesFn  = "ChapterPages"
-)
+import "github.com/metafates/mangal/constant"
 
 var mustHave = []string{
-	searchMangaFn,
-	mangaChaptersFn,
-	chapterPagesFn,
+	constant.SearchMangaFn,
+	constant.MangaChaptersFn,
+	constant.ChapterPagesFn,
 }
