@@ -38,6 +38,10 @@ const SourceTemplate = `{{ repeat "-" (max (len .URL) (len .Name)) }}{{ repeat "
 -- ...
 
 
+--- VARIABLES ---
+-- ...
+
+
 --- Searches for manga with given query.
 -- @param query Query to search for
 -- @return Table of tables with the following fields: name, url
