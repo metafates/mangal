@@ -73,12 +73,10 @@ func pageFromTable(table *lua.LTable, chapter *source.Chapter) (*source.Page, er
 
 	extension := table.RawGetString("extension")
 
-	if extension.Type() != lua.LTNil && extension.Type() != lua.LTString {
-		return nil, errors.New("type of field \"extension\" should be string")
-	}
-
-	if extension.String() == "" {
+	if extension.Type() == lua.LTNil {
 		extension = lua.LString(".jpg")
+	} else if extension.Type() != lua.LTString {
+		return nil, errors.New("type of field \"extension\" should be string")
 	} else if !strings.HasPrefix(extension.String(), ".") {
 		return nil, errors.New("extension must start with a dot")
 	}
