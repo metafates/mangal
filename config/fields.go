@@ -55,6 +55,10 @@ const (
 )
 
 const (
+	GenAuthor = "gen.author"
+)
+
+const (
 	LogsWrite = "logs.write"
 	LogsLevel = "logs.level"
 )

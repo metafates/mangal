@@ -104,6 +104,9 @@ func setDefaults() {
 		InstallerRepo:   "mangal-scrapers",
 		InstallerBranch: "main",
 
+		// Gen
+		GenAuthor: "",
+
 		// Logs
 		LogsWrite: false,
 		LogsLevel: "info",

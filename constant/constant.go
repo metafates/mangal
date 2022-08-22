@@ -26,29 +26,38 @@ const (
 	ChapterPagesFn  = "ChapterPages"
 )
 
-const SourceTemplate = `-- {{ .Name }}
--- {{ .URL }} 
+const SourceTemplate = `{{ repeat "-" (len .URL) }}---
+-- {{ .Name }} 
+-- {{ .URL }}
+--
+-- @author  {{ .Author }} 
+-- @license MIT
+{{ repeat "-" (len .URL) }}---
 
--- Searches for manga with given query
--- Must return a table of tables with the following fields:
--- name: name of the manga
--- url: url of the manga
+
+--- IMPORTS ---
+-- ...
+
+
+--- Searches for manga with given query.
+-- @param query Query to search for
+-- @return Table of tables with the following fields: name, url
 function {{ .SearchMangaFn }}(query)
 end
 
 
--- Gets the list of all manga chapters
--- Returns a table of tables with the following fields:
--- name: name of the chapter
--- url: url of the chapter
-function {{ .MangaChaptersFn }}(manga_url)
+--- Gets the list of all manga chapters.
+-- @param mangaURL URL of the manga
+-- @return Table of tables with the following fields: name, url
+function {{ .MangaChaptersFn }}(mangaURL)
 end
 
 
--- Gets the list of all pages of a chapter
--- Returns a table of tables with the following fields:
--- url: url of the page
--- index: index of the page
-function {{ .ChapterPagesFn }}(chapter_url)
+--- Gets the list of all pages of a chapter.
+-- @param chapterURL URL of the chapter
+-- @return Table of tables with the following fields: url, index
+function {{ .ChapterPagesFn }}(chapterURL)
 end
-`
+
+
+-- ex: ts=4 sw=4 et filetype=lua`
