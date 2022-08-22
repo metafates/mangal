@@ -26,13 +26,12 @@ const (
 	ChapterPagesFn  = "ChapterPages"
 )
 
-const SourceTemplate = `{{ repeat "-" (len .URL) }}---
--- {{ .Name }} 
--- {{ .URL }}
---
+const SourceTemplate = `{{ repeat "-" (max (len .URL) (len .Name)) }}{{ repeat "-" 12 }}
+-- @name    {{ .Name }} 
+-- @url     {{ .URL }}
 -- @author  {{ .Author }} 
 -- @license MIT
-{{ repeat "-" (len .URL) }}---
+{{ repeat "-" (max (len .URL) (len .Name)) }}{{ repeat "-" 12 }}
 
 
 --- IMPORTS ---

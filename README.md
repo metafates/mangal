@@ -249,6 +249,11 @@ user = 'metafates'
 branch = 'main'
 
 
+[gen]
+# Name of author for gen command.
+# Will use OS username if empty
+author = ''
+
 
 [logs]
 # write logs?
@@ -272,13 +277,18 @@ For scraper examples, check the [mangal-scrapers repository](https://github.com/
 
 ### Creating a custom scraper
 
-1. Create a new lua file in the `mangal where --sources` folder
-2. Filename will be used as a source name
-3. Your script __must__ contain __3__ essential functions
-   - `SearchManga(query)` - must return a table of tables each having 2 fields `name` and `url`
-   - `MangaChapters(mangalUrl)` - must return a table of tables each having 2 fields `name` and `url` _(again)_
-   - `ChapterPages(chapterUrl)` - must return a table of tables each having 2 fields `index` _(for ordering)_ and `url` _(to download image)_
-4. __That's it!__ You can test it by running `mangal run ...` where `...` is a filename
+This command will create `example.lua` file in the `mangal where --sources` directory.
+
+    mangal gen --name example --url https://example.com
+
+Open the file and edit it as you wish.
+Take a look at the comments for more information.
+See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) for examples.
+
+You can test it by running `mangal run <filepath>`
+
+It should automatically appear in the list of available scrapers.
+
 
 > New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
 
