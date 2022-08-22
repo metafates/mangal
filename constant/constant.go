@@ -43,6 +43,7 @@ const SourceTemplate = `{{ repeat "-" (len .URL) }}---
 -- @param query Query to search for
 -- @return Table of tables with the following fields: name, url
 function {{ .SearchMangaFn }}(query)
+	return {}
 end
 
 
@@ -50,6 +51,7 @@ end
 -- @param mangaURL URL of the manga
 -- @return Table of tables with the following fields: name, url
 function {{ .MangaChaptersFn }}(mangaURL)
+	return {}
 end
 
 
@@ -57,6 +59,7 @@ end
 -- @param chapterURL URL of the chapter
 -- @return Table of tables with the following fields: url, index
 function {{ .ChapterPagesFn }}(chapterURL)
+	return {}
 end
 
 
