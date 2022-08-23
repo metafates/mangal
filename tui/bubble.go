@@ -100,7 +100,10 @@ func (b *statefulBubble) newState(s state) {
 
 func (b *statefulBubble) previousState() {
 	if b.statesHistory.Len() > 0 {
-		b.setState(b.statesHistory.Pop())
+		s := b.statesHistory.Pop()
+		if s != 0 {
+			b.setState(s)
+		}
 	}
 }
 
