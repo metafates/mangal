@@ -133,7 +133,7 @@ Example of usage:
 
     mangal inline --source Manganelo --query "death note" --manga first --chapters "@Vol.1 @"  -d
 
-> This will download the first volume of "Death Note" from Mangalelo.
+> This will download the first volume of "Death Note" from Manganelo.
 
 Type `mangal help inline` for more information
 
@@ -145,8 +145,9 @@ See `mangal help` for more information
 ## Configuration
 
 Mangal uses [TOML](https://toml.io) format for configuration under the `mangal.toml` filename.
-Config is expected to be at the OS default config directory.
-For example, on Linux it would be `~/.config/mangal/mangal.toml`.
+Config path depends on the OS.
+To find yours, use `mangal where --config`. 
+For example, on __Linux__ it would be `~/.config/mangal/mangal.toml`.
 
 Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
 > See `mangal env` to show all available env variables.
