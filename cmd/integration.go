@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/integration/anilist"
 	"github.com/metafates/mangal/log"
 	"github.com/samber/lo"
@@ -30,15 +30,15 @@ var integrationAnilistCmd = &cobra.Command{
 See https://github.com/metafates/mangal/wiki/Anilist-Integration for more information`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if lo.Must(cmd.Flags().GetBool("disable")) {
-			viper.Set(config.AnilistEnable, false)
-			viper.Set(config.AnilistCode, "")
-			viper.Set(config.AnilistSecret, "")
-			viper.Set(config.AnilistID, "")
+			viper.Set(constant.AnilistEnable, false)
+			viper.Set(constant.AnilistCode, "")
+			viper.Set(constant.AnilistSecret, "")
+			viper.Set(constant.AnilistID, "")
 			log.Info("Anilist integration disabled")
 			return viper.WriteConfig()
 		}
 
-		if !viper.GetBool(config.AnilistEnable) {
+		if !viper.GetBool(constant.AnilistEnable) {
 			confirm := survey.Confirm{
 				Message: "Anilist is disabled. Enable?",
 				Default: false,
@@ -54,7 +54,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 				return nil
 			}
 
-			viper.Set(config.AnilistEnable, response)
+			viper.Set(constant.AnilistEnable, response)
 			err = viper.WriteConfig()
 			if err != nil {
 				switch err.(type) {
@@ -70,7 +70,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			}
 		}
 
-		if viper.GetString(config.AnilistID) == "" {
+		if viper.GetString(constant.AnilistID) == "" {
 			input := survey.Input{
 				Message: "Anilsit client ID is not set. Please enter it:",
 				Help:    "",
@@ -85,7 +85,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 				return nil
 			}
 
-			viper.Set(config.AnilistID, response)
+			viper.Set(constant.AnilistID, response)
 			err = viper.WriteConfig()
 			if err != nil {
 				log.Error(err)
@@ -93,7 +93,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			}
 		}
 
-		if viper.GetString(config.AnilistSecret) == "" {
+		if viper.GetString(constant.AnilistSecret) == "" {
 			input := survey.Input{
 				Message: "Anilsit client secret is not set. Please enter it:",
 				Help:    "",
@@ -108,7 +108,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 				return nil
 			}
 
-			viper.Set(config.AnilistSecret, response)
+			viper.Set(constant.AnilistSecret, response)
 			err = viper.WriteConfig()
 			if err != nil {
 				log.Error(err)
@@ -116,7 +116,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			}
 		}
 
-		if viper.GetString(config.AnilistCode) == "" {
+		if viper.GetString(constant.AnilistCode) == "" {
 			fmt.Println(anilist.New().AuthURL())
 			input := survey.Input{
 				Message: "Anilsit code is not set. Please copy it from the link above and paste in here:",
@@ -132,7 +132,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 				return nil
 			}
 
-			viper.Set(config.AnilistCode, response)
+			viper.Set(constant.AnilistCode, response)
 			err = viper.WriteConfig()
 			if err != nil {
 				log.Error(err)

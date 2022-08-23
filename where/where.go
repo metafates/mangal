@@ -3,7 +3,9 @@ package where
 import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 )
@@ -54,4 +56,29 @@ func History() string {
 	}
 
 	return path
+}
+
+func Download() string {
+	path, err := filepath.Abs(viper.GetString(constant.DownloaderPath))
+
+	if err != nil {
+		path = "."
+	}
+
+	return mkdir(path)
+}
+
+func Manga(mangaName string) string {
+	var path string
+
+	if viper.GetBool(constant.DownloaderCreateMangaDir) {
+		path = filepath.Join(
+			Download(),
+			util.SanitizeFilename(mangaName),
+		)
+	} else {
+		path = Download()
+	}
+
+	return mkdir(path)
 }

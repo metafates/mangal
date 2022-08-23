@@ -26,21 +26,28 @@ const (
 	ChapterPagesFn  = "ChapterPages"
 )
 
-const SourceTemplate = `{{ repeat "-" (max (len .URL) (len .Name)) }}{{ repeat "-" 12 }}
+const SourceTemplate = `{{ $divider := repeat "-" (plus (max (len .URL) (len .Name) (len .Author) 3) 12) }}{{ $divider }}
 -- @name    {{ .Name }} 
 -- @url     {{ .URL }}
 -- @author  {{ .Author }} 
 -- @license MIT
-{{ repeat "-" (max (len .URL) (len .Name)) }}{{ repeat "-" 12 }}
+{{ $divider }}
 
 
---- IMPORTS ---
--- ...
 
 
---- VARIABLES ---
--- ...
+----- IMPORTS -----
+--- END IMPORTS ---
 
+
+
+
+----- VARIABLES -----
+--- END VARIABLES ---
+
+
+
+----- MAIN -----
 
 --- Searches for manga with given query.
 -- @param query Query to search for
@@ -65,5 +72,12 @@ function {{ .ChapterPagesFn }}(chapterURL)
 	return {}
 end
 
+--- END MAIN ---
+
+
+
+
+----- HELPERS -----
+--- END HELPERS ---
 
 -- ex: ts=4 sw=4 et filetype=lua`

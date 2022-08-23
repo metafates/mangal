@@ -1,18 +1,17 @@
 package pdf
 
 import (
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/where"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/log"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"io"
-	"os"
 	"path/filepath"
 )
 
@@ -39,7 +38,7 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 	if temp {
 		mangaDir, err = filesystem.Get().TempDir("", constant.TempPrefix)
 	} else {
-		mangaDir, err = prepareMangaDir(chapter.Manga)
+		mangaDir = where.Manga(chapter.Manga.Name)
 	}
 
 	if err != nil {
@@ -67,29 +66,6 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 	}
 
 	return chapterPdf, nil
-}
-
-// prepareMangaDir will create manga direcotry if it doesn't exist
-func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
-	absDownloaderPath, err := filepath.Abs(viper.GetString(config.DownloaderPath))
-	if err != nil {
-		return "", err
-	}
-
-	if viper.GetBool(config.DownloaderCreateMangaDir) {
-		mangaDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(manga.Name),
-		)
-	} else {
-		mangaDir = absDownloaderPath
-	}
-
-	if err = filesystem.Get().MkdirAll(mangaDir, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return mangaDir, nil
 }
 
 // imagesToPDF will convert images to PDF and write to w
@@ -123,7 +99,7 @@ func imagesToPDF(w io.Writer, images []io.Reader) error {
 		indRef, err := pdfcpu.NewPageForImage(ctx.XRefTable, r, pagesIndRef, imp)
 
 		if err != nil {
-			if viper.GetBool(config.FormatsSkipUnsupportedImages) {
+			if viper.GetBool(constant.FormatsSkipUnsupportedImages) {
 				continue
 			}
 

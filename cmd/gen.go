@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/util"
@@ -34,7 +33,7 @@ var genCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cmd.SetOut(os.Stdout)
 
-		author := viper.GetString(config.GenAuthor)
+		author := viper.GetString(constant.GenAuthor)
 		if author == "" {
 			usr, err := user.Current()
 			if err == nil {
@@ -62,12 +61,16 @@ var genCmd = &cobra.Command{
 
 		funcMap := template.FuncMap{
 			"repeat": strings.Repeat,
-			"max": func(a, b int) int {
-				if a > b {
-					return a
+			"plus":   func(a, b int) int { return a + b },
+			"max": func(nums ...int) int {
+				max := nums[0]
+				for _, num := range nums {
+					if num > max {
+						max = num
+					}
 				}
 
-				return b
+				return max
 			},
 		}
 

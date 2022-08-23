@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	cc "github.com/ivanpirog/coloredcobra"
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/icon"
@@ -21,16 +20,16 @@ func init() {
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return converter.Available(), cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(config.FormatsUse, rootCmd.PersistentFlags().Lookup("format")))
+	lo.Must0(viper.BindPFlag(constant.FormatsUse, rootCmd.PersistentFlags().Lookup("format")))
 
 	rootCmd.PersistentFlags().StringP("icons", "I", "", "icons variant")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("icons", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return icon.AvailableVariants(), cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(config.IconsVariant, rootCmd.PersistentFlags().Lookup("icons")))
+	lo.Must0(viper.BindPFlag(constant.IconsVariant, rootCmd.PersistentFlags().Lookup("icons")))
 
 	rootCmd.PersistentFlags().BoolP("history", "H", true, "write history of the read chapters")
-	lo.Must0(viper.BindPFlag(config.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("history")))
+	lo.Must0(viper.BindPFlag(constant.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("history")))
 
 	rootCmd.PersistentFlags().StringP("source", "S", "", "source")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("source", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -39,7 +38,7 @@ func init() {
 
 		return d, cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(config.DownloaderDefaultSource, rootCmd.PersistentFlags().Lookup("source")))
+	lo.Must0(viper.BindPFlag(constant.DownloaderDefaultSource, rootCmd.PersistentFlags().Lookup("source")))
 
 	rootCmd.Flags().BoolP("continue", "c", false, "continue reading")
 

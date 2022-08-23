@@ -2,7 +2,7 @@ package mini
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/provider"
@@ -32,7 +32,7 @@ const (
 func (m *mini) handleSourceSelectState() error {
 	var err error
 
-	if name := viper.GetString(config.DownloaderDefaultSource); name != "" {
+	if name := viper.GetString(constant.DownloaderDefaultSource); name != "" {
 		p, ok := provider.Get(name)
 		if !ok {
 			return fmt.Errorf("unknown source \"%s\"", name)
@@ -100,7 +100,7 @@ func (m *mini) handleMangaSearchState() error {
 
 		erase := progress("Searching Query..")
 		m.cachedMangas[query], err = m.selectedSource.Search(query)
-		max := lo.Min([]int{len(m.cachedMangas[query]), viper.GetInt(config.MiniSearchLimit)})
+		max := lo.Min([]int{len(m.cachedMangas[query]), viper.GetInt(constant.MiniSearchLimit)})
 		m.cachedMangas[query] = m.cachedMangas[query][:max]
 		erase()
 
@@ -333,7 +333,7 @@ func (m *mini) handleChaptersDownloadState() error {
 
 		erase()
 
-		if err != nil && viper.GetBool(config.DownloaderStopOnError) {
+		if err != nil && viper.GetBool(constant.DownloaderStopOnError) {
 			return err
 		}
 

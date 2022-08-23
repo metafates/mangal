@@ -66,53 +66,53 @@ func setDefaults() {
 
 	fields := map[string]any{
 		// Downloader
-		DownloaderPath:                ".",
-		DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
-		DownloaderAsync:               true,
-		DownloaderCreateMangaDir:      true,
-		DownloaderDefaultSource:       "",
-		DownloaderStopOnError:         false,
+		constant.DownloaderPath:                ".",
+		constant.DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
+		constant.DownloaderAsync:               true,
+		constant.DownloaderCreateMangaDir:      true,
+		constant.DownloaderDefaultSource:       "",
+		constant.DownloaderStopOnError:         false,
 
 		// Formats
-		FormatsUse:                   "pdf",
-		FormatsSkipUnsupportedImages: true,
+		constant.FormatsUse:                   "pdf",
+		constant.FormatsSkipUnsupportedImages: true,
 
 		// Mini-mode
-		MiniSearchLimit: 20,
+		constant.MiniSearchLimit: 20,
 
 		// Icons
-		IconsVariant: "plain",
+		constant.IconsVariant: "plain",
 
 		// Reader
-		ReaderPDF:           "",
-		ReaderCBZ:           "",
-		ReaderZIP:           "",
-		RaderPlain:          "",
-		ReaderReadInBrowser: false,
+		constant.ReaderPDF:           "",
+		constant.ReaderCBZ:           "",
+		constant.ReaderZIP:           "",
+		constant.RaderPlain:          "",
+		constant.ReaderReadInBrowser: false,
 
 		// History
-		HistorySaveOnRead:     true,
-		HistorySaveOnDownload: false,
+		constant.HistorySaveOnRead:     true,
+		constant.HistorySaveOnDownload: false,
 
 		// Mangadex
-		MangadexLanguage:                "en",
-		MangadexNSFW:                    false,
-		MangadexShowUnavailableChapters: false,
+		constant.MangadexLanguage:                "en",
+		constant.MangadexNSFW:                    false,
+		constant.MangadexShowUnavailableChapters: false,
 
 		// Installer
-		InstallerUser:   "metafates",
-		InstallerRepo:   "mangal-scrapers",
-		InstallerBranch: "main",
+		constant.InstallerUser:   "metafates",
+		constant.InstallerRepo:   "mangal-scrapers",
+		constant.InstallerBranch: "main",
 
 		// Gen
-		GenAuthor: "",
+		constant.GenAuthor: "",
 
 		// Logs
-		LogsWrite: false,
-		LogsLevel: "info",
+		constant.LogsWrite: false,
+		constant.LogsLevel: "info",
 
 		// Anilist
-		AnilistEnable: false,
+		constant.AnilistEnable: false,
 	}
 
 	for field, value := range fields {
@@ -123,10 +123,10 @@ func setDefaults() {
 // resolveAliases resolves the aliases for the paths
 func resolveAliases() {
 	home := lo.Must(os.UserHomeDir())
-	path := viper.GetString(DownloaderPath)
+	path := viper.GetString(constant.DownloaderPath)
 
 	path = strings.ReplaceAll(path, "$HOME", home)
 	path = strings.ReplaceAll(path, "~", home)
 
-	viper.Set(DownloaderPath, path)
+	viper.Set(constant.DownloaderPath, path)
 }

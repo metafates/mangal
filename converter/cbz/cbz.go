@@ -3,15 +3,13 @@ package cbz
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/where"
 	"github.com/spf13/afero"
-	"github.com/spf13/viper"
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -40,7 +38,7 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 	if temp {
 		mangaDir, err = filesystem.Get().TempDir("", constant.TempPrefix)
 	} else {
-		mangaDir, err = prepareMangaDir(chapter.Manga)
+		mangaDir = where.Manga(chapter.Manga.Name)
 	}
 
 	if err != nil {
@@ -82,29 +80,6 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 	}
 
 	return absPath, nil
-}
-
-// prepareMangaDir will create manga direcotry if it doesn't exist
-func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
-	absDownloaderPath, err := filepath.Abs(viper.GetString(config.DownloaderPath))
-	if err != nil {
-		return "", err
-	}
-
-	if viper.GetBool(config.DownloaderCreateMangaDir) {
-		mangaDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(manga.Name),
-		)
-	} else {
-		mangaDir = absDownloaderPath
-	}
-
-	if err = filesystem.Get().MkdirAll(mangaDir, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return mangaDir, nil
 }
 
 func comicInfo(chapter *source.Chapter) string {

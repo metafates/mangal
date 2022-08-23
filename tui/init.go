@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/provider"
 	"github.com/spf13/viper"
 )
 
 func (b *statefulBubble) Init() tea.Cmd {
-	if name := viper.GetString(config.DownloaderDefaultSource); name != "" {
+	if name := viper.GetString(constant.DownloaderDefaultSource); name != "" {
 		p, ok := provider.Get(name)
 		if !ok {
 			b.lastError = fmt.Errorf("provider %s not found", name)

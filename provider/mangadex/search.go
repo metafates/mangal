@@ -3,7 +3,7 @@ package mangadex
 import (
 	"fmt"
 	"github.com/darylhjd/mangodex"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
 	"log"
@@ -25,7 +25,7 @@ func (m *Mangadex) Search(query string) ([]*source.Manga, error) {
 		params.Add("contentRating[]", rating)
 	}
 
-	if viper.GetBool(config.MangadexNSFW) {
+	if viper.GetBool(constant.MangadexNSFW) {
 		params.Add("contentRating[]", mangodex.Porn)
 		params.Add("contentRating[]", mangodex.Erotica)
 	}
@@ -43,7 +43,7 @@ func (m *Mangadex) Search(query string) ([]*source.Manga, error) {
 
 	for i, manga := range mangaList.Data {
 		m := source.Manga{
-			Name:     manga.GetTitle(viper.GetString(config.MangadexLanguage)),
+			Name:     manga.GetTitle(viper.GetString(constant.MangadexLanguage)),
 			URL:      fmt.Sprintf("https://mangadex.org/title/%s", manga.ID),
 			Index:    uint16(i),
 			SourceID: ID,

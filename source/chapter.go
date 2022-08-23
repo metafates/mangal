@@ -3,7 +3,7 @@ package source
 import (
 	"fmt"
 	"github.com/dustin/go-humanize"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
 	"strings"
@@ -51,7 +51,7 @@ func (c *Chapter) DownloadPages() error {
 			err = page.Download()
 		}
 
-		if viper.GetBool(config.DownloaderAsync) {
+		if viper.GetBool(constant.DownloaderAsync) {
 			go d(page)
 		} else {
 			d(page)
@@ -64,7 +64,7 @@ func (c *Chapter) DownloadPages() error {
 
 // FormattedName of the chapter according to the template in the config.
 func (c *Chapter) FormattedName() (name string) {
-	template := viper.GetString(config.DownloaderChapterNameTemplate)
+	template := viper.GetString(constant.DownloaderChapterNameTemplate)
 	name = strings.ReplaceAll(template, "{manga}", c.Manga.Name)
 	name = strings.ReplaceAll(name, "{chapter}", c.Name)
 	name = strings.ReplaceAll(name, "{index}", fmt.Sprintf("%d", c.Index))

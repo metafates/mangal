@@ -2,12 +2,11 @@ package plain
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
-	"github.com/spf13/viper"
+	"github.com/metafates/mangal/where"
 	"io"
 	"os"
 	"path/filepath"
@@ -74,23 +73,8 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 
 // prepareMangaDir will create manga direcotry if it doesn't exist
 func prepareChapterDir(chapter *source.Chapter) (chapterDir string, err error) {
-	absDownloaderPath, err := filepath.Abs(viper.GetString(config.DownloaderPath))
-	if err != nil {
-		return "", err
-	}
-
-	if viper.GetBool(config.DownloaderCreateMangaDir) {
-		chapterDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(chapter.Manga.Name),
-			util.SanitizeFilename(chapter.FormattedName()),
-		)
-	} else {
-		chapterDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(chapter.FormattedName()),
-		)
-	}
+	path := where.Manga(chapter.Manga.Name)
+	chapterDir = filepath.Join(path, util.SanitizeFilename(chapter.FormattedName()))
 
 	if err = filesystem.Get().MkdirAll(chapterDir, os.ModePerm); err != nil {
 		return "", err
