@@ -58,7 +58,7 @@ func History() string {
 	return path
 }
 
-func Download() string {
+func Downloads() string {
 	path, err := filepath.Abs(viper.GetString(constant.DownloaderPath))
 
 	if err != nil {
@@ -73,11 +73,11 @@ func Manga(mangaName string) string {
 
 	if viper.GetBool(constant.DownloaderCreateMangaDir) {
 		path = filepath.Join(
-			Download(),
+			Downloads(),
 			util.SanitizeFilename(mangaName),
 		)
 	} else {
-		path = Download()
+		path = Downloads()
 	}
 
 	return mkdir(path)

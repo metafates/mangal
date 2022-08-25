@@ -14,7 +14,8 @@ func init() {
 	whereCmd.Flags().BoolP("config", "c", false, "configuration path")
 	whereCmd.Flags().BoolP("sources", "s", false, "sources path")
 	whereCmd.Flags().BoolP("logs", "l", false, "logs path")
-	whereCmd.MarkFlagsMutuallyExclusive("config", "sources", "logs")
+	whereCmd.Flags().BoolP("downloads", "d", false, "downloads path")
+	whereCmd.MarkFlagsMutuallyExclusive("config", "sources", "logs", "downloads")
 }
 
 var whereCmd = &cobra.Command{
@@ -27,7 +28,8 @@ var whereCmd = &cobra.Command{
 
 		whereConfig := lo.Must(cmd.Flags().GetBool("config"))
 		whereSources := lo.Must(cmd.Flags().GetBool("sources"))
-		wherLogs := lo.Must(cmd.Flags().GetBool("logs"))
+		whereLogs := lo.Must(cmd.Flags().GetBool("logs"))
+		whereDownloads := lo.Must(cmd.Flags().GetBool("downloads"))
 
 		title := func(do bool, what, arg string) {
 			if do {
@@ -50,19 +52,28 @@ var whereCmd = &cobra.Command{
 			cmd.Println(where.Logs())
 		}
 
+		printDownloadsPath := func(header bool) {
+			title(header, "Downloads", "--downloads")
+			cmd.Println(where.Downloads())
+		}
+
 		switch {
 		case whereConfig:
 			printConfigPath(false)
 		case whereSources:
 			printSourcesPath(false)
-		case wherLogs:
+		case whereLogs:
 			printLogsPath(false)
+		case whereDownloads:
+			printDownloadsPath(false)
 		default:
 			printConfigPath(true)
 			cmd.Println()
 			printSourcesPath(true)
 			cmd.Println()
 			printLogsPath(true)
+			cmd.Println()
+			printDownloadsPath(true)
 		}
 	},
 }
