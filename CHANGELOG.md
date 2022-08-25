@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 ## 3.5.0
 
 - Add `--raw` flag for the `sources` command to print without headers
+- Add `--downloads` flag for the `where` command to print location of the downloads directory
 - `gen` command added to generate a template for custom source
+- Show chapter index in the tui history list
 
 ## 3.4.1
 
