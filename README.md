@@ -14,7 +14,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Try it!
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/run | bash
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/run | bash
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
 > 
@@ -74,7 +74,7 @@ Install using [Homebrew](https://brew.sh/)
 
 Install using [this bash script](https://raw.githubusercontent.com/metafates/mangal/main/install)
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/install | bash
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | bash
 
 ### Windows
 
