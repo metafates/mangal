@@ -10,7 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Add `--raw` flag for the `sources` command to print without headers
 - Add `--downloads` flag for the `where` command to print location of the downloads directory
 - `gen` command added to generate a template for custom source
-- Show chapter index in the tui history list
+- Show chapter index in the TUI history list
+- Fixed bug where pressing <kbd>confirm</kbd> button with empty history would cause mangal to crash
 
 ## 3.4.1
 
