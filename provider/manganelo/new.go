@@ -48,7 +48,7 @@ func New() source.Source {
 			URL:      e.Request.AbsoluteURL(link),
 			Index:    uint16(e.Index),
 			Chapters: make([]*source.Chapter, 0),
-			SourceID: manganelo.ID(),
+			Source:   &manganelo,
 		}
 
 		manganelo.mangas[path] = append(manganelo.mangas[path], &manga)
@@ -75,12 +75,11 @@ func New() source.Source {
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
 		chapter := source.Chapter{
-			Name:     e.Text,
-			URL:      e.Request.AbsoluteURL(link),
-			Index:    uint16(e.Index),
-			Pages:    make([]*source.Page, 0),
-			Manga:    manga,
-			SourceID: manganelo.ID(),
+			Name:  e.Text,
+			URL:   e.Request.AbsoluteURL(link),
+			Index: uint16(e.Index),
+			Pages: make([]*source.Page, 0),
+			Manga: manga,
 		}
 		manga.Chapters = append(manga.Chapters, &chapter)
 
@@ -111,7 +110,6 @@ func New() source.Source {
 			Index:     uint16(e.Index),
 			Chapter:   chapter,
 			Extension: ext,
-			SourceID:  manganelo.ID(),
 		}
 		chapter.Pages = append(chapter.Pages, &page)
 

@@ -12,10 +12,10 @@ import (
 )
 
 // Download the chapter using given source.
-func Download(src source.Source, chapter *source.Chapter, progress func(string)) (string, error) {
+func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	log.Info("downloading " + chapter.Name)
 	progress("Getting pages")
-	pages, err := src.PagesOf(chapter)
+	pages, err := chapter.Source().PagesOf(chapter)
 	if err != nil {
 		log.Error(err)
 		return "", err

@@ -15,16 +15,16 @@ import (
 
 // Read the chapter by downloading it with the given source
 // and opening it with the configured reader.
-func Read(src source.Source, chapter *source.Chapter, progress func(string)) error {
+func Read(chapter *source.Chapter, progress func(string)) error {
 
 	if viper.GetBool(constant.ReaderReadInBrowser) {
 		return open.Start(chapter.URL)
 	}
 
-	log.Info("downloading " + chapter.Name + " from " + chapter.Manga.Name + " for reading. Provider is " + src.ID())
+	log.Info("downloading " + chapter.Name + " from " + chapter.Manga.Name + " for reading. Provider is " + chapter.Source().ID())
 	log.Info("getting pages of " + chapter.Name)
 	progress("Getting pages")
-	pages, err := src.PagesOf(chapter)
+	pages, err := chapter.Source().PagesOf(chapter)
 	if err != nil {
 		log.Error(err)
 		return err

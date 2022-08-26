@@ -36,7 +36,6 @@ func (m *Mangadex) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 			Extension: filepath.Ext(name),
 			Contents:  io.NopCloser(bytes.NewReader(image)),
 			Size:      uint64(len(image)),
-			SourceID:  ID,
 		}
 		chapter.Pages = append(chapter.Pages, &page)
 		pages = append(pages, &page)

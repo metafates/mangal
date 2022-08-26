@@ -63,12 +63,10 @@ func SampleChapter(t *testing.T) *source.Chapter {
 		Name:     "manga name",
 		URL:      "manga url",
 		Index:    1337,
-		SourceID: "tester",
 		ID:       "wjakfkawgjj",
 		Chapters: []*source.Chapter{&chapter},
 	}
 	chapter.Manga = &manga
-	chapter.SourceID = manga.SourceID
 
 	// to get images
 	filesystem.SetOsFs()
@@ -93,7 +91,6 @@ func SampleChapter(t *testing.T) *source.Chapter {
 				URL:       "dwadwaf",
 				Index:     0,
 				Extension: filepath.Ext(path),
-				SourceID:  manga.SourceID,
 				Chapter:   &chapter,
 				Contents:  io.NopCloser(bytes.NewReader(image)),
 			}

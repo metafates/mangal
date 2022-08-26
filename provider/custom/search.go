@@ -41,7 +41,7 @@ func (s *luaSource) Search(query string) ([]*source.Manga, error) {
 			s.state.RaiseError(err.Error())
 		}
 
-		manga.SourceID = s.ID()
+		manga.Source = s
 
 		mangas = append(mangas, manga)
 	})

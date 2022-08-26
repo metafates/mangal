@@ -18,8 +18,6 @@ type Page struct {
 	Index uint16
 	// Extension of the page image.
 	Extension string
-	// SourceID of the source the page is from.
-	SourceID string
 	// Size of the page in bytes
 	Size uint64
 	// Contents of the page
@@ -75,9 +73,13 @@ func (p *Page) Read(b []byte) (int, error) {
 	return p.Contents.Read(b)
 }
 
-func (p *Page) Filename() string {
-	filename := fmt.Sprintf("%d%s", p.Index, p.Extension)
+func (p *Page) Filename() (filename string) {
+	filename = fmt.Sprintf("%d%s", p.Index, p.Extension)
 	filename = util.PadZero(filename, 10)
 
-	return filename
+	return
+}
+
+func (p *Page) Source() Source {
+	return p.Chapter.Source()
 }

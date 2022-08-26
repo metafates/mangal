@@ -41,7 +41,6 @@ func (s *luaSource) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 			s.state.RaiseError(err.Error())
 		}
 
-		chapter.SourceID = s.ID()
 		chapters = append(chapters, chapter)
 	})
 

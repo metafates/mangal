@@ -19,8 +19,6 @@ type Chapter struct {
 	URL string
 	// Index of the chapter in the manga.
 	Index uint16
-	// SourceID of the source the chapter is from.
-	SourceID string
 	// ID of the chapter in the source.
 	ID string
 	// Manga that the chapter belongs to.
@@ -97,6 +95,8 @@ func (c *Chapter) SizeHuman() string {
 func (c *Chapter) Filename() (filename string) {
 	filename = util.SanitizeFilename(c.formattedName())
 
+	// plain format assumes that chapter is a directory with images
+	// rather than a single file. So no need to add extension to it
 	if f := viper.GetString(constant.FormatsUse); f != constant.Plain {
 		return filename + "." + f
 	}
@@ -112,4 +112,8 @@ func (c *Chapter) Path(temp bool) (path string, err error) {
 
 	path = filepath.Join(path, c.Filename())
 	return
+}
+
+func (c *Chapter) Source() Source {
+	return c.Manga.Source
 }

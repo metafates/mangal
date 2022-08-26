@@ -43,11 +43,11 @@ func (m *Mangadex) Search(query string) ([]*source.Manga, error) {
 
 	for i, manga := range mangaList.Data {
 		m := source.Manga{
-			Name:     manga.GetTitle(viper.GetString(constant.MangadexLanguage)),
-			URL:      fmt.Sprintf("https://mangadex.org/title/%s", manga.ID),
-			Index:    uint16(i),
-			SourceID: ID,
-			ID:       manga.ID,
+			Name:   manga.GetTitle(viper.GetString(constant.MangadexLanguage)),
+			URL:    fmt.Sprintf("https://mangadex.org/title/%s", manga.ID),
+			Index:  uint16(i),
+			ID:     manga.ID,
+			Source: m,
 		}
 
 		mangas = append(mangas, &m)

@@ -85,7 +85,7 @@ func Save(chapter *source.Chapter) error {
 	}
 
 	jsonChapter := SavedChapter{
-		SourceID:           chapter.SourceID,
+		SourceID:           chapter.Manga.Source.ID(),
 		MangaName:          chapter.Manga.Name,
 		MangaURL:           chapter.Manga.URL,
 		Name:               chapter.Name,
@@ -96,7 +96,7 @@ func Save(chapter *source.Chapter) error {
 		Index:              int(chapter.Index),
 	}
 
-	chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)] = &jsonChapter
+	chapters[fmt.Sprintf("%s (%s)", jsonChapter.MangaName, jsonChapter.SourceID)] = &jsonChapter
 
 	// encode json
 	log.Info("Encoding history to json")

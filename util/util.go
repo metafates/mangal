@@ -101,7 +101,7 @@ func ClearScreen() {
 // ReGroups parses the string with the given regular expression and returns the
 // group values defined in the expression.
 func ReGroups(pattern *regexp.Regexp, str string) (groups map[string]string) {
-
+	groups = make(map[string]string)
 	match := pattern.FindStringSubmatch(str)
 
 	for i, name := range pattern.SubexpNames() {

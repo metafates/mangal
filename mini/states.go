@@ -237,7 +237,7 @@ func (m *mini) handleChapterReadState() error {
 		util.ClearScreen()
 		var erase = func() {}
 
-		err = downloader.Read(m.selectedSource, chapter, func(s string) {
+		err = downloader.Read(chapter, func(s string) {
 			erase()
 			erase = progress(s)
 		})
@@ -326,7 +326,7 @@ func (m *mini) handleChaptersDownloadState() error {
 
 		title(fmt.Sprintf("Currently downloading %s %s (%s)", chapter.Manga.Name, chapter.Name, m.selectedSource.Name()))
 
-		_, err := downloader.Download(m.selectedSource, chapter, func(s string) {
+		_, err := downloader.Download(chapter, func(s string) {
 			erase()
 			erase = progress(s)
 		})
@@ -413,11 +413,10 @@ func (m *mini) handleHistorySelectState() error {
 
 	erase = progress("Fetching Chapters..")
 	manga := &source.Manga{
-		Name:     c.MangaName,
-		URL:      c.MangaURL,
-		Index:    0,
-		SourceID: c.SourceID,
-		ID:       c.MangaID,
+		Name:  c.MangaName,
+		URL:   c.MangaURL,
+		Index: 0,
+		ID:    c.MangaID,
 	}
 	chaps, err := m.selectedSource.ChaptersOf(manga)
 	erase()

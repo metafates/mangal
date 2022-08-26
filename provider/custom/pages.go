@@ -35,7 +35,6 @@ func (s *luaSource) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 			s.state.RaiseError(err.Error())
 		}
 
-		page.SourceID = s.ID()
 		pages = append(pages, page)
 	})
 
