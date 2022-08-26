@@ -8,6 +8,28 @@ import (
 	"testing"
 )
 
+type testSource struct{}
+
+func (testSource) Name() string {
+	panic("")
+}
+
+func (testSource) Search(_ string) ([]*source.Manga, error) {
+	panic("")
+}
+
+func (testSource) ChaptersOf(_ *source.Manga) ([]*source.Chapter, error) {
+	panic("")
+}
+
+func (testSource) PagesOf(_ *source.Chapter) ([]*source.Page, error) {
+	panic("")
+}
+
+func (testSource) ID() string {
+	return "test source"
+}
+
 func init() {
 	filesystem.SetMemMapFs()
 }
@@ -26,6 +48,7 @@ func TestHistory(t *testing.T) {
 			URL:      "fwa",
 			Index:    1337,
 			ID:       "wjakfkawgjj",
+			Source:   testSource{},
 			Chapters: []*source.Chapter{&chapter},
 		}
 		chapter.Manga = &manga

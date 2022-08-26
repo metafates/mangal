@@ -61,16 +61,7 @@ var genCmd = &cobra.Command{
 		funcMap := template.FuncMap{
 			"repeat": strings.Repeat,
 			"plus":   func(a, b int) int { return a + b },
-			"max": func(nums ...int) int {
-				max := nums[0]
-				for _, num := range nums {
-					if num > max {
-						max = num
-					}
-				}
-
-				return max
-			},
+			"max":    util.Max[int],
 		}
 
 		tmpl, err := template.New("source").Funcs(funcMap).Parse(constant.SourceTemplate)

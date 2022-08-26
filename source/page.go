@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/util"
-	"github.com/samber/lo"
 	"io"
 	"net/http"
 )
@@ -54,7 +53,7 @@ func (p *Page) Download() error {
 	}
 
 	p.Contents = resp.Body
-	p.Size = lo.Max([]uint64{uint64(resp.ContentLength), 0})
+	p.Size = uint64(util.Max(resp.ContentLength, 0))
 
 	return nil
 }
