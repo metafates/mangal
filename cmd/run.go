@@ -1,12 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/provider/custom"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 func init() {
@@ -27,9 +24,6 @@ Or you can use mangal as a standalone lua interpreter.`,
 
 		// LoadSource runs file when it's loaded
 		_, err := custom.LoadSource(sourcePath, !lo.Must(cmd.Flags().GetBool("lenient")))
-		if err != nil {
-			fmt.Println(icon.Get(icon.Fail) + " " + err.Error())
-			os.Exit(1)
-		}
+		handleErr(err)
 	},
 }

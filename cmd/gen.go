@@ -29,7 +29,7 @@ var genCmd = &cobra.Command{
 	Use:   "gen",
 	Short: "Generate a new lua source",
 	Long:  `Generate a new lua source.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		cmd.SetOut(os.Stdout)
 
 		author := viper.GetString(constant.GenAuthor)
@@ -74,25 +74,17 @@ var genCmd = &cobra.Command{
 		}
 
 		tmpl, err := template.New("source").Funcs(funcMap).Parse(constant.SourceTemplate)
-
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		target := filepath.Join(where.Sources(), util.SanitizeFilename(s.Name)+".lua")
 		f, err := filesystem.Get().Create(target)
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		util.Ignore(f.Close)
 
 		err = tmpl.Execute(f, s)
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		cmd.Println(target)
-		return nil
 	},
 }

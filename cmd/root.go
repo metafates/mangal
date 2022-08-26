@@ -6,6 +6,7 @@ import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/tui"
@@ -13,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"strings"
 )
 
 func init() {
@@ -48,17 +50,17 @@ func init() {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   constant.Mangal,
-	Short: "The ultimate manga downloader",
+	Use:     constant.Mangal,
+	Version: constant.Version,
+	Short:   "The ultimate manga downloader",
 	Long: style.Combined(style.Yellow, style.Bold)(constant.AssciiArtLogo) + "\n" +
 		style.Combined(style.HiRed, style.Italic)("    - The ultimate cli manga downloader"),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		options := tui.Options{
 			Continue: lo.Must(cmd.Flags().GetBool("continue")),
 		}
-		return tui.Run(&options)
+		handleErr(tui.Run(&options))
 	},
-	Version: constant.Version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -76,6 +78,14 @@ func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func handleErr(err error) {
+	if err != nil {
+		log.Error(err)
+		_, _ = fmt.Fprintf(os.Stderr, "%s %s\n", icon.Get(icon.Fail), strings.Trim(err.Error(), " \n"))
 		os.Exit(1)
 	}
 }

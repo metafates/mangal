@@ -42,27 +42,21 @@ Chapter selectors:
   @[substring]@ - select chapters by name substring`,
 
 	Example: "mangal inline --source Manganelo --query \"death note\" --manga first --chapters \"@Vol.1 @\" -d",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		sourceName := lo.Must(cmd.Flags().GetString("source"))
 		p, ok := provider.Get(sourceName)
 		if !ok {
-			return fmt.Errorf("source not found: %s", sourceName)
+			handleErr(fmt.Errorf("source not found: %s", sourceName))
 		}
 
 		src, err := p.CreateSource()
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		mangaPicker, err := inline.ParseMangaPicker(lo.Must(cmd.Flags().GetString("manga")))
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		chapterFilter, err := inline.ParseChaptersFilter(lo.Must(cmd.Flags().GetString("chapters")))
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		options := &inline.Options{
 			Source:        src,
@@ -72,6 +66,6 @@ Chapter selectors:
 			ChapterFilter: chapterFilter,
 		}
 
-		return inline.Run(options)
+		handleErr(inline.Run(options))
 	},
 }

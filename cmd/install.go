@@ -14,7 +14,7 @@ var installCmd = &cobra.Command{
 	Short: "Browse and install custom scrapers",
 	Long: `Browse and install custom scrapers from official GitHub repo.
 https://github.com/metafates/mangal-scrapers`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return tui.Run(&tui.Options{Install: true})
+	Run: func(cmd *cobra.Command, args []string) {
+		handleErr(tui.Run(&tui.Options{Install: true}))
 	},
 }

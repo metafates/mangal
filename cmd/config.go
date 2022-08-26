@@ -29,27 +29,25 @@ var configInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize config",
 	Long:  `Initialize default config`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		mangalDir := where.Config()
 		if !lo.Must(filesystem.Get().Exists(mangalDir)) {
 			_ = filesystem.Get().MkdirAll(mangalDir, os.ModePerm)
 		}
 
-		return viper.SafeWriteConfig()
+		handleErr(viper.SafeWriteConfig())
 	},
 }
 
 var configRemoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "Removes config file",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		mangalDir := where.Config()
 		configPath := filepath.Join(mangalDir, constant.Mangal+".toml")
 
 		if lo.Must(filesystem.Get().Exists(configPath)) {
-			return filesystem.Get().Remove(configPath)
+			handleErr(filesystem.Get().Remove(configPath))
 		}
-
-		return nil
 	},
 }

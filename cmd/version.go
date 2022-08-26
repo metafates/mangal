@@ -26,11 +26,9 @@ var versionLatestCmd = &cobra.Command{
 	Use:   "latest",
 	Short: "Print the latest version number of the mangal",
 	Long:  `It will fetch the latest version from the github and print it`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := http.Get("https://api.github.com/repos/metafates/mangal/releases/latest")
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		defer util.Ignore(resp.Body.Close)
 
@@ -38,14 +36,12 @@ var versionLatestCmd = &cobra.Command{
 			TagName string `json:"tag_name"`
 		}
 
-		if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-			return err
-		}
+		err = json.NewDecoder(resp.Body).Decode(&release)
+		handleErr(err)
 
 		// remove the v from the tag name
 		latestVersion := release.TagName[1:]
 
 		cmd.Println("mangal latest version is " + latestVersion)
-		return nil
 	},
 }

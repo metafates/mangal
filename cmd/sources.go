@@ -18,7 +18,7 @@ var sourcesCmd = &cobra.Command{
 	Use:     "sources",
 	Short:   "List an available sources",
 	Example: "mangal sources",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		cmd.SetOut(os.Stdout)
 
 		printHeader := !lo.Must(cmd.Flags().GetBool("raw"))
@@ -41,7 +41,5 @@ var sourcesCmd = &cobra.Command{
 		for name := range provider.CustomProviders() {
 			cmd.Println(name)
 		}
-
-		return nil
 	},
 }

@@ -28,14 +28,14 @@ var integrationAnilistCmd = &cobra.Command{
 	Short: "Integration with Anilist",
 	Long: `Integration with Anilist.
 See https://github.com/metafates/mangal/wiki/Anilist-Integration for more information`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		if lo.Must(cmd.Flags().GetBool("disable")) {
 			viper.Set(constant.AnilistEnable, false)
 			viper.Set(constant.AnilistCode, "")
 			viper.Set(constant.AnilistSecret, "")
 			viper.Set(constant.AnilistID, "")
 			log.Info("Anilist integration disabled")
-			return viper.WriteConfig()
+			handleErr(viper.WriteConfig())
 		}
 
 		if !viper.GetBool(constant.AnilistEnable) {
@@ -45,13 +45,10 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			}
 			var response bool
 			err := survey.AskOne(&confirm, &response)
-			if err != nil {
-				log.Error(err)
-				return err
-			}
+			handleErr(err)
 
 			if !response {
-				return nil
+				return
 			}
 
 			viper.Set(constant.AnilistEnable, response)
@@ -60,12 +57,10 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 				switch err.(type) {
 				case viper.ConfigFileNotFoundError:
 					err = viper.SafeWriteConfig()
-					if err != nil {
-						return err
-					}
+					handleErr(err)
 				default:
+					handleErr(err)
 					log.Error(err)
-					return err
 				}
 			}
 		}
@@ -77,20 +72,15 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			}
 			var response string
 			err := survey.AskOne(&input, &response)
-			if err != nil {
-				return err
-			}
+			handleErr(err)
 
 			if response == "" {
-				return nil
+				return
 			}
 
 			viper.Set(constant.AnilistID, response)
 			err = viper.WriteConfig()
-			if err != nil {
-				log.Error(err)
-				return err
-			}
+			handleErr(err)
 		}
 
 		if viper.GetString(constant.AnilistSecret) == "" {
@@ -100,20 +90,15 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			}
 			var response string
 			err := survey.AskOne(&input, &response)
-			if err != nil {
-				return err
-			}
+			handleErr(err)
 
 			if response == "" {
-				return nil
+				return
 			}
 
 			viper.Set(constant.AnilistSecret, response)
 			err = viper.WriteConfig()
-			if err != nil {
-				log.Error(err)
-				return err
-			}
+			handleErr(err)
 		}
 
 		if viper.GetString(constant.AnilistCode) == "" {
@@ -124,22 +109,15 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			}
 			var response string
 			err := survey.AskOne(&input, &response)
-			if err != nil {
-				return err
-			}
+			handleErr(err)
 
 			if response == "" {
-				return nil
+				return
 			}
 
 			viper.Set(constant.AnilistCode, response)
 			err = viper.WriteConfig()
-			if err != nil {
-				log.Error(err)
-				return err
-			}
+			handleErr(err)
 		}
-
-		return nil
 	},
 }

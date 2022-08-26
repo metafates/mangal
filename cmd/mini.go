@@ -20,21 +20,15 @@ var miniCmd = &cobra.Command{
 	Short: "Launch in the mini mode",
 	Long: `Launch mangal in the mini mode.
 Will try to mimic ani-cli.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		options := mini.Options{
 			Download: lo.Must(cmd.Flags().GetBool("download")),
 			Continue: lo.Must(cmd.Flags().GetBool("continue")),
 		}
 		err := mini.Run(&options)
 
-		if err != nil {
-			if err.Error() == "interrupt" {
-				return nil
-			}
-
-			return err
+		if err != nil && err.Error() != "interrupt" {
+			handleErr(err)
 		}
-
-		return nil
 	},
 }
