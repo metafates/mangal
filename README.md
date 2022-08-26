@@ -31,6 +31,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 ## Features
 
 - __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+- [Mangadex](https://mangadex.org) + [Manganelo](https://m.manganelo.com/wwww) Built-In
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __3 Different modes__ - TUI, Mini and Inline
@@ -156,6 +157,9 @@ Run `mangal where` to show expected config paths
 
 Run `mangal config init` to generate a default config file
 
+<details>
+    <summary><strong>Default config example (click to show)</strong></summary>
+
 ```toml
 # mangal.toml
 
@@ -263,6 +267,7 @@ write = false
 # panic, fatal, error, warn, info, debug, trace
 level = "info"
 ```
+</details>
 
 ## Custom scrapers
 
@@ -290,7 +295,6 @@ You can test it by running `mangal run <filepath>`
 
 It should automatically appear in the list of available scrapers.
 
-
 > New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
 
 ## Anilist
@@ -301,4 +305,4 @@ It will mark chapters as read on Anilsit when you read them inside mangal.
 
 For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist-Integration)
 
-> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open to suggestions!
+> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open for suggestions!

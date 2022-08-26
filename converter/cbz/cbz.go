@@ -57,6 +57,8 @@ func comicInfo(chapter *source.Chapter) *bytes.Buffer {
   	<Series>{{ .Manga.Name }}</Series>
   	<Genre>Web Comic</Genre>
   	<Web>{{ .Manga.URL }}</Web>
+	<PageCount>{{ len .Pages }}</PageCount>
+	<Count>{{ len .Manga.Chapters }}</Count>
   	<Manga>YesAndRightToLeft</Manga>
 </ComicInfo>`
 

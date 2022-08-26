@@ -37,9 +37,9 @@ func (m *Mangadex) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 			Contents:  io.NopCloser(bytes.NewReader(image)),
 			Size:      uint64(len(image)),
 		}
-		chapter.Pages = append(chapter.Pages, &page)
 		pages = append(pages, &page)
 	}
 
+	chapter.Pages = pages
 	return pages, nil
 }

@@ -35,6 +35,8 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	var chapters []*source.Chapter
 	var currOffset = 0
 
+	language := viper.GetString(constant.MangadexLanguage)
+
 	for {
 		params.Set("offset", strconv.Itoa(currOffset))
 		list, err := m.client.Chapter.GetMangaChapters(manga.ID, params)
@@ -49,7 +51,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 			}
 
 			// skip chapters that are not in the current language
-			if chapter.Attributes.TranslatedLanguage != viper.GetString(constant.MangadexLanguage) {
+			if language != "any" && chapter.Attributes.TranslatedLanguage != language {
 				currOffset += 500
 				continue
 			}
@@ -69,7 +71,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 
 			chapters = append(chapters, &source.Chapter{
 				Name:  name,
-				Index: n + 1,
+				Index: n,
 				ID:    chapter.ID,
 				URL:   fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
 				Manga: manga,
@@ -89,6 +91,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		return a.Index < b.Index
 	})
 
+	manga.Chapters = chapters
 	m.cachedChapters[manga.URL] = chapters
 	return chapters, nil
 }
