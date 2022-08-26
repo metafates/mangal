@@ -5,14 +5,11 @@ import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
-	"github.com/metafates/mangal/where"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/log"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
-	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"io"
-	"path/filepath"
 )
 
 type PDF struct{}
@@ -29,31 +26,18 @@ func (*PDF) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 
-func save(chapter *source.Chapter, temp bool) (string, error) {
-	var (
-		mangaDir string
-		err      error
-	)
-
-	if temp {
-		mangaDir, err = filesystem.Get().TempDir("", constant.TempPrefix)
-	} else {
-		mangaDir = where.Manga(chapter.Manga.Name)
-	}
-
+func save(chapter *source.Chapter, temp bool) (path string, err error) {
+	path, err = chapter.Path(temp)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	chapterPdf := filepath.Join(mangaDir, util.SanitizeFilename(chapter.FormattedName())+".pdf")
-	pdfFile, err := filesystem.Get().Create(chapterPdf)
+	pdfFile, err := filesystem.Get().Create(path)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	defer func(pdfFile afero.File) {
-		_ = pdfFile.Close()
-	}(pdfFile)
+	defer util.Ignore(pdfFile.Close)
 
 	var readers = make([]io.Reader, len(chapter.Pages))
 	for i, page := range chapter.Pages {
@@ -61,11 +45,7 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 	}
 
 	err = imagesToPDF(pdfFile, readers)
-	if err != nil {
-		return "", err
-	}
-
-	return chapterPdf, nil
+	return
 }
 
 // imagesToPDF will convert images to PDF and write to w

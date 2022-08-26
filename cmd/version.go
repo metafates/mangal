@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/util"
 	"github.com/spf13/cobra"
-	"io"
 	"net/http"
 )
 
@@ -32,9 +32,7 @@ var versionLatestCmd = &cobra.Command{
 			return err
 		}
 
-		defer func(Body io.ReadCloser) {
-			_ = Body.Close()
-		}(resp.Body)
+		defer util.Ignore(resp.Body.Close)
 
 		var release struct {
 			TagName string `json:"tag_name"`

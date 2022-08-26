@@ -98,17 +98,22 @@ func ClearScreen() {
 	}
 }
 
-// ReGroups parses url with the given regular expression and returns the
+// ReGroups parses the string with the given regular expression and returns the
 // group values defined in the expression.
-func ReGroups(pattern *regexp.Regexp, str string) map[string]string {
+func ReGroups(pattern *regexp.Regexp, str string) (groups map[string]string) {
 
 	match := pattern.FindStringSubmatch(str)
 
-	groups := make(map[string]string)
 	for i, name := range pattern.SubexpNames() {
 		if i > 0 && i <= len(match) {
 			groups[name] = match[i]
 		}
 	}
-	return groups
+
+	return
+}
+
+// Ignore calls function and explicitely ignores error
+func Ignore(f func() error) {
+	_ = f()
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -86,9 +85,7 @@ var genCmd = &cobra.Command{
 			return err
 		}
 
-		defer func(f afero.File) {
-			_ = f.Close()
-		}(f)
+		util.Ignore(f.Close)
 
 		err = tmpl.Execute(f, s)
 		if err != nil {

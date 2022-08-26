@@ -2,7 +2,9 @@ package source
 
 import (
 	"errors"
+	"fmt"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"io"
 	"net/http"
@@ -32,7 +34,7 @@ func (p *Page) Download() error {
 		return nil
 	}
 
-	req, err := http.NewRequest("GET", p.URL, nil)
+	req, err := http.NewRequest(http.MethodGet, p.URL, nil)
 	if err != nil {
 		return err
 	}
@@ -71,4 +73,11 @@ func (p *Page) Read(b []byte) (int, error) {
 	}
 
 	return p.Contents.Read(b)
+}
+
+func (p *Page) Filename() string {
+	filename := fmt.Sprintf("%d%s", p.Index, p.Extension)
+	filename = util.PadZero(filename, 10)
+
+	return filename
 }

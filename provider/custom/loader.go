@@ -6,7 +6,6 @@ import (
 	"github.com/metafates/mangal/luamodules"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
-	"github.com/spf13/afero"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/yuin/gopher-lua/parse"
 )
@@ -58,9 +57,7 @@ func Compile(path string) (*lua.FunctionProto, error) {
 		return nil, err
 	}
 
-	defer func(file afero.File) {
-		_ = file.Close()
-	}(file)
+	defer util.Ignore(file.Close)
 
 	chunk, err := parse.Parse(file, path)
 

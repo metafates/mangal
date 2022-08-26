@@ -2,6 +2,7 @@ package converter
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter/cbz"
 	"github.com/metafates/mangal/converter/pdf"
 	"github.com/metafates/mangal/converter/plain"
@@ -15,27 +16,20 @@ type Converter interface {
 	SaveTemp(chapter *source.Chapter) (string, error)
 }
 
-const (
-	Plain = "plain"
-	CBZ   = "cbz"
-	PDF   = "pdf"
-	ZIP   = "zip"
-)
-
 var converters = map[string]Converter{
-	Plain: plain.New(),
-	CBZ:   cbz.New(),
-	PDF:   pdf.New(),
-	ZIP:   zip.New(),
+	constant.Plain: plain.New(),
+	constant.CBZ:   cbz.New(),
+	constant.PDF:   pdf.New(),
+	constant.ZIP:   zip.New(),
 }
 
 // Available returns a list of available converters.
 func Available() []string {
 	return []string{
-		Plain,
-		CBZ,
-		PDF,
-		ZIP,
+		constant.Plain,
+		constant.CBZ,
+		constant.PDF,
+		constant.ZIP,
 	}
 }
 

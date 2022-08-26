@@ -6,6 +6,7 @@ import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
+	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -62,8 +63,8 @@ func (c *Chapter) DownloadPages() error {
 	return err
 }
 
-// FormattedName of the chapter according to the template in the config.
-func (c *Chapter) FormattedName() (name string) {
+// formattedName of the chapter according to the template in the config.
+func (c *Chapter) formattedName() (name string) {
 	template := viper.GetString(constant.DownloaderChapterNameTemplate)
 	name = strings.ReplaceAll(template, "{manga}", c.Manga.Name)
 	name = strings.ReplaceAll(name, "{chapter}", c.Name)
@@ -91,4 +92,25 @@ func (c *Chapter) SizeHuman() string {
 	} else {
 		return humanize.Bytes(size)
 	}
+}
+
+func (c *Chapter) Filename() string {
+	filename := util.SanitizeFilename(c.formattedName())
+	extension := ""
+
+	if f := viper.GetString(constant.FormatsUse); f != constant.Plain {
+		extension = "." + f
+	}
+
+	return filename + extension
+}
+
+func (c *Chapter) Path(temp bool) (path string, err error) {
+	path, err = c.Manga.Path(temp)
+	if err != nil {
+		return
+	}
+
+	path = filepath.Join(path, c.Filename())
+	return
 }

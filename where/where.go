@@ -3,7 +3,6 @@ package where
 import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
 	"os"
@@ -23,8 +22,7 @@ func mkdir(path string) string {
 func Config() string {
 	var path string
 
-	customDir, present := os.LookupEnv(EnvConfigPath)
-	if present {
+	if customDir, present := os.LookupEnv(EnvConfigPath); present {
 		path = customDir
 	} else {
 		path = filepath.Join(lo.Must(os.UserConfigDir()), constant.Mangal)
@@ -58,26 +56,15 @@ func History() string {
 	return path
 }
 
+// Downloads path
 func Downloads() string {
 	path, err := filepath.Abs(viper.GetString(constant.DownloaderPath))
 
 	if err != nil {
-		path = "."
-	}
-
-	return mkdir(path)
-}
-
-func Manga(mangaName string) string {
-	var path string
-
-	if viper.GetBool(constant.DownloaderCreateMangaDir) {
-		path = filepath.Join(
-			Downloads(),
-			util.SanitizeFilename(mangaName),
-		)
-	} else {
-		path = Downloads()
+		path, err = os.Getwd()
+		if err != nil {
+			path = "."
+		}
 	}
 
 	return mkdir(path)

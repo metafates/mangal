@@ -30,27 +30,26 @@ func (c *SavedChapter) String() string {
 }
 
 // Get returns all chapters from the history file
-func Get() (map[string]*SavedChapter, error) {
+func Get() (chapters map[string]*SavedChapter, err error) {
 	log.Info("Getting history location")
 	historyFile := where.History()
 
 	// decode json into slice of structs
 	log.Info("Reading history file")
-	var chapters map[string]*SavedChapter
 	contents, err := filesystem.Get().ReadFile(historyFile)
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return
 	}
 
 	log.Info("Decoding history from json")
 	err = json.Unmarshal(contents, &chapters)
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return
 	}
 
-	return chapters, nil
+	return
 }
 
 // Save saves the chapter to the history file
