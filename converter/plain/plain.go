@@ -4,6 +4,7 @@ import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"io"
+	"os"
 	"path/filepath"
 	"sync"
 )
@@ -24,6 +25,11 @@ func (*Plain) SaveTemp(chapter *source.Chapter) (string, error) {
 
 func save(chapter *source.Chapter, temp bool) (path string, err error) {
 	path, err = chapter.Path(temp)
+	if err != nil {
+		return
+	}
+
+	err = filesystem.Get().Mkdir(path, os.ModePerm)
 	if err != nil {
 		return
 	}

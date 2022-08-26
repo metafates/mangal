@@ -31,6 +31,7 @@ func Test(t *testing.T) {
 				Convey("And the result should be a path pointing to a directory", func() {
 					So(result, ShouldNotBeEmpty)
 					isDir, err := filesystem.Get().IsDir(result)
+
 					if err != nil {
 						t.Fatal(err)
 					}

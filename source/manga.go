@@ -23,7 +23,8 @@ type Manga struct {
 	// ID of manga in the source.
 	ID string
 	// Chapters of the manga
-	Chapters []*Chapter
+	Chapters       []*Chapter
+	cachedTempPath string
 }
 
 func (m *Manga) String() string {
@@ -36,7 +37,13 @@ func (m *Manga) Filename() string {
 
 func (m *Manga) Path(temp bool) (path string, err error) {
 	if temp {
-		return filesystem.Get().TempDir("", constant.TempPrefix)
+		if path = m.cachedTempPath; path != "" {
+			return
+		}
+
+		path, err = filesystem.Get().TempDir("", constant.TempPrefix)
+		m.cachedTempPath = path
+		return
 	}
 
 	path = where.Downloads()
@@ -46,6 +53,5 @@ func (m *Manga) Path(temp bool) (path string, err error) {
 	}
 
 	_ = filesystem.Get().MkdirAll(path, os.ModePerm)
-
 	return
 }

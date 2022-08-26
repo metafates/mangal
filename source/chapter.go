@@ -85,7 +85,7 @@ func (c *Chapter) Size() uint64 {
 	return n
 }
 
-// SizeHuman is the same as Size but returns a human readable string.
+// SizeHuman is the same as Size but returns a human-readable string.
 func (c *Chapter) SizeHuman() string {
 	if size := c.Size(); size == 0 {
 		return "Unknown size"
@@ -94,15 +94,14 @@ func (c *Chapter) SizeHuman() string {
 	}
 }
 
-func (c *Chapter) Filename() string {
-	filename := util.SanitizeFilename(c.formattedName())
-	extension := ""
+func (c *Chapter) Filename() (filename string) {
+	filename = util.SanitizeFilename(c.formattedName())
 
 	if f := viper.GetString(constant.FormatsUse); f != constant.Plain {
-		extension = "." + f
+		return filename + "." + f
 	}
 
-	return filename + extension
+	return
 }
 
 func (c *Chapter) Path(temp bool) (path string, err error) {
