@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - `gen` command added to generate a template for custom source
 - Show chapter index in the TUI history list
 - Fixed bug where pressing <kbd>confirm</kbd> button with empty history would cause mangal to crash
+- Fixed bug where error message would not fit the screen
 
 ## 3.4.1
 

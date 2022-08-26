@@ -80,7 +80,7 @@ var genCmd = &cobra.Command{
 		f, err := filesystem.Get().Create(target)
 		handleErr(err)
 
-		util.Ignore(f.Close)
+		defer util.Ignore(f.Close)
 
 		err = tmpl.Execute(f, s)
 		handleErr(err)
