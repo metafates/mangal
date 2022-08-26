@@ -167,10 +167,8 @@ func (b *statefulBubble) viewError() string {
 			"",
 			icon.Get(icon.Fail) + " Uggh, something went wrong. Maybe try again?",
 			"",
-			style.Italic(util.Wrap(b.errorPlot, b.width)),
-			"",
 		},
-			strings.Split(errorMsg, "\n")...,
+			strings.Split(util.Wrap(style.Italic(b.errorPlot), b.width)+"\n\n"+errorMsg, "\n")...,
 		),
 	)
 }
