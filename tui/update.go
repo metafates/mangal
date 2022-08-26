@@ -263,24 +263,25 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return b, cmd
 			}
 		case key.Matches(msg, b.keymap.selectOne, b.keymap.confirm):
-			selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
-			providers := lo.Map(b.sourcesC.Items(), func(i list.Item, _ int) *provider.Provider {
-				return i.(*listItem).internal.(*provider.Provider)
-			})
+			if b.historyC.SelectedItem() != nil {
+				selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+				providers := lo.Map(b.sourcesC.Items(), func(i list.Item, _ int) *provider.Provider {
+					return i.(*listItem).internal.(*provider.Provider)
+				})
 
-			p, ok := lo.Find(providers, func(p *provider.Provider) bool {
-				return p.ID == selected.SourceID
-			})
+				p, ok := lo.Find(providers, func(p *provider.Provider) bool {
+					return p.ID == selected.SourceID
+				})
 
-			if !ok {
-				err := fmt.Errorf("provider %s not found", selected.SourceID)
-				b.raiseError(err)
-				return b, nil
+				if !ok {
+					err := fmt.Errorf("provider %s not found", selected.SourceID)
+					b.raiseError(err)
+					return b, nil
+				}
+
+				b.newState(loadingState)
+				return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
 			}
-
-			b.newState(loadingState)
-			return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
-
 		}
 	}
 
