@@ -39,7 +39,7 @@ var icons = map[Icon]*iconDef{
 	Success: {
 		emoji:   "🎉",
 		nerd:    style.Green("\uF65F "),
-		plain:   style.Green(":)"),
+		plain:   style.Green("✓"),
 		kaomoji: style.Green("(ᵔ◡ᵔ)"),
 		squares: style.Green("▣"),
 	},

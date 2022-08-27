@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 3.5.0
 
+- `mangal update` command added
 - Added `--raw` flag for the `sources` command to print without headers
 - Added `--downloads` flag for the `where` command to print location of the downloads directory
 - Option to show all languages in mangadex by setting `mangadex.language = 'any'` in the config.

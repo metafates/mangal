@@ -114,7 +114,11 @@ and copy them to the desired location.
 
 Visit this link to install [Go](https://go.dev/doc/install)
 
-    go install -ldflags="-s -w" github.com/metafates/mangal@latest
+```bash
+git clone --depth 1 https://github.com/metafates/mangal.git
+cd mangal
+go install -ldflags="-s -w"
+```
 
 ## Usage
 

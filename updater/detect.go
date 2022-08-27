@@ -15,7 +15,6 @@ type installationMethod int
 
 const (
 	unknown installationMethod = iota
-	golang
 	homebrew
 	scoop
 	script
@@ -23,7 +22,6 @@ const (
 
 func detectInstallationMethod() installationMethod {
 	for _, t := range []lo.Tuple2[installationMethod, func() bool]{
-		{golang, isUnderGo},
 		{scoop, isUnderScoop},
 		{homebrew, isUnderHomebrew},
 	} {
@@ -46,19 +44,6 @@ func detectInstallationMethod() installationMethod {
 	return unknown
 }
 
-func isUnderGo() (ok bool) {
-	if !has("go") {
-		return false
-	}
-
-	path, err := os.Executable()
-	if err != nil {
-		return false
-	}
-
-	return strings.Contains(path, filepath.Join("go", "bin"))
-}
-
 func isUnderHomebrew() (ok bool) {
 	if !has("brew") {
 		return
@@ -69,8 +54,7 @@ func isUnderHomebrew() (ok bool) {
 		return false
 	}
 
-	ok = strings.Contains(out, constant.Mangal)
-	return true
+	return strings.Contains(out, constant.Mangal)
 }
 
 func isUnderScoop() (ok bool) {
