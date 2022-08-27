@@ -43,26 +43,12 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Installation
 
-- [Go (any OS)](#go-any-os)
-- [Arch](#arch-linux)
 - [Linux / macOS](#linux--macos)
 - [Windows](#windows)
 - [Docker](#docker)
 - [Manual](#manual)
 
-### Go (Any OS)
-
-Visit this link to install [Go](https://go.dev/doc/install)
-
-    go install -ldflags="-s -w" github.com/metafates/mangal@latest
-
-> **Note** `-ldflags="-s -w"` makes the binary smaller
-> 
-> Use this method if others are not working for some reason.
-> And please open an issue if so
-
-
-### Linux | MacOS
+### Linux + MacOS
 
 Install using [this shell script](https://raw.githubusercontent.com/metafates/mangal/main/install)
 
@@ -119,20 +105,16 @@ To run
 ### Manual
 
 
-### Pre-compiled
+#### Pre-compiled
 
 Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
 and copy them to the desired location.
 
-### From source
+#### From source
 
-You will need [Go](https://go.dev/doc/install) (and git)
+Visit this link to install [Go](https://go.dev/doc/install)
 
-```bash
-git clone --depth 1 https://github.com/metafates/mangal.git
-cd mangal
-go install -ldflags="-s -w"
-```
+    go install -ldflags="-s -w" github.com/metafates/mangal@latest
 
 ## Usage
 
