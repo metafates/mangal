@@ -17,8 +17,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
     curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/run | sh
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
-> 
-> Linux / macOS only
+> Linux + MacOS only
 
 ## Table of contents
 - [Features](#features)
@@ -49,7 +48,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ### Linux + MacOS
 
-Install using [this shell script](https://raw.githubusercontent.com/metafates/mangal/main/install)
+Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
 
     curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | sh
 
