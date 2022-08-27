@@ -137,7 +137,7 @@ func (b *statefulBubble) resize(width, height int) {
 
 	b.width = styledWidth
 	b.height = styledHeight
-	b.helpC.Width = styledWidth
+	b.helpC.Width = listWidth
 }
 
 func (b *statefulBubble) startLoading() tea.Cmd {

@@ -43,7 +43,7 @@ var defaultProviders = []*Provider{
 }
 
 func DefaultProviders() map[string]*Provider {
-	providers := make(map[string]*Provider)
+	providers := make(map[string]*Provider, len(defaultProviders))
 
 	for _, provider := range defaultProviders {
 		providers[provider.Name] = provider
@@ -59,13 +59,13 @@ func CustomProviders() map[string]*Provider {
 		return make(map[string]*Provider)
 	}
 
-	providers := make(map[string]*Provider)
 	paths := lo.FilterMap(files, func(f os.FileInfo, _ int) (string, bool) {
 		if filepath.Ext(f.Name()) == customProviderExtension {
 			return filepath.Join(where.Sources(), f.Name()), true
 		}
 		return "", false
 	})
+	providers := make(map[string]*Provider, len(paths))
 
 	for _, path := range paths {
 		name := util.FileStem(path)
