@@ -22,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 - Option to continue downloading chapters after fail
 - Option to redownload failed chapters
-- Option to select custom reader app for each format 
+- Option to select custom reader app for each format
 - Option to skip images with unsupported formats by converter (e.g. pdf converter will skip .gif images) (#77)
 - Option to specify custom repository for `mangal install` command
 - Fixed error when using custom readers was not possible
@@ -43,7 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 3.2.1
 
-- Fix home variable in config 
+- Fix home variable in config
 
 ## 3.2.0
 
@@ -88,7 +88,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - History mode added. Now you can resume your readings by launching mangal with `mangal --resume` flag (`-r` for short)
 - Support for new environment variables added
 - `mangal env` command added to list all env variables and their values (if any set)
-- ComicInfo.xml file fixed #53 
+- ComicInfo.xml file fixed #53
 
 ## 2.1.1
 
@@ -122,9 +122,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 1.5.2
 
-- Command to check for update added `mangal check-update` #26 
+- Command to check for update added `mangal check-update` #26
 - Scraper system improved
-- Fixed bug where chapters with colon in title would not open for read on windows #24 
+- Fixed bug where chapters with colon in title would not open for read on windows #24
 - Various bug fixes
 
 ## 1.5.1

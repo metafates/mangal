@@ -20,6 +20,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 > Linux + MacOS only
 
 ## Table of contents
+
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -29,7 +30,8 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Features
 
-- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __
+  Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 - [Mangadex](https://mangadex.org) + [Manganelo](https://m.manganelo.com/wwww) Built-In
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
@@ -96,7 +98,6 @@ go install -ldflags="-s -w"
 
 </details>
 
-
 ### Windows
 
 Install using [Scoop](https://scoop.sh/)
@@ -140,7 +141,6 @@ Example of usage:
 
 Type `mangal help inline` for more information
 
-
 ### Other
 
 See `mangal help` for more information
@@ -149,7 +149,7 @@ See `mangal help` for more information
 
 Mangal uses [TOML](https://toml.io) format for configuration under the `mangal.toml` filename.
 Config path depends on the OS.
-To find yours, use `mangal where --config`. 
+To find yours, use `mangal where --config`.
 For example, on __Linux__ it would be `~/.config/mangal/mangal.toml`.
 
 Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
@@ -269,11 +269,13 @@ write = false
 # panic, fatal, error, warn, info, debug, trace
 level = "info"
 ```
+
 </details>
 
 ## Custom scrapers
 
-TLDR; To browse and install a custom scraper from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) run
+TLDR; To browse and install a custom scraper
+from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) run
 
     mangal install
 

@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: 
+    branches:
       - main
   pull_request:
 
@@ -13,26 +13,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     env:
       GOFLAGS: -mod=readonly
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
 
-    - name: Test
-      run: go test -race -v ./...
-      if: runner.os != 'Windows'
+      - name: Test
+        run: go test -race -v ./...
+        if: runner.os != 'Windows'
 
-    - name: Test (without race detector)
-      run: go test -v ./...
-      if: runner.os == 'Windows'
+      - name: Test (without race detector)
+        run: go test -v ./...
+        if: runner.os == 'Windows'
 
   lint:
     name: Lint

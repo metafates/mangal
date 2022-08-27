@@ -19,17 +19,15 @@ builds:
       - -trimpath
 
 archives:
-  -
-    replacements:
+  - replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
       386: i386
       amd64: x86_64
     format_overrides:
-    -
-      goos: windows
-      format: zip
+      - goos: windows
+        format: zip
     files:
       - completions/*
       - README.md
@@ -72,17 +70,15 @@ changelog:
       - go mod tidy
 
 dockers:
-  -
-    goos: linux
+  - goos: linux
     goarch: amd64
     image_templates:
-    - "metafates/mangal:latest"
+      - "metafates/mangal:latest"
     skip_push: true
     use: docker
 
 brews:
-  -
-    name: mangal
+  - name: mangal
 
     tap:
       owner: metafates
@@ -144,8 +140,7 @@ release:
     Bugs? Suggestions? [Open an issue](https://github.com/metafates/mangal/issues/new/choose)
 
 nfpms:
-  -
-    file_name_template: "{{ .ConventionalFileName }}"
+  - file_name_template: "{{ .ConventionalFileName }}"
     homepage: https://github.com/metafates/mangal
     maintainer: metafates <fates@duck.com>
     description: |-
@@ -174,7 +169,7 @@ nfpms:
         file_info:
           mode: 0644
       - src: ./completions/mangal.zsh
-        dst:  /usr/share/zsh/vendor-completions/_mangal
+        dst: /usr/share/zsh/vendor-completions/_mangal
         file_info:
           mode: 0644
       - src: ./LICENSE
