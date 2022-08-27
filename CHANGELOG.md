@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Show chapter index in the TUI history list
 - Fixed bug where pressing <kbd>confirm</kbd> button with empty history would cause mangal to crash
 - Fixed bug where error message would not fit the screen
+- Fixed bug when `mangal config init --force` would ignore `--force` flag
+- Internal performance improvements
 
 ## 3.4.1
 
@@ -90,7 +92,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 ## 2.1.1
 
 - `doctor` command now shows more information about errors
-- minor bug fixes and perfomance improvements
+- minor bug fixes and performance improvements
 
 ## 2.1.0
 

@@ -7,7 +7,6 @@ import (
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 	"path/filepath"
 )
 
@@ -30,9 +29,10 @@ var configInitCmd = &cobra.Command{
 	Short: "Initialize config",
 	Long:  `Initialize default config`,
 	Run: func(cmd *cobra.Command, args []string) {
-		mangalDir := where.Config()
-		if !lo.Must(filesystem.Get().Exists(mangalDir)) {
-			_ = filesystem.Get().MkdirAll(mangalDir, os.ModePerm)
+		force := lo.Must(cmd.Flags().GetBool("force"))
+		if force {
+			err := filesystem.Get().Remove(filepath.Join(where.Config(), "mangal.toml"))
+			handleErr(err)
 		}
 
 		handleErr(viper.SafeWriteConfig())
