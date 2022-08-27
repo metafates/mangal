@@ -212,7 +212,7 @@ install() {
             install_rpm
             ;;
         *)
-            info "Unknown linux distro is detected"
+            info "Unknown linux distro detected"
             install_binary
             ;;
         esac
