@@ -86,7 +86,7 @@ func (b *statefulBubble) viewConfirm() string {
 		[]string{
 			style.Title("Confirm"),
 			"",
-			fmt.Sprintf(icon.Get(icon.Question)+" Download %d chapters?", len(b.selectedChapters)),
+			fmt.Sprintf("%s Download %s?", icon.Get(icon.Question), util.Quantity(len(b.selectedChapters), "chapter")),
 		},
 	)
 }
