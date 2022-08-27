@@ -42,24 +42,11 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Installation
 
-- [Go (any OS)](#go-any-os)
 - [Arch](#arch-linux)
 - [Linux / macOS](#linux--macos)
 - [Windows](#windows)
 - [Docker](#docker)
 - [Manual](#manual)
-
-### Go (Any OS)
-
-Visit this link to install [Go](https://go.dev/doc/install)
-
-    go install -ldflags="-s -w" github.com/metafates/mangal@latest
-
-> **Note** `-ldflags="-s -w"` makes the binary smaller
-> 
-> Use this method if others are not working for some reason.
-> And please open an issue if so
-
 
 ### Arch Linux
 
