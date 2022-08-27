@@ -44,10 +44,6 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Installation
 
-- [Linux / macOS](#linux--macos)
-- [Windows](#windows)
-- [Docker](#docker)
-
 ### Linux + MacOS
 
 Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
