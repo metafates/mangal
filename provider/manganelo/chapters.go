@@ -3,6 +3,7 @@ package manganelo
 import (
 	"github.com/gocolly/colly"
 	"github.com/metafates/mangal/source"
+	"net/http"
 )
 
 func (m *Manganelo) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
@@ -12,7 +13,7 @@ func (m *Manganelo) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 
 	ctx := colly.NewContext()
 	ctx.Put("manga", manga)
-	err := m.chaptersCollector.Request("GET", manga.URL, nil, ctx, nil)
+	err := m.chaptersCollector.Request(http.MethodGet, manga.URL, nil, ctx, nil)
 
 	if err != nil {
 		return nil, err

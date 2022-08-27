@@ -32,19 +32,19 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	pdfFile, err := filesystem.Get().Create(path)
+	file, err := filesystem.Get().Create(path)
 	if err != nil {
 		return
 	}
 
-	defer util.Ignore(pdfFile.Close)
+	defer util.Ignore(file.Close)
 
-	var readers = make([]io.Reader, len(chapter.Pages))
+	var images = make([]io.Reader, len(chapter.Pages))
 	for i, page := range chapter.Pages {
-		readers[i] = page
+		images[i] = page
 	}
 
-	err = imagesToPDF(pdfFile, readers)
+	err = imagesToPDF(file, images)
 	return
 }
 

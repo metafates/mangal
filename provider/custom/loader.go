@@ -1,7 +1,7 @@
 package custom
 
 import (
-	"errors"
+	"fmt"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/luamodules"
 	"github.com/metafates/mangal/source"
@@ -37,7 +37,7 @@ func LoadSource(path string, validate bool) (source.Source, error) {
 			defined := state.GetGlobal(fn)
 
 			if defined.Type() != lua.LTFunction {
-				return nil, errors.New("required function " + fn + " is not defined in the luaSource " + name)
+				return nil, fmt.Errorf("required function %s is not defined in the luaSource %s", fn, name)
 			}
 		}
 	}

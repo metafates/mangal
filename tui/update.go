@@ -206,10 +206,11 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 
 		manga := &source.Manga{
-			Name:  selected.MangaName,
-			URL:   selected.MangaURL,
-			Index: 0,
-			ID:    selected.MangaID,
+			Name:   selected.MangaName,
+			URL:    selected.MangaURL,
+			Index:  0,
+			ID:     selected.MangaID,
+			Source: b.selectedSource,
 		}
 
 		b.selectedManga = manga

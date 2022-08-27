@@ -30,13 +30,13 @@ func (b *statefulBubble) loadScrapers() tea.Cmd {
 			return strings.Compare(a.Name, b.Name) < 0
 		})
 
-		var items []list.Item
-		for _, s := range scrapers {
-			items = append(items, &listItem{
+		var items = make([]list.Item, len(scrapers))
+		for i, s := range scrapers {
+			items[i] = &listItem{
 				title:       s.Name,
 				description: s.GithubURL(),
 				internal:    s,
-			})
+			}
 		}
 
 		cmd := b.scrapersInstallC.SetItems(items)

@@ -13,9 +13,7 @@ func (b *statefulBubble) Init() tea.Cmd {
 	if name := viper.GetString(constant.DownloaderDefaultSource); name != "" {
 		p, ok := provider.Get(name)
 		if !ok {
-			b.lastError = fmt.Errorf("provider %s not found", name)
-			b.errorPlot = randomPlot()
-			b.newState(errorState)
+			b.raiseError(fmt.Errorf("provider %s not found", name))
 			return nil
 		}
 

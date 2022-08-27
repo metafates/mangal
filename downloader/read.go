@@ -21,7 +21,7 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		return open.Start(chapter.URL)
 	}
 
-	log.Info("downloading " + chapter.Name + " from " + chapter.Manga.Name + " for reading. Provider is " + chapter.Source().ID())
+	log.Info(fmt.Sprintf("downloading %s for reading. Provider is %s", chapter.Name, chapter.Source().ID()))
 	log.Info("getting pages of " + chapter.Name)
 	progress("Getting pages")
 	pages, err := chapter.Source().PagesOf(chapter)

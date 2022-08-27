@@ -19,7 +19,8 @@ func (s *luaSource) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	}
 
 	table := s.state.CheckTable(-1)
-	chapters := make([]*source.Chapter, 0)
+	chapters := make([]*source.Chapter, table.Len())
+	var i uint16
 
 	table.ForEach(func(k lua.LValue, v lua.LValue) {
 		if k.Type() != lua.LTNumber {
@@ -41,7 +42,8 @@ func (s *luaSource) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 			s.state.RaiseError(err.Error())
 		}
 
-		chapters = append(chapters, chapter)
+		chapters[i] = chapter
+		i++
 	})
 
 	s.cachedChapters[manga.URL] = chapters
