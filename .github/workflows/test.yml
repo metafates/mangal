@@ -34,22 +34,3 @@ jobs:
         run: go test -v ./...
         if: runner.os == 'Windows'
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    env:
-      GOFLAGS: -mod=readonly
-
-    steps:
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.18
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.45.2
