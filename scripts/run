@@ -67,9 +67,17 @@ verify_checksums() {
 run() {
     pre_run
 
-    if [ "$OS" = "Linux" ] && [ "$ARCH" = "aarch64" ]; then
+    case "$ARCH" in
+    aarch64)
         ARCH="arm64"
-    fi
+        ;;
+    armv*)
+        ARCH="armv6"
+        ;;
+    amd64)
+        ARCH="x86_64"
+        ;;
+    esac
 
     TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
     TAR_FILE="$TMPDIR/$TAR_NAME"

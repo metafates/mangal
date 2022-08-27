@@ -51,21 +51,29 @@ install_deb() {
         return
     fi
 
-    if [ "$ARCH" = "aarch64" ];
-    then
+
+    case "$ARCH" in
+    aarch64)
         ARCH="arm64"
-    fi
+        ;;
+    armv*)
+        ARCH="armhf"
+        ;;
+    x86_64)
+        ARCH="amd64"
+        ;;
+    esac
 
-    RPM_NAME="${FILE_BASENAME}_${VERSION}_${ARCH}.deb"
-    RPM_FILE="$TMPDIR/$RPM_NAME"
+    DEB_NAME="${FILE_BASENAME}_${VERSION}_${ARCH}.deb"
+    DEB_FILE="$TMPDIR/$DEB_NAME"
 
-    export RPM_FILE RPM_NAME
+    export DEB_FILE DEB_NAME
 
     (
         cd "$TMPDIR"
 
         info "Downloading Mangal $VERSION..."
-        download "$RPM_FILE" "$RELEASES_URL/download/$TAG/$RPM_NAME"
+        download "$DEB_FILE" "$RELEASES_URL/download/$TAG/$DEB_NAME"
 
         info "Downloading checksums..."
         download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
@@ -74,16 +82,23 @@ install_deb() {
     )
 
     info "Installing..."
-    sudo dpkg --install "$RPM_FILE"
+    sudo dpkg --install "$DEB_FILE"
 }
 
 install_binary() {
     info "Installing raw binary"
 
-    if [ "$OS" = "Linux" ] && [ "$ARCH" = "aarch64" ];
-    then
+    case "$ARCH" in
+    aarch64)
         ARCH="arm64"
-    fi
+        ;;
+    armv*)
+        ARCH="armv6"
+        ;;
+    amd64)
+        ARCH="x86_64"
+        ;;
+    esac
 
     TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
     TAR_FILE="$TMPDIR/$TAR_NAME"
@@ -134,16 +149,28 @@ install_rpm() {
         return
     fi
 
-    RPM_NAME="${FILE_BASENAME}-${VERSION}.${ARCH}.rpm"
-    RPM_FILE="$TMPDIR/$RPM_NAME"
+    case "$ARCH" in
+    arm64)
+        ARCH="aarch64"
+        ;;
+    armv*)
+        ARCH="armv6hl"
+        ;;
+    amd64)
+        ARCH="x86_64"
+        ;;
+    esac
 
-    export RPM_FILE RPM_NAME
+    DEB_NAME="${FILE_BASENAME}-${VERSION}.${ARCH}.rpm"
+    DEB_FILE="$TMPDIR/$DEB_NAME"
+
+    export DEB_FILE DEB_NAME
 
     (
         cd "$TMPDIR"
 
         info "Downloading Mangal $VERSION..."
-        download "$RPM_FILE" "$RELEASES_URL/download/$TAG/$RPM_NAME"
+        download "$DEB_FILE" "$RELEASES_URL/download/$TAG/$DEB_NAME"
 
         info "Downloading checksums..."
         download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
@@ -152,7 +179,7 @@ install_rpm() {
     )
 
     info "Installing..."
-    sudo rpm --install "$RPM_FILE"
+    sudo rpm --install "$DEB_FILE"
 }
 
 pre_install() {
