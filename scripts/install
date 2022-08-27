@@ -1,86 +1,216 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
-RELEASES_URL="https://github.com/metafates/mangal/releases"
-FILE_BASENAME="mangal"
+# Check if command is available
+has() {
+    command -v "$1" > /dev/null 2>&1
+}
 
-test -z "$VERSION" && VERSION="$(curl -sfL -o /dev/null -w "%{url_effective}" "$RELEASES_URL/latest" |
-    rev |
-    cut -f1 -d'/' |
-    rev)"
+info() {
+    printf "\033[1;35minfo:\033[0m %s\n" "$1"
+}
 
-test -z "$VERSION" && {
-    echo "Unable to get mangal version." >&2
+warn() {
+    echo "warn: $1"
+}
+
+err() {
+    printf "\33[2K\r\033[1;31m%s\033[0m\n" "$*" >&2
+}
+
+die() {
+    err "$1"
     exit 1
 }
 
-test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
+# Download file. first argument is out path, second is URL
+download() {
+    curl -sfLo "$1" "$2"
+}
 
-OS=$(uname -s)
-ARCH=$(uname -m)
-
-if [[ $OS -eq "Linux" && $ARCH -eq "aarch64" ]]; then
-    ARCH="arm64"
-fi
-
-TAR_NAME="${FILE_BASENAME}_${VERSION:1}_${OS}_${ARCH}.tar.gz"
-TAR_FILE="$TMPDIR/${TAR_NAME}"
-
-export TAR_NAME
-export TAR_FILE
-
-(
-    cd "$TMPDIR"
-    echo "Downloading Mangal $VERSION..."
-    curl -sfLo "$TAR_FILE" \
-        "$RELEASES_URL/download/$VERSION/${TAR_NAME}"
-
-    echo "Downloading checksums..."
-    curl -sfLo "checksums.txt" "$RELEASES_URL/download/$VERSION/checksums.txt"
-
-    echo "Verifying checksums..."
-    if command -v sha256sum &>/dev/null; then
+verify_checksums() {
+    info "Verifying checksums..."
+    if has sha256sum; then
         sha256sum --ignore-missing --quiet --check checksums.txt
     else
         shasum -a 256 --ignore-missing --quiet --check checksums.txt
     fi
-)
+}
 
-tar -xf "$TAR_FILE" -C "$TMPDIR"
-
-echo "Installing..."
-case $OS in
-Darwin)
-    echo "macOS detected. Checking if brew is installed..."
-    if command -v brew &>/dev/null; then
-        OUT="$(brew --prefix)/bin/"
-        echo "Brew is installed. Moving to ${OUT}"
-        echo "But I would recommend installing it with brew directly"
-        cp "${TMPDIR}/${FILE_BASENAME}" "${OUT}"
-    else
-        OUT="/usr/local/bin/"
-        echo "Brew is not installed. Moving to ${OUT}"
-        sudo cp "${TMPDIR}/${FILE_BASENAME}" "${OUT}"
+install_deb() {
+    if ! has dpkg;
+    then
+        warn "dpkg is not in path. Using alternative method..."
+        install_binary
+        return
     fi
-    ;;
 
-*)
+    if [ "$ARCH" = "aarch64" ];
+    then
+        ARCH="arm64"
+    fi
+
+    RPM_NAME="${FILE_BASENAME}_${VERSION}_${ARCH}.deb"
+    RPM_FILE="$TMPDIR/$RPM_NAME"
+
+    export RPM_FILE
+    export RPM_NAME
+
+    (
+        cd "$TMPDIR"
+
+        info "Downloading Mangal $VERSION..."
+        download "$RPM_FILE" "$RELEASES_URL/download/$TAG/$RPM_NAME"
+
+        info "Downloading checksums..."
+        download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
+
+        verify_checksums
+    )
+
+    info "Installing..."
+    sudo dpkg --install "$RPM_FILE"
+}
+
+install_binary() {
+    info "Installing raw binary"
+
+    if [ "$OS" = "Linux" ] && [ "$ARCH" = "aarch64" ];
+    then
+        ARCH="arm64"
+    fi
+
+    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
+    TAR_FILE="$TMPDIR/$TAR_NAME"
+
+    export TAR_NAME
+    export TAR_FILE
+
+    (
+        cd "$TMPDIR"
+
+        info "Downloading Mangal $VERSION..."
+        download "$TAR_FILE" "$RELEASES_URL/download/$TAG/$TAR_NAME"
+
+        info "Downloading checksums..."
+        download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
+
+        verify_checksums
+    )
+
+    tar -xf "$TAR_FILE" -C "$TMPDIR"
+
+    info "Installing..."
     OUT="/usr/local/bin/"
-    echo "Linux detected. Moving to ${OUT}"
+    info "Linux detected. Moving to ${OUT}"
     sudo cp "${TMPDIR}/${FILE_BASENAME}" "${OUT}"
-    ;;
-esac
+}
 
-echo "Checking if it's available in the PATH..."
-if ! command -v mangal &>/dev/null; then
-    echo "Looks like it's not :("
+install_macos() {
+    if ! has brew; then
+        warn "Homebrew is not installed. Using alternative method..."
+        install_binary
+        return
+    fi
 
-    cp "${TMPDIR}/${FILE_BASENAME}" ./
-    echo "I've moved mangal to your current directory, try installing it manually"
-    exit 1
-fi
+    info "Installing with homebrew"
+    brew tap metafates/mangal
+    brew install mangal
+}
 
-echo "Mangal is now installed. You can run this script again to update it"
-rm "${TMPDIR}/${FILE_BASENAME}"
-exit 0
+install_rpm() {
+    if ! has rpm; then
+        warn "rpm is not in path. Using alternative method..."
+        install_binary
+        return
+    fi
+
+    RPM_NAME="${FILE_BASENAME}-${VERSION}.${ARCH}.rpm"
+    RPM_FILE="$TMPDIR/$RPM_NAME"
+
+    export RPM_FILE
+    export RPM_NAME
+
+    (
+        cd "$TMPDIR"
+
+        info "Downloading Mangal $VERSION..."
+        download "$RPM_FILE" "$RELEASES_URL/download/$TAG/$RPM_NAME"
+
+        info "Downloading checksums..."
+        download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
+
+        verify_checksums
+    )
+
+    info "Installing..."
+    sudo rpm --install "$RPM_FILE"
+}
+
+check_path() {
+    info "Checking if it's available in the PATH..."
+    if ! has mangal; then
+        die "Looks like it's not :( Try installing it manually..."
+    fi
+}
+
+pre_install() {
+    RELEASES_URL="https://github.com/metafates/mangal/releases"
+    FILE_BASENAME="mangal"
+
+    info "Fetching latest version..."
+    TAG="$(curl -sfL -o /dev/null -w "%{url_effective}" "$RELEASES_URL/latest" |
+        rev |
+        cut -f1 -d'/' |
+        rev)"
+
+    test -z "$TAG" && {
+        echo "Unable to get mangal version." >&2
+        exit 1
+    }
+
+    test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
+
+    OS=$(uname -s)
+    ARCH=$(uname -m)
+    VERSION=${TAG#?}
+
+    export RELEASES_URL FILE_BASENAME VERSION TAG OS ARCH
+}
+
+post_install() {
+    info "Mangal is now installed. You can run this script again to update it"
+}
+
+install() {
+    pre_install
+
+    case $OS in
+    Darwin)
+        info "macOS detected"
+        install_macos
+        ;;
+    *)
+        case $(cat /etc/*release | tr "[:upper:]" "[:lower:]") in
+        *ubuntu* | *debian*)
+            info "Debian detected"
+            install_deb
+            ;;
+        *fedora*)
+            info "Fedora detected"
+            install_rpm
+            ;;
+        *)
+            info "Unknown linux distro is detected"
+            install_binary
+            ;;
+        esac
+        ;;
+    esac
+
+    check_path
+    post_install
+}
+
+install

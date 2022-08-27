@@ -14,7 +14,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Try it!
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/run | bash
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/run | sh
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
 > 
@@ -62,20 +62,42 @@ Visit this link to install [Go](https://go.dev/doc/install)
 > And please open an issue if so
 
 
-### Arch Linux
+### Linux | MacOS
+
+Install using [this shell script](https://raw.githubusercontent.com/metafates/mangal/main/install)
+
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | sh
+
+This script will automatically detect OS & Distro and use the best option available.
+For example, on macOS it will try to use Homebrew, on Ubuntu it will install the `.deb` package and so on...
+
+<details>
+<summary>😡 I hate scripts! Show me how to install it manually</summary>
+
+
+#### Arch Linux
 
 [AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
 
-### Linux / macOS
+#### Ubuntu / Debian
+
+1. Download the `*.deb` file from [release page](https://github.com/metafates/mangal/releases/latest)
+2. Run `sudo dpkg --install ...` where `...` is the name of the file you downloaded
+
+#### Fedora / Any other rpm based distro
+
+1. Download the `*.rpm` file from [release page](https://github.com/metafates/mangal/releases/latest)
+2. Run `sudo rpm --install ...` where `...` is the name of the file you downloaded
+
+#### MacOS
 
 Install using [Homebrew](https://brew.sh/)
 
     brew tap metafates/mangal
     brew install mangal
 
-Install using [this bash script](https://raw.githubusercontent.com/metafates/mangal/main/install)
+</details>
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | bash
 
 ### Windows
 

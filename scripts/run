@@ -1,52 +1,96 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
-RELEASES_URL="https://github.com/metafates/mangal/releases"
-FILE_BASENAME="mangal"
+# Check if command is available
+has() {
+    command -v "$1" >/dev/null 2>&1
+}
 
-test -z "$VERSION" && VERSION="$(curl -sfL -o /dev/null -w "%{url_effective}" "$RELEASES_URL/latest" |
-    rev |
-    cut -f1 -d'/' |
-    rev)"
+info() {
+    printf "\033[1;35minfo:\033[0m %s\n" "$1"
+}
 
-test -z "$VERSION" && {
-    echo "Unable to get mangal version." >&2
+warn() {
+    echo "warn: $1"
+}
+
+err() {
+    printf "\33[2K\r\033[1;31m%s\033[0m\n" "$*" >&2
+}
+
+die() {
+    err "$1"
     exit 1
 }
 
-test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
+# Download file. first argument is out path, second is URL
+download() {
+    curl -sfLo "$1" "$2"
+}
 
-OS=$(uname -s)
-ARCH=$(uname -m)
+pre_run() {
+    RELEASES_URL="https://github.com/metafates/mangal/releases"
+    FILE_BASENAME="mangal"
 
-if [[ $OS -eq "Linux" && $ARCH -eq "aarch64" ]]; then
-    ARCH="arm64"
-fi
+    info "Fetching latest version..."
+    TAG="$(curl -sfL -o /dev/null -w "%{url_effective}" "$RELEASES_URL/latest" |
+        rev |
+        cut -f1 -d'/' |
+        rev)"
 
-TAR_NAME="${FILE_BASENAME}_${VERSION:1}_${OS}_${ARCH}.tar.gz"
-TAR_FILE="$TMPDIR/${TAR_NAME}"
+    test -z "$TAG" && {
+        echo "Unable to get mangal version." >&2
+        exit 1
+    }
 
-export TAR_NAME
-export TAR_FILE
+    test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 
-(
-    cd "$TMPDIR"
+    OS=$(uname -s)
+    ARCH=$(uname -m)
+    VERSION=${TAG#?}
 
-    echo "Downloading Mangal $VERSION..."
-    curl -sfLo "$TAR_FILE" \
-        "$RELEASES_URL/download/$VERSION/${TAR_NAME}"
+    export RELEASES_URL FILE_BASENAME VERSION TAG OS ARCH
+}
 
-    echo "Downloading checksums..."
-    curl -sfLo "checksums.txt" "$RELEASES_URL/download/$VERSION/checksums.txt"
 
-    echo "Verifying checksums..."
-    if command -v sha256sum &>/dev/null; then
+verify_checksums() {
+    info "Verifying checksums..."
+    if has sha256sum; then
         sha256sum --ignore-missing --quiet --check checksums.txt
     else
         shasum -a 256 --ignore-missing --quiet --check checksums.txt
     fi
-)
+}
 
-tar -xf "$TAR_FILE" -C "$TMPDIR"
-"${TMPDIR}/${FILE_BASENAME}" "$@"
+
+run() {
+    pre_run
+
+    if [ "$OS" = "Linux" ] && [ "$ARCH" = "aarch64" ]; then
+        ARCH="arm64"
+    fi
+
+    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
+    TAR_FILE="$TMPDIR/$TAR_NAME"
+
+    export TAR_NAME
+    export TAR_FILE
+
+    (
+        cd "$TMPDIR"
+
+        info "Downloading Mangal $VERSION..."
+        download "$TAR_FILE" "$RELEASES_URL/download/$TAG/$TAR_NAME"
+
+        info "Downloading checksums..."
+        download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
+
+        verify_checksums
+    )
+
+    tar -xf "$TAR_FILE" -C "$TMPDIR"
+    "${TMPDIR}/${FILE_BASENAME}" "$@"
+}
+
+run "$@"
