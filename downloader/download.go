@@ -2,7 +2,7 @@ package downloader
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/log"
@@ -12,10 +12,10 @@ import (
 )
 
 // Download the chapter using given source.
-func Download(src source.Source, chapter *source.Chapter, progress func(string)) (string, error) {
+func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	log.Info("downloading " + chapter.Name)
 	progress("Getting pages")
-	pages, err := src.PagesOf(chapter)
+	pages, err := chapter.Source().PagesOf(chapter)
 	if err != nil {
 		log.Error(err)
 		return "", err
@@ -30,27 +30,27 @@ func Download(src source.Source, chapter *source.Chapter, progress func(string))
 		return "", err
 	}
 
-	log.Info("getting " + viper.GetString(config.FormatsUse) + " converter")
+	log.Info("getting " + viper.GetString(constant.FormatsUse) + " converter")
 	progress(fmt.Sprintf(
 		"Converting %d pages to %s %s",
 		len(pages),
-		style.Yellow(viper.GetString(config.FormatsUse)),
+		style.Yellow(viper.GetString(constant.FormatsUse)),
 		style.Faint(chapter.SizeHuman())),
 	)
-	conv, err := converter.Get(viper.GetString(config.FormatsUse))
+	conv, err := converter.Get(viper.GetString(constant.FormatsUse))
 	if err != nil {
 		log.Error(err)
 		return "", err
 	}
 
-	log.Info("converting " + viper.GetString(config.FormatsUse))
+	log.Info("converting " + viper.GetString(constant.FormatsUse))
 	path, err := conv.Save(chapter)
 	if err != nil {
 		log.Error(err)
 		return "", err
 	}
 
-	if viper.GetBool(config.HistorySaveOnDownload) {
+	if viper.GetBool(constant.HistorySaveOnDownload) {
 		go func() {
 			err = history.Save(chapter)
 			if err != nil {

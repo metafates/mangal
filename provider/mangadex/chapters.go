@@ -3,7 +3,7 @@ package mangadex
 import (
 	"fmt"
 	"github.com/darylhjd/mangodex"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
@@ -23,7 +23,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		params.Add("contentRating[]", rating)
 	}
 
-	if viper.GetBool(config.MangadexNSFW) {
+	if viper.GetBool(constant.MangadexNSFW) {
 		params.Add("contentRating[]", mangodex.Porn)
 		params.Add("contentRating[]", mangodex.Erotica)
 	}
@@ -35,6 +35,8 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	var chapters []*source.Chapter
 	var currOffset = 0
 
+	language := viper.GetString(constant.MangadexLanguage)
+
 	for {
 		params.Set("offset", strconv.Itoa(currOffset))
 		list, err := m.client.Chapter.GetMangaChapters(manga.ID, params)
@@ -44,12 +46,12 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 
 		for i, chapter := range list.Data {
 			// Skip external chapters. Their pages cannot be downloaded.
-			if chapter.Attributes.ExternalURL != nil && !viper.GetBool(config.MangadexShowUnavailableChapters) {
+			if chapter.Attributes.ExternalURL != nil && !viper.GetBool(constant.MangadexShowUnavailableChapters) {
 				continue
 			}
 
 			// skip chapters that are not in the current language
-			if chapter.Attributes.TranslatedLanguage != viper.GetString(config.MangadexLanguage) {
+			if language != "any" && chapter.Attributes.TranslatedLanguage != language {
 				currOffset += 500
 				continue
 			}
@@ -68,12 +70,11 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 			}
 
 			chapters = append(chapters, &source.Chapter{
-				Name:     name,
-				Index:    n + 1,
-				SourceID: ID,
-				ID:       chapter.ID,
-				URL:      fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
-				Manga:    manga,
+				Name:  name,
+				Index: n,
+				ID:    chapter.ID,
+				URL:   fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
+				Manga: manga,
 			})
 		}
 		currOffset += 500
@@ -90,6 +91,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		return a.Index < b.Index
 	})
 
+	manga.Chapters = chapters
 	m.cachedChapters[manga.URL] = chapters
 	return chapters, nil
 }

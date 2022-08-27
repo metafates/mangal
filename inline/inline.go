@@ -3,7 +3,7 @@ package inline
 import (
 	"errors"
 	"fmt"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/spf13/viper"
 )
@@ -33,14 +33,14 @@ func Run(options *Options) error {
 
 	for _, chapter := range chapters {
 		if options.Download {
-			path, err := downloader.Download(options.Source, chapter, func(string) {})
-			if err != nil && viper.GetBool(config.DownloaderStopOnError) {
+			path, err := downloader.Download(chapter, func(string) {})
+			if err != nil && viper.GetBool(constant.DownloaderStopOnError) {
 				return err
 			}
 
 			fmt.Println(path)
 		} else {
-			err := downloader.Read(options.Source, chapter, func(string) {})
+			err := downloader.Read(chapter, func(string) {})
 			if err != nil {
 				return err
 			}

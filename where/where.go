@@ -4,6 +4,7 @@ import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 )
@@ -21,8 +22,7 @@ func mkdir(path string) string {
 func Config() string {
 	var path string
 
-	customDir, present := os.LookupEnv(EnvConfigPath)
-	if present {
+	if customDir, present := os.LookupEnv(EnvConfigPath); present {
 		path = customDir
 	} else {
 		path = filepath.Join(lo.Must(os.UserConfigDir()), constant.Mangal)
@@ -54,4 +54,18 @@ func History() string {
 	}
 
 	return path
+}
+
+// Downloads path
+func Downloads() string {
+	path, err := filepath.Abs(viper.GetString(constant.DownloaderPath))
+
+	if err != nil {
+		path, err = os.Getwd()
+		if err != nil {
+			path = "."
+		}
+	}
+
+	return mkdir(path)
 }

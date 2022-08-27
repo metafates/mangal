@@ -64,55 +64,7 @@ func setEnvs() {
 func setDefaults() {
 	viper.SetTypeByDefaultValue(true)
 
-	fields := map[string]any{
-		// Downloader
-		DownloaderPath:                ".",
-		DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
-		DownloaderAsync:               true,
-		DownloaderCreateMangaDir:      true,
-		DownloaderDefaultSource:       "",
-		DownloaderStopOnError:         false,
-
-		// Formats
-		FormatsUse:                   "pdf",
-		FormatsSkipUnsupportedImages: true,
-
-		// Mini-mode
-		MiniSearchLimit: 20,
-
-		// Icons
-		IconsVariant: "plain",
-
-		// Reader
-		ReaderPDF:           "",
-		ReaderCBZ:           "",
-		ReaderZIP:           "",
-		RaderPlain:          "",
-		ReaderReadInBrowser: false,
-
-		// History
-		HistorySaveOnRead:     true,
-		HistorySaveOnDownload: false,
-
-		// Mangadex
-		MangadexLanguage:                "en",
-		MangadexNSFW:                    false,
-		MangadexShowUnavailableChapters: false,
-
-		// Installer
-		InstallerUser:   "metafates",
-		InstallerRepo:   "mangal-scrapers",
-		InstallerBranch: "main",
-
-		// Logs
-		LogsWrite: false,
-		LogsLevel: "info",
-
-		// Anilist
-		AnilistEnable: false,
-	}
-
-	for field, value := range fields {
+	for field, value := range defaultValues {
 		viper.SetDefault(field, value)
 	}
 }
@@ -120,10 +72,10 @@ func setDefaults() {
 // resolveAliases resolves the aliases for the paths
 func resolveAliases() {
 	home := lo.Must(os.UserHomeDir())
-	path := viper.GetString(DownloaderPath)
+	path := viper.GetString(constant.DownloaderPath)
 
 	path = strings.ReplaceAll(path, "$HOME", home)
 	path = strings.ReplaceAll(path, "~", home)
 
-	viper.Set(DownloaderPath, path)
+	viper.Set(constant.DownloaderPath, path)
 }

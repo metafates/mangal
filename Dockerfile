@@ -1,5 +1,3 @@
-# To run this image
-# docker run --rm -ti -e "TERM=xterm-256color" -v (PWD)/mangal/downloads:/downloads -v (PWD)/mangal/config:/config metafates/mangal
 FROM alpine:latest
 
 ENV MANGAL_DOWNLOADER_PATH=/downloads

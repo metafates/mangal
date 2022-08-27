@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -67,6 +68,12 @@ type statefulBubble struct {
 	succededChapters []*source.Chapter
 }
 
+func (b *statefulBubble) raiseError(err error) {
+	b.lastError = err
+	b.errorPlot = randomPlot()
+	b.newState(errorState)
+}
+
 func (b *statefulBubble) setState(s state) {
 	b.state = s
 	b.keymap.setState(s)
@@ -80,7 +87,6 @@ func (b *statefulBubble) newState(s state) {
 
 	// Transitioning to these states is not allowed (it makes no sense)
 	if !lo.Contains([]state{
-		idle,
 		loadingState,
 		readState,
 		downloadDoneState,
@@ -95,7 +101,10 @@ func (b *statefulBubble) newState(s state) {
 
 func (b *statefulBubble) previousState() {
 	if b.statesHistory.Len() > 0 {
-		b.setState(b.statesHistory.Pop())
+		s := b.statesHistory.Pop()
+		if s != 0 {
+			b.setState(s)
+		}
 	}
 }
 
@@ -110,13 +119,25 @@ func (b *statefulBubble) resize(width, height int) {
 	listHeight := height - yy
 
 	b.scrapersInstallC.SetSize(listWidth, listHeight)
+	b.scrapersInstallC.Help.Width = listWidth
+
 	b.historyC.SetSize(listWidth, listHeight)
+	b.historyC.Help.Width = listWidth
+
 	b.sourcesC.SetSize(listWidth, listHeight)
+	b.sourcesC.Help.Width = listWidth
+
 	b.mangasC.SetSize(listWidth, listHeight)
+	b.mangasC.Help.Width = listWidth
+
 	b.chaptersC.SetSize(listWidth, listHeight)
-	b.progressC.Width = styledWidth
+	b.chaptersC.Help.Width = listWidth
+
+	b.progressC.Width = listWidth
+
 	b.width = styledWidth
 	b.height = styledHeight
+	b.helpC.Width = listWidth
 }
 
 func (b *statefulBubble) startLoading() tea.Cmd {
@@ -134,7 +155,6 @@ func (b *statefulBubble) stopLoading() tea.Cmd {
 func newBubble() *statefulBubble {
 	keymap := newStatefulKeymap()
 	bubble := statefulBubble{
-		state:         idle,
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
 
@@ -261,7 +281,7 @@ func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
 	for _, s := range saved {
 		items = append(items, &listItem{
 			title:       s.MangaName,
-			description: s.Name,
+			description: fmt.Sprintf("%s : %d / %d", s.Name, s.Index, s.MangaChaptersTotal),
 			internal:    s,
 		})
 	}

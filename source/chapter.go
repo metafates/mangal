@@ -3,9 +3,10 @@ package source
 import (
 	"fmt"
 	"github.com/dustin/go-humanize"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
+	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -18,8 +19,6 @@ type Chapter struct {
 	URL string
 	// Index of the chapter in the manga.
 	Index uint16
-	// SourceID of the source the chapter is from.
-	SourceID string
 	// ID of the chapter in the source.
 	ID string
 	// Manga that the chapter belongs to.
@@ -51,7 +50,7 @@ func (c *Chapter) DownloadPages() error {
 			err = page.Download()
 		}
 
-		if viper.GetBool(config.DownloaderAsync) {
+		if viper.GetBool(constant.DownloaderAsync) {
 			go d(page)
 		} else {
 			d(page)
@@ -62,9 +61,9 @@ func (c *Chapter) DownloadPages() error {
 	return err
 }
 
-// FormattedName of the chapter according to the template in the config.
-func (c *Chapter) FormattedName() (name string) {
-	template := viper.GetString(config.DownloaderChapterNameTemplate)
+// formattedName of the chapter according to the template in the config.
+func (c *Chapter) formattedName() (name string) {
+	template := viper.GetString(constant.DownloaderChapterNameTemplate)
 	name = strings.ReplaceAll(template, "{manga}", c.Manga.Name)
 	name = strings.ReplaceAll(name, "{chapter}", c.Name)
 	name = strings.ReplaceAll(name, "{index}", fmt.Sprintf("%d", c.Index))
@@ -84,11 +83,37 @@ func (c *Chapter) Size() uint64 {
 	return n
 }
 
-// SizeHuman is the same as Size but returns a human readable string.
+// SizeHuman is the same as Size but returns a human-readable string.
 func (c *Chapter) SizeHuman() string {
 	if size := c.Size(); size == 0 {
 		return "Unknown size"
 	} else {
 		return humanize.Bytes(size)
 	}
+}
+
+func (c *Chapter) Filename() (filename string) {
+	filename = util.SanitizeFilename(c.formattedName())
+
+	// plain format assumes that chapter is a directory with images
+	// rather than a single file. So no need to add extension to it
+	if f := viper.GetString(constant.FormatsUse); f != constant.Plain {
+		return filename + "." + f
+	}
+
+	return
+}
+
+func (c *Chapter) Path(temp bool) (path string, err error) {
+	path, err = c.Manga.Path(temp)
+	if err != nil {
+		return
+	}
+
+	path = filepath.Join(path, c.Filename())
+	return
+}
+
+func (c *Chapter) Source() Source {
+	return c.Manga.Source
 }

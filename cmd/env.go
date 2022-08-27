@@ -4,8 +4,10 @@ import (
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/slices"
 	"os"
 	"strings"
 )
@@ -22,11 +24,12 @@ var envCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filter := lo.Must(cmd.Flags().GetBool("filter"))
 
-		config.EnvExposed = append(config.EnvExposed, "MANGAL_CONFIG_PATH")
+		config.EnvExposed = append(config.EnvExposed, where.EnvConfigPath)
+		slices.Sort(config.EnvExposed)
 		for _, env := range config.EnvExposed {
-
 			env = strings.ToUpper(constant.Mangal + "_" + config.EnvKeyReplacer.Replace(env))
-			value, present := os.LookupEnv(env)
+			value := os.Getenv(env)
+			present := value != ""
 
 			if !present && filter {
 				continue
@@ -35,7 +38,7 @@ var envCmd = &cobra.Command{
 			cmd.Print(style.Combined(style.Bold, style.Magenta)(env))
 			cmd.Print("=")
 
-			if present && value != "" {
+			if present {
 				cmd.Println(style.Green(value))
 			} else {
 				cmd.Println(style.Red("unset"))

@@ -2,8 +2,9 @@ package source
 
 import (
 	"errors"
+	"fmt"
 	"github.com/metafates/mangal/constant"
-	"github.com/samber/lo"
+	"github.com/metafates/mangal/util"
 	"io"
 	"net/http"
 )
@@ -16,8 +17,6 @@ type Page struct {
 	Index uint16
 	// Extension of the page image.
 	Extension string
-	// SourceID of the source the page is from.
-	SourceID string
 	// Size of the page in bytes
 	Size uint64
 	// Contents of the page
@@ -32,7 +31,7 @@ func (p *Page) Download() error {
 		return nil
 	}
 
-	req, err := http.NewRequest("GET", p.URL, nil)
+	req, err := http.NewRequest(http.MethodGet, p.URL, nil)
 	if err != nil {
 		return err
 	}
@@ -54,7 +53,7 @@ func (p *Page) Download() error {
 	}
 
 	p.Contents = resp.Body
-	p.Size = lo.Max([]uint64{uint64(resp.ContentLength), 0})
+	p.Size = uint64(util.Max(resp.ContentLength, 0))
 
 	return nil
 }
@@ -71,4 +70,15 @@ func (p *Page) Read(b []byte) (int, error) {
 	}
 
 	return p.Contents.Read(b)
+}
+
+func (p *Page) Filename() (filename string) {
+	filename = fmt.Sprintf("%d%s", p.Index, p.Extension)
+	filename = util.PadZero(filename, 10)
+
+	return
+}
+
+func (p *Page) Source() Source {
+	return p.Chapter.Source()
 }

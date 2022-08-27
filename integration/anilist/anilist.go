@@ -1,7 +1,7 @@
 package anilist
 
 import (
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/spf13/viper"
 )
 
@@ -17,15 +17,15 @@ func New() *Anilist {
 }
 
 func (a *Anilist) id() string {
-	return viper.GetString(config.AnilistID)
+	return viper.GetString(constant.AnilistID)
 }
 
 func (a *Anilist) secret() string {
-	return viper.GetString(config.AnilistSecret)
+	return viper.GetString(constant.AnilistSecret)
 }
 
 func (a *Anilist) code() string {
-	return viper.GetString(config.AnilistCode)
+	return viper.GetString(constant.AnilistCode)
 }
 
 func (a *Anilist) AuthURL() string {

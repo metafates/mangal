@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/log"
@@ -30,13 +30,13 @@ func (b *statefulBubble) loadScrapers() tea.Cmd {
 			return strings.Compare(a.Name, b.Name) < 0
 		})
 
-		var items []list.Item
-		for _, s := range scrapers {
-			items = append(items, &listItem{
+		var items = make([]list.Item, len(scrapers))
+		for i, s := range scrapers {
+			items[i] = &listItem{
 				title:       s.Name,
 				description: s.GithubURL(),
 				internal:    s,
-			})
+			}
 		}
 
 		cmd := b.scrapersInstallC.SetItems(items)
@@ -175,7 +175,7 @@ func (b *statefulBubble) waitForChapters() tea.Cmd {
 func (b *statefulBubble) readChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
 		b.currentDownloadingChapter = chapter
-		err := downloader.Read(b.selectedSource, chapter, func(s string) {
+		err := downloader.Read(chapter, func(s string) {
 			b.progressStatus = s
 		})
 
@@ -204,12 +204,12 @@ func (b *statefulBubble) waitForChapterRead() tea.Cmd {
 func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
 		b.currentDownloadingChapter = chapter
-		path, err := downloader.Download(b.selectedSource, chapter, func(s string) {
+		path, err := downloader.Download(chapter, func(s string) {
 			b.progressStatus = s
 		})
 
 		if err != nil {
-			if viper.GetBool(config.DownloaderStopOnError) {
+			if viper.GetBool(constant.DownloaderStopOnError) {
 				b.errorChannel <- err
 			} else {
 				b.failedChapters = append(b.failedChapters, chapter)

@@ -14,13 +14,13 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Try it!
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/run | bash
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/run | sh
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
-> 
-> Linux / macOS only
+> Linux + MacOS only
 
 ## Table of contents
+
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -30,7 +30,9 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Features
 
-- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __
+  Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+- [Mangadex](https://mangadex.org) + [Manganelo](https://m.manganelo.com/wwww) Built-In
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __3 Different modes__ - TUI, Mini and Inline
@@ -42,26 +44,55 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Installation
 
-- [Arch](#arch-linux)
-- [Linux / macOS](#linux--macos)
-- [Windows](#windows)
-- [Docker](#docker)
-- [Manual](#manual)
+### Linux + MacOS
 
-### Arch Linux
+Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
+
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | sh
+
+This script will automatically detect OS & Distro and use the best option available.
+For example, on macOS it will try to use Homebrew, on Ubuntu it will install the `.deb` package and so on...
+
+<details>
+<summary>😡 I hate scripts! Show me how to install it manually</summary>
+
+#### Arch Linux
 
 [AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
 
-### Linux / macOS
+#### Ubuntu / Debian
+
+1. Download the `*.deb` file from [release page](https://github.com/metafates/mangal/releases/latest)
+2. Run `sudo dpkg --install ...` where `...` is the name of the file you downloaded
+
+#### Fedora / Any other rpm based distro
+
+1. Download the `*.rpm` file from [release page](https://github.com/metafates/mangal/releases/latest)
+2. Run `sudo rpm --install ...` where `...` is the name of the file you downloaded
+
+#### MacOS
 
 Install using [Homebrew](https://brew.sh/)
 
     brew tap metafates/mangal
     brew install mangal
 
-Install using [this bash script](https://raw.githubusercontent.com/metafates/mangal/main/install)
+#### Pre-compiled
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/install | bash
+Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
+and copy them to the desired location.
+
+#### From source
+
+Visit this link to install [Go](https://go.dev/doc/install)
+
+```bash
+git clone --depth 1 https://github.com/metafates/mangal.git
+cd mangal
+go install -ldflags="-s -w"
+```
+
+</details>
 
 ### Windows
 
@@ -79,24 +110,6 @@ Install using... well, you know. (thanks to [@ArabCoders](https://github.com/Ara
 To run
 
     docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
-
-### Manual
-
-
-### Pre-compiled
-
-Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
-and copy them to the desired location.
-
-### From source
-
-You will need [Go](https://go.dev/doc/install) (and git)
-
-```bash
-git clone --depth 1 https://github.com/metafates/mangal.git
-cd mangal
-go install -ldflags="-s -w"
-```
 
 ## Usage
 
@@ -120,10 +133,9 @@ Example of usage:
 
     mangal inline --source Manganelo --query "death note" --manga first --chapters "@Vol.1 @"  -d
 
-> This will download the first volume of "Death Note" from Mangalelo.
+> This will download the first volume of "Death Note" from Manganelo.
 
 Type `mangal help inline` for more information
-
 
 ### Other
 
@@ -132,8 +144,9 @@ See `mangal help` for more information
 ## Configuration
 
 Mangal uses [TOML](https://toml.io) format for configuration under the `mangal.toml` filename.
-Config is expected to be at the OS default config directory.
-For example, on Linux it would be `~/.config/mangal/mangal.toml`.
+Config path depends on the OS.
+To find yours, use `mangal where --config`.
+For example, on __Linux__ it would be `~/.config/mangal/mangal.toml`.
 
 Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
 > See `mangal env` to show all available env variables.
@@ -141,6 +154,9 @@ Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
 Run `mangal where` to show expected config paths
 
 Run `mangal config init` to generate a default config file
+
+<details>
+    <summary><strong>Default config example (click to show)</strong></summary>
 
 ```toml
 # mangal.toml
@@ -236,6 +252,11 @@ user = 'metafates'
 branch = 'main'
 
 
+[gen]
+# Name of author for gen command.
+# Will use OS username if empty
+author = ''
+
 
 [logs]
 # write logs?
@@ -245,9 +266,12 @@ write = false
 level = "info"
 ```
 
+</details>
+
 ## Custom scrapers
 
-TLDR; To browse and install a custom scraper from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) run
+TLDR; To browse and install a custom scraper
+from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) run
 
     mangal install
 
@@ -259,13 +283,17 @@ For scraper examples, check the [mangal-scrapers repository](https://github.com/
 
 ### Creating a custom scraper
 
-1. Create a new lua file in the `mangal where --sources` folder
-2. Filename will be used as a source name
-3. Your script __must__ contain __3__ essential functions
-   - `SearchManga(query)` - must return a table of tables each having 2 fields `name` and `url`
-   - `MangaChapters(mangalUrl)` - must return a table of tables each having 2 fields `name` and `url` _(again)_
-   - `ChapterPages(chapterUrl)` - must return a table of tables each having 2 fields `index` _(for ordering)_ and `url` _(to download image)_
-4. __That's it!__ You can test it by running `mangal run ...` where `...` is a filename
+This command will create `example.lua` file in the `mangal where --sources` directory.
+
+    mangal gen --name example --url https://example.com
+
+Open the file and edit it as you wish.
+Take a look at the comments for more information.
+See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) for examples.
+
+You can test it by running `mangal run <filepath>`
+
+It should automatically appear in the list of available scrapers.
 
 > New to Lua? [Quick start guide](https://learnxinyminutes.com/docs/lua/)
 
@@ -277,4 +305,4 @@ It will mark chapters as read on Anilsit when you read them inside mangal.
 
 For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist-Integration)
 
-> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open to suggestions!
+> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open for suggestions!

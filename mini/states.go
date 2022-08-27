@@ -2,7 +2,7 @@ package mini
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/provider"
@@ -32,7 +32,7 @@ const (
 func (m *mini) handleSourceSelectState() error {
 	var err error
 
-	if name := viper.GetString(config.DownloaderDefaultSource); name != "" {
+	if name := viper.GetString(constant.DownloaderDefaultSource); name != "" {
 		p, ok := provider.Get(name)
 		if !ok {
 			return fmt.Errorf("unknown source \"%s\"", name)
@@ -100,7 +100,7 @@ func (m *mini) handleMangaSearchState() error {
 
 		erase := progress("Searching Query..")
 		m.cachedMangas[query], err = m.selectedSource.Search(query)
-		max := lo.Min([]int{len(m.cachedMangas[query]), viper.GetInt(config.MiniSearchLimit)})
+		max := lo.Min([]int{len(m.cachedMangas[query]), viper.GetInt(constant.MiniSearchLimit)})
 		m.cachedMangas[query] = m.cachedMangas[query][:max]
 		erase()
 
@@ -237,7 +237,7 @@ func (m *mini) handleChapterReadState() error {
 		util.ClearScreen()
 		var erase = func() {}
 
-		err = downloader.Read(m.selectedSource, chapter, func(s string) {
+		err = downloader.Read(chapter, func(s string) {
 			erase()
 			erase = progress(s)
 		})
@@ -326,14 +326,14 @@ func (m *mini) handleChaptersDownloadState() error {
 
 		title(fmt.Sprintf("Currently downloading %s %s (%s)", chapter.Manga.Name, chapter.Name, m.selectedSource.Name()))
 
-		_, err := downloader.Download(m.selectedSource, chapter, func(s string) {
+		_, err := downloader.Download(chapter, func(s string) {
 			erase()
 			erase = progress(s)
 		})
 
 		erase()
 
-		if err != nil && viper.GetBool(config.DownloaderStopOnError) {
+		if err != nil && viper.GetBool(constant.DownloaderStopOnError) {
 			return err
 		}
 
@@ -413,11 +413,10 @@ func (m *mini) handleHistorySelectState() error {
 
 	erase = progress("Fetching Chapters..")
 	manga := &source.Manga{
-		Name:     c.MangaName,
-		URL:      c.MangaURL,
-		Index:    0,
-		SourceID: c.SourceID,
-		ID:       c.MangaID,
+		Name:  c.MangaName,
+		URL:   c.MangaURL,
+		Index: 0,
+		ID:    c.MangaID,
 	}
 	chaps, err := m.selectedSource.ChaptersOf(manga)
 	erase()

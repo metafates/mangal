@@ -23,8 +23,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case error:
-		b.errorPlot = randomPlot()
-		b.newState(errorState)
+		b.raiseError(msg)
 	case tea.WindowSizeMsg:
 		b.resize(msg.Width, msg.Height)
 	case tea.KeyMsg:
@@ -79,8 +78,6 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch b.state {
-	case idle:
-		return b.updateIdle(msg)
 	case loadingState:
 		return b.updateLoading(msg)
 	case historyState:
@@ -108,11 +105,6 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	panic("unreachable")
-}
-
-func (b *statefulBubble) updateIdle(_ tea.Msg) (tea.Model, tea.Cmd) {
-	panic("idle state must not be reached")
-	return b, nil
 }
 
 func (b *statefulBubble) updateScrapersInstall(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -214,11 +206,11 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 
 		manga := &source.Manga{
-			Name:     selected.MangaName,
-			URL:      selected.MangaURL,
-			Index:    0,
-			SourceID: selected.SourceID,
-			ID:       selected.MangaID,
+			Name:   selected.MangaName,
+			URL:    selected.MangaURL,
+			Index:  0,
+			ID:     selected.MangaID,
+			Source: b.selectedSource,
 		}
 
 		b.selectedManga = manga
@@ -256,9 +248,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				chapter := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 				err := open.Run(chapter.URL)
 				if err != nil {
-					b.lastError = err
-					b.errorPlot = randomPlot()
-					b.newState(errorState)
+					b.raiseError(err)
 				}
 			}
 		case key.Matches(msg, b.keymap.remove):
@@ -273,25 +263,25 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return b, cmd
 			}
 		case key.Matches(msg, b.keymap.selectOne, b.keymap.confirm):
-			selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
-			providers := lo.Map(b.sourcesC.Items(), func(i list.Item, _ int) *provider.Provider {
-				return i.(*listItem).internal.(*provider.Provider)
-			})
+			if b.historyC.SelectedItem() != nil {
+				selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
+				providers := lo.Map(b.sourcesC.Items(), func(i list.Item, _ int) *provider.Provider {
+					return i.(*listItem).internal.(*provider.Provider)
+				})
 
-			p, ok := lo.Find(providers, func(p *provider.Provider) bool {
-				return p.ID == selected.SourceID
-			})
+				p, ok := lo.Find(providers, func(p *provider.Provider) bool {
+					return p.ID == selected.SourceID
+				})
 
-			if !ok {
-				b.lastError = fmt.Errorf("provider %s not found", selected.SourceID)
-				b.errorPlot = randomPlot()
-				b.newState(errorState)
-				return b, nil
+				if !ok {
+					err := fmt.Errorf("provider %s not found", selected.SourceID)
+					b.raiseError(err)
+					return b, nil
+				}
+
+				b.newState(loadingState)
+				return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
 			}
-
-			b.newState(loadingState)
-			return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
-
 		}
 	}
 
@@ -364,9 +354,7 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m, _ := b.mangasC.SelectedItem().(*listItem).internal.(*source.Manga)
 			err := open.Start(m.URL)
 			if err != nil {
-				b.lastError = err
-				b.errorPlot = randomPlot()
-				b.newState(errorState)
+				b.raiseError(err)
 			}
 		}
 	case []*source.Chapter:
@@ -405,9 +393,7 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
 			err := open.Start(chapter.URL)
 			if err != nil {
-				b.errorPlot = randomPlot()
-				b.lastError = err
-				b.newState(errorState)
+				b.raiseError(err)
 			}
 		case key.Matches(msg, b.keymap.selectOne):
 			if b.chaptersC.SelectedItem() == nil {
@@ -546,9 +532,7 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.openFolder):
 			err := open.Start(filepath.Dir(b.lastDownloadedChapterPath))
 			if err != nil {
-				b.errorPlot = randomPlot()
-				b.lastError = err
-				b.newState(errorState)
+				b.raiseError(err)
 			}
 		case key.Matches(msg, b.keymap.redownloadFailed):
 			if len(b.failedChapters) == 0 {

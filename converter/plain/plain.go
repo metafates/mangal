@@ -1,13 +1,8 @@
 package plain
 
 import (
-	"fmt"
-	"github.com/metafates/mangal/config"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
-	"github.com/metafates/mangal/util"
-	"github.com/spf13/viper"
 	"io"
 	"os"
 	"path/filepath"
@@ -28,20 +23,15 @@ func (*Plain) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 
-func save(chapter *source.Chapter, temp bool) (string, error) {
-	var (
-		chapterDir string
-		err        error
-	)
-
-	if temp {
-		chapterDir, err = filesystem.Get().TempDir("", constant.TempPrefix)
-	} else {
-		chapterDir, err = prepareChapterDir(chapter)
+func save(chapter *source.Chapter, temp bool) (path string, err error) {
+	path, err = chapter.Path(temp)
+	if err != nil {
+		return
 	}
 
+	err = filesystem.Get().Mkdir(path, os.ModePerm)
 	if err != nil {
-		return "", err
+		return
 	}
 
 	wg := sync.WaitGroup{}
@@ -54,56 +44,16 @@ func save(chapter *source.Chapter, temp bool) (string, error) {
 				return
 			}
 
-			err = savePage(page, chapterDir)
+			err = savePage(page, path)
 		}(page)
 	}
 
 	wg.Wait()
-
-	if err != nil {
-		return "", err
-	}
-
-	abs, err := filepath.Abs(chapterDir)
-	if err != nil {
-		return chapterDir, nil
-	}
-
-	return abs, nil
-}
-
-// prepareMangaDir will create manga direcotry if it doesn't exist
-func prepareChapterDir(chapter *source.Chapter) (chapterDir string, err error) {
-	absDownloaderPath, err := filepath.Abs(viper.GetString(config.DownloaderPath))
-	if err != nil {
-		return "", err
-	}
-
-	if viper.GetBool(config.DownloaderCreateMangaDir) {
-		chapterDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(chapter.Manga.Name),
-			util.SanitizeFilename(chapter.FormattedName()),
-		)
-	} else {
-		chapterDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(chapter.FormattedName()),
-		)
-	}
-
-	if err = filesystem.Get().MkdirAll(chapterDir, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return chapterDir, nil
+	return
 }
 
 func savePage(page *source.Page, to string) error {
-	pageName := fmt.Sprintf("%d%s", page.Index, page.Extension)
-	pageName = util.PadZero(pageName, 10)
-
-	file, err := filesystem.Get().Create(filepath.Join(to, pageName))
+	file, err := filesystem.Get().Create(filepath.Join(to, page.Filename()))
 	if err != nil {
 		return err
 	}

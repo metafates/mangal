@@ -3,6 +3,7 @@ package manganelo
 import (
 	"github.com/gocolly/colly"
 	"github.com/metafates/mangal/source"
+	"net/http"
 )
 
 func (m *Manganelo) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
@@ -12,7 +13,7 @@ func (m *Manganelo) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 
 	ctx := colly.NewContext()
 	ctx.Put("chapter", chapter)
-	err := m.pagesCollector.Request("GET", chapter.URL, nil, ctx, nil)
+	err := m.pagesCollector.Request(http.MethodGet, chapter.URL, nil, ctx, nil)
 
 	if err != nil {
 		return nil, err

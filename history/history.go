@@ -3,7 +3,7 @@ package history
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/metafates/mangal/config"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/integration"
 	"github.com/metafates/mangal/log"
@@ -30,32 +30,31 @@ func (c *SavedChapter) String() string {
 }
 
 // Get returns all chapters from the history file
-func Get() (map[string]*SavedChapter, error) {
+func Get() (chapters map[string]*SavedChapter, err error) {
 	log.Info("Getting history location")
 	historyFile := where.History()
 
 	// decode json into slice of structs
 	log.Info("Reading history file")
-	var chapters map[string]*SavedChapter
 	contents, err := filesystem.Get().ReadFile(historyFile)
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return
 	}
 
 	log.Info("Decoding history from json")
 	err = json.Unmarshal(contents, &chapters)
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return
 	}
 
-	return chapters, nil
+	return
 }
 
 // Save saves the chapter to the history file
 func Save(chapter *source.Chapter) error {
-	if viper.GetBool(config.AnilistEnable) {
+	if viper.GetBool(constant.AnilistEnable) {
 		defer func() {
 			log.Info("Saving chapter to anilist")
 			err := integration.Anilist.MarkRead(chapter)
@@ -86,7 +85,7 @@ func Save(chapter *source.Chapter) error {
 	}
 
 	jsonChapter := SavedChapter{
-		SourceID:           chapter.SourceID,
+		SourceID:           chapter.Manga.Source.ID(),
 		MangaName:          chapter.Manga.Name,
 		MangaURL:           chapter.Manga.URL,
 		Name:               chapter.Name,
@@ -97,7 +96,7 @@ func Save(chapter *source.Chapter) error {
 		Index:              int(chapter.Index),
 	}
 
-	chapters[fmt.Sprintf("%s (%s)", chapter.Manga.Name, chapter.SourceID)] = &jsonChapter
+	chapters[fmt.Sprintf("%s (%s)", jsonChapter.MangaName, jsonChapter.SourceID)] = &jsonChapter
 
 	// encode json
 	log.Info("Encoding history to json")

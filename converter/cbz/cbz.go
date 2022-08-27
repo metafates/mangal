@@ -2,18 +2,13 @@ package cbz
 
 import (
 	"archive/zip"
-	"fmt"
-	"github.com/metafates/mangal/config"
-	"github.com/metafates/mangal/constant"
+	"bytes"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
-	"github.com/spf13/afero"
-	"github.com/spf13/viper"
+	"github.com/samber/lo"
 	"io"
-	"os"
-	"path/filepath"
-	"strings"
+	"text/template"
 )
 
 type CBZ struct{}
@@ -30,92 +25,48 @@ func (*CBZ) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 
-func save(chapter *source.Chapter, temp bool) (string, error) {
-
-	var (
-		mangaDir string
-		err      error
-	)
-
-	if temp {
-		mangaDir, err = filesystem.Get().TempDir("", constant.TempPrefix)
-	} else {
-		mangaDir, err = prepareMangaDir(chapter.Manga)
-	}
-
+func save(chapter *source.Chapter, temp bool) (path string, err error) {
+	path, err = chapter.Path(temp)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	chapterCbz := filepath.Join(mangaDir, util.SanitizeFilename(chapter.FormattedName())+".cbz")
-	cbzFile, err := filesystem.Get().Create(chapterCbz)
+	cbzFile, err := filesystem.Get().Create(path)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	defer func(cbzFile afero.File) {
-		_ = cbzFile.Close()
-	}(cbzFile)
+	defer util.Ignore(cbzFile.Close)
 
 	zipWriter := zip.NewWriter(cbzFile)
-	defer func(zipWriter *zip.Writer) {
-		_ = zipWriter.Close()
-	}(zipWriter)
+	defer util.Ignore(zipWriter.Close)
 
 	for _, page := range chapter.Pages {
-		pageName := fmt.Sprintf("%d%s", page.Index, page.Extension)
-		pageName = util.PadZero(pageName, 10)
-
-		if err = addToZip(zipWriter, page.Contents, pageName); err != nil {
-			return "", err
+		if err = addToZip(zipWriter, page.Contents, page.Filename()); err != nil {
+			return
 		}
 	}
 
-	err = addToZip(zipWriter, strings.NewReader(comicInfo(chapter)), "ComicInfo.xml")
-	if err != nil {
-		return "", err
-	}
-
-	absPath, err := filepath.Abs(chapterCbz)
-	if err != nil {
-		return chapterCbz, nil
-	}
-
-	return absPath, nil
+	err = addToZip(zipWriter, comicInfo(chapter), "ComicInfo.xml")
+	return
 }
 
-// prepareMangaDir will create manga direcotry if it doesn't exist
-func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
-	absDownloaderPath, err := filepath.Abs(viper.GetString(config.DownloaderPath))
-	if err != nil {
-		return "", err
-	}
-
-	if viper.GetBool(config.DownloaderCreateMangaDir) {
-		mangaDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(manga.Name),
-		)
-	} else {
-		mangaDir = absDownloaderPath
-	}
-
-	if err = filesystem.Get().MkdirAll(mangaDir, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return mangaDir, nil
-}
-
-func comicInfo(chapter *source.Chapter) string {
-	return `
-<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <Title>` + chapter.Name + `</Title>
-  <Series>` + chapter.Manga.Name + `</Series>
-  <Genre>Web Comic</Genre>
-  <Web>` + chapter.Manga.URL + `</Web>
-  <Manga>YesAndRightToLeft</Manga>
+func comicInfo(chapter *source.Chapter) *bytes.Buffer {
+	t := `<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Title>{{ .Name }}</Title>
+  	<Series>{{ .Manga.Name }}</Series>
+  	<Genre>Web Comic</Genre>
+  	<Web>{{ .Manga.URL }}</Web>
+	<PageCount>{{ len .Pages }}</PageCount>
+	<Count>{{ len .Manga.Chapters }}</Count>
+  	<Manga>YesAndRightToLeft</Manga>
 </ComicInfo>`
+
+	parsed := lo.Must(template.New("ComicInfo").Parse(t))
+	buf := bytes.NewBufferString("")
+	lo.Must0(parsed.Execute(buf, chapter))
+
+	return buf
 }
 
 func addToZip(writer *zip.Writer, file io.Reader, name string) error {

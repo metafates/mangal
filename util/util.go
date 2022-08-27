@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"github.com/samber/lo"
+	"golang.org/x/exp/constraints"
 	"golang.org/x/term"
 	"os"
 	"os/exec"
@@ -14,11 +15,7 @@ import (
 
 // PadZero pads a number with leading zeros.
 func PadZero(s string, l int) string {
-	for l > len(s) {
-		s = "0" + s
-	}
-
-	return s
+	return strings.Repeat("0", Max(l-len(s), 0)) + s
 }
 
 // replacers is a list of regexp.Regexp pairs that will be used to sanitize filenames.
@@ -98,17 +95,32 @@ func ClearScreen() {
 	}
 }
 
-// ReGroups parses url with the given regular expression and returns the
+// ReGroups parses the string with the given regular expression and returns the
 // group values defined in the expression.
-func ReGroups(pattern *regexp.Regexp, str string) map[string]string {
-
+func ReGroups(pattern *regexp.Regexp, str string) (groups map[string]string) {
+	groups = make(map[string]string)
 	match := pattern.FindStringSubmatch(str)
 
-	groups := make(map[string]string)
 	for i, name := range pattern.SubexpNames() {
 		if i > 0 && i <= len(match) {
 			groups[name] = match[i]
 		}
 	}
-	return groups
+
+	return
+}
+
+// Ignore calls function and explicitely ignores error
+func Ignore(f func() error) {
+	_ = f()
+}
+
+func Max[T constraints.Ordered](items ...T) (max T) {
+	for _, item := range items {
+		if item > max {
+			max = item
+		}
+	}
+
+	return
 }

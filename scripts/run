@@ -1,0 +1,96 @@
+#!/bin/sh
+
+set -e
+
+# Check if command is available
+has() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+info() {
+    printf "\033[1;35minfo:\033[0m %s\n" "$1"
+}
+
+warn() {
+    echo "warn: $1"
+}
+
+err() {
+    printf "\33[2K\r\033[1;31m%s\033[0m\n" "$*" >&2
+}
+
+die() {
+    err "$1"
+    exit 1
+}
+
+# Download file. first argument is out path, second is URL
+download() {
+    curl -sfLo "$1" "$2"
+}
+
+pre_run() {
+    RELEASES_URL="https://github.com/metafates/mangal/releases"
+    FILE_BASENAME="mangal"
+
+    info "Fetching latest version..."
+    TAG="$(curl -sfL -o /dev/null -w "%{url_effective}" "$RELEASES_URL/latest" |
+        rev |
+        cut -f1 -d'/' |
+        rev)"
+
+    test -z "$TAG" && {
+        echo "Unable to get mangal version." >&2
+        exit 1
+    }
+
+    test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
+
+    OS=$(uname -s)
+    ARCH=$(uname -m)
+    VERSION=${TAG#?}
+
+    export RELEASES_URL FILE_BASENAME VERSION TAG OS ARCH
+}
+
+
+verify_checksums() {
+    info "Verifying checksums..."
+    if has sha256sum; then
+        sha256sum --ignore-missing --quiet --check checksums.txt
+    else
+        shasum -a 256 --ignore-missing --quiet --check checksums.txt
+    fi
+}
+
+
+run() {
+    pre_run
+
+    if [ "$OS" = "Linux" ] && [ "$ARCH" = "aarch64" ]; then
+        ARCH="arm64"
+    fi
+
+    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
+    TAR_FILE="$TMPDIR/$TAR_NAME"
+
+    export TAR_NAME
+    export TAR_FILE
+
+    (
+        cd "$TMPDIR"
+
+        info "Downloading Mangal $VERSION..."
+        download "$TAR_FILE" "$RELEASES_URL/download/$TAG/$TAR_NAME"
+
+        info "Downloading checksums..."
+        download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
+
+        verify_checksums
+    )
+
+    tar -xf "$TAR_FILE" -C "$TMPDIR"
+    "${TMPDIR}/${FILE_BASENAME}" "$@"
+}
+
+run "$@"

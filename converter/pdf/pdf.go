@@ -1,7 +1,6 @@
 package pdf
 
 import (
-	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
@@ -9,11 +8,8 @@ import (
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/log"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
-	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"io"
-	"os"
-	"path/filepath"
 )
 
 type PDF struct{}
@@ -30,66 +26,26 @@ func (*PDF) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 
-func save(chapter *source.Chapter, temp bool) (string, error) {
-	var (
-		mangaDir string
-		err      error
-	)
-
-	if temp {
-		mangaDir, err = filesystem.Get().TempDir("", constant.TempPrefix)
-	} else {
-		mangaDir, err = prepareMangaDir(chapter.Manga)
-	}
-
+func save(chapter *source.Chapter, temp bool) (path string, err error) {
+	path, err = chapter.Path(temp)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	chapterPdf := filepath.Join(mangaDir, util.SanitizeFilename(chapter.FormattedName())+".pdf")
-	pdfFile, err := filesystem.Get().Create(chapterPdf)
+	file, err := filesystem.Get().Create(path)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	defer func(pdfFile afero.File) {
-		_ = pdfFile.Close()
-	}(pdfFile)
+	defer util.Ignore(file.Close)
 
-	var readers = make([]io.Reader, len(chapter.Pages))
+	var images = make([]io.Reader, len(chapter.Pages))
 	for i, page := range chapter.Pages {
-		readers[i] = page
+		images[i] = page
 	}
 
-	err = imagesToPDF(pdfFile, readers)
-	if err != nil {
-		return "", err
-	}
-
-	return chapterPdf, nil
-}
-
-// prepareMangaDir will create manga direcotry if it doesn't exist
-func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
-	absDownloaderPath, err := filepath.Abs(viper.GetString(config.DownloaderPath))
-	if err != nil {
-		return "", err
-	}
-
-	if viper.GetBool(config.DownloaderCreateMangaDir) {
-		mangaDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(manga.Name),
-		)
-	} else {
-		mangaDir = absDownloaderPath
-	}
-
-	if err = filesystem.Get().MkdirAll(mangaDir, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return mangaDir, nil
+	err = imagesToPDF(file, images)
+	return
 }
 
 // imagesToPDF will convert images to PDF and write to w
@@ -123,7 +79,7 @@ func imagesToPDF(w io.Writer, images []io.Reader) error {
 		indRef, err := pdfcpu.NewPageForImage(ctx.XRefTable, r, pagesIndRef, imp)
 
 		if err != nil {
-			if viper.GetBool(config.FormatsSkipUnsupportedImages) {
+			if viper.GetBool(constant.FormatsSkipUnsupportedImages) {
 				continue
 			}
 

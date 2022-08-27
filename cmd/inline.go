@@ -1,23 +1,24 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/inline"
 	"github.com/metafates/mangal/provider"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
 	rootCmd.AddCommand(inlineCmd)
 
-	inlineCmd.Flags().String("source", "", "source to use. see `mangal sources` for available sources")
 	inlineCmd.Flags().String("query", "", "query to search for")
 	inlineCmd.Flags().String("manga", "", "manga selector")
 	inlineCmd.Flags().String("chapters", "", "chapter selector")
 	inlineCmd.Flags().BoolP("download", "d", false, "download chapters")
 
-	lo.Must0(inlineCmd.MarkFlagRequired("source"))
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	lo.Must0(inlineCmd.MarkFlagRequired("manga"))
 	lo.Must0(inlineCmd.MarkFlagRequired("chapters"))
@@ -42,27 +43,24 @@ Chapter selectors:
   @[substring]@ - select chapters by name substring`,
 
 	Example: "mangal inline --source Manganelo --query \"death note\" --manga first --chapters \"@Vol.1 @\" -d",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		sourceName := lo.Must(cmd.Flags().GetString("source"))
+	Run: func(cmd *cobra.Command, args []string) {
+		sourceName := viper.GetString(constant.DownloaderDefaultSource)
+		if sourceName == "" {
+			handleErr(errors.New("source not set"))
+		}
 		p, ok := provider.Get(sourceName)
 		if !ok {
-			return fmt.Errorf("source not found: %s", sourceName)
+			handleErr(fmt.Errorf("source not found: %s", sourceName))
 		}
 
 		src, err := p.CreateSource()
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		mangaPicker, err := inline.ParseMangaPicker(lo.Must(cmd.Flags().GetString("manga")))
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		chapterFilter, err := inline.ParseChaptersFilter(lo.Must(cmd.Flags().GetString("chapters")))
-		if err != nil {
-			return err
-		}
+		handleErr(err)
 
 		options := &inline.Options{
 			Source:        src,
@@ -72,6 +70,6 @@ Chapter selectors:
 			ChapterFilter: chapterFilter,
 		}
 
-		return inline.Run(options)
+		handleErr(inline.Run(options))
 	},
 }

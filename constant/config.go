@@ -1,4 +1,4 @@
-package config
+package constant
 
 const (
 	DownloaderPath                = "downloader.path"
@@ -55,37 +55,10 @@ const (
 )
 
 const (
+	GenAuthor = "gen.author"
+)
+
+const (
 	LogsWrite = "logs.write"
 	LogsLevel = "logs.level"
 )
-
-var EnvExposed = []string{
-	// downloader
-	DownloaderPath,
-	DownloaderChapterNameTemplate,
-	DownloaderCreateMangaDir,
-	DownloaderDefaultSource,
-
-	// formats
-	FormatsUse,
-
-	// reader
-	ReaderCBZ,
-	ReaderPDF,
-	ReaderZIP,
-	RaderPlain,
-
-	// history
-	HistorySaveOnRead,
-	HistorySaveOnDownload,
-
-	// Logs
-	LogsWrite,
-	LogsLevel,
-
-	// Anilist
-	AnilistEnable,
-	AnilistID,
-	AnilistSecret,
-	AnilistCode,
-}

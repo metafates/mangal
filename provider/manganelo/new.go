@@ -10,7 +10,14 @@ import (
 	"time"
 )
 
-var delay = time.Millisecond * 500
+var (
+	delay       = time.Millisecond * 500
+	parallelism = 50
+
+	mangasSelector   = ".search-story-item a.item-title"
+	chaptersSelector = ".chapter-name"
+	pageSelector     = ".container-chapter-reader img"
+)
 
 func New() source.Source {
 	manganelo := Manganelo{
@@ -40,7 +47,7 @@ func New() source.Source {
 	})
 
 	// Get mangas
-	mangasCollector.OnHTML(".search-story-item a.item-title", func(e *colly.HTMLElement) {
+	mangasCollector.OnHTML(mangasSelector, func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		manga := source.Manga{
@@ -48,14 +55,14 @@ func New() source.Source {
 			URL:      e.Request.AbsoluteURL(link),
 			Index:    uint16(e.Index),
 			Chapters: make([]*source.Chapter, 0),
-			SourceID: manganelo.ID(),
+			Source:   &manganelo,
 		}
 
 		manganelo.mangas[path] = append(manganelo.mangas[path], &manga)
 	})
 
 	_ = mangasCollector.Limit(&colly.LimitRule{
-		Parallelism: 50,
+		Parallelism: parallelism,
 		RandomDelay: delay,
 		DomainGlob:  "*",
 	})
@@ -70,24 +77,23 @@ func New() source.Source {
 	})
 
 	// Get chapters
-	chaptersCollector.OnHTML(".chapter-name", func(e *colly.HTMLElement) {
+	chaptersCollector.OnHTML(chaptersSelector, func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
 		chapter := source.Chapter{
-			Name:     e.Text,
-			URL:      e.Request.AbsoluteURL(link),
-			Index:    uint16(e.Index),
-			Pages:    make([]*source.Page, 0),
-			Manga:    manga,
-			SourceID: manganelo.ID(),
+			Name:  e.Text,
+			URL:   e.Request.AbsoluteURL(link),
+			Index: uint16(e.Index),
+			Pages: make([]*source.Page, 0),
+			Manga: manga,
 		}
 		manga.Chapters = append(manga.Chapters, &chapter)
 
 		manganelo.chapters[path] = append(manganelo.chapters[path], &chapter)
 	})
 	_ = chaptersCollector.Limit(&colly.LimitRule{
-		Parallelism: 50,
+		Parallelism: parallelism,
 		RandomDelay: delay,
 		DomainGlob:  "*",
 	})
@@ -101,7 +107,7 @@ func New() source.Source {
 	})
 
 	// Get pages
-	pagesCollector.OnHTML(".container-chapter-reader img", func(e *colly.HTMLElement) {
+	pagesCollector.OnHTML(pageSelector, func(e *colly.HTMLElement) {
 		link := e.Attr("data-src")
 		ext := filepath.Ext(link)
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
@@ -111,14 +117,13 @@ func New() source.Source {
 			Index:     uint16(e.Index),
 			Chapter:   chapter,
 			Extension: ext,
-			SourceID:  manganelo.ID(),
 		}
 		chapter.Pages = append(chapter.Pages, &page)
 
 		manganelo.pages[path] = append(manganelo.pages[path], &page)
 	})
 	_ = pagesCollector.Limit(&colly.LimitRule{
-		Parallelism: 50,
+		Parallelism: parallelism,
 		RandomDelay: delay,
 		DomainGlob:  "*",
 	})

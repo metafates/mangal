@@ -2,17 +2,10 @@ package zip
 
 import (
 	"archive/zip"
-	"fmt"
-	"github.com/metafates/mangal/config"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
-	"github.com/spf13/afero"
-	"github.com/spf13/viper"
 	"io"
-	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -30,70 +23,29 @@ func (*ZIP) SaveTemp(chapter *source.Chapter) (string, error) {
 	return save(chapter, true)
 }
 
-func save(chapter *source.Chapter, temp bool) (string, error) {
-	var (
-		mangaDir string
-		err      error
-	)
-
-	if temp {
-		mangaDir, err = filesystem.Get().TempDir("", constant.TempPrefix)
-	} else {
-		mangaDir, err = prepareMangaDir(chapter.Manga)
-	}
-
+func save(chapter *source.Chapter, temp bool) (path string, err error) {
+	path, err = chapter.Path(temp)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	chapterZip := filepath.Join(mangaDir, util.SanitizeFilename(chapter.FormattedName())+".zip")
-	zipFile, err := filesystem.Get().Create(chapterZip)
+	zipFile, err := filesystem.Get().Create(path)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	defer func(zipFile afero.File) {
-		_ = zipFile.Close()
-	}(zipFile)
+	defer util.Ignore(zipFile.Close)
 
 	zipWriter := zip.NewWriter(zipFile)
-	defer func() {
-		_ = zipWriter.Close()
-	}()
+	defer util.Ignore(zipWriter.Close)
 
 	for _, page := range chapter.Pages {
-		pageName := fmt.Sprintf("%d%s", page.Index, page.Extension)
-		pageName = util.PadZero(pageName, 10)
-
-		if err = addToZip(zipWriter, page.Contents, pageName); err != nil {
+		if err = addToZip(zipWriter, page.Contents, page.Filename()); err != nil {
 			return "", err
 		}
 	}
 
-	return chapterZip, nil
-}
-
-// prepareMangaDir will create manga direcotry if it doesn't exist
-func prepareMangaDir(manga *source.Manga) (mangaDir string, err error) {
-	absDownloaderPath, err := filepath.Abs(viper.GetString(config.DownloaderPath))
-	if err != nil {
-		return "", err
-	}
-
-	if viper.GetBool(config.DownloaderCreateMangaDir) {
-		mangaDir = filepath.Join(
-			absDownloaderPath,
-			util.SanitizeFilename(manga.Name),
-		)
-	} else {
-		mangaDir = absDownloaderPath
-	}
-
-	if err = filesystem.Get().MkdirAll(mangaDir, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return mangaDir, nil
+	return
 }
 
 func addToZip(writer *zip.Writer, file io.Reader, name string) error {

@@ -3,34 +3,43 @@ package cmd
 import (
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 func init() {
 	rootCmd.AddCommand(sourcesCmd)
+
+	sourcesCmd.Flags().BoolP("raw", "r", false, "do not print headers")
 }
 
 var sourcesCmd = &cobra.Command{
 	Use:     "sources",
 	Short:   "List an available sources",
 	Example: "mangal sources",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.SetOut(os.Stdout)
+
+		printHeader := !lo.Must(cmd.Flags().GetBool("raw"))
 		headerStyle := style.Combined(style.Bold, style.HiBlue)
 
-		cmd.Println(headerStyle("Builtin:"))
+		h := func(s string) {
+			if printHeader {
+				cmd.Println(headerStyle(s))
+			}
+		}
+
+		h("Builtin:")
 		for name := range provider.DefaultProviders() {
 			cmd.Println(name)
 		}
 
-		cmd.Println()
+		h("")
 
-		cmd.Println(headerStyle("Custom:"))
-		custom := provider.CustomProviders()
-
-		for name := range custom {
+		h("Custom:")
+		for name := range provider.CustomProviders() {
 			cmd.Println(name)
 		}
-
-		return nil
 	},
 }

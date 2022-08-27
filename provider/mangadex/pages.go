@@ -14,11 +14,11 @@ func (m *Mangadex) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 		return nil, err
 	}
 
-	var pages []*source.Page
-
 	if len(downloader.Pages) == 0 {
 		return nil, errors.New("there were no pages for this chapter")
 	}
+
+	var pages = make([]*source.Page, len(downloader.Pages))
 
 	for i, name := range downloader.Pages {
 		image, err := downloader.GetChapterPage(name)
@@ -36,11 +36,11 @@ func (m *Mangadex) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 			Extension: filepath.Ext(name),
 			Contents:  io.NopCloser(bytes.NewReader(image)),
 			Size:      uint64(len(image)),
-			SourceID:  ID,
 		}
-		chapter.Pages = append(chapter.Pages, &page)
-		pages = append(pages, &page)
+
+		pages[i] = &page
 	}
 
+	chapter.Pages = pages
 	return pages, nil
 }

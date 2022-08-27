@@ -3,6 +3,7 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/metafates/mangal/util"
 	"io"
 	"net/http"
 )
@@ -44,9 +45,7 @@ func (g *githubFilesCollector) collect() error {
 		return err
 	}
 
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(res.Body)
+	defer util.Ignore(res.Body.Close)
 
 	err = json.Unmarshal(r, g)
 	if err != nil {

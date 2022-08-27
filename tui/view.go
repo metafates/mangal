@@ -13,8 +13,6 @@ import (
 
 func (b *statefulBubble) View() string {
 	switch b.state {
-	case idle:
-		return b.viewIdle()
 	case scrapersInstallState:
 		return b.viewScrapersInstallState()
 	case loadingState:
@@ -42,10 +40,6 @@ func (b *statefulBubble) View() string {
 	}
 
 	panic("unknown state")
-}
-
-func (b *statefulBubble) viewIdle() string {
-	return ""
 }
 
 func (b *statefulBubble) viewLoading() string {
@@ -92,7 +86,7 @@ func (b *statefulBubble) viewConfirm() string {
 		[]string{
 			style.Title("Confirm"),
 			"",
-			fmt.Sprintf(icon.Get(icon.Question)+" Download %d chapters?", len(b.selectedChapters)),
+			fmt.Sprintf("%s Download %s?", icon.Get(icon.Question), util.Quantity(len(b.selectedChapters), "chapter")),
 		},
 	)
 }
@@ -173,10 +167,8 @@ func (b *statefulBubble) viewError() string {
 			"",
 			icon.Get(icon.Fail) + " Uggh, something went wrong. Maybe try again?",
 			"",
-			style.Italic(util.Wrap(b.errorPlot, b.width)),
-			"",
 		},
-			strings.Split(errorMsg, "\n")...,
+			strings.Split(util.Wrap(style.Italic(b.errorPlot), b.width)+"\n\n"+errorMsg, "\n")...,
 		),
 	)
 }
