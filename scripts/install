@@ -104,7 +104,7 @@ install_binary() {
     info "Installing..."
     OUT="/usr/local/bin/"
     info "Linux detected. Moving to ${OUT}"
-    sudo cp "${TMPDIR}/${FILE_BASENAME}" "${OUT}"
+    sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
 }
 
 install_macos() {
