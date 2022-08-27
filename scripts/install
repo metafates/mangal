@@ -116,9 +116,15 @@ install_macos() {
         return
     fi
 
-    info "Installing with homebrew..."
+    info "Installing with Homebrew..."
     brew tap metafates/mangal
-    brew install mangal
+
+    if has mangal;
+    then
+        brew reinstall mangal
+    else
+        brew install mangal
+    fi
 }
 
 install_rpm() {
@@ -175,7 +181,12 @@ pre_install() {
 }
 
 post_install() {
-    printf "\n🎉 \033[1;32mMangal was installed successfully\033[0m\n"
+    if has mangal;
+    then
+        printf "\n🎉 \033[1;32mMangal was installed successfully\033[0m\n\n"
+    else
+        die "Mangal was not installed :("
+    fi
 }
 
 install() {
