@@ -18,8 +18,14 @@ test -z "$VERSION" && {
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 
 
+OS=$(uname -s)
+ARCH=$(uname -m)
 
-TAR_NAME="${FILE_BASENAME}_${VERSION:1}_$(uname -s)_$(uname -m).tar.gz"
+if [[ $OS -eq "Linux" && $ARCH -eq "aarch64" ]]; then
+  ARCH="arm64"
+fi
+
+TAR_NAME="${FILE_BASENAME}_${VERSION:1}_${OS}_${ARCH}.tar.gz"
 TAR_FILE="$TMPDIR/${TAR_NAME}"
 
 export TAR_NAME
