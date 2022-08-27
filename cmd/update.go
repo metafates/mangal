@@ -6,6 +6,7 @@ import (
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/updater"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 func init() {
@@ -16,6 +17,8 @@ var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update mangal",
 	Run: func(cmd *cobra.Command, args []string) {
+		cmd.SetOut(os.Stdout)
+
 		cmd.Printf("%s %s\n", icon.Get(icon.Progress), "Fetching latest version...")
 
 		latestVersion, err := updater.LatestVersion()

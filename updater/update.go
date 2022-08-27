@@ -3,6 +3,7 @@ package updater
 import (
 	"errors"
 	"fmt"
+	"github.com/metafates/mangal/icon"
 	"net/http"
 	"os"
 	"os/exec"
@@ -13,10 +14,13 @@ func Update() (err error) {
 
 	switch method {
 	case homebrew:
+		fmt.Printf("%s Homebrew installation detected", icon.Get(icon.Progress))
 		return updateHomebrew()
 	case scoop:
+		fmt.Printf("%s Scoop installation detected", icon.Get(icon.Progress))
 		return updateScoop()
 	case script:
+		fmt.Printf("%s Script installation detected", icon.Get(icon.Progress))
 		return updateScript()
 	case unknown:
 		return errors.New("unknown installation method, can't update")

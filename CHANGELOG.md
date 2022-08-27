@@ -7,11 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 3.5.0
 
-- `mangal update` command added
+- `mangal update` command added to update itself
+- `mangal gen` command added to generate a template for custom source
 - Added `--raw` flag for the `sources` command to print without headers
 - Added `--downloads` flag for the `where` command to print location of the downloads directory
 - Option to show all languages in mangadex by setting `mangadex.language = 'any'` in the config.
-- `gen` command added to generate a template for custom source
 - Show chapter index in the TUI history list
 - Fixed bug where pressing <kbd>confirm</kbd> button with empty history would cause mangal to crash
 - Fixed bug where error message would not fit the screen

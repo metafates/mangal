@@ -46,7 +46,6 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - [Linux / macOS](#linux--macos)
 - [Windows](#windows)
 - [Docker](#docker)
-- [Manual](#manual)
 
 ### Linux + MacOS
 
@@ -59,7 +58,6 @@ For example, on macOS it will try to use Homebrew, on Ubuntu it will install the
 
 <details>
 <summary>😡 I hate scripts! Show me how to install it manually</summary>
-
 
 #### Arch Linux
 
@@ -82,6 +80,21 @@ Install using [Homebrew](https://brew.sh/)
     brew tap metafates/mangal
     brew install mangal
 
+#### Pre-compiled
+
+Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
+and copy them to the desired location.
+
+#### From source
+
+Visit this link to install [Go](https://go.dev/doc/install)
+
+```bash
+git clone --depth 1 https://github.com/metafates/mangal.git
+cd mangal
+go install -ldflags="-s -w"
+```
+
 </details>
 
 
@@ -101,24 +114,6 @@ Install using... well, you know. (thanks to [@ArabCoders](https://github.com/Ara
 To run
 
     docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
-
-### Manual
-
-
-#### Pre-compiled
-
-Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
-and copy them to the desired location.
-
-#### From source
-
-Visit this link to install [Go](https://go.dev/doc/install)
-
-```bash
-git clone --depth 1 https://github.com/metafates/mangal.git
-cd mangal
-go install -ldflags="-s -w"
-```
 
 ## Usage
 
