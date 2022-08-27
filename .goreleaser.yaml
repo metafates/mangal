@@ -74,7 +74,7 @@ dockers:
     goarch: amd64
     image_templates:
       - "metafates/mangal:latest"
-    skip_push: true
+    skip_push: false
     use: docker
 
 brews:
@@ -94,7 +94,7 @@ brews:
     homepage: "https://github.com/metafates/mangal"
     description: "The ultimate CLI manga downloader!"
     license: "MIT"
-    skip_upload: true
+    skip_upload: false
 
     test: |
       system "#{bin}/mangal -v"
@@ -122,7 +122,7 @@ scoop:
   homepage: "https://github.com/metafates/mangal"
   description: "The ultimate CLI manga downloader!"
   license: MIT
-  skip_upload: true
+  skip_upload: false
 
 
 release:
@@ -130,7 +130,7 @@ release:
     owner: metafates
     name: mangal
 
-  draft: true
+  draft: false
   name_template: "{{.ProjectName}} v{{.Version}}"
   footer: |
     **Full Changelog**: https://github.com/metafates/mangal/compare/{{ .PreviousTag }}...{{ .Tag }}
