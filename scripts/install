@@ -23,37 +23,19 @@ contains() {
 }
 
 create_termux_alias() {
-    alias "mangal" >/dev/null 2>&1 && return
-
-    info "Creating alias for mangal..."
     ALIAS="alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
-    info "$ALIAS"
+    BASHRC="$PREFIX/etc/bash.bashrc"
+    ZSHRC="$HOME/.zshrc"
 
-    PS=$(ps)
-    ANY=0
-
-    contains "$PS" "bash" && {
+    contains "$(cat "$BASHRC")" "alias mangal" || {
         echo "$ALIAS" >> "$PREFIX/etc/bash.bashrc"
         info "Alias for bash created"
-        ANY=1
     }
 
-    contains "$PS" "zsh" && {
+    contains "$(cat "$ZSHRC")" "alias mangal" || {
         echo "$ALIAS" >> "$HOME/.zshrc"
         info "Alias for zsh created"
-        ANY=1
     }
-
-    contains "$PS" "fish" && {
-        mkdir -p "$HOME/.config/fish/conf.d"
-        echo "$ALIAS" >>"$HOME/.config/fish/conf.d/aliases.fish"
-        info "Alias for fish created"
-        ANY=1
-    }
-
-    if [ $ANY -eq 0 ]; then
-        warn "Could not create alias for unknown shell. Run this script from bash, zsh or fish."
-    fi
 }
 
 info() {
