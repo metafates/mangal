@@ -11,6 +11,17 @@ is_under_termux() {
     has termux-setup-storage
 }
 
+contains() {
+    string="$1"
+    substring="$2"
+    if test "${string#*$substring}" != "$string"
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
 create_termux_alias() {
     alias "mangal" >/dev/null 2>&1 && return
 
@@ -18,24 +29,31 @@ create_termux_alias() {
     ALIAS="alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
     info "$ALIAS"
 
-    case $(ps -p $$) in
-    *bash*)
+    PS=$(ps)
+    ANY=0
+
+    contains "$PS" "bash" && {
         echo "$ALIAS" >> "$PREFIX/etc/bash.bashrc"
         info "Alias for bash created"
-        ;;
-    *zsh*)
-        echo "$ALIAS" >>"$HOME/.zshrc"
+        ANY=1
+    }
+
+    contains "$PS" "zsh" && {
+        echo "$ALIAS" >> "$HOME/.zshrc"
         info "Alias for zsh created"
-        ;;
-    *fish*)
+        ANY=1
+    }
+
+    contains "$PS" "fish" && {
         mkdir -p "$HOME/.config/fish/conf.d"
         echo "$ALIAS" >>"$HOME/.config/fish/conf.d/aliases.fish"
         info "Alias for fish created"
-        ;;
-    *)
+        ANY=1
+    }
+
+    $ANY || {
         warn "Could not create alias for unknown shell. Run this script from bash, zsh or fish."
-        ;;
-    esac
+    }
 }
 
 info() {
