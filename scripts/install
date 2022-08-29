@@ -7,33 +7,35 @@ has() {
     command -v "$1" >/dev/null 2>&1
 }
 
-has_alias() {
-    alias "$1" >/dev/null 2>&1
-}
-
 is_under_termux() {
     has termux-setup-storage
 }
 
 create_termux_alias() {
+    alias "mangal" >/dev/null 2>&1 && return
+
     info "Creating alias for mangal..."
+    ALIAS="alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
     info "$ALIAS"
 
-    ALIAS="alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
-
-    echo "$ALIAS" >>"$PREFIX/etc/bash.bashrc"
-    info "Alias for bash created"
-
-    test -f "$HOME/.zshrc" && {
+    case $(ps -p $$) in
+    *bash*)
+        echo "$ALIAS" >> "$PREFIX/etc/bash.bashrc"
+        info "Alias for bash created"
+        ;;
+    *zsh*)
         echo "$ALIAS" >>"$HOME/.zshrc"
         info "Alias for zsh created"
-    }
-
-    test -d "$HOME/.config/fish" && {
+        ;;
+    *fish*)
         mkdir -p "$HOME/.config/fish/conf.d"
         echo "$ALIAS" >>"$HOME/.config/fish/conf.d/aliases.fish"
         info "Alias for fish created"
-    }
+        ;;
+    *)
+        warn "Could not create alias for unknown shell. Run this script from bash, zsh or fish."
+        ;;
+    esac
 }
 
 info() {
@@ -166,7 +168,7 @@ install_termux() {
         pkg install proot
     }
 
-    has_alias mangal || create_termux_alias
+    create_termux_alias
 }
 
 install_macos() {
