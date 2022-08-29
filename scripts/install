@@ -15,6 +15,27 @@ is_under_termux() {
     has termux-setup-storage
 }
 
+create_termux_alias() {
+    info "Creating alias for mangal..."
+    info "$ALIAS"
+
+    ALIAS="alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
+
+    echo "$ALIAS" >>"$PREFIX/etc/bash.bashrc"
+    info "Alias for bash created"
+
+    test -f "$HOME/.zshrc" && {
+        echo "$ALIAS" >>"$HOME/.zshrc"
+        info "Alias for zsh created"
+    }
+
+    test -d "$HOME/.config/fish" && {
+        mkdir -p "$HOME/.config/fish/conf.d"
+        echo "$ALIAS" >>"$HOME/.config/fish/conf.d/aliases.fish"
+        info "Alias for fish created"
+    }
+}
+
 info() {
     printf "\033[1;35mInfo:\033[0m %s\n" "$1"
 }
@@ -112,7 +133,7 @@ install_termux() {
         ;;
     esac
 
-    TAR_NAME="${FILE_BASENAME}_${VERSION}_Android_${ARCH}.tar.gz"
+    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
     TAR_FILE="$TMPDIR/$TAR_NAME"
 
     export TAR_NAME TAR_FILE
@@ -132,23 +153,20 @@ install_termux() {
     tar -xf "$TAR_FILE" -C "$TMPDIR"
 
     OUT="$PREFIX/bin"
-    info "Moving to ${OUT}"
+    info "Moving to ${OUT}..."
     sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
 
     pkg list-installed resolv-conf >/dev/null 2>&1 || {
-        info "Installing resolv-conf"
+        info "Installing resolv-conf..."
         pkg install resolv-conf
     }
 
     pkg list-installed proot >/dev/null 2>&1 || {
-        info "Installing proot"
+        info "Installing proot..."
         pkg install proot
     }
 
-    has_alias mangal || {
-        info "Creating alias for mangal"
-        echo "alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'" >>"$PREFIX/etc/bash.bashrc"
-    }
+    has_alias mangal || create_termux_alias
 }
 
 install_macos() {
