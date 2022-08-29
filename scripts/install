@@ -27,12 +27,13 @@ create_termux_alias() {
     BASHRC="$PREFIX/etc/bash.bashrc"
     ZSHRC="$HOME/.zshrc"
 
-    contains "$(cat "$BASHRC")" "alias mangal" || {
+     contains "$(cat "$BASHRC")" "alias mangal" || {
         echo "$ALIAS" >> "$PREFIX/etc/bash.bashrc"
         info "Alias for bash created"
     }
 
-    contains "$(cat "$ZSHRC")" "alias mangal" || {
+    # shellcheck disable=SC2015
+    has zsh && contains "$(cat "$ZSHRC")" "alias mangal" || {
         echo "$ALIAS" >> "$HOME/.zshrc"
         info "Alias for zsh created"
     }
