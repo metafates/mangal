@@ -51,9 +51,9 @@ create_termux_alias() {
         ANY=1
     }
 
-    $ANY || {
+    if [ $ANY -eq 0 ]; then
         warn "Could not create alias for unknown shell. Run this script from bash, zsh or fish."
-    }
+    fi
 }
 
 info() {
