@@ -28,16 +28,16 @@ create_termux_alias() {
     ZSHRC="$HOME/.zshrc"
 
      contains "$(cat "$BASHRC")" "alias mangal" || {
-        alias "$ALIAS"
         echo "alias $ALIAS" >> "$PREFIX/etc/bash.bashrc"
         info "Alias for bash created"
+        info "Restart your shell or run 'source $BASHRC'"
     }
 
     # shellcheck disable=SC2015
     has zsh && contains "$(cat "$ZSHRC" 2> /dev/null)" "alias mangal" || {
-        alias "$ALIAS"
         echo "alias $ALIAS" >> "$HOME/.zshrc"
         info "Alias for zsh created"
+        info "Restart your shell or run 'source $ZSHRC'"
     }
 }
 
