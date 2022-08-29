@@ -23,18 +23,20 @@ contains() {
 }
 
 create_termux_alias() {
-    ALIAS="alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
+    ALIAS="mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
     BASHRC="$PREFIX/etc/bash.bashrc"
     ZSHRC="$HOME/.zshrc"
 
      contains "$(cat "$BASHRC")" "alias mangal" || {
-        echo "$ALIAS" >> "$PREFIX/etc/bash.bashrc"
+        alias "$ALIAS"
+        echo "alias $ALIAS" >> "$PREFIX/etc/bash.bashrc"
         info "Alias for bash created"
     }
 
     # shellcheck disable=SC2015
     has zsh && contains "$(cat "$ZSHRC" 2> /dev/null)" "alias mangal" || {
-        echo "$ALIAS" >> "$HOME/.zshrc"
+        alias "$ALIAS"
+        echo "alias $ALIAS" >> "$HOME/.zshrc"
         info "Alias for zsh created"
     }
 }
