@@ -4,15 +4,15 @@ set -e
 
 # Check if command is available
 has() {
-    command -v "$1" > /dev/null 2>&1
+    command -v "$1" >/dev/null 2>&1
 }
 
 has_alias() {
-    alias "$1" > /dev/null 2>&1
+    alias "$1" >/dev/null 2>&1
 }
 
 is_under_termux() {
-   has termux-setup-storage
+    has termux-setup-storage
 }
 
 info() {
@@ -34,8 +34,7 @@ die() {
 
 # Download file. first argument is out path, second is URL
 download() {
-    if has curl;
-    then
+    if has curl; then
         curl -sfLo "$1" "$2"
     elif has wget; then
         wget -qO "$1" "$2"
@@ -56,16 +55,13 @@ verify_checksums() {
 }
 
 install_deb() {
-    if ! has dpkg;
-    then
+    if ! has dpkg; then
         warn "dpkg is not available. Using alternative method..."
         install_binary
         return
     fi
 
-
-    if [ "$OS" = "Linux" ];
-    then
+    if [ "$OS" = "Linux" ]; then
         case "$ARCH" in
         aarch64)
             ARCH="arm64"
@@ -101,13 +97,8 @@ install_deb() {
     sudo dpkg --install "$DEB_FILE"
 }
 
-install_binary() {
-    if [ "$OS" = "Android" ];
-    then
-        die "Android is not supported for raw binary installation"
-    fi
-
-    info "Installing raw binary"
+install_termux() {
+    info "Installing with Termux"
 
     case "$ARCH" in
     aarch64)
@@ -121,7 +112,7 @@ install_binary() {
         ;;
     esac
 
-    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
+    TAR_NAME="${FILE_BASENAME}_${VERSION}_Android_${ARCH}.tar.gz"
     TAR_FILE="$TMPDIR/$TAR_NAME"
 
     export TAR_NAME TAR_FILE
@@ -140,31 +131,24 @@ install_binary() {
 
     tar -xf "$TAR_FILE" -C "$TMPDIR"
 
-    if is_under_termux;
-    then
-        OUT="$PREFIX/bin"
-        info "Moving to ${OUT}"
-        sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
+    OUT="$PREFIX/bin"
+    info "Moving to ${OUT}"
+    sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
 
-        pkg list-installed resolv-conf > /dev/null 2>&1 || {
-            info "Installing resolv-conf"
-            pkg install resolv-conf
-        }
+    pkg list-installed resolv-conf >/dev/null 2>&1 || {
+        info "Installing resolv-conf"
+        pkg install resolv-conf
+    }
 
-        pkg list-installed proot > /dev/null 2>&1 || {
-            info "Installing proot"
-            pkg install proot
-        }
+    pkg list-installed proot >/dev/null 2>&1 || {
+        info "Installing proot"
+        pkg install proot
+    }
 
-        has_alias mangal || {
-            info "Creating alias for mangal"
-            echo "alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'" >> "$PREFIX/etc/bash.bashrc"
-        }
-    else
-        OUT="/usr/local/bin/"
-        info "Moving to ${OUT}"
-        sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
-    fi
+    has_alias mangal || {
+        info "Creating alias for mangal"
+        echo "alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'" >>"$PREFIX/etc/bash.bashrc"
+    }
 }
 
 install_macos() {
@@ -177,8 +161,7 @@ install_macos() {
     info "Installing with Homebrew..."
     brew tap metafates/mangal
 
-    if has mangal;
-    then
+    if has mangal; then
         brew reinstall mangal
     else
         brew install mangal
@@ -225,6 +208,45 @@ install_rpm() {
     sudo rpm --install "$DEB_FILE"
 }
 
+install_binary() {
+    info "Installing raw binary"
+
+    case "$ARCH" in
+    aarch64)
+        ARCH="arm64"
+        ;;
+    armv*)
+        ARCH="armv6"
+        ;;
+    amd64)
+        ARCH="x86_64"
+        ;;
+    esac
+
+    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
+    TAR_FILE="$TMPDIR/$TAR_NAME"
+
+    export TAR_NAME TAR_FILE
+
+    (
+        cd "$TMPDIR"
+
+        info "Downloading Mangal $VERSION..."
+        download "$TAR_FILE" "$RELEASES_URL/download/$TAG/$TAR_NAME"
+
+        info "Downloading checksums..."
+        download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
+
+        verify_checksums
+    )
+
+    tar -xf "$TAR_FILE" -C "$TMPDIR"
+
+    OUT="/usr/local/bin/"
+    info "Moving to ${OUT}"
+    sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
+}
+
 pre_install() {
     has mangal && warn "mangal is installed already, reinstalling..."
 
@@ -251,51 +273,50 @@ pre_install() {
 }
 
 post_install() {
-    if has mangal;
-    then
+    if has mangal; then
         printf "\n🎉 \033[1;32mMangal was installed successfully\033[0m\n\n"
     else
-        die "Mangal was not installed :("
+        die "Mangal was not installed or it's not in the PATH."
     fi
 }
 
 install() {
     pre_install
 
-    if is_under_termux;
-    then
-       info "Termux detected"
-       install_binary
-    else
-        case $OS in
-        Darwin)
-            info "macOS detected"
-            install_macos
+    case $OS in
+    Darwin)
+        info "macOS detected"
+        install_macos
+        ;;
+    Linux)
+        case $(cat /etc/*release 2>/dev/null | tr "[:upper:]" "[:lower:]") in
+        *debian*)
+            info "Debian detected"
+            install_deb
             ;;
-        Linux)
-            case $(cat /etc/*release | tr "[:upper:]" "[:lower:]") in
-            *debian*)
-                info "Debian detected"
-                install_deb
-                ;;
-            *ubuntu*)
-                info "Ubuntu detected"
-                install_deb
-                ;;
-            *fedora*)
-                info "Fedora detected"
-                install_rpm
-                ;;
-            *)
-                info "Unknown linux distro detected"
-                install_binary
-                ;;
-            esac
+        *ubuntu*)
+            info "Ubuntu detected"
+            install_deb
+            ;;
+        *fedora*)
+            info "Fedora detected"
+            install_rpm
             ;;
         *)
-            die "Unknown OS: $OS"
+            if is_under_termux; then
+                info "Termux detected"
+                install_termux
+            else
+                info "Unknown linux distro detected"
+                install_binary
+            fi
+            ;;
         esac
-    fi
+        ;;
+    *)
+        err "Unknown OS detected: $OS"
+        ;;
+    esac
 
     post_install
 }
