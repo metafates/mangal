@@ -33,7 +33,7 @@ create_termux_alias() {
     }
 
     # shellcheck disable=SC2015
-    has zsh && contains "$(cat "$ZSHRC")" "alias mangal" || {
+    has zsh && contains "$(cat "$ZSHRC" 2> /dev/null)" "alias mangal" || {
         echo "$ALIAS" >> "$HOME/.zshrc"
         info "Alias for zsh created"
     }
