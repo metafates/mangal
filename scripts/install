@@ -7,6 +7,10 @@ has() {
     command -v "$1" > /dev/null 2>&1
 }
 
+has_alias() {
+    alias "$1" > /dev/null 2>&1
+}
+
 info() {
     printf "\033[1;35mInfo:\033[0m %s\n" "$1"
 }
@@ -26,7 +30,14 @@ die() {
 
 # Download file. first argument is out path, second is URL
 download() {
-    curl -sfLo "$1" "$2"
+    if has curl;
+    then
+        curl -sfLo "$1" "$2"
+    elif has wget; then
+        wget -qO "$1" "$2"
+    else
+        die "No download program (curl, wget) found, please install one."
+    fi
 }
 
 verify_checksums() {
@@ -37,10 +48,7 @@ verify_checksums() {
         OK=$(shasum -a 256 --ignore-missing --quiet --check checksums.txt)
     fi
 
-    if ! $OK;
-    then
-        die "Checksums mismatch. Abort"
-    fi
+    $OK || die "Checksums did not match! Abort"
 }
 
 install_deb() {
@@ -52,19 +60,23 @@ install_deb() {
     fi
 
 
-    case "$ARCH" in
-    aarch64)
-        ARCH="arm64"
-        ;;
-    armv*)
-        ARCH="armhf"
-        ;;
-    x86_64)
-        ARCH="amd64"
-        ;;
-    esac
+    if [ "$OS" = "Linux" ];
+    then
+        case "$ARCH" in
+        aarch64)
+            ARCH="arm64"
+            ;;
+        armv*)
+            ARCH="armhf"
+            ;;
+        x86_64)
+            ARCH="amd64"
+            ;;
+        esac
 
-    DEB_NAME="${FILE_BASENAME}_${VERSION}_${ARCH}.deb"
+        DEB_NAME="${FILE_BASENAME}_${VERSION}_${ARCH}.deb"
+    fi
+
     DEB_FILE="$TMPDIR/$DEB_NAME"
 
     export DEB_FILE DEB_NAME
@@ -86,6 +98,11 @@ install_deb() {
 }
 
 install_binary() {
+    if [ "$OS" = "Android" ];
+    then
+        die "Android is not supported for raw binary installation"
+    fi
+
     info "Installing raw binary"
 
     case "$ARCH" in
@@ -119,9 +136,33 @@ install_binary() {
 
     tar -xf "$TAR_FILE" -C "$TMPDIR"
 
-    OUT="/usr/local/bin/"
-    info "Moving to ${OUT}"
-    sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
+    case "$OS" in
+    Android)
+        OUT="$PREFIX/bin"
+        info "Moving to ${OUT}"
+        sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
+
+        pkg list-installed resolv-conf > /dev/null 2>&1 || {
+            info "Installing resolv-conf"
+            pkg install resolv-conf
+        }
+
+        pkg list-installed proot > /dev/null 2>&1 || {
+            info "Installing proot"
+            pkg install proot
+        }
+
+        has_alias mangal || {
+            info "Creating alias for mangal"
+            echo "alias mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'" >> "$PREFIX/etc/bash.bashrc"
+        }
+        ;;
+    Linux)
+        OUT="/usr/local/bin/"
+        info "Moving to ${OUT}"
+        sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
+        ;;
+    esac
 }
 
 install_macos() {
@@ -243,6 +284,10 @@ install() {
             install_binary
             ;;
         esac
+        ;;
+    Android)
+        info "Android detected"
+        install_binary
         ;;
     *)
         die "Unknown OS: $OS"

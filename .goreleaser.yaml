@@ -10,6 +10,7 @@ builds:
       - linux
       - windows
       - darwin
+      - android
     goarch:
       - "386"
       - amd64
@@ -18,11 +19,22 @@ builds:
     flags:
       - -trimpath
 
+    ignore:
+      - goos: android
+        goarch: "386"
+      - goos: android
+        goarch: amd64
+      - goos: android
+        goarch: arm
+
+
+
 archives:
   - replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
+      android: Android
       386: i386
       amd64: x86_64
     format_overrides:
@@ -74,7 +86,7 @@ dockers:
     goarch: amd64
     image_templates:
       - "metafates/mangal:latest"
-    skip_push: false
+    skip_push: true
     use: docker
 
 brews:
@@ -94,7 +106,7 @@ brews:
     homepage: "https://github.com/metafates/mangal"
     description: "The ultimate CLI manga downloader!"
     license: "MIT"
-    skip_upload: false
+    skip_upload: true
 
     test: |
       system "#{bin}/mangal -v"
@@ -122,7 +134,7 @@ scoop:
   homepage: "https://github.com/metafates/mangal"
   description: "The ultimate CLI manga downloader!"
   license: MIT
-  skip_upload: false
+  skip_upload: true
 
 
 release:
@@ -130,7 +142,7 @@ release:
     owner: metafates
     name: mangal
 
-  draft: false
+  discussion_category_name: Releases
   name_template: "{{.ProjectName}} v{{.Version}}"
   header: |
     To update:
