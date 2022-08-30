@@ -17,7 +17,6 @@ require (
 	github.com/pdfcpu/pdfcpu v0.3.13
 	github.com/samber/lo v1.27.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/afero v1.9.2
 	github.com/spf13/cobra v1.5.0
