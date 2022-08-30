@@ -162,12 +162,12 @@ install_termux() {
 
     contains "$(pkg list-installed)" "resolv-conf" >/dev/null 2>&1 || {
         info "Installing resolv-conf..."
-        pkg install resolv-conf
+        pkg install resolv-conf -y
     }
 
     contains "$(pkg list-installed)" "proot" || {
         info "Installing proot..."
-        pkg install proot
+        pkg install proot -y
     }
 
     create_termux_alias
