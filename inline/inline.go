@@ -23,7 +23,9 @@ func Run(options *Options) error {
 	if options.Json && options.All {
 		// pre-load _all_ chapters
 		for _, manga := range mangas {
-			jsonUpdateChapters(manga, options)
+			if err = jsonUpdateChapters(manga, options); err != nil {
+				return err
+			}
 		}
 
 		return jsonPrint(&JsonData{Manga: mangas})
@@ -46,7 +48,9 @@ func Run(options *Options) error {
 	}
 
 	if options.Json {
-		jsonUpdateChapters(manga, options)
+		if err = jsonUpdateChapters(manga, options); err != nil {
+			return err
+		}
 
 		mangas := make([]*source.Manga, 1)
 		mangas[0] = manga
