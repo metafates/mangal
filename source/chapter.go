@@ -22,7 +22,7 @@ type Chapter struct {
 	// ID of the chapter in the source.
 	ID string
 	// Manga that the chapter belongs to.
-	Manga *Manga
+	Manga *Manga `json:"-"`
 	// Pages of the chapter.
 	Pages []*Page
 }

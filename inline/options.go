@@ -1,10 +1,11 @@
 package inline
 
 import (
-	"fmt"
+	"errors"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -13,12 +14,14 @@ import (
 
 type (
 	MangaPicker   func([]*source.Manga) *source.Manga
-	ChapterFilter func([]*source.Chapter) []*source.Chapter
+	ChapterFilter func([]*source.Chapter) ([]*source.Chapter, error)
 )
 
 type Options struct {
 	Source        source.Source
 	Download      bool
+	Json          bool
+	All           bool
 	Query         string
 	MangaPicker   MangaPicker
 	ChapterFilter ChapterFilter
@@ -73,33 +76,31 @@ func ParseChaptersFilter(description string) (ChapterFilter, error) {
 		return nil, fmt.Errorf("invalid chapter filter pattern: %s", description)
 	}
 
-	return func(chapters []*source.Chapter) []*source.Chapter {
+	return func(chapters []*source.Chapter) ([]*source.Chapter, error) {
 		if len(chapters) == 0 {
-			_, _ = fmt.Fprint(os.Stderr, "No chapters found.\n")
-			os.Exit(1)
-			return nil
+			return nil, errors.New("No chapters found")
 		}
 
 		switch description {
 		case first:
-			return chapters[0:1]
+			return chapters[0:1], nil
 		case last:
-			return chapters[len(chapters)-1:]
+			return chapters[len(chapters)-1:], nil
 		case all:
-			return chapters
+			return chapters, nil
 		default:
 			groups := util.ReGroups(mangaPickerRegex, description)
 
 			if sub, ok := groups[sub]; ok && sub != "" {
 				return lo.Filter(chapters, func(a *source.Chapter, _ int) bool {
 					return strings.Contains(a.Name, sub)
-				})
+				}), nil
 			}
 
 			from := lo.Must(strconv.ParseUint(groups[from], 10, 16))
 			to := lo.Must(strconv.ParseUint(groups[to], 10, 16))
 
-			return chapters[from-1 : to]
+			return chapters[from-1 : to], nil
 		}
 	}, nil
 }

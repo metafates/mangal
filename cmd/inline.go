@@ -18,6 +18,8 @@ func init() {
 	inlineCmd.Flags().String("manga", "", "manga selector")
 	inlineCmd.Flags().String("chapters", "", "chapter selector")
 	inlineCmd.Flags().BoolP("download", "d", false, "download chapters")
+	inlineCmd.Flags().BoolP("json", "j", false, "JSON output")
+	inlineCmd.Flags().BoolP("all", "a", false, "Return all mangas (--json only)")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	lo.Must0(inlineCmd.MarkFlagRequired("manga"))
@@ -43,6 +45,13 @@ Chapter selectors:
   @[substring]@ - select chapters by name substring`,
 
 	Example: "mangal inline --source Manganelo --query \"death note\" --manga first --chapters \"@Vol.1 @\" -d",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		all, _ := cmd.Flags().GetBool("all")
+
+		if all {
+			cmd.MarkFlagRequired("json")
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		sourceName := viper.GetString(constant.DownloaderDefaultSource)
 		if sourceName == "" {
@@ -65,6 +74,8 @@ Chapter selectors:
 		options := &inline.Options{
 			Source:        src,
 			Download:      lo.Must(cmd.Flags().GetBool("download")),
+			Json:          lo.Must(cmd.Flags().GetBool("json")),
+			All:           lo.Must(cmd.Flags().GetBool("all")),
 			Query:         lo.Must(cmd.Flags().GetString("query")),
 			MangaPicker:   mangaPicker,
 			ChapterFilter: chapterFilter,

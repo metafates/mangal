@@ -1,10 +1,12 @@
 package inline
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
+	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
 )
 
@@ -18,6 +20,28 @@ func Run(options *Options) error {
 		return errors.New("no mangas found")
 	}
 
+	if options.Json && options.All {
+		// pre-load _all_ chapters
+		for _, manga := range mangas {
+			chapters, _ := options.Source.ChaptersOf(manga)
+			chapters, err := options.ChapterFilter(chapters)
+
+			if err == nil {
+				manga.Chapters = chapters
+			}
+		}
+
+		marshalledMangas, err := json.Marshal(&JsonData{Manga: mangas})
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Print(string(marshalledMangas))
+
+		return nil
+	}
+
 	manga := options.MangaPicker(mangas)
 
 	chapters, err := options.Source.ChaptersOf(manga)
@@ -29,7 +53,24 @@ func Run(options *Options) error {
 		return errors.New("no chapters found")
 	}
 
-	chapters = options.ChapterFilter(chapters)
+	chapters, err = options.ChapterFilter(chapters)
+	if err != nil {
+		return err
+	}
+
+	if options.Json {
+		mangas := make([]*source.Manga, 1)
+		mangas[0] = manga
+		marshalledManga, err := json.Marshal(&JsonData{Manga: mangas})
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Print(string(marshalledManga))
+
+		return nil
+	}
 
 	for _, chapter := range chapters {
 		if options.Download {
