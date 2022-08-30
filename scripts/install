@@ -137,7 +137,7 @@ install_termux() {
         ;;
     esac
 
-    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_Linux.tar.gz"
+    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
     TAR_FILE="$TMPDIR/$TAR_NAME"
 
     export TAR_NAME TAR_FILE
