@@ -19,6 +19,9 @@ func Update() (err error) {
 	case scoop:
 		fmt.Printf("%s Scoop installation detected", icon.Get(icon.Progress))
 		return updateScoop()
+	case termux:
+		fmt.Printf("%s Termux installation detected", icon.Get(icon.Progress))
+		return updateScript()
 	case script:
 		fmt.Printf("%s Script installation detected", icon.Get(icon.Progress))
 		return updateScript()
@@ -44,7 +47,7 @@ func updateScoop() (err error) {
 }
 
 func updateScript() (err error) {
-	res, err := http.Get("https://raw.githubusercontent.com/metafates/mangal/main/install")
+	res, err := http.Get("https://raw.githubusercontent.com/metafates/mangal/main/scripts/install")
 	if err != nil {
 		return err
 	}
