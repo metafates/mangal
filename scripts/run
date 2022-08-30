@@ -7,6 +7,10 @@ has() {
     command -v "$1" >/dev/null 2>&1
 }
 
+is_under_termux() {
+    has termux-setup-storage
+}
+
 info() {
     printf "\033[1;35minfo:\033[0m %s\n" "$1"
 }
@@ -51,6 +55,11 @@ pre_run() {
     VERSION=${TAG#?}
 
     export RELEASES_URL FILE_BASENAME VERSION TAG OS ARCH
+
+    is_under_termux && {
+        warn "Termux detected, searching won't work. Please, run install script to use full functionality."
+        warn "https://github.com/metafates/mangal/blob/main/scripts/install"
+    }
 }
 
 

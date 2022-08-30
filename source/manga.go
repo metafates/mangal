@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
-	"runtime"
 )
 
 // Manga is a manga from a source.
@@ -41,13 +40,7 @@ func (m *Manga) Path(temp bool) (path string, err error) {
 			return
 		}
 
-		if runtime.GOOS == "android" {
-			prefix := os.Getenv("PREFIX")
-			path = filepath.Join(prefix, "tmp")
-			err = filesystem.Get().MkdirAll(filepath.Join(prefix, "tmp", constant.TempPrefix), os.ModePerm)
-		} else {
-			path, err = filesystem.Get().TempDir("", constant.TempPrefix)
-		}
+		path, err = filesystem.Get().TempDir("", constant.TempPrefix)
 
 		m.cachedTempPath = path
 		return

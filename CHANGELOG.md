@@ -7,8 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 3.5.1
 
-- Add basic Termux support (opening files doesn't work yet)
-- Minor fixes
+- Add basic Termux support. Scripts that use headless chrome browser won't work as well as reading mode. That means that you can use it only for downloading manga (for now)
 
 ## 3.5.0
 
