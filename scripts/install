@@ -145,7 +145,7 @@ install_termux() {
     (
         cd "$TMPDIR"
 
-        info "Downloading Mangal $VERSION..."
+        info "Downloading $TAR_NAME..."
         download "$TAR_FILE" "$RELEASES_URL/download/$TAG/$TAR_NAME"
 
         info "Downloading checksums..."
