@@ -69,7 +69,7 @@ download() {
 }
 
 verify_checksums() {
-    info "Verifying checksums..."
+    info "Verifying checksums"
     if has sha256sum; then
         OK=$(sha256sum --ignore-missing --quiet --check checksums.txt)
     else
@@ -81,27 +81,24 @@ verify_checksums() {
 
 install_deb() {
     if ! has dpkg; then
-        warn "dpkg is not available. Using alternative method..."
+        warn "dpkg is not available. Using alternative method"
         install_binary
         return
     fi
 
-    if [ "$OS" = "Linux" ]; then
-        case "$ARCH" in
-        aarch64)
-            ARCH="arm64"
-            ;;
-        armv*)
-            ARCH="armhf"
-            ;;
-        x86_64)
-            ARCH="amd64"
-            ;;
-        esac
+    case "$ARCH" in
+    aarch64)
+        ARCH="arm64"
+        ;;
+    armv*)
+        ARCH="armhf"
+        ;;
+    x86_64)
+        ARCH="amd64"
+        ;;
+    esac
 
-        DEB_NAME="${FILE_BASENAME}_${VERSION}_${ARCH}.deb"
-    fi
-
+    DEB_NAME="${FILE_BASENAME}_${VERSION}_${ARCH}.deb"
     DEB_FILE="$TMPDIR/$DEB_NAME"
 
     export DEB_FILE DEB_NAME
@@ -109,22 +106,22 @@ install_deb() {
     (
         cd "$TMPDIR"
 
-        info "Downloading Mangal $VERSION..."
+        info "Downloading $DEB_NAME"
         download "$DEB_FILE" "$RELEASES_URL/download/$TAG/$DEB_NAME"
 
-        info "Downloading checksums..."
+        info "Downloading checksums"
         download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
 
         verify_checksums
     )
 
-    info "Installing..."
+    info "Installing"
     sudo dpkg --install "$DEB_FILE"
 }
 
 install_termux() {
     info "Installing for Termux"
-    warn "Termux support is experimental. Opening files and scrapers using headless chrome won't work!"
+    warn "Termux support is experimental. Some features won't work."
 
     case "$ARCH" in
     aarch64)
@@ -146,10 +143,10 @@ install_termux() {
     (
         cd "$TMPDIR"
 
-        info "Downloading $TAR_NAME..."
+        info "Downloading $TAR_NAME"
         download "$TAR_FILE" "$RELEASES_URL/download/$TAG/$TAR_NAME"
 
-        info "Downloading checksums..."
+        info "Downloading checksums"
         download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
 
         verify_checksums
@@ -158,16 +155,16 @@ install_termux() {
     tar -xf "$TAR_FILE" -C "$TMPDIR"
 
     OUT="$PREFIX/bin"
-    info "Moving to ${OUT}..."
+    info "Moving to ${OUT}"
     sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
 
     contains "$(pkg list-installed 2>/dev/null)" "resolv-conf" || {
-        info "Installing resolv-conf..."
+        info "Installing resolv-conf"
         pkg install resolv-conf -y >/dev/null 2>&1
     }
 
     contains "$(pkg list-installed 2>/dev/null)" "proot" || {
-        info "Installing proot..."
+        info "Installing proot"
         pkg install proot -y >/dev/null 2>&1
     }
 
@@ -176,12 +173,12 @@ install_termux() {
 
 install_macos() {
     if ! has brew; then
-        warn "Homebrew is not installed. Using alternative method..."
+        warn "Homebrew is not installed. Using alternative method"
         install_binary
         return
     fi
 
-    info "Installing with Homebrew..."
+    info "Installing with Homebrew"
     brew tap metafates/mangal
 
     if has mangal; then
@@ -193,7 +190,7 @@ install_macos() {
 
 install_rpm() {
     if ! has rpm; then
-        warn "rpm is not available. Using alternative method..."
+        warn "rpm is not available. Using alternative method"
         install_binary
         return
     fi
@@ -210,25 +207,25 @@ install_rpm() {
         ;;
     esac
 
-    DEB_NAME="${FILE_BASENAME}-${VERSION}.${ARCH}.rpm"
-    DEB_FILE="$TMPDIR/$DEB_NAME"
+    RPM_NAME="${FILE_BASENAME}-${VERSION}.${ARCH}.rpm"
+    RPM_FILE="$TMPDIR/$DEB_NAME"
 
-    export DEB_FILE DEB_NAME
+    export RPM_FILE RPM_NAME
 
     (
         cd "$TMPDIR"
 
-        info "Downloading Mangal $VERSION..."
-        download "$DEB_FILE" "$RELEASES_URL/download/$TAG/$DEB_NAME"
+        info "Downloading $RPM_NAME"
+        download "$DEB_FILE" "$RELEASES_URL/download/$TAG/$RPM_NAME"
 
-        info "Downloading checksums..."
+        info "Downloading checksums"
         download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
 
         verify_checksums
     )
 
-    info "Installing..."
-    sudo rpm --install "$DEB_FILE"
+    info "Installing"
+    sudo rpm --install "$RPM_FILE"
 }
 
 install_binary() {
@@ -254,10 +251,10 @@ install_binary() {
     (
         cd "$TMPDIR"
 
-        info "Downloading Mangal $VERSION..."
+        info "Downloading $TAR_NAME"
         download "$TAR_FILE" "$RELEASES_URL/download/$TAG/$TAR_NAME"
 
-        info "Downloading checksums..."
+        info "Downloading checksums"
         download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
 
         verify_checksums
@@ -271,12 +268,12 @@ install_binary() {
 }
 
 pre_install() {
-    has mangal && warn "mangal is installed already, reinstalling..."
+    has mangal && warn "mangal is installed already, reinstalling"
 
     RELEASES_URL="https://github.com/metafates/mangal/releases"
     FILE_BASENAME="mangal"
 
-    info "Fetching latest version..."
+    info "Fetching latest version"
     TAG="$(curl -sfL -o /dev/null -w "%{url_effective}" "$RELEASES_URL/latest" |
         rev |
         cut -f1 -d'/' |
