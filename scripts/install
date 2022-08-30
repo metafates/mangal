@@ -160,7 +160,7 @@ install_termux() {
     info "Moving to ${OUT}..."
     sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
 
-    contains "$(pkg list-installed)" "resolv-conf" >/dev/null 2>&1 || {
+    contains "$(pkg list-installed)" "resolv-conf" || {
         info "Installing resolv-conf..."
         pkg install resolv-conf -y
     }
