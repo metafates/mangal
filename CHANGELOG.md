@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.5.1
+
+- Add basic Termux support (opening files doesn't work yet)
+- Minor fixes
+
 ## 3.5.0
 
 - `mangal update` command added to update itself

@@ -12,7 +12,6 @@ import (
 var (
 	unsupportedOSError = fmt.Errorf("can't open on this OS: %s", runtime.GOOS)
 	runDll32           = filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
-	termuxOpen         = "env -i PATH=/data/data/com.termux/files/usr/bin ANDROID_DATA=/data am broadcast -a android.intent.action.VIEW -n com.termux/com.termux.app.TermuxOpenReceiver -d"
 )
 
 func open(input string) (cmd *exec.Cmd, osSupported bool) {
@@ -24,7 +23,7 @@ func open(input string) (cmd *exec.Cmd, osSupported bool) {
 	case "linux":
 		return exec.Command("xdg-open", input), true
 	case "android":
-		return exec.Command(termuxOpen, input), true
+		return exec.Command("termux-open", input), true
 	default:
 		return nil, false
 	}
@@ -39,7 +38,7 @@ func openWith(input, with string) (cmd *exec.Cmd, osSupported bool) {
 	case "linux":
 		return exec.Command(with, input), true
 	case "android":
-		return exec.Command(termuxOpen, input), true
+		return exec.Command("termux-open", input), true
 	default:
 		return nil, false
 	}

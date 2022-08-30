@@ -23,18 +23,17 @@ contains() {
 }
 
 create_termux_alias() {
-    ALIAS="mangal='proot -b /data/data/com.termux/files/usr/bin  -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
+    ALIAS="mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
     BASHRC="$PREFIX/etc/bash.bashrc"
     ZSHRC="$HOME/.zshrc"
 
-     contains "$(cat "$BASHRC")" "alias mangal" || {
+    contains "$(cat "$BASHRC")" "alias mangal" || {
         echo "alias $ALIAS" >> "$PREFIX/etc/bash.bashrc"
         info "Alias for bash created"
         info "Restart your shell or run 'source $BASHRC'"
     }
 
-    # shellcheck disable=SC2015
-    has zsh && contains "$(cat "$ZSHRC" 2> /dev/null)" "alias mangal" || {
+    contains "$(cat "$ZSHRC" 2> /dev/null)" "alias mangal" || {
         echo "alias $ALIAS" >> "$HOME/.zshrc"
         info "Alias for zsh created"
         info "Restart your shell or run 'source $ZSHRC'"
@@ -138,7 +137,7 @@ install_termux() {
         ;;
     esac
 
-    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
+    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_Android.tar.gz"
     TAR_FILE="$TMPDIR/$TAR_NAME"
 
     export TAR_NAME TAR_FILE
@@ -161,12 +160,12 @@ install_termux() {
     info "Moving to ${OUT}..."
     sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
 
-    pkg list-installed resolv-conf >/dev/null 2>&1 || {
+    contains "$(pkg list-installed)" "resolv-conf" >/dev/null 2>&1 || {
         info "Installing resolv-conf..."
         pkg install resolv-conf
     }
 
-    pkg list-installed proot >/dev/null 2>&1 || {
+    contains "$(pkg list-installed)" "proot" || {
         info "Installing proot..."
         pkg install proot
     }
