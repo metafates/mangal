@@ -78,7 +78,7 @@ func isUnderScoop() (ok bool) {
 
 func has(command string) bool {
 	ok, err := exec.LookPath(command)
-	return err != nil || ok != ""
+	return err == nil && ok != ""
 }
 
 func execute(command string, arguments ...string) (output string, err error) {

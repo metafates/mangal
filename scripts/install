@@ -23,7 +23,7 @@ contains() {
 }
 
 create_termux_alias() {
-    ALIAS="mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
+    ALIAS="mangal='proot -b /data/data/com.termux/files/usr/bin  -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
     BASHRC="$PREFIX/etc/bash.bashrc"
     ZSHRC="$HOME/.zshrc"
 
