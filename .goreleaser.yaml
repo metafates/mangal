@@ -10,7 +10,6 @@ builds:
       - linux
       - windows
       - darwin
-      - android
     goarch:
       - "386"
       - amd64
@@ -18,14 +17,6 @@ builds:
       - arm64
     flags:
       - -trimpath
-    ignore:
-      - goos: android
-        goarch: "386"
-      - goos: android
-        goarch: arm
-      - goos: android
-        goarch: amd64
-
 
 archives:
   - replacements:
