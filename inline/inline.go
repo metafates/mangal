@@ -23,23 +23,10 @@ func Run(options *Options) error {
 	if options.Json && options.All {
 		// pre-load _all_ chapters
 		for _, manga := range mangas {
-			chapters, _ := options.Source.ChaptersOf(manga)
-			chapters, err := options.ChapterFilter(chapters)
-
-			if err == nil {
-				manga.Chapters = chapters
-			}
+			jsonUpdateChapters(manga, options)
 		}
 
-		marshalledMangas, err := json.Marshal(&JsonData{Manga: mangas})
-
-		if err != nil {
-			return err
-		}
-
-		fmt.Print(string(marshalledMangas))
-
-		return nil
+		return jsonPrint(&JsonData{Manga: mangas})
 	}
 
 	manga := options.MangaPicker(mangas)
@@ -59,17 +46,11 @@ func Run(options *Options) error {
 	}
 
 	if options.Json {
+		jsonUpdateChapters(manga, options)
+
 		mangas := make([]*source.Manga, 1)
 		mangas[0] = manga
-		marshalledManga, err := json.Marshal(&JsonData{Manga: mangas})
-
-		if err != nil {
-			return err
-		}
-
-		fmt.Print(string(marshalledManga))
-
-		return nil
+		return jsonPrint(&JsonData{Manga: mangas})
 	}
 
 	for _, chapter := range chapters {
@@ -87,6 +68,29 @@ func Run(options *Options) error {
 			}
 		}
 	}
+
+	return nil
+}
+
+func jsonUpdateChapters(manga *source.Manga, options *Options) error {
+	chapters, _ := options.Source.ChaptersOf(manga)
+	chapters, err := options.ChapterFilter(chapters)
+
+	if err == nil {
+		manga.Chapters = chapters
+	}
+
+	return err
+}
+
+func jsonPrint(data *JsonData) error {
+	marshalledManga, err := json.Marshal(data)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(string(marshalledManga))
 
 	return nil
 }
