@@ -160,14 +160,14 @@ install_termux() {
     info "Moving to ${OUT}..."
     sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
 
-    contains "$(pkg list-installed)" "resolv-conf" || {
+    contains "$(pkg list-installed 2> /dev/null)" "resolv-conf" || {
         info "Installing resolv-conf..."
-        pkg install resolv-conf -y
+        pkg install resolv-conf -y 1> /dev/null
     }
 
-    contains "$(pkg list-installed)" "proot" || {
+    contains "$(pkg list-installed 2> /dev/null)" "proot" || {
         info "Installing proot..."
-        pkg install proot -y
+        pkg install proot -y 1> /dev/null
     }
 
     create_termux_alias
