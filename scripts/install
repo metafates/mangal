@@ -123,7 +123,8 @@ install_deb() {
 }
 
 install_termux() {
-    info "Installing with Termux"
+    info "Installing for Termux"
+    warn "Termux support is experimental. Opening files and scrapers using headless chrome won't work!"
 
     case "$ARCH" in
     aarch64)
@@ -160,14 +161,14 @@ install_termux() {
     info "Moving to ${OUT}..."
     sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
 
-    contains "$(pkg list-installed 2> /dev/null)" "resolv-conf" || {
+    contains "$(pkg list-installed 2>/dev/null)" "resolv-conf" || {
         info "Installing resolv-conf..."
-        pkg install resolv-conf -y 1> /dev/null
+        pkg install resolv-conf -y >/dev/null 2>&1
     }
 
-    contains "$(pkg list-installed 2> /dev/null)" "proot" || {
+    contains "$(pkg list-installed 2>/dev/null)" "proot" || {
         info "Installing proot..."
-        pkg install proot -y 1> /dev/null
+        pkg install proot -y >/dev/null 2>&1
     }
 
     create_termux_alias
