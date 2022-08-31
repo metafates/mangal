@@ -124,3 +124,14 @@ func Max[T constraints.Ordered](items ...T) (max T) {
 
 	return
 }
+
+func Min[T constraints.Ordered](items ...T) (min T) {
+	min = items[0]
+	for _, item := range items {
+		if item < min {
+			min = item
+		}
+	}
+
+	return
+}

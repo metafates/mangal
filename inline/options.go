@@ -2,10 +2,10 @@ package inline
 
 import (
 	"errors"
+	"fmt"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
-	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -13,18 +13,17 @@ import (
 )
 
 type (
-	MangaPicker   func([]*source.Manga) *source.Manga
-	ChapterFilter func([]*source.Chapter) ([]*source.Chapter, error)
+	MangaPicker    func([]*source.Manga) *source.Manga
+	ChaptersFilter func([]*source.Chapter) ([]*source.Chapter, error)
 )
 
 type Options struct {
-	Source        source.Source
-	Download      bool
-	Json          bool
-	All           bool
-	Query         string
-	MangaPicker   MangaPicker
-	ChapterFilter ChapterFilter
+	Source         source.Source
+	Download       bool
+	Json           bool
+	Query          string
+	MangaPicker    util.Option[MangaPicker]
+	ChaptersFilter ChaptersFilter
 }
 
 func ParseMangaPicker(description string) (MangaPicker, error) {
@@ -59,7 +58,7 @@ func ParseMangaPicker(description string) (MangaPicker, error) {
 	}, nil
 }
 
-func ParseChaptersFilter(description string) (ChapterFilter, error) {
+func ParseChaptersFilter(description string) (ChaptersFilter, error) {
 	var (
 		first = "first"
 		last  = "last"
@@ -98,9 +97,21 @@ func ParseChaptersFilter(description string) (ChapterFilter, error) {
 			}
 
 			from := lo.Must(strconv.ParseUint(groups[from], 10, 16))
-			to := lo.Must(strconv.ParseUint(groups[to], 10, 16))
+			from = util.Min(from, uint64(len(chapters)))
 
-			return chapters[from-1 : to], nil
+			n := groups[to]
+			if n == "" {
+				return []*source.Chapter{chapters[from]}, nil
+			}
+
+			to := lo.Must(strconv.ParseUint(n, 10, 16))
+			to = util.Min(to, uint64(len(chapters)))
+
+			if from > to {
+				from, to = to, from
+			}
+
+			return chapters[from:to], nil
 		}
 	}, nil
 }
