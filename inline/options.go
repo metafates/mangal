@@ -21,6 +21,7 @@ type Options struct {
 	Source         source.Source
 	Download       bool
 	Json           bool
+	PopulatePages  bool
 	Query          string
 	MangaPicker    util.Option[MangaPicker]
 	ChaptersFilter ChaptersFilter
@@ -111,7 +112,7 @@ func ParseChaptersFilter(description string) (ChaptersFilter, error) {
 				from, to = to, from
 			}
 
-			return chapters[from:to], nil
+			return chapters[from : to+1], nil
 		}
 	}, nil
 }

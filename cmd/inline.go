@@ -20,6 +20,7 @@ func init() {
 	inlineCmd.Flags().String("chapters", "", "chapter selector")
 	inlineCmd.Flags().BoolP("download", "d", false, "download chapters")
 	inlineCmd.Flags().BoolP("json", "j", false, "JSON output")
+	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	lo.Must0(inlineCmd.MarkFlagRequired("chapters"))
@@ -51,6 +52,10 @@ Chapter selectors:
 		if !json {
 			lo.Must0(cmd.MarkFlagRequired("manga"))
 		}
+
+		if lo.Must(cmd.Flags().GetBool("populate-pages")) {
+			lo.Must0(cmd.MarkFlagRequired("json"))
+		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		sourceName := viper.GetString(constant.DownloaderDefaultSource)
@@ -81,6 +86,7 @@ Chapter selectors:
 			Download:       lo.Must(cmd.Flags().GetBool("download")),
 			Json:           lo.Must(cmd.Flags().GetBool("json")),
 			Query:          lo.Must(cmd.Flags().GetString("query")),
+			PopulatePages:  lo.Must(cmd.Flags().GetBool("populate-pages")),
 			MangaPicker:    mangaPicker,
 			ChaptersFilter: chapterFilter,
 		}

@@ -18,11 +18,11 @@ type Page struct {
 	// Extension of the page image.
 	Extension string
 	// Size of the page in bytes
-	Size uint64
+	Size uint64 `json:"-"`
 	// Contents of the page
-	Contents io.ReadCloser
+	Contents io.ReadCloser `json:"-"`
 	// Chapter that the page belongs to.
-	Chapter *Chapter
+	Chapter *Chapter `json:"-"`
 }
 
 // Download Page contents.
