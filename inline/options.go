@@ -1,6 +1,7 @@
 package inline
 
 import (
+	"errors"
 	"fmt"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -12,16 +13,18 @@ import (
 )
 
 type (
-	MangaPicker   func([]*source.Manga) *source.Manga
-	ChapterFilter func([]*source.Chapter) []*source.Chapter
+	MangaPicker    func([]*source.Manga) *source.Manga
+	ChaptersFilter func([]*source.Chapter) ([]*source.Chapter, error)
 )
 
 type Options struct {
-	Source        source.Source
-	Download      bool
-	Query         string
-	MangaPicker   MangaPicker
-	ChapterFilter ChapterFilter
+	Source         source.Source
+	Download       bool
+	Json           bool
+	PopulatePages  bool
+	Query          string
+	MangaPicker    util.Option[MangaPicker]
+	ChaptersFilter ChaptersFilter
 }
 
 func ParseMangaPicker(description string) (MangaPicker, error) {
@@ -56,7 +59,7 @@ func ParseMangaPicker(description string) (MangaPicker, error) {
 	}, nil
 }
 
-func ParseChaptersFilter(description string) (ChapterFilter, error) {
+func ParseChaptersFilter(description string) (ChaptersFilter, error) {
 	var (
 		first = "first"
 		last  = "last"
@@ -73,33 +76,43 @@ func ParseChaptersFilter(description string) (ChapterFilter, error) {
 		return nil, fmt.Errorf("invalid chapter filter pattern: %s", description)
 	}
 
-	return func(chapters []*source.Chapter) []*source.Chapter {
+	return func(chapters []*source.Chapter) ([]*source.Chapter, error) {
 		if len(chapters) == 0 {
-			_, _ = fmt.Fprint(os.Stderr, "No chapters found.\n")
-			os.Exit(1)
-			return nil
+			return nil, errors.New("No chapters found")
 		}
 
 		switch description {
 		case first:
-			return chapters[0:1]
+			return chapters[0:1], nil
 		case last:
-			return chapters[len(chapters)-1:]
+			return chapters[len(chapters)-1:], nil
 		case all:
-			return chapters
+			return chapters, nil
 		default:
 			groups := util.ReGroups(mangaPickerRegex, description)
 
 			if sub, ok := groups[sub]; ok && sub != "" {
 				return lo.Filter(chapters, func(a *source.Chapter, _ int) bool {
 					return strings.Contains(a.Name, sub)
-				})
+				}), nil
 			}
 
 			from := lo.Must(strconv.ParseUint(groups[from], 10, 16))
-			to := lo.Must(strconv.ParseUint(groups[to], 10, 16))
+			from = util.Min(from, uint64(len(chapters)))
 
-			return chapters[from-1 : to]
+			n := groups[to]
+			if n == "" {
+				return []*source.Chapter{chapters[from]}, nil
+			}
+
+			to := lo.Must(strconv.ParseUint(n, 10, 16))
+			to = util.Min(to, uint64(len(chapters)))
+
+			if from > to {
+				from, to = to, from
+			}
+
+			return chapters[from : to+1], nil
 		}
 	}, nil
 }
