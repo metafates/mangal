@@ -15,12 +15,12 @@ import (
 func init() {
 	rootCmd.AddCommand(inlineCmd)
 
-	inlineCmd.Flags().String("query", "", "query to search for")
-	inlineCmd.Flags().String("manga", "", "manga selector")
-	inlineCmd.Flags().String("chapters", "", "chapter selector")
+	inlineCmd.Flags().StringP("query", "q", "", "query to search for")
+	inlineCmd.Flags().StringP("manga", "m", "", "manga selector")
+	inlineCmd.Flags().StringP("chapters", "c", "", "chapter selector")
 	inlineCmd.Flags().BoolP("download", "d", false, "download chapters")
 	inlineCmd.Flags().BoolP("json", "j", false, "JSON output")
-	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages for JSON output")
+	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	lo.Must0(inlineCmd.MarkFlagRequired("chapters"))

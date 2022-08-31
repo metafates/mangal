@@ -135,3 +135,11 @@ func Min[T constraints.Ordered](items ...T) (min T) {
 
 	return
 }
+
+func PrintErasable(msg string) (eraser func()) {
+	fmt.Printf("\r%s", msg)
+
+	return func() {
+		_, _ = fmt.Fprintf(os.Stdout, "\r%s\r", strings.Repeat(" ", len(msg)))
+	}
+}

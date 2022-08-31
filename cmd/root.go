@@ -30,8 +30,8 @@ func init() {
 	}))
 	lo.Must0(viper.BindPFlag(constant.IconsVariant, rootCmd.PersistentFlags().Lookup("icons")))
 
-	rootCmd.PersistentFlags().BoolP("history", "H", true, "write history of the read chapters")
-	lo.Must0(viper.BindPFlag(constant.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("history")))
+	rootCmd.PersistentFlags().BoolP("write-history", "H", true, "write history of the read chapters")
+	lo.Must0(viper.BindPFlag(constant.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("write-history")))
 
 	rootCmd.PersistentFlags().StringP("source", "S", "", "source")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("source", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
