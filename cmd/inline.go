@@ -20,7 +20,7 @@ func init() {
 	inlineCmd.Flags().String("chapters", "", "chapter selector")
 	inlineCmd.Flags().BoolP("download", "d", false, "download chapters")
 	inlineCmd.Flags().BoolP("json", "j", false, "JSON output")
-	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages")
+	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages for JSON output")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	lo.Must0(inlineCmd.MarkFlagRequired("chapters"))
@@ -43,7 +43,9 @@ Chapter selectors:
   all - all chapters in the list
   [number] - select chapter by index
   [from]-[to] - select chapters by range
-  @[substring]@ - select chapters by name substring`,
+  @[substring]@ - select chapters by name substring
+
+When using the json flag manga selector could be omitted. That way, it will select all mangas`,
 
 	Example: "mangal inline --source Manganelo --query \"death note\" --manga first --chapters \"@Vol.1 @\" -d",
 	PreRun: func(cmd *cobra.Command, args []string) {

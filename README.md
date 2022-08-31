@@ -54,7 +54,8 @@ Install using [this shell script](https://github.com/metafates/mangal/blob/main/
 This script will automatically detect OS & Distro and use the best option available.
 For example, on macOS it will try to use Homebrew, on Ubuntu it will install the `.deb` package and so on...
 
-> Termux support is limited to downloading manga. You can't read chapters or use headless chrome based scrapers
+> Termux support is limited to downloading manga only.
+> You can't read chapters or use headless chrome based scrapers
 
 <details>
 <summary>😡 I hate scripts! Show me how to install it manually</summary>
@@ -80,7 +81,7 @@ Install using [Homebrew](https://brew.sh/)
     brew tap metafates/mangal
     brew install mangal
 
-### Termux
+#### Termux
 
 1. Download the arm64 linux binary from the [release page](https://github.com/metafates/mangal/releases/latest)
 2. Move it to `$PREFIX/bin`

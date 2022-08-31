@@ -39,6 +39,7 @@ body:
         - macOS
         - Windows
         - Linux
+        - Termux
     validations:
       required: true
   - type: markdown
