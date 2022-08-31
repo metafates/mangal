@@ -23,6 +23,7 @@ func init() {
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	lo.Must0(inlineCmd.MarkFlagRequired("chapters"))
+	inlineCmd.MarkFlagsMutuallyExclusive("download", "json")
 }
 
 var inlineCmd = &cobra.Command{
