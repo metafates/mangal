@@ -54,7 +54,7 @@ func ParseMangaPicker(description string) (MangaPicker, error) {
 			return mangas[len(mangas)-1]
 		default:
 			index := lo.Must(strconv.ParseUint(description, 10, 16))
-			return mangas[index]
+			return mangas[util.Min(index, uint64(len(mangas)-1))]
 		}
 	}, nil
 }
