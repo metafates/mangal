@@ -48,18 +48,12 @@ pre_run() {
         exit 1
     }
 
-    test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
-
+    TMPDIR="$(mktemp -d)"
     OS=$(uname -s)
     ARCH=$(uname -m)
     VERSION=${TAG#?}
 
     export RELEASES_URL FILE_BASENAME VERSION TAG OS ARCH
-
-    is_under_termux && {
-        warn "Termux detected, searching won't work. Please, run install script to use full functionality."
-        warn "https://github.com/metafates/mangal/blob/main/scripts/install"
-    }
 }
 
 
