@@ -33,7 +33,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolP("write-history", "H", true, "write history of the read chapters")
 	lo.Must0(viper.BindPFlag(constant.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("write-history")))
 
-	rootCmd.PersistentFlags().StringP("source", "S", "", "source")
+	rootCmd.PersistentFlags().StringP("source", "S", "", "default source to use")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("source", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		d := lo.Keys(provider.DefaultProviders())
 		d = append(d, lo.Keys(provider.CustomProviders())...)

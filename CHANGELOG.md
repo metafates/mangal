@@ -7,9 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 3.6.0
 
-- Fixed `mangal update` command 
+- Add `--json` flag for the `inline` mode by [@jojoxd](https://github.com/jojoxd) #83
+- Fixed `mangal update` command
+- Rename `history` global flag to `write-history` (shorthands are the same `-H`)
 - Add basic Termux support. Scripts that use headless chrome browser won't work as well as reading mode. That means that you can use it only for downloading manga (for now at least) #80
-- Add `--json` flag for `inline` mode by [@jojoxd](https://github.com/jojoxd) #83
 - Fixed a bug where reading manga with mini mode would cause mangal to crash #82
 
 
