@@ -40,13 +40,14 @@ type statefulBubble struct {
 	progressC        progress.Model
 	helpC            help.Model
 
-	selectedSource   source.Source
-	selectedManga    *source.Manga
-	selectedChapters map[*source.Chapter]struct{} // mathematical set
+	selectedProviders map[*provider.Provider]struct{}
+	selectedSources   []source.Source
+	selectedManga     *source.Manga
+	selectedChapters  map[*source.Chapter]struct{} // mathematical set
 
 	scrapersLoadedChannel   chan []*installer.Scraper
 	scraperInstalledChannel chan *installer.Scraper
-	sourceLoadedChannel     chan source.Source
+	sourcesLoadedChannel    chan []source.Source
 	foundMangasChannel      chan []*source.Manga
 	foundChaptersChannel    chan []*source.Chapter
 	chapterReadChannel      chan struct{}
@@ -160,13 +161,14 @@ func newBubble() *statefulBubble {
 
 		scrapersLoadedChannel:   make(chan []*installer.Scraper),
 		scraperInstalledChannel: make(chan *installer.Scraper),
-		sourceLoadedChannel:     make(chan source.Source),
+		sourcesLoadedChannel:    make(chan []source.Source),
 		foundMangasChannel:      make(chan []*source.Manga),
 		foundChaptersChannel:    make(chan []*source.Chapter),
 		chapterReadChannel:      make(chan struct{}),
 		chapterDownloadChannel:  make(chan struct{}),
 		errorChannel:            make(chan error),
 
+		selectedProviders:  make(map[*provider.Provider]struct{}),
 		selectedChapters:   make(map[*source.Chapter]struct{}),
 		chaptersToDownload: util.Stack[*source.Chapter]{},
 
@@ -237,7 +239,7 @@ func newBubble() *statefulBubble {
 	return &bubble
 }
 
-func (b *statefulBubble) loadSources() tea.Cmd {
+func (b *statefulBubble) loadProviders() tea.Cmd {
 	providers := provider.DefaultProviders()
 	customProviders := provider.CustomProviders()
 
@@ -286,5 +288,5 @@ func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
 		})
 	}
 
-	return tea.Batch(b.historyC.SetItems(items), b.loadSources()), nil
+	return tea.Batch(b.historyC.SetItems(items), b.loadProviders()), nil
 }

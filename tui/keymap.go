@@ -136,7 +136,8 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case historyState:
 		return to2(h(k.confirm, k.remove, k.back, k.openURL))
 	case sourcesState:
-		return to2(h(k.confirm))
+		search := withDescription(k.confirm, "search with selected")
+		return h(k.selectOne, k.selectAll, search), h(k.selectOne, k.selectAll, k.clearSelection, search)
 	case searchState:
 		return to2(h(k.confirm, k.forceQuit))
 	case mangasState:
@@ -185,4 +186,11 @@ func (k *statefulKeymap) forList() list.KeyMap {
 		Quit:                 k.quit,
 		ForceQuit:            k.forceQuit,
 	}
+}
+
+func withDescription(k key.Binding, description string) key.Binding {
+	return key.NewBinding(
+		key.WithKeys(k.Keys()...),
+		key.WithHelp(k.Help().Key, description),
+	)
 }
