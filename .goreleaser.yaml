@@ -150,7 +150,7 @@ release:
       ```sh
       curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | sh
       ```
-    <details>
+    </details>
 
     ## What's new?
 
