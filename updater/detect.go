@@ -17,6 +17,7 @@ const (
 	unknown installationMethod = iota
 	homebrew
 	scoop
+	termux
 	script
 )
 
@@ -24,6 +25,7 @@ func detectInstallationMethod() installationMethod {
 	for _, t := range []lo.Tuple2[installationMethod, func() bool]{
 		{scoop, isUnderScoop},
 		{homebrew, isUnderHomebrew},
+		{termux, isUnderTermux},
 	} {
 		if t.B() {
 			return t.A
@@ -42,6 +44,10 @@ func detectInstallationMethod() installationMethod {
 	}
 
 	return unknown
+}
+
+func isUnderTermux() (ok bool) {
+	return has("termux-setup-storage")
 }
 
 func isUnderHomebrew() (ok bool) {
@@ -72,7 +78,7 @@ func isUnderScoop() (ok bool) {
 
 func has(command string) bool {
 	ok, err := exec.LookPath(command)
-	return err != nil || ok != ""
+	return err == nil && ok != ""
 }
 
 func execute(command string, arguments ...string) (output string, err error) {

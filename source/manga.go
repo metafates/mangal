@@ -22,7 +22,7 @@ type Manga struct {
 	ID string
 	// Chapters of the manga
 	Chapters       []*Chapter
-	Source         Source
+	Source         Source `json:"-"`
 	cachedTempPath string
 }
 
@@ -41,6 +41,7 @@ func (m *Manga) Path(temp bool) (path string, err error) {
 		}
 
 		path, err = filesystem.Get().TempDir("", constant.TempPrefix)
+
 		m.cachedTempPath = path
 		return
 	}

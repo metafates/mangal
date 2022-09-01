@@ -6,9 +6,9 @@ import (
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/open"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
-	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
 	"path/filepath"
 )

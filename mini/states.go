@@ -413,10 +413,11 @@ func (m *mini) handleHistorySelectState() error {
 
 	erase = progress("Fetching Chapters..")
 	manga := &source.Manga{
-		Name:  c.MangaName,
-		URL:   c.MangaURL,
-		Index: 0,
-		ID:    c.MangaID,
+		Name:   c.MangaName,
+		URL:    c.MangaURL,
+		Index:  0,
+		ID:     c.MangaID,
+		Source: s,
 	}
 	chaps, err := m.selectedSource.ChaptersOf(manga)
 	erase()

@@ -124,3 +124,22 @@ func Max[T constraints.Ordered](items ...T) (max T) {
 
 	return
 }
+
+func Min[T constraints.Ordered](items ...T) (min T) {
+	min = items[0]
+	for _, item := range items {
+		if item < min {
+			min = item
+		}
+	}
+
+	return
+}
+
+func PrintErasable(msg string) (eraser func()) {
+	fmt.Printf("\r%s", msg)
+
+	return func() {
+		_, _ = fmt.Fprintf(os.Stdout, "\r%s\r", strings.Repeat(" ", len(msg)))
+	}
+}

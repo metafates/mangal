@@ -4,6 +4,7 @@
     <img alt="Linux" src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black">
     <img alt="macOS" src="https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0">
     <img alt="Windows" src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white">
+    <img alt="Termux" src="https://img.shields.io/badge/Termux-000000?style=for-the-badge&logo=GNOME%20Terminal&logoColor=white">
 </p>
 
 <h3 align="center">
@@ -17,7 +18,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
     curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/run | sh
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
-> Linux + MacOS only
+> Not available on Windows.
 
 ## Table of contents
 
@@ -39,12 +40,12 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 - __Fast?__ - YES.
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 - __Fancy__ - (ﾉ>ω<)ﾉ :｡･::･ﾟ’★,｡･:･ﾟ’☆
-- __Cross-Platform__ - Linux, macOS, Windows. Sorry, *BSD users...
+- __Cross-Platform__ - Linux, macOS, Windows, Termux (partially)
 - __Anilist integration__ - Track your manga progress on Anilist when reading with Mangal.
 
 ## Installation
 
-### Linux + MacOS
+### Linux + MacOS + Termux
 
 Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
 
@@ -52,6 +53,9 @@ Install using [this shell script](https://github.com/metafates/mangal/blob/main/
 
 This script will automatically detect OS & Distro and use the best option available.
 For example, on macOS it will try to use Homebrew, on Ubuntu it will install the `.deb` package and so on...
+
+> Termux support is limited to downloading manga only.
+> You can't read chapters or use headless chrome based scrapers
 
 <details>
 <summary>😡 I hate scripts! Show me how to install it manually</summary>
@@ -62,12 +66,12 @@ For example, on macOS it will try to use Homebrew, on Ubuntu it will install the
 
 #### Ubuntu / Debian
 
-1. Download the `*.deb` file from [release page](https://github.com/metafates/mangal/releases/latest)
+1. Download the `*.deb` file from the [release page](https://github.com/metafates/mangal/releases/latest)
 2. Run `sudo dpkg --install ...` where `...` is the name of the file you downloaded
 
 #### Fedora / Any other rpm based distro
 
-1. Download the `*.rpm` file from [release page](https://github.com/metafates/mangal/releases/latest)
+1. Download the `*.rpm` file from the [release page](https://github.com/metafates/mangal/releases/latest)
 2. Run `sudo rpm --install ...` where `...` is the name of the file you downloaded
 
 #### MacOS
@@ -76,6 +80,13 @@ Install using [Homebrew](https://brew.sh/)
 
     brew tap metafates/mangal
     brew install mangal
+
+#### Termux
+
+1. Download the arm64 linux binary from the [release page](https://github.com/metafates/mangal/releases/latest)
+2. Move it to `$PREFIX/bin`
+3. Install `resolve-conf` & `proot` (`pkg install -y resolve-conf proot`)
+4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal'` (install script will create an alias for this automatically)
 
 #### Pre-compiled
 

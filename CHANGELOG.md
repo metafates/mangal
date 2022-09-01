@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.6.0
+
+- Add `--json` flag for the `inline` mode by [@jojoxd](https://github.com/jojoxd) #83
+- Fixed `mangal update` command
+- Rename `history` global flag to `write-history` (shorthands are the same `-H`)
+- Add basic Termux support. Scripts that use headless chrome browser won't work as well as reading mode. That means that you can use it only for downloading manga (for now at least) #80
+- Fixed a bug where reading manga with mini mode would cause mangal to crash #82
+
+
 ## 3.5.0
 
 - `mangal update` command added to update itself

@@ -23,6 +23,7 @@ archives:
       darwin: Darwin
       linux: Linux
       windows: Windows
+      android: Android
       386: i386
       amd64: x86_64
     format_overrides:
@@ -130,8 +131,30 @@ release:
     owner: metafates
     name: mangal
 
-  draft: false
+  discussion_category_name: Releases
   name_template: "{{.ProjectName}} v{{.Version}}"
+  header: |
+    To update:
+    ```
+    mangal update 
+    ```
+
+    To install:
+    ```sh
+    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | sh
+    ```
+
+    <details>
+      <summary>If you have any problems updating</summary>
+      Run the install script (you can run it multiple times):
+
+      ```sh
+      curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | sh
+      ```
+    <details>
+
+    ## What's new?
+
   footer: |
     **Full Changelog**: https://github.com/metafates/mangal/compare/{{ .PreviousTag }}...{{ .Tag }}
 

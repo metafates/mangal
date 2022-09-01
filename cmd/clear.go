@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
@@ -13,33 +16,44 @@ import (
 
 func init() {
 	rootCmd.AddCommand(clearCmd)
-	clearCmd.Flags().BoolP("cache", "c", false, "Clear cache files")
-	clearCmd.Flags().BoolP("history-file", "r", false, "Clear history")
+	clearCmd.Flags().Bool("cache", false, "Clear cache files")
+	clearCmd.Flags().Bool("history", false, "Clear history")
 }
 
 var clearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "Clears a sidelined files",
 	Run: func(cmd *cobra.Command, args []string) {
+		var any bool
 		doClearCache := lo.Must(cmd.Flags().GetBool("cache"))
 		doClearHistory := lo.Must(cmd.Flags().GetBool("history"))
 
 		if doClearCache {
+			any = true
+			e := util.PrintErasable(fmt.Sprintf("%s Clearing cache...", icon.Get(icon.Progress)))
 			clearCache()
+			e()
+			fmt.Printf("%s Cache cleared\n", icon.Get(icon.Success))
 		}
 
 		if doClearHistory {
+			any = true
+			e := util.PrintErasable(fmt.Sprintf("%s Clearing history...", icon.Get(icon.Progress)))
 			clearHistory()
+			e()
+			fmt.Printf("%s History cleared\n", icon.Get(icon.Success))
 		}
 
-		cmd.Println("Cleared")
+		if !any {
+			handleErr(cmd.Help())
+		}
 	},
 }
 
 func clearCache() {
 	cacheDir := lo.Must(os.UserCacheDir())
 	cacheDir = filepath.Join(cacheDir, constant.CachePrefix)
-	_ = filesystem.Get().RemoveAll(cacheDir)
+	handleErr(filesystem.Get().RemoveAll(cacheDir))
 }
 
 func clearTemp() {
@@ -64,5 +78,5 @@ func clearTemp() {
 
 func clearHistory() {
 	historyFile := where.History()
-	_ = filesystem.Get().Remove(historyFile)
+	handleErr(filesystem.Get().Remove(historyFile))
 }
