@@ -131,7 +131,6 @@ release:
     owner: metafates
     name: mangal
 
-  discussion_category_name: Releases
   name_template: "{{.ProjectName}} v{{.Version}}"
   header: |
     To update:
