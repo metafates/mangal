@@ -18,8 +18,8 @@ func (b *statefulBubble) Init() tea.Cmd {
 		}
 
 		b.setState(loadingState)
-		return tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
+		return tea.Batch(b.startLoading(), b.loadSources([]*provider.Provider{p}), b.waitForSourcesLoaded())
 	}
 
-	return tea.Batch(textinput.Blink, b.loadSources())
+	return tea.Batch(textinput.Blink, b.loadProviders())
 }

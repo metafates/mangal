@@ -178,8 +178,8 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return msg
 			})
 		}
-	case source.Source:
-		b.selectedSource = msg
+	case []source.Source:
+		b.selectedSources = msg
 
 		if b.statesHistory.Peek() == historyState {
 			b.newState(historyState)
@@ -201,8 +201,8 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case source.Source:
-		b.selectedSource = msg
+	case []source.Source:
+		b.selectedSources = msg
 		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 
 		manga := &source.Manga{
@@ -210,7 +210,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 			URL:    selected.MangaURL,
 			Index:  0,
 			ID:     selected.MangaID,
-			Source: b.selectedSource,
+			Source: b.selectedSources[0],
 		}
 
 		b.selectedManga = manga
@@ -280,7 +280,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				b.newState(loadingState)
-				return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
+				return b, tea.Batch(b.startLoading(), b.loadSources([]*provider.Provider{p}), b.waitForSourcesLoaded())
 			}
 		}
 	}
@@ -297,14 +297,46 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case b.sourcesC.FilterState() == list.Filtering:
 			break
-		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
+		case key.Matches(msg, b.keymap.selectAll):
+			for _, item := range b.sourcesC.Items() {
+				item := item.(*listItem)
+				item.marked = true
+				b.selectedProviders[item.internal.(*provider.Provider)] = struct{}{}
+			}
+		case key.Matches(msg, b.keymap.clearSelection):
+			for _, item := range b.sourcesC.Items() {
+				item := item.(*listItem)
+				item.marked = false
+				delete(b.selectedProviders, item.internal.(*provider.Provider))
+			}
+		case key.Matches(msg, b.keymap.selectOne):
 			if b.sourcesC.SelectedItem() == nil {
 				break
 			}
 
-			p := b.sourcesC.SelectedItem().(*listItem).internal.(*provider.Provider)
+			item := b.sourcesC.SelectedItem().(*listItem)
+			p := item.internal.(*provider.Provider)
+
+			if item.marked {
+				delete(b.selectedProviders, p)
+			} else {
+				b.selectedProviders[p] = struct{}{}
+			}
+
+			item.toggleMark()
+		case key.Matches(msg, b.keymap.confirm):
+			if b.sourcesC.SelectedItem() == nil {
+				break
+			}
+
+			item := b.sourcesC.SelectedItem().(*listItem)
+
+			if len(b.selectedProviders) == 0 {
+				b.selectedProviders[item.internal.(*provider.Provider)] = struct{}{}
+			}
+
 			b.newState(loadingState)
-			return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
+			return b, tea.Batch(b.startLoading(), b.loadSources(lo.Keys(b.selectedProviders)), b.waitForSourcesLoaded())
 		}
 	}
 
