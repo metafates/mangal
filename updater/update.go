@@ -9,6 +9,7 @@ import (
 	"os/exec"
 )
 
+// Update updates mangal to the latest version.
 func Update() (err error) {
 	method := detectInstallationMethod()
 
@@ -32,6 +33,7 @@ func Update() (err error) {
 	return
 }
 
+// updateHomebrew updates mangal using homebrew.
 func updateHomebrew() (err error) {
 	cmd := exec.Command("brew", "upgrade", "mangal")
 	cmd.Stdout = os.Stdout
@@ -39,6 +41,7 @@ func updateHomebrew() (err error) {
 	return cmd.Run()
 }
 
+// updateScoop updates mangal using scoop.
 func updateScoop() (err error) {
 	cmd := exec.Command("scoop", "update", "mangal")
 	cmd.Stdout = os.Stdout
@@ -46,6 +49,7 @@ func updateScoop() (err error) {
 	return cmd.Run()
 }
 
+// updateScript updates mangal using the script.
 func updateScript() (err error) {
 	res, err := http.Get("https://raw.githubusercontent.com/metafates/mangal/main/scripts/install")
 	if err != nil {

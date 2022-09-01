@@ -72,6 +72,7 @@ func (p *Page) Read(b []byte) (int, error) {
 	return p.Contents.Read(b)
 }
 
+// Filename generates a filename for the page.
 func (p *Page) Filename() (filename string) {
 	filename = fmt.Sprintf("%d%s", p.Index, p.Extension)
 	filename = util.PadZero(filename, 10)
