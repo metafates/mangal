@@ -130,7 +130,9 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 
 	switch k.state {
 	case scrapersInstallState:
-		return to2(h(k.confirm, k.openURL))
+		viewSource := withDescription(k.openURL, "view source")
+		install := withDescription(k.confirm, "install")
+		return to2(h(install, viewSource))
 	case loadingState:
 		return to2(h(k.forceQuit, k.back))
 	case historyState:
@@ -143,7 +145,8 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	case mangasState:
 		return to2(h(k.confirm, k.back, k.openURL))
 	case chaptersState:
-		return h(k.read, k.selectOne, k.selectAll, k.confirm, k.back), h(k.read, k.selectOne, k.selectAll, k.clearSelection, k.openURL, k.confirm, k.back)
+		download := withDescription(k.confirm, "download selected")
+		return h(k.read, k.selectOne, k.selectAll, download, k.back), h(k.read, k.selectOne, k.selectAll, k.clearSelection, k.openURL, download, k.back)
 	case confirmState:
 		return to2(h(k.confirm, k.back, k.quit))
 	case readState:
