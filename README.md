@@ -84,9 +84,9 @@ Install using [Homebrew](https://brew.sh/)
 #### Termux
 
 1. Download the arm64 linux binary from the [release page](https://github.com/metafates/mangal/releases/latest)
-2. Move it to `$PREFIX/bin`
+2. Move it to the `$PREFIX/bin`
 3. Install `resolve-conf` & `proot` (`pkg install -y resolve-conf proot`)
-4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal'` (install script will create an alias for this automatically)
+4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal` (install script will create an alias for this automatically)
 
 #### Pre-compiled
 
