@@ -96,6 +96,9 @@ install_deb() {
     x86_64)
         ARCH="amd64"
         ;;
+    i*)
+        ARCH="i386"
+        ;;
     esac
 
     DEB_NAME="${FILE_BASENAME}_${VERSION}_${ARCH}.deb"
@@ -205,6 +208,9 @@ install_rpm() {
     amd64)
         ARCH="x86_64"
         ;;
+    i*)
+        ARCH="i386"
+        ;;
     esac
 
     RPM_NAME="${FILE_BASENAME}-${VERSION}.${ARCH}.rpm"
@@ -240,6 +246,9 @@ install_binary() {
         ;;
     amd64)
         ARCH="x86_64"
+        ;;
+    i*)
+        ARCH="i386"
         ;;
     esac
 

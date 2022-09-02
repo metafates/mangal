@@ -80,6 +80,9 @@ run() {
     amd64)
         ARCH="x86_64"
         ;;
+    i*)
+        ARCH="i386"
+        ;;
     esac
 
     TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
