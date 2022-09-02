@@ -158,12 +158,15 @@ func (b *statefulBubble) searchManga(query string) tea.Cmd {
 					log.Error(err)
 					b.errorChannel <- err
 				}
-				log.Info(fmt.Sprintf("found %d mangas from source %s", len(mangas), s.Name()))
+
+				log.Infof("found %s from source %s", util.Quantity(len(sourceMangas), "manga"), s.Name())
 				mangas = append(mangas, sourceMangas...)
 			}(s)
 		}
 
 		wg.Wait()
+
+		log.Infof("found %d mangas from %d sources", len(mangas), len(b.selectedSources))
 
 		b.foundMangasChannel <- mangas
 
@@ -191,7 +194,7 @@ func (b *statefulBubble) getChapters(manga *source.Manga) tea.Cmd {
 			log.Error(err)
 			b.errorChannel <- err
 		} else {
-			log.Info("found " + fmt.Sprintf("%d", len(chapters)) + " chapters")
+			log.Infof("found %s", util.Quantity(len(chapters), "chapter"))
 			b.foundChaptersChannel <- chapters
 		}
 

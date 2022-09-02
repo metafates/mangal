@@ -48,6 +48,7 @@ var defaultValues = map[string]any{
 	// Logs
 	constant.LogsWrite: false,
 	constant.LogsLevel: "info",
+	constant.LogsJson:  false,
 
 	// Anilist
 	constant.AnilistEnable: false,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
 	"path/filepath"
@@ -34,6 +35,7 @@ func (c *Chapter) String() string {
 // DownloadPages downloads the Pages contents of the Chapter.
 // Pages needs to be set before calling this function.
 func (c *Chapter) DownloadPages() error {
+	log.Debugf("Downloading %d pages of chapter \"%s\"", len(c.Pages), c.Name)
 	wg := sync.WaitGroup{}
 	wg.Add(len(c.Pages))
 

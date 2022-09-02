@@ -11,7 +11,7 @@ var browserMethods = map[string]lua.LGFunction{
 }
 
 func newBrowser() lua.LGFunction {
-	log.Info("creating browser")
+	log.Debug("creating browser")
 	return func(L *lua.LState) int {
 		browser := rod.New()
 		err := browser.Connect()
@@ -53,7 +53,7 @@ func browserPage(L *lua.LState) int {
 	browser := checkBrowser(L)
 	url := L.ToString(2)
 
-	log.Info("opening page " + url)
+	log.Debug("opening page " + url)
 	p := browser.MustPage(url)
 
 	ud := L.NewUserData()

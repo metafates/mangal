@@ -61,4 +61,5 @@ const (
 const (
 	LogsWrite = "logs.write"
 	LogsLevel = "logs.level"
+	LogsJson  = "logs.json"
 )
