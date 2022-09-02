@@ -275,6 +275,8 @@ write = false
 # Available options are: (from less to most verbose)
 # panic, fatal, error, warn, info, debug, trace
 level = "info"
+# Use json format for logs 
+json = false
 ```
 
 </details>
