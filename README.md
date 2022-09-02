@@ -33,8 +33,8 @@ curl -sL io.metafates.one/mr | sh
 
 ## Features
 
-- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with __
-  Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper 
+  with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 - [Mangadex](https://mangadex.org) + [Manganelo](https://m.manganelo.com/wwww) Built-In
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
