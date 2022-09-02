@@ -3,6 +3,7 @@ package updater
 import (
 	"errors"
 	"fmt"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
 	"net/http"
 	"os"
@@ -35,7 +36,7 @@ func Update() (err error) {
 
 // updateHomebrew updates mangal using homebrew.
 func updateHomebrew() (err error) {
-	cmd := exec.Command("brew", "upgrade", "mangal")
+	cmd := exec.Command("brew", "upgrade", constant.Mangal)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -43,7 +44,7 @@ func updateHomebrew() (err error) {
 
 // updateScoop updates mangal using scoop.
 func updateScoop() (err error) {
-	cmd := exec.Command("scoop", "update", "mangal")
+	cmd := exec.Command("scoop", "update", constant.Mangal)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -51,7 +52,7 @@ func updateScoop() (err error) {
 
 // updateScript updates mangal using the script.
 func updateScript() (err error) {
-	res, err := http.Get("https://raw.githubusercontent.com/metafates/mangal/main/scripts/install")
+	res, err := http.Get(constant.InstallScriptURL)
 	if err != nil {
 		return err
 	}
