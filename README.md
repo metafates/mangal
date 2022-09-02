@@ -62,7 +62,7 @@ For example, on macOS it will try to use Homebrew, on Ubuntu it will install the
 
 #### Arch Linux
 
-[AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
+[AUR package](https://aur.archlinux.org/packages/mangal-bin) (maintained by [@balajsra](https://github.com/balajsra), thank you)
 
 #### Ubuntu / Debian
 
@@ -107,10 +107,20 @@ go install -ldflags="-s -w"
 
 ### Windows
 
-Install using [Scoop](https://scoop.sh/)
+Install using [Scoop](https://scoop.sh/) (thanks to [@SonaliBendre](https://github.com/SonaliBendre) for adding it to the official bucket)
+
+    scoop bucket add extras
+    scoop install mangal
+
+<details>
+<summary>In case it's outdated</summary>
+
+Use my bucket
 
     scoop bucket add metafates https://github.com/metafates/scoop-metafates
     scoop install mangal
+
+</details>
 
 ### Docker
 
