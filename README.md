@@ -16,7 +16,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 ## Try it!
 
 ```shell
-curl -sL io.metafates.one/mr  | sh
+curl -sfL io.metafates.one/mr  | sh
 ```
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
@@ -52,7 +52,7 @@ curl -sL io.metafates.one/mr  | sh
 Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
 
 ```shell
-curl -sL io.metafates.one/mi | sh
+curl -sfL io.metafates.one/mi | sh
 ```
 
 This script will automatically detect OS & Distro and use the best option available.
