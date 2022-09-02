@@ -15,7 +15,9 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 ## Try it!
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/run | sh
+```shell
+curl -sL io.metafates.one/mr  | sh
+```
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
 > Not available on Windows.
@@ -49,7 +51,9 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 
 Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
 
-    curl -sfL https://raw.githubusercontent.com/metafates/mangal/main/scripts/install | sh
+```shell
+curl -sL io.metafates.one/mi | sh
+```
 
 This script will automatically detect OS & Distro and use the best option available.
 For example, on macOS it will try to use Homebrew, on Ubuntu it will install the `.deb` package and so on...
