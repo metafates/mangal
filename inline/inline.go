@@ -15,10 +15,6 @@ func Run(options *Options) error {
 		return err
 	}
 
-	if len(mangas) == 0 {
-		return errors.New("no mangas found")
-	}
-
 	// manga picker can only be none if json is set
 	if options.MangaPicker.IsNone() {
 		// preload all chapters
@@ -31,28 +27,34 @@ func Run(options *Options) error {
 		return printAsJson(mangas)
 	}
 
-	manga := options.MangaPicker.Unwrap()(mangas)
+	var chapters []*source.Chapter
 
-	chapters, err := options.Source.ChaptersOf(manga)
-	if err != nil {
-		return err
-	}
+	if len(mangas) == 0 {
+		chapters = []*source.Chapter{}
+	} else {
+		manga := options.MangaPicker.Unwrap()(mangas)
 
-	if len(chapters) == 0 {
-		return errors.New("no chapters found")
-	}
-
-	chapters, err = options.ChaptersFilter(chapters)
-	if err != nil {
-		return err
-	}
-
-	if options.Json {
-		if err = jsonUpdateChapters(manga, options); err != nil {
+		chapters, err = options.Source.ChaptersOf(manga)
+		if err != nil {
 			return err
 		}
 
-		return printAsJson([]*source.Manga{manga})
+		if len(chapters) == 0 {
+			return errors.New("no chapters found")
+		}
+
+		chapters, err = options.ChaptersFilter(chapters)
+		if err != nil {
+			return err
+		}
+
+		if options.Json {
+			if err = jsonUpdateChapters(manga, options); err != nil {
+				return err
+			}
+
+			return printAsJson([]*source.Manga{manga})
+		}
 	}
 
 	for _, chapter := range chapters {

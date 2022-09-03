@@ -1,12 +1,10 @@
 package inline
 
 import (
-	"errors"
 	"fmt"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -42,8 +40,6 @@ func ParseMangaPicker(description string) (MangaPicker, error) {
 
 	return func(mangas []*source.Manga) *source.Manga {
 		if len(mangas) == 0 {
-			_, _ = fmt.Fprint(os.Stderr, "No mangas found.\n")
-			os.Exit(1)
 			return nil
 		}
 
@@ -78,7 +74,7 @@ func ParseChaptersFilter(description string) (ChaptersFilter, error) {
 
 	return func(chapters []*source.Chapter) ([]*source.Chapter, error) {
 		if len(chapters) == 0 {
-			return nil, errors.New("No chapters found")
+			return chapters, nil
 		}
 
 		switch description {
