@@ -1,7 +1,6 @@
 package inline
 
 import (
-	"errors"
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
@@ -37,10 +36,6 @@ func Run(options *Options) error {
 		chapters, err = options.Source.ChaptersOf(manga)
 		if err != nil {
 			return err
-		}
-
-		if len(chapters) == 0 {
-			return errors.New("no chapters found")
 		}
 
 		chapters, err = options.ChaptersFilter(chapters)
