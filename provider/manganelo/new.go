@@ -50,11 +50,13 @@ func New() source.Source {
 	mangasCollector.OnHTML(mangasSelector, func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
+		url := e.Request.AbsoluteURL(link)
 		manga := source.Manga{
 			Name:     e.Text,
-			URL:      e.Request.AbsoluteURL(link),
+			URL:      url,
 			Index:    uint16(e.Index),
 			Chapters: make([]*source.Chapter, 0),
+			ID:       filepath.Base(url),
 			Source:   &manganelo,
 		}
 
@@ -81,11 +83,13 @@ func New() source.Source {
 		link := e.Attr("href")
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
+		url := e.Request.AbsoluteURL(link)
 		chapter := source.Chapter{
 			Name:  e.Text,
-			URL:   e.Request.AbsoluteURL(link),
+			URL:   url,
 			Index: uint16(e.Index),
 			Pages: make([]*source.Page, 0),
+			ID:    filepath.Base(url),
 			Manga: manga,
 		}
 		manga.Chapters = append(manga.Chapters, &chapter)
