@@ -182,11 +182,15 @@ Run `mangal config init` to generate a default config file
 # Type `mangal sources` for available sources
 default_source = ''
 # Name template of the downloaded chapters
+# Path forbidden symbols will be replaced with _
 # Available variables:
-# {index}        - index of the chapters
-# {padded-index} - same as index but padded with leading zeros
-# {chapter}      - name of the chapter
-# {manga}        - name of the manga
+# {index}          - index of the chapters
+# {padded-index}   - same as index but padded with leading zeros
+# {chapters-count} - total number of chapters
+# {chapter}        - name of the chapter
+# {manga}          - name of the manga
+# {volume}         - volume of the chapter
+# {source}         - name of the source
 chapter_name_template = '[{padded-index}] {chapter}'
 # Where to download manga
 # Absolute or relative.
@@ -199,6 +203,8 @@ path = '.'
 async = true
 # Create a subdirectory for each manga
 create_manga_dir = true
+# Create a subdirectory for each volume (if available)
+careate_volume_dir = true
 # Stop downloading other chapters on error
 stop_on_error = false
 

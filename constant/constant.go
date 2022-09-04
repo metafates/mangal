@@ -60,7 +60,7 @@ end
 
 --- Gets the list of all manga chapters.
 -- @param mangaURL URL of the manga
--- @return Table of tables with the following fields: name, url
+-- @return Table of tables with the following fields: name, url (optional: volume)
 function {{ .MangaChaptersFn }}(mangaURL)
 	return {}
 end

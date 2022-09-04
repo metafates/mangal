@@ -16,8 +16,9 @@ func init() {
 }
 
 var updateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "Update mangal",
+	Use:     "update",
+	Short:   "Update mangal",
+	Aliases: []string{"upgrade"},
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.SetOut(os.Stdout)
 

@@ -10,7 +10,7 @@ type statefulKeymap struct {
 	state state
 
 	quit, forceQuit,
-	selectOne, selectAll, clearSelection,
+	selectOne, selectAll, selectVolume, clearSelection,
 	remove,
 	redownloadFailed,
 	confirm,
@@ -53,6 +53,10 @@ func newStatefulKeymap() *statefulKeymap {
 		selectAll: k(
 			keys("ctrl+a", "tab", "*"),
 			help("tab", "select all"),
+		),
+		selectVolume: k(
+			keys("v"),
+			help("v", "select volume"),
 		),
 		clearSelection: k(
 			keys("backspace"),
@@ -146,7 +150,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 		return to2(h(k.confirm, k.back, k.openURL))
 	case chaptersState:
 		download := withDescription(k.confirm, "download selected")
-		return h(k.read, k.selectOne, k.selectAll, download, k.back), h(k.read, k.selectOne, k.selectAll, k.clearSelection, k.openURL, download, k.back)
+		return h(k.read, k.selectOne, k.selectAll, download, k.back), h(k.read, k.selectOne, k.selectAll, k.clearSelection, k.openURL, download, k.selectVolume, k.back)
 	case confirmState:
 		return to2(h(k.confirm, k.back, k.quit))
 	case readState:

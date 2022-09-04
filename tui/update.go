@@ -14,7 +14,6 @@ import (
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"golang.org/x/exp/slices"
-	"path/filepath"
 	"time"
 )
 
@@ -427,6 +426,28 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				b.raiseError(err)
 			}
+		case key.Matches(msg, b.keymap.selectVolume):
+			if b.chaptersC.SelectedItem() == nil {
+				break
+			}
+
+			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
+
+			if chapter.Volume == "" {
+				break
+			}
+
+			for _, item := range b.chaptersC.Items() {
+				item := item.(*listItem)
+				if item.internal.(*source.Chapter).Volume == chapter.Volume {
+					item.toggleMark()
+					if item.marked {
+						b.selectedChapters[item.internal.(*source.Chapter)] = struct{}{}
+					} else {
+						delete(b.selectedChapters, item.internal.(*source.Chapter))
+					}
+				}
+			}
 		case key.Matches(msg, b.keymap.selectOne):
 			if b.chaptersC.SelectedItem() == nil {
 				break
@@ -562,7 +583,7 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keymap.openFolder):
-			err := open.Start(filepath.Dir(b.lastDownloadedChapterPath))
+			err := open.Start(lo.Must(b.currentDownloadingChapter.Manga.Path(false)))
 			if err != nil {
 				b.raiseError(err)
 			}

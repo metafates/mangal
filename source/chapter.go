@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -22,6 +24,8 @@ type Chapter struct {
 	Index uint16
 	// ID of the chapter in the source.
 	ID string
+	// Volume which the chapter belongs to.
+	Volume string
 	// Manga that the chapter belongs to.
 	Manga *Manga `json:"-"`
 	// Pages of the chapter.
@@ -65,11 +69,19 @@ func (c *Chapter) DownloadPages() error {
 
 // formattedName of the chapter according to the template in the config.
 func (c *Chapter) formattedName() (name string) {
-	template := viper.GetString(constant.DownloaderChapterNameTemplate)
-	name = strings.ReplaceAll(template, "{manga}", c.Manga.Name)
-	name = strings.ReplaceAll(name, "{chapter}", c.Name)
-	name = strings.ReplaceAll(name, "{index}", fmt.Sprintf("%d", c.Index))
-	name = strings.ReplaceAll(name, "{padded-index}", util.PadZero(fmt.Sprintf("%d", c.Index), 4))
+	name = viper.GetString(constant.DownloaderChapterNameTemplate)
+
+	for variable, value := range map[string]string{
+		"manga":          c.Manga.Name,
+		"chapter":        c.Name,
+		"index":          fmt.Sprintf("%d", c.Index),
+		"padded-index":   fmt.Sprintf("%04d", c.Index),
+		"chapters-count": fmt.Sprintf("%d", len(c.Manga.Chapters)),
+		"volume":         c.Volume,
+		"source":         c.Source().Name(),
+	} {
+		name = strings.ReplaceAll(name, fmt.Sprintf("{%s}", variable), value)
+	}
 
 	return
 }
@@ -110,6 +122,14 @@ func (c *Chapter) Path(temp bool) (path string, err error) {
 	path, err = c.Manga.Path(temp)
 	if err != nil {
 		return
+	}
+
+	if c.Volume != "" && viper.GetBool(constant.DownloaderCreateVolumeDir) {
+		path = filepath.Join(path, util.SanitizeFilename(c.Volume))
+		err = filesystem.Get().MkdirAll(path, os.ModePerm)
+		if err != nil {
+			return
+		}
 	}
 
 	path = filepath.Join(path, c.Filename())

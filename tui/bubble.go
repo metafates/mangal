@@ -59,7 +59,6 @@ type statefulBubble struct {
 	chaptersToDownload util.Stack[*source.Chapter]
 
 	currentDownloadingChapter *source.Chapter
-	lastDownloadedChapterPath string
 	lastError                 error
 
 	width, height int

@@ -246,7 +246,7 @@ func (b *statefulBubble) waitForChapterRead() tea.Cmd {
 func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
 		b.currentDownloadingChapter = chapter
-		path, err := downloader.Download(chapter, func(s string) {
+		_, err := downloader.Download(chapter, func(s string) {
 			b.progressStatus = s
 		})
 
@@ -260,7 +260,6 @@ func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 		} else {
 			b.succededChapters = append(b.succededChapters, chapter)
 			b.chapterDownloadChannel <- struct{}{}
-			b.lastDownloadedChapterPath = path
 		}
 
 		return nil
