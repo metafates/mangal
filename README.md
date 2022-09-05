@@ -30,7 +30,7 @@ curl -sL mangal.metafates.one/run | sh
 - [Configuration](#configuration)
 - [Custom scrapers](#custom-scrapers)
 - [Anilist](#anilist)
-- [Honororable mentions](#honorable-mentions)
+- [Honorable mentions](#honorable-mentions)
 
 ## Features
 
