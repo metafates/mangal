@@ -170,9 +170,9 @@ Inline mode is intended for use with other scripts.
 
 Example of usage:
 
-    mangal inline --source Manganelo --query "death note" --manga first --chapters "@Vol.1 @"  -d
+    mangal inline --source Manganelo --query "death note" --manga first --chapters all  -d
 
-> This will download the first volume of "Death Note" from Manganelo.
+> This will download all chapters of the "Death Note" from Manganelo.
 
 Type `mangal help inline` for more information
 
@@ -371,8 +371,6 @@ For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist
 - [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) - Responsible for the awesome CLI & config experience 🛠 
 - [pdfcpu](https://github.com/pdfcpu/pdfcpu) - Fast pdf processor in pure go 📄
 - _And many others!_
-
-The project would definitely not be complete or even in a working state if it weren't for these dependencies.
 
 ### Contributors
 
