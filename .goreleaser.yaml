@@ -140,7 +140,7 @@ release:
 
     To install:
     ```sh
-    curl -sL io.metafates.one/mi | sh
+    curl -sL mangal.metafates.one/install | sh
     ```
 
     <details>
@@ -148,7 +148,7 @@ release:
       Run the install script (you can run it multiple times):
 
       ```sh
-      curl -sL io.metafates.one/mi | sh
+      curl -sL mangal.metafates.one/install | sh
       ```
     </details>
 
