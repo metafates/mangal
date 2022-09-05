@@ -10,7 +10,7 @@ type statefulKeymap struct {
 	state state
 
 	quit, forceQuit,
-	selectOne, selectAll, clearSelection,
+	selectOne, selectAll, selectVolume, clearSelection,
 	remove,
 	redownloadFailed,
 	confirm,
@@ -53,6 +53,10 @@ func newStatefulKeymap() *statefulKeymap {
 		selectAll: k(
 			keys("ctrl+a", "tab", "*"),
 			help("tab", "select all"),
+		),
+		selectVolume: k(
+			keys("v"),
+			help("v", "select volume"),
 		),
 		clearSelection: k(
 			keys("backspace"),
@@ -130,19 +134,23 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 
 	switch k.state {
 	case scrapersInstallState:
-		return to2(h(k.confirm, k.openURL))
+		viewSource := withDescription(k.openURL, "view source")
+		install := withDescription(k.confirm, "install")
+		return to2(h(install, viewSource))
 	case loadingState:
 		return to2(h(k.forceQuit, k.back))
 	case historyState:
 		return to2(h(k.confirm, k.remove, k.back, k.openURL))
 	case sourcesState:
-		return to2(h(k.confirm))
+		search := withDescription(k.confirm, "search with selected")
+		return h(k.selectOne, k.selectAll, search), h(k.selectOne, k.selectAll, k.clearSelection, search)
 	case searchState:
 		return to2(h(k.confirm, k.forceQuit))
 	case mangasState:
 		return to2(h(k.confirm, k.back, k.openURL))
 	case chaptersState:
-		return h(k.read, k.selectOne, k.selectAll, k.confirm, k.back), h(k.read, k.selectOne, k.selectAll, k.clearSelection, k.openURL, k.confirm, k.back)
+		download := withDescription(k.confirm, "download selected")
+		return h(k.read, k.selectOne, k.selectAll, download, k.back), h(k.read, k.selectOne, k.selectAll, k.clearSelection, k.openURL, download, k.selectVolume, k.back)
 	case confirmState:
 		return to2(h(k.confirm, k.back, k.quit))
 	case readState:
@@ -185,4 +193,11 @@ func (k *statefulKeymap) forList() list.KeyMap {
 		Quit:                 k.quit,
 		ForceQuit:            k.forceQuit,
 	}
+}
+
+func withDescription(k key.Binding, description string) key.Binding {
+	return key.NewBinding(
+		key.WithKeys(k.Keys()...),
+		key.WithHelp(k.Help().Key, description),
+	)
 }

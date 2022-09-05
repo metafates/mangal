@@ -19,8 +19,7 @@ func (s *luaSource) Search(query string) ([]*source.Manga, error) {
 	}
 
 	table := s.state.CheckTable(-1)
-	mangas := make([]*source.Manga, table.Len())
-	var i uint16
+	mangas := make([]*source.Manga, 0)
 
 	table.ForEach(func(k lua.LValue, v lua.LValue) {
 		if k.Type() != lua.LTNumber {
@@ -43,8 +42,7 @@ func (s *luaSource) Search(query string) ([]*source.Manga, error) {
 		}
 
 		manga.Source = s
-		mangas[i] = manga
-		i++
+		mangas = append(mangas, manga)
 	})
 
 	s.cachedMangas[query] = mangas

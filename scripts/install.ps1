@@ -8,15 +8,21 @@ $url = ""
 $arch = $env:PROCESSOR_ARCHITECTURE
 $releases_api_url = "https://github.com/metafates/mangal/releases/download/$tag/mangal_${version}_Windows"
 
-if ($arch -eq "AMD64") {
+if ($arch -eq "AMD64")
+{
     $url = "${releases_api_url}_x86_64.zip"
-} elseif ($arch -eq "x86") {
+}
+elseif ($arch -eq "x86")
+{
     $url = "${releases_api_url}_i386.zip"
-} elseif ($arch -eq "arm64") {
+}
+elseif ($arch -eq "arm64")
+{
     $url = "${releases_api_url}_arm64.zip"
 }
 
-if (Test-Path -path $loc) {
+if (Test-Path -path $loc)
+{
     Remove-Item $loc -Recurse -Force
 }
 
@@ -34,9 +40,12 @@ Remove-Item mangal* -Recurse -Force
 
 [System.Environment]::SetEnvironmentVariable("Path", $Env:Path + ";$loc", [System.EnvironmentVariableTarget]::User)
 
-if (Test-Path -path $loc) {
+if (Test-Path -path $loc)
+{
     Write-Host "Mangal version $tag installed successfully" -ForegroundColor Green
-} else {
+}
+else
+{
     Write-Host "Download failed" -ForegroundColor Red
     Write-Host "Please try again later" -ForegroundColor Red
 }

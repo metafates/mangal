@@ -1,9 +1,10 @@
 package constant
 
 const (
-	Mangal    = "mangal"
-	Version   = "3.6.0"
-	UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
+	Mangal           = "mangal"
+	Version          = "3.7.0"
+	UserAgent        = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
+	InstallScriptURL = "https://raw.githubusercontent.com/metafates/mangal/main/scripts/install"
 )
 
 const (
@@ -59,7 +60,7 @@ end
 
 --- Gets the list of all manga chapters.
 -- @param mangaURL URL of the manga
--- @return Table of tables with the following fields: name, url
+-- @return Table of tables with the following fields: name, url (optional: volume)
 function {{ .MangaChaptersFn }}(mangaURL)
 	return {}
 end

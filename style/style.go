@@ -4,6 +4,7 @@ import "github.com/charmbracelet/lipgloss"
 
 type Style func(string) string
 
+// Combined combines multiple styles into one.
 func Combined(styles ...func(string) string) func(string) string {
 	return func(s string) string {
 		for _, style := range styles {

@@ -14,7 +14,6 @@ import (
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"golang.org/x/exp/slices"
-	"path/filepath"
 	"time"
 )
 
@@ -178,8 +177,8 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return msg
 			})
 		}
-	case source.Source:
-		b.selectedSource = msg
+	case []source.Source:
+		b.selectedSources = msg
 
 		if b.statesHistory.Peek() == historyState {
 			b.newState(historyState)
@@ -201,8 +200,8 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case source.Source:
-		b.selectedSource = msg
+	case []source.Source:
+		b.selectedSources = msg
 		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 
 		manga := &source.Manga{
@@ -210,7 +209,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 			URL:    selected.MangaURL,
 			Index:  0,
 			ID:     selected.MangaID,
-			Source: b.selectedSource,
+			Source: b.selectedSources[0],
 		}
 
 		b.selectedManga = manga
@@ -280,7 +279,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				b.newState(loadingState)
-				return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
+				return b, tea.Batch(b.startLoading(), b.loadSources([]*provider.Provider{p}), b.waitForSourcesLoaded())
 			}
 		}
 	}
@@ -297,14 +296,46 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case b.sourcesC.FilterState() == list.Filtering:
 			break
-		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
+		case key.Matches(msg, b.keymap.selectAll):
+			for _, item := range b.sourcesC.Items() {
+				item := item.(*listItem)
+				item.marked = true
+				b.selectedProviders[item.internal.(*provider.Provider)] = struct{}{}
+			}
+		case key.Matches(msg, b.keymap.clearSelection):
+			for _, item := range b.sourcesC.Items() {
+				item := item.(*listItem)
+				item.marked = false
+				delete(b.selectedProviders, item.internal.(*provider.Provider))
+			}
+		case key.Matches(msg, b.keymap.selectOne):
 			if b.sourcesC.SelectedItem() == nil {
 				break
 			}
 
-			p := b.sourcesC.SelectedItem().(*listItem).internal.(*provider.Provider)
-			b.newState(loadingState)
-			return b, tea.Batch(b.startLoading(), b.loadSource(p), b.waitForSourceLoaded())
+			item := b.sourcesC.SelectedItem().(*listItem)
+			p := item.internal.(*provider.Provider)
+
+			if item.marked {
+				delete(b.selectedProviders, p)
+			} else {
+				b.selectedProviders[p] = struct{}{}
+			}
+
+			item.toggleMark()
+		case key.Matches(msg, b.keymap.confirm):
+			if b.sourcesC.SelectedItem() == nil {
+				break
+			}
+
+			item := b.sourcesC.SelectedItem().(*listItem)
+			defer b.newState(loadingState)
+
+			if len(b.selectedProviders) == 0 {
+				return b, tea.Batch(b.startLoading(), b.loadSources([]*provider.Provider{item.internal.(*provider.Provider)}), b.waitForSourcesLoaded())
+			}
+
+			return b, tea.Batch(b.startLoading(), b.loadSources(lo.Keys(b.selectedProviders)), b.waitForSourcesLoaded())
 		}
 	}
 
@@ -360,9 +391,11 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []*source.Chapter:
 		items := make([]list.Item, len(msg))
 		for i, c := range msg {
+			title := c.Name
+
 			items[i] = &listItem{
 				internal:    c,
-				title:       c.Name,
+				title:       title,
 				description: c.URL,
 			}
 		}
@@ -394,6 +427,26 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			err := open.Start(chapter.URL)
 			if err != nil {
 				b.raiseError(err)
+			}
+		case key.Matches(msg, b.keymap.selectVolume):
+			if b.chaptersC.SelectedItem() == nil {
+				break
+			}
+
+			chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
+
+			if chapter.Volume == "" {
+				break
+			}
+
+			for _, item := range b.chaptersC.Items() {
+				item := item.(*listItem)
+				if item.internal.(*source.Chapter).Volume == chapter.Volume {
+					if !item.marked {
+						b.selectedChapters[item.internal.(*source.Chapter)] = struct{}{}
+					}
+					item.marked = true
+				}
 			}
 		case key.Matches(msg, b.keymap.selectOne):
 			if b.chaptersC.SelectedItem() == nil {
@@ -530,7 +583,7 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keymap.openFolder):
-			err := open.Start(filepath.Dir(b.lastDownloadedChapterPath))
+			err := open.Start(lo.Must(b.currentDownloadingChapter.Manga.Path(false)))
 			if err != nil {
 				b.raiseError(err)
 			}

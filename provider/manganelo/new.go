@@ -7,6 +7,7 @@ import (
 	"github.com/samber/lo"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -49,12 +50,14 @@ func New() source.Source {
 	// Get mangas
 	mangasCollector.OnHTML(mangasSelector, func(e *colly.HTMLElement) {
 		link := e.Attr("href")
-		path := e.Request.AbsoluteURL(e.Request.URL.Path)
+		path := e.Request.URL.String()
+		url := e.Request.AbsoluteURL(link)
 		manga := source.Manga{
 			Name:     e.Text,
-			URL:      e.Request.AbsoluteURL(link),
+			URL:      url,
 			Index:    uint16(e.Index),
 			Chapters: make([]*source.Chapter, 0),
+			ID:       filepath.Base(url),
 			Source:   &manganelo,
 		}
 
@@ -81,12 +84,27 @@ func New() source.Source {
 		link := e.Attr("href")
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
+		url := e.Request.AbsoluteURL(link)
+
+		var (
+			volume string
+			name   = e.Text
+		)
+
+		if strings.HasPrefix(name, "Vol.") {
+			splitted := strings.Split(name, " ")
+			volume = splitted[0]
+			name = strings.Join(splitted[1:], " ")
+		}
+
 		chapter := source.Chapter{
-			Name:  e.Text,
-			URL:   e.Request.AbsoluteURL(link),
-			Index: uint16(e.Index),
-			Pages: make([]*source.Page, 0),
-			Manga: manga,
+			Name:   name,
+			URL:    url,
+			Index:  uint16(e.Index),
+			Pages:  make([]*source.Page, 0),
+			ID:     filepath.Base(url),
+			Manga:  manga,
+			Volume: volume,
 		}
 		manga.Chapters = append(manga.Chapters, &chapter)
 

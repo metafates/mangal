@@ -41,6 +41,12 @@ func Setup() error {
 
 	log.SetOutput(logFile)
 
+	if viper.GetBool(constant.LogsJson) {
+		log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
+	} else {
+		log.SetFormatter(&log.TextFormatter{})
+	}
+
 	switch viper.GetString(constant.LogsLevel) {
 	case "panic":
 		log.SetLevel(log.PanicLevel)
@@ -69,9 +75,21 @@ func Panic(args ...interface{}) {
 	}
 }
 
+func Panicf(format string, args ...interface{}) {
+	if writeLogs {
+		log.Panicf(format, args...)
+	}
+}
+
 func Fatal(args ...interface{}) {
 	if writeLogs {
 		log.Fatal(args...)
+	}
+}
+
+func Fatalf(format string, args ...interface{}) {
+	if writeLogs {
+		log.Fatalf(format, args...)
 	}
 }
 
@@ -81,9 +99,21 @@ func Error(args ...interface{}) {
 	}
 }
 
+func Errorf(format string, args ...interface{}) {
+	if writeLogs {
+		log.Errorf(format, args...)
+	}
+}
+
 func Warn(args ...interface{}) {
 	if writeLogs {
 		log.Warn(args...)
+	}
+}
+
+func Warnf(format string, args ...interface{}) {
+	if writeLogs {
+		log.Warnf(format, args...)
 	}
 }
 
@@ -93,14 +123,32 @@ func Info(args ...interface{}) {
 	}
 }
 
+func Infof(format string, args ...interface{}) {
+	if writeLogs {
+		log.Infof(format, args...)
+	}
+}
+
 func Debug(args ...interface{}) {
 	if writeLogs {
 		log.Debug(args...)
 	}
 }
 
+func Debugf(format string, args ...interface{}) {
+	if writeLogs {
+		log.Debugf(format, args...)
+	}
+}
+
 func Trace(args ...interface{}) {
 	if writeLogs {
 		log.Trace(args...)
+	}
+}
+
+func Tracef(format string, args ...interface{}) {
+	if writeLogs {
+		log.Tracef(format, args...)
 	}
 }

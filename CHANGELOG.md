@@ -5,14 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.7.0
+
+- Add support for volumes - now you can select chapters by volume (in TUI mode only). #90
+- New config field `downloader.create_volume_dir` to create a subdirectory for each volume if it's known
+  (default: `true`)
+- New feature - search with multiple sources at once (TUI mode only). #86
+- New config field `logs.json` to write logs in json format (default: `false`)
+- Better keymap help
+- Slightly more logs
+- Fix sources command: do not print `custom sources` header if there are none
+- More minor fixes
+
 ## 3.6.0
 
 - Add `--json` flag for the `inline` mode by [@jojoxd](https://github.com/jojoxd) #83
 - Fixed `mangal update` command
 - Rename `history` global flag to `write-history` (shorthands are the same `-H`)
-- Add basic Termux support. Scripts that use headless chrome browser won't work as well as reading mode. That means that you can use it only for downloading manga (for now at least) #80
+- Add basic Termux support. Scripts that use headless Chrome browser won't work as well as reading mode. That means that
+  you can use it only for downloading manga (for now at least) #80
 - Fixed a bug where reading manga with mini mode would cause mangal to crash #82
-
 
 ## 3.5.0
 

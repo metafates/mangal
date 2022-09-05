@@ -8,6 +8,7 @@ var defaultValues = map[string]any{
 	constant.DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
 	constant.DownloaderAsync:               true,
 	constant.DownloaderCreateMangaDir:      true,
+	constant.DownloaderCreateVolumeDir:     true,
 	constant.DownloaderDefaultSource:       "",
 	constant.DownloaderStopOnError:         false,
 
@@ -48,6 +49,7 @@ var defaultValues = map[string]any{
 	// Logs
 	constant.LogsWrite: false,
 	constant.LogsLevel: "info",
+	constant.LogsJson:  false,
 
 	// Anilist
 	constant.AnilistEnable: false,

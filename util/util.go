@@ -115,6 +115,7 @@ func Ignore(f func() error) {
 	_ = f()
 }
 
+// Max returns the maximum value of the given items.
 func Max[T constraints.Ordered](items ...T) (max T) {
 	for _, item := range items {
 		if item > max {
@@ -125,6 +126,7 @@ func Max[T constraints.Ordered](items ...T) (max T) {
 	return
 }
 
+// Min returns the minimum value of the given items.
 func Min[T constraints.Ordered](items ...T) (min T) {
 	min = items[0]
 	for _, item := range items {
@@ -136,8 +138,9 @@ func Min[T constraints.Ordered](items ...T) (min T) {
 	return
 }
 
+// PrintErasable prints a string that can be erased by calling a returned function.
 func PrintErasable(msg string) (eraser func()) {
-	fmt.Printf("\r%s", msg)
+	fmt.Fprintf(os.Stdout, "\r%s", msg)
 
 	return func() {
 		_, _ = fmt.Fprintf(os.Stdout, "\r%s\r", strings.Repeat(" ", len(msg)))

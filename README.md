@@ -11,12 +11,12 @@
     The most advanced CLI manga downloader in the entire universe!
 </h3>
 
-https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-a413-37cb07c1552e.mov
+https://user-images.githubusercontent.com/62389790/188451627-c11db959-b1b2-4dee-a474-7edbb14b6038.mov
 
 ## Try it!
 
 ```shell
-curl -sfL io.metafates.one/mr | sh
+curl -sL mangal.metafates.one/run | sh
 ```
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
@@ -30,6 +30,7 @@ curl -sfL io.metafates.one/mr | sh
 - [Configuration](#configuration)
 - [Custom scrapers](#custom-scrapers)
 - [Anilist](#anilist)
+- [Honorable mentions](#honorable-mentions)
 
 ## Features
 
@@ -52,7 +53,7 @@ curl -sfL io.metafates.one/mr | sh
 Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
 
 ```shell
-curl -sfL io.metafates.one/mi | sh
+curl -sL mangal.metafates.one/install | sh
 ```
 
 This script will automatically detect OS & Distro and use the best option available.
@@ -66,7 +67,8 @@ For example, on macOS it will try to use Homebrew, on Ubuntu it will install the
 
 #### Arch Linux
 
-[AUR package](https://aur.archlinux.org/packages/mangal-bin) (maintained by [@balajsra](https://github.com/balajsra), thank you)
+[AUR package](https://aur.archlinux.org/packages/mangal-bin) (maintained by [@balajsra](https://github.com/balajsra),
+thank you)
 
 #### Ubuntu / Debian
 
@@ -90,7 +92,8 @@ Install using [Homebrew](https://brew.sh/)
 1. Download the arm64 linux binary from the [release page](https://github.com/metafates/mangal/releases/latest)
 2. Move it to the `$PREFIX/bin`
 3. Install `resolve-conf` & `proot` (`pkg install -y resolve-conf proot`)
-4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal` (install script will create an alias for this automatically)
+4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal` (install script will create an alias for
+   this automatically)
 
 #### Pre-compiled
 
@@ -111,7 +114,8 @@ go install -ldflags="-s -w"
 
 ### Windows
 
-Install using [Scoop](https://scoop.sh/) (thanks to [@SonaliBendre](https://github.com/SonaliBendre) for adding it to the official bucket)
+Install using [Scoop](https://scoop.sh/) (thanks to [@SonaliBendre](https://github.com/SonaliBendre) for adding it to
+the official bucket)
 
     scoop bucket add extras
     scoop install mangal
@@ -134,13 +138,38 @@ Install using... well, you know. (thanks to [@ArabCoders](https://github.com/Ara
 
 To run
 
-    docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
+```shell
+docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
+```
 
 ## Usage
 
 ### TUI
 
 Just run `mangal` and you're ready to go.
+
+<details>
+<summary>Keybinds</summary>
+
+| Bind                                                        | Description   |
+|-------------------------------------------------------------|---------------|
+| <kbd>?</kbd>                                                | Show help     |
+| <kbd>↑/j</kbd> <kbd>↓/k</kbd> <kbd>→/l</kbd> <kbd>←/h</kbd> | Navigate      |
+| <kbd>g</kbd>                                                | Go to first   |
+| <kbd>G</kbd>                                                | Go to last    |
+| <kbd>/</kbd>                                                | Filter        |
+| <kbd>esc</kbd>                                              | Back          |
+| <kbd>space</kbd>                                            | Select one    |
+| <kbd>tab</kbd>                                              | Select all    |
+| <kbd>v</kbd>                                                | Select volume |
+| <kbd>backspace</kbd>                                        | Unselect all  |
+| <kbd>enter</kbd>                                            | Confirm       |
+| <kbd>o</kbd>                                                | Open URL      |
+| <kbd>r</kbd>                                                | Read          |
+| <kbd>q</kbd>                                                | Quit          |
+| <kbd>ctrl+c</kbd>                                           | Force quit    |
+
+</details>
 
 ### Mini
 
@@ -156,9 +185,9 @@ Inline mode is intended for use with other scripts.
 
 Example of usage:
 
-    mangal inline --source Manganelo --query "death note" --manga first --chapters "@Vol.1 @"  -d
+    mangal inline --source Manganelo --query "death note" --manga first --chapters all  -d
 
-> This will download the first volume of "Death Note" from Manganelo.
+> This will download all chapters of the "Death Note" from Manganelo.
 
 Type `mangal help inline` for more information
 
@@ -192,11 +221,15 @@ Run `mangal config init` to generate a default config file
 # Type `mangal sources` for available sources
 default_source = ''
 # Name template of the downloaded chapters
+# Path forbidden symbols will be replaced with _
 # Available variables:
-# {index}        - index of the chapters
-# {padded-index} - same as index but padded with leading zeros
-# {chapter}      - name of the chapter
-# {manga}        - name of the manga
+# {index}          - index of the chapters
+# {padded-index}   - same as index but padded with leading zeros
+# {chapters-count} - total number of chapters
+# {chapter}        - name of the chapter
+# {manga}          - name of the manga
+# {volume}         - volume of the chapter
+# {source}         - name of the source
 chapter_name_template = '[{padded-index}] {chapter}'
 # Where to download manga
 # Absolute or relative.
@@ -209,6 +242,8 @@ path = '.'
 async = true
 # Create a subdirectory for each manga
 create_manga_dir = true
+# Create a subdirectory for each volume (if available)
+careate_volume_dir = true
 # Stop downloading other chapters on error
 stop_on_error = false
 
@@ -289,6 +324,8 @@ write = false
 # Available options are: (from less to most verbose)
 # panic, fatal, error, warn, info, debug, trace
 level = "info"
+# Use json format for logs 
+json = false
 ```
 
 </details>
@@ -331,3 +368,39 @@ It will mark chapters as read on Anilsit when you read them inside mangal.
 For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist-Integration)
 
 > Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open for suggestions!
+
+## Honorable mentions
+
+### Similar Projects
+
+- [mangadesk](https://github.com/darylhjd/mangadesk) - Terminal client for MangaDex
+- [ani-cli](https://github.com/pystardust/ani-cli) - A cli tool to browse and play anime
+- [manga-py](https://github.com/manga-py/manga-py) - Universal manga downloader
+- [animdl](https://github.com/justfoolingaround/animdl) - A highly efficient, fast, powerful and light-weight anime
+  downloader and streamer
+- [tachiyomi](https://github.com/tachiyomiorg/tachiyomi) - Free and open source manga reader for Android
+
+### Libraries
+
+- [bubbletea](https://github.com/charmbracelet/bubbletea), [bubbles](https://github.com/charmbracelet/bubbles)
+  & [lipgloss](https://github.com/charmbracelet/lipgloss) - Made mangal shine! The best TUI libraries ever ✨
+- [gopher-lua](https://github.com/yuin/gopher-lua) - Made it possible to write custom scrapers with Lua ❤️
+- [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) - Responsible for the awesome CLI
+  & config experience 🛠
+- [pdfcpu](https://github.com/pdfcpu/pdfcpu) - Fast pdf processor in pure go 📄
+- _And many others!_
+
+### Contributors
+
+And of course, thanks to all the contributors! You are awesome!
+
+<p align="center">
+<a href="https://github.com/metafates/mangal/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=metafates/mangal" />
+</a>
+</p>
+
+---
+
+If you find this project useful or want to say thank you,
+please consider starring it, that would mean a lot to me ⭐

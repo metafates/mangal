@@ -69,12 +69,17 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 				name = fmt.Sprintf("Chapter %d - %s", n, name)
 			}
 
+			var volume string
+			if chapter.Attributes.Volume != nil {
+				volume = fmt.Sprintf("Vol.%s", *chapter.Attributes.Volume)
+			}
 			chapters = append(chapters, &source.Chapter{
-				Name:  name,
-				Index: n,
-				ID:    chapter.ID,
-				URL:   fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
-				Manga: manga,
+				Name:   name,
+				Index:  n,
+				ID:     chapter.ID,
+				URL:    fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
+				Manga:  manga,
+				Volume: volume,
 			})
 		}
 		currOffset += 500

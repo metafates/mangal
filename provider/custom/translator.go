@@ -40,12 +40,24 @@ func chapterFromTable(table *lua.LTable, manga *source.Manga, index uint16) (*so
 		return nil, errors.New("type of field \"url\" should be string")
 	}
 
+	var volume string
+
+	vol := table.RawGetString("volume")
+	if vol.Type() != lua.LTNil {
+		if vol.Type() != lua.LTString {
+			return nil, errors.New("type of field \"volume\" should be string")
+		}
+
+		volume = vol.String()
+	}
+
 	chapter := &source.Chapter{
-		Name:  strings.TrimSpace(name.String()),
-		URL:   strings.TrimSpace(url.String()),
-		Manga: manga,
-		Index: index,
-		Pages: []*source.Page{},
+		Name:   strings.TrimSpace(name.String()),
+		URL:    strings.TrimSpace(url.String()),
+		Manga:  manga,
+		Index:  index,
+		Volume: volume,
+		Pages:  []*source.Page{},
 	}
 
 	manga.Chapters = append(manga.Chapters, chapter)

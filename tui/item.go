@@ -3,6 +3,8 @@ package tui
 import (
 	"fmt"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 )
 
 type listItem struct {
@@ -16,16 +18,21 @@ func (t *listItem) toggleMark() {
 	t.marked = !t.marked
 }
 
-func (t *listItem) Title() string {
-	if t.title != "" {
-		if t.marked {
-			return fmt.Sprintf("%s %s", t.title, icon.Get(icon.Mark))
-		} else {
-			return t.title
-		}
+func (t *listItem) Title() (title string) {
+	switch e := t.internal.(type) {
+	case *source.Chapter:
+		title = fmt.Sprintf("%s %s", e.Name, style.Faint(e.Volume))
+	case *source.Manga:
+		title = e.Name
+	default:
+		title = t.title
 	}
 
-	panic("title is empty")
+	if title != "" && t.marked {
+		title = fmt.Sprintf("%s %s", title, icon.Get(icon.Mark))
+	}
+
+	return
 }
 
 func (t *listItem) Description() string {
@@ -33,7 +40,7 @@ func (t *listItem) Description() string {
 		return t.description
 	}
 
-	panic("description is empty")
+	return ""
 }
 
 func (t *listItem) FilterValue() string {

@@ -10,9 +10,11 @@ import (
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"strings"
+	"sync"
 )
 
 func (b *statefulBubble) loadScrapers() tea.Cmd {
@@ -85,28 +87,51 @@ func (b *statefulBubble) waitForScraperInstallation() tea.Cmd {
 	}
 }
 
-func (b *statefulBubble) loadSource(p *provider.Provider) tea.Cmd {
+func (b *statefulBubble) loadSources(ps []*provider.Provider) tea.Cmd {
 	return func() tea.Msg {
-		log.Info("loading source " + p.ID)
-		b.progressStatus = "Initializing source"
-		s, err := p.CreateSource()
+		var (
+			sources = make([]source.Source, len(ps))
+			wg      = sync.WaitGroup{}
+			err     error
+		)
 
-		if err != nil {
-			log.Error(err)
-			b.errorChannel <- err
-		} else {
-			log.Info("source " + p.ID + " loaded")
-			b.sourceLoadedChannel <- s
+		wg.Add(len(ps))
+		for i, p := range ps {
+			go func(i int, p *provider.Provider) {
+				defer wg.Done()
+
+				if err != nil {
+					return
+				}
+
+				log.Info("loading source " + p.ID)
+				b.progressStatus = "Initializing source"
+				var s source.Source
+				s, err = p.CreateSource()
+
+				if err != nil {
+					log.Error(err)
+					b.errorChannel <- err
+					return
+				}
+
+				log.Info("source " + p.ID + " loaded")
+				sources[i] = s
+			}(i, p)
 		}
+
+		wg.Wait()
+
+		b.sourcesLoadedChannel <- sources
 
 		return nil
 	}
 }
 
-func (b *statefulBubble) waitForSourceLoaded() tea.Cmd {
+func (b *statefulBubble) waitForSourcesLoaded() tea.Cmd {
 	return func() tea.Msg {
 		select {
-		case res := <-b.sourceLoadedChannel:
+		case res := <-b.sourcesLoadedChannel:
 			return res
 		case err := <-b.errorChannel:
 			b.lastError = err
@@ -118,15 +143,32 @@ func (b *statefulBubble) waitForSourceLoaded() tea.Cmd {
 func (b *statefulBubble) searchManga(query string) tea.Cmd {
 	return func() tea.Msg {
 		log.Info("searching for " + query)
-		b.progressStatus = "Searching"
-		mangas, err := b.selectedSource.Search(query)
-		if err != nil {
-			log.Error(err)
-			b.errorChannel <- err
-		} else {
-			log.Info("found " + fmt.Sprintf("%d", len(mangas)) + " mangas")
-			b.foundMangasChannel <- mangas
+		b.progressStatus = fmt.Sprintf("Searching among %s", util.Quantity(len(b.selectedSources), "source"))
+
+		var mangas = make([]*source.Manga, 0)
+
+		wg := sync.WaitGroup{}
+		wg.Add(len(b.selectedSources))
+		for _, s := range b.selectedSources {
+			go func(s source.Source) {
+				defer wg.Done()
+				sourceMangas, err := s.Search(query)
+
+				if err != nil {
+					log.Error(err)
+					b.errorChannel <- err
+				}
+
+				log.Infof("found %s from source %s", util.Quantity(len(sourceMangas), "manga"), s.Name())
+				mangas = append(mangas, sourceMangas...)
+			}(s)
 		}
+
+		wg.Wait()
+
+		log.Infof("found %d mangas from %d sources", len(mangas), len(b.selectedSources))
+
+		b.foundMangasChannel <- mangas
 
 		return nil
 	}
@@ -147,12 +189,12 @@ func (b *statefulBubble) waitForMangas() tea.Cmd {
 func (b *statefulBubble) getChapters(manga *source.Manga) tea.Cmd {
 	return func() tea.Msg {
 		log.Info("getting chapters of " + manga.Name)
-		chapters, err := b.selectedSource.ChaptersOf(manga)
+		chapters, err := manga.Source.ChaptersOf(manga)
 		if err != nil {
 			log.Error(err)
 			b.errorChannel <- err
 		} else {
-			log.Info("found " + fmt.Sprintf("%d", len(chapters)) + " chapters")
+			log.Infof("found %s", util.Quantity(len(chapters), "chapter"))
 			b.foundChaptersChannel <- chapters
 		}
 
@@ -204,7 +246,7 @@ func (b *statefulBubble) waitForChapterRead() tea.Cmd {
 func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 	return func() tea.Msg {
 		b.currentDownloadingChapter = chapter
-		path, err := downloader.Download(chapter, func(s string) {
+		_, err := downloader.Download(chapter, func(s string) {
 			b.progressStatus = s
 		})
 
@@ -218,7 +260,6 @@ func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 		} else {
 			b.succededChapters = append(b.succededChapters, chapter)
 			b.chapterDownloadChannel <- struct{}{}
-			b.lastDownloadedChapterPath = path
 		}
 
 		return nil
