@@ -34,8 +34,8 @@ curl -sL mangal.metafates.one/run | sh
 
 ## Features
 
-- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper 
-  with __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+- __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with
+  __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 - [Mangadex](https://mangadex.org) + [Manganelo](https://m.manganelo.com/wwww) Built-In
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
@@ -67,7 +67,7 @@ For example, on macOS it will try to use Homebrew, on Ubuntu it will install the
 
 #### Arch Linux
 
-[AUR package](https://aur.archlinux.org/packages/mangal-bin) (by [@balajsra](https://github.com/balajsra))
+[AUR package](https://aur.archlinux.org/packages/mangal-bin) (maintained by [@balajsra](https://github.com/balajsra), thank you)
 
 #### Ubuntu / Debian
 
@@ -89,9 +89,9 @@ Install using [Homebrew](https://brew.sh/)
 #### Termux
 
 1. Download the arm64 linux binary from the [release page](https://github.com/metafates/mangal/releases/latest)
-2. Move it to `$PREFIX/bin`
+2. Move it to the `$PREFIX/bin`
 3. Install `resolve-conf` & `proot` (`pkg install -y resolve-conf proot`)
-4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal'` (install script will create an alias for this automatically)
+4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal` (install script will create an alias for this automatically)
 
 #### Pre-compiled
 
@@ -112,10 +112,20 @@ go install -ldflags="-s -w"
 
 ### Windows
 
-Install using [Scoop](https://scoop.sh/)
+Install using [Scoop](https://scoop.sh/) (thanks to [@SonaliBendre](https://github.com/SonaliBendre) for adding it to the official bucket)
+
+    scoop bucket add extras
+    scoop install mangal
+
+<details>
+<summary>In case it's outdated</summary>
+
+Use my bucket
 
     scoop bucket add metafates https://github.com/metafates/scoop-metafates
     scoop install mangal
+
+</details>
 
 ### Docker
 
