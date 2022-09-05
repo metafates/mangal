@@ -125,7 +125,9 @@ Install using... well, you know. (thanks to [@ArabCoders](https://github.com/Ara
 
 To run
 
-    docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
+```shell
+docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
+```
 
 ## Usage
 
