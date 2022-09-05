@@ -41,7 +41,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist --relase-notes changelog-temp.md
+          args: release --rm-dist --release-notes changelog-temp.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SCOOP_TAP_GITHUB_TOKEN: ${{ secrets.SCOOP_TAP_GITHUB_TOKEN }}
