@@ -16,7 +16,7 @@ https://user-images.githubusercontent.com/62389790/183284495-86140f8b-d543-4bc4-
 ## Try it!
 
 ```shell
-curl -sL io.metafates.one/mr | sh
+curl -sL mangal.metafates.one/run | sh
 ```
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
@@ -30,6 +30,7 @@ curl -sL io.metafates.one/mr | sh
 - [Configuration](#configuration)
 - [Custom scrapers](#custom-scrapers)
 - [Anilist](#anilist)
+- [Honororable mentions](#honorable-mentions)
 
 ## Features
 
@@ -52,7 +53,7 @@ curl -sL io.metafates.one/mr | sh
 Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
 
 ```shell
-curl -sL io.metafates.one/mi | sh
+curl -sL mangal.metafates.one/install | sh
 ```
 
 This script will automatically detect OS & Distro and use the best option available.
@@ -131,6 +132,29 @@ To run
 ### TUI
 
 Just run `mangal` and you're ready to go.
+
+<details>
+<summary>Keybinds</summary>
+
+| Bind                                                        | Description   |
+|-------------------------------------------------------------|---------------|
+| <kbd>?</kbd>                                                | Show help     |
+| <kbd>↑/j</kbd> <kbd>↓/k</kbd> <kbd>→/l</kbd> <kbd>←/h</kbd> | Navigate      |
+| <kbd>g</kbd>                                                | Go to first   |
+| <kbd>G</kbd>                                                | Go to last    |
+| <kbd>/</kbd>                                                | Filter        |
+| <kbd>esc</kbd>                                              | Back          |
+| <kbd>space</kbd>                                            | Select one    |
+| <kbd>tab</kbd>                                              | Select all    |
+| <kbd>v</kbd>                                                | Select volume |
+| <kbd>backspace</kbd>                                        | Unselect all  |
+| <kbd>enter</kbd>                                            | Confirm       |
+| <kbd>o</kbd>                                                | Open URL      |
+| <kbd>r</kbd>                                                | Read          |
+| <kbd>q</kbd>                                                | Quit          |
+| <kbd>ctrl+c</kbd>                                           | Force quit    |
+
+</details>
 
 ### Mini
 
@@ -329,3 +353,38 @@ It will mark chapters as read on Anilsit when you read them inside mangal.
 For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist-Integration)
 
 > Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open for suggestions!
+
+## Honorable mentions
+
+### Similar Projects
+
+- [mangadesk](https://github.com/darylhjd/mangadesk) - Terminal client for MangaDex
+- [ani-cli](https://github.com/pystardust/ani-cli) - A cli tool to browse and play anime
+- [manga-py](https://github.com/manga-py/manga-py) - Universal manga downloader
+- [animdl](https://github.com/justfoolingaround/animdl) - A highly efficient, fast, powerful and light-weight anime downloader and streamer
+- [saikou](https://github.com/saikou-app/saikou) - An Android Anilist only client, which lets you stream & download Anime & Manga.
+
+### Libraries
+
+- [bubbletea](https://github.com/charmbracelet/bubbletea), [bubbles](https://github.com/charmbracelet/bubbles) & [lipgloss](https://github.com/charmbracelet/lipgloss) - Made mangal shine! The best TUI libraries ever ✨
+- [gopher-lua](https://github.com/yuin/gopher-lua) - Made it possible to write custom scrapers with Lua ❤️
+- [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) - Responsible for the best CLI & config experience 🛠 
+- [pdfcpu](https://github.com/pdfcpu/pdfcpu) - the best Go pdf processor 📄
+- _And many others!_
+
+The project would definitely not be complete or even in a working state if it weren't for these dependencies.
+
+### Contributors
+
+And of course, thanks to all the contributors! You are awesome!
+
+<p align="center">
+<a href="https://github.com/metafates/mangal/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=metafates/mangal" />
+</a>
+</p>
+
+---
+
+If you find this project useful or want to say thank you,
+please consider starring it, that would mean a lot to me ⭐

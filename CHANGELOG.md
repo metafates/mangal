@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.7.0
+
+- Add support for volumes - now you can select chapters by volume (in TUI mode only). #90
+- New config field `downloader.create_volume_dir` to create a subdirectory for each volume if it's known
+  (default: `true`)
+- New feature - search with multiple sources at once (TUI mode only). #86
+- New config field `logs.json` to write logs in json format (default: `false`)
+- Better keymap help
+- Slightly more logs
+- Fix sources command: do not print `custom sources` header if there are none
+- More minor fixes
+
 ## 3.6.0
 
 - Add `--json` flag for the `inline` mode by [@jojoxd](https://github.com/jojoxd) #83
