@@ -67,7 +67,8 @@ For example, on macOS it will try to use Homebrew, on Ubuntu it will install the
 
 #### Arch Linux
 
-[AUR package](https://aur.archlinux.org/packages/mangal-bin) (maintained by [@balajsra](https://github.com/balajsra), thank you)
+[AUR package](https://aur.archlinux.org/packages/mangal-bin) (maintained by [@balajsra](https://github.com/balajsra),
+thank you)
 
 #### Ubuntu / Debian
 
@@ -91,7 +92,8 @@ Install using [Homebrew](https://brew.sh/)
 1. Download the arm64 linux binary from the [release page](https://github.com/metafates/mangal/releases/latest)
 2. Move it to the `$PREFIX/bin`
 3. Install `resolve-conf` & `proot` (`pkg install -y resolve-conf proot`)
-4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal` (install script will create an alias for this automatically)
+4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal` (install script will create an alias for
+   this automatically)
 
 #### Pre-compiled
 
@@ -112,7 +114,8 @@ go install -ldflags="-s -w"
 
 ### Windows
 
-Install using [Scoop](https://scoop.sh/) (thanks to [@SonaliBendre](https://github.com/SonaliBendre) for adding it to the official bucket)
+Install using [Scoop](https://scoop.sh/) (thanks to [@SonaliBendre](https://github.com/SonaliBendre) for adding it to
+the official bucket)
 
     scoop bucket add extras
     scoop install mangal
@@ -373,14 +376,17 @@ For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist
 - [mangadesk](https://github.com/darylhjd/mangadesk) - Terminal client for MangaDex
 - [ani-cli](https://github.com/pystardust/ani-cli) - A cli tool to browse and play anime
 - [manga-py](https://github.com/manga-py/manga-py) - Universal manga downloader
-- [animdl](https://github.com/justfoolingaround/animdl) - A highly efficient, fast, powerful and light-weight anime downloader and streamer
+- [animdl](https://github.com/justfoolingaround/animdl) - A highly efficient, fast, powerful and light-weight anime
+  downloader and streamer
 - [tachiyomi](https://github.com/tachiyomiorg/tachiyomi) - Free and open source manga reader for Android
 
 ### Libraries
 
-- [bubbletea](https://github.com/charmbracelet/bubbletea), [bubbles](https://github.com/charmbracelet/bubbles) & [lipgloss](https://github.com/charmbracelet/lipgloss) - Made mangal shine! The best TUI libraries ever ✨
+- [bubbletea](https://github.com/charmbracelet/bubbletea), [bubbles](https://github.com/charmbracelet/bubbles)
+  & [lipgloss](https://github.com/charmbracelet/lipgloss) - Made mangal shine! The best TUI libraries ever ✨
 - [gopher-lua](https://github.com/yuin/gopher-lua) - Made it possible to write custom scrapers with Lua ❤️
-- [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) - Responsible for the awesome CLI & config experience 🛠 
+- [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) - Responsible for the awesome CLI
+  & config experience 🛠
 - [pdfcpu](https://github.com/pdfcpu/pdfcpu) - Fast pdf processor in pure go 📄
 - _And many others!_
 

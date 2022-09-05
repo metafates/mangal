@@ -1,6 +1,6 @@
 # HTML
 
-Goquery lua port 
+Goquery lua port
 
 ## Types
 
@@ -13,7 +13,6 @@ Goquery lua port
 | Function | Arguments | Return   |
 |----------|-----------|----------|
 | parse    | string    | document |
-
 
 ### Document
 
@@ -36,8 +35,6 @@ Goquery lua port
 | is       | string                   | Is checks the current matched set of elements against a selector and returns true if at least one of these elements matches.                                                                                                                                                                              | boolean   |
 | next     |                          | Next gets the immediately following sibling of each element in the Selection. It returns a new Selection object containing the matched elements.                                                                                                                                                          | selection |
 | prev     |                          | Prev gets the immediately preceding sibling of each element in the Selection. It returns a new Selection object containing the matched elements.                                                                                                                                                          | selection |
-
-
 
 ## Example
 

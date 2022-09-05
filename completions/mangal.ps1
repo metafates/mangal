@@ -1,21 +1,24 @@
 # powershell completion for mangal                               -*- shell-script -*-
 
-function __mangal_debug {
-    if ($env:BASH_COMP_DEBUG_FILE) {
+function __mangal_debug
+{
+    if ($env:BASH_COMP_DEBUG_FILE)
+    {
         "$args" | Out-File -Append -FilePath "$env:BASH_COMP_DEBUG_FILE"
     }
 }
 
-filter __mangal_escapeStringWithSpecialChars {
-    $_ -replace '\s|#|@|\$|;|,|''|\{|\}|\(|\)|"|`|\||<|>|&','`$&'
+filter __mangal_escapeStringWithSpecialChars
+{
+    $_ -replace '\s|#|@|\$|;|,|''|\{|\}|\(|\)|"|`|\||<|>|&', '`$&'
 }
 
 Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
     param(
-            $WordToComplete,
-            $CommandAst,
-            $CursorPosition
-        )
+        $WordToComplete,
+        $CommandAst,
+        $CursorPosition
+    )
 
     # Get the current command line and convert into a string
     $Command = $CommandAst.CommandElements
@@ -30,52 +33,56 @@ Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
     # to truncate the command-line ($Command) up to the $CursorPosition location.
     # Make sure the $Command is longer then the $CursorPosition before we truncate.
     # This happens because the $Command does not include the last space.
-    if ($Command.Length -gt $CursorPosition) {
-        $Command=$Command.Substring(0,$CursorPosition)
+    if ($Command.Length -gt $CursorPosition)
+    {
+        $Command = $Command.Substring(0, $CursorPosition)
     }
     __mangal_debug "Truncated command: $Command"
 
-    $ShellCompDirectiveError=1
-    $ShellCompDirectiveNoSpace=2
-    $ShellCompDirectiveNoFileComp=4
-    $ShellCompDirectiveFilterFileExt=8
-    $ShellCompDirectiveFilterDirs=16
+    $ShellCompDirectiveError = 1
+    $ShellCompDirectiveNoSpace = 2
+    $ShellCompDirectiveNoFileComp = 4
+    $ShellCompDirectiveFilterFileExt = 8
+    $ShellCompDirectiveFilterDirs = 16
 
     # Prepare the command to request completions for the program.
     # Split the command at the first space to separate the program and arguments.
-    $Program,$Arguments = $Command.Split(" ",2)
+    $Program, $Arguments = $Command.Split(" ", 2)
 
-    $RequestComp="$Program __complete $Arguments"
+    $RequestComp = "$Program __complete $Arguments"
     __mangal_debug "RequestComp: $RequestComp"
 
     # we cannot use $WordToComplete because it
     # has the wrong values if the cursor was moved
     # so use the last argument
-    if ($WordToComplete -ne "" ) {
+    if ($WordToComplete -ne "")
+    {
         $WordToComplete = $Arguments.Split(" ")[-1]
     }
     __mangal_debug "New WordToComplete: $WordToComplete"
 
 
     # Check for flag with equal sign
-    $IsEqualFlag = ($WordToComplete -Like "--*=*" )
-    if ( $IsEqualFlag ) {
+    $IsEqualFlag = ($WordToComplete -Like "--*=*")
+    if ($IsEqualFlag)
+    {
         __mangal_debug "Completing equal sign flag"
         # Remove the flag part
-        $Flag,$WordToComplete = $WordToComplete.Split("=",2)
+        $Flag, $WordToComplete = $WordToComplete.Split("=", 2)
     }
 
-    if ( $WordToComplete -eq "" -And ( -Not $IsEqualFlag )) {
+    if ($WordToComplete -eq "" -And ( -Not$IsEqualFlag))
+    {
         # If the last parameter is complete (there is a space following it)
         # We add an extra empty parameter so we can indicate this to the go method.
         __mangal_debug "Adding extra empty parameter"
         # We need to use `"`" to pass an empty argument a "" or '' does not work!!!
-        $RequestComp="$RequestComp" + ' `"`"'
+        $RequestComp = "$RequestComp" + ' `"`"'
     }
 
     __mangal_debug "Calling $RequestComp"
     # First disable ActiveHelp which is not supported for Powershell
-    $env:MANGAL_ACTIVE_HELP=0
+    $env:MANGAL_ACTIVE_HELP = 0
 
     #call the command store the output in $out and redirect stderr and stdout to null
     # $Out is an array contains each line per element
@@ -83,7 +90,8 @@ Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
 
     # get directive from last line
     [int]$Directive = $Out[-1].TrimStart(':')
-    if ($Directive -eq "") {
+    if ($Directive -eq "")
+    {
         # There is no directive specified
         $Directive = 0
     }
@@ -93,7 +101,8 @@ Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
     $Out = $Out | Where-Object { $_ -ne $Out[-1] }
     __mangal_debug "The completions are: $Out"
 
-    if (($Directive -band $ShellCompDirectiveError) -ne 0 ) {
+    if (($Directive -band $ShellCompDirectiveError) -ne 0)
+    {
         # Error code.  No completion.
         __mangal_debug "Received error from custom completion go code"
         return
@@ -102,32 +111,36 @@ Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
     $Longest = 0
     $Values = $Out | ForEach-Object {
         #Split the output in name and description
-        $Name, $Description = $_.Split("`t",2)
+        $Name, $Description = $_.Split("`t", 2)
         __mangal_debug "Name: $Name Description: $Description"
 
         # Look for the longest completion so that we can format things nicely
-        if ($Longest -lt $Name.Length) {
+        if ($Longest -lt $Name.Length)
+        {
             $Longest = $Name.Length
         }
 
         # Set the description to a one space string if there is none set.
         # This is needed because the CompletionResult does not accept an empty string as argument
-        if (-Not $Description) {
+        if (-Not$Description)
+        {
             $Description = " "
         }
-        @{Name="$Name";Description="$Description"}
+        @{ Name = "$Name"; Description = "$Description" }
     }
 
 
     $Space = " "
-    if (($Directive -band $ShellCompDirectiveNoSpace) -ne 0 ) {
+    if (($Directive -band $ShellCompDirectiveNoSpace) -ne 0)
+    {
         # remove the space here
         __mangal_debug "ShellCompDirectiveNoSpace is called"
         $Space = ""
     }
 
-    if ((($Directive -band $ShellCompDirectiveFilterFileExt) -ne 0 ) -or
-       (($Directive -band $ShellCompDirectiveFilterDirs) -ne 0 ))  {
+    if ((($Directive -band $ShellCompDirectiveFilterFileExt) -ne 0) -or
+            (($Directive -band $ShellCompDirectiveFilterDirs) -ne 0))
+    {
         __mangal_debug "ShellCompDirectiveFilterFileExt ShellCompDirectiveFilterDirs are not supported"
 
         # return here to prevent the completion of the extensions
@@ -139,16 +152,19 @@ Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
         $_.Name -like "$WordToComplete*"
 
         # Join the flag back if we have an equal sign flag
-        if ( $IsEqualFlag ) {
+        if ($IsEqualFlag)
+        {
             __mangal_debug "Join the equal sign flag back to the completion value"
             $_.Name = $Flag + "=" + $_.Name
         }
     }
 
-    if (($Directive -band $ShellCompDirectiveNoFileComp) -ne 0 ) {
+    if (($Directive -band $ShellCompDirectiveNoFileComp) -ne 0)
+    {
         __mangal_debug "ShellCompDirectiveNoFileComp is called"
 
-        if ($Values.Length -eq 0) {
+        if ($Values.Length -eq 0)
+        {
             # Just print an empty string here so the
             # shell does not start to complete paths.
             # We cannot use CompletionResult here because
@@ -159,7 +175,7 @@ Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
     }
 
     # Get the current mode
-    $Mode = (Get-PSReadLineKeyHandler | Where-Object {$_.Key -eq "Tab" }).Function
+    $Mode = (Get-PSReadLineKeyHandler | Where-Object { $_.Key -eq "Tab" }).Function
     __mangal_debug "Mode: $Mode"
 
     $Values | ForEach-Object {
@@ -179,40 +195,48 @@ Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
         # 3) ResultType     type of completion result
         # 4) ToolTip        text for the tooltip with details about the object
 
-        switch ($Mode) {
+        switch ($Mode)
+        {
 
             # bash like
             "Complete" {
 
-                if ($Values.Length -eq 1) {
+                if ($Values.Length -eq 1)
+                {
                     __mangal_debug "Only one completion left"
 
                     # insert space after value
-                    [System.Management.Automation.CompletionResult]::new($($comp.Name | __mangal_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                    [System.Management.Automation.CompletionResult]::new($( $comp.Name | __mangal_escapeStringWithSpecialChars ) + $Space, "$( $comp.Name )", 'ParameterValue', "$( $comp.Description )")
 
-                } else {
+                }
+                else
+                {
                     # Add the proper number of spaces to align the descriptions
-                    while($comp.Name.Length -lt $Longest) {
+                    while ($comp.Name.Length -lt $Longest)
+                    {
                         $comp.Name = $comp.Name + " "
                     }
 
                     # Check for empty description and only add parentheses if needed
-                    if ($($comp.Description) -eq " " ) {
+                    if ($( $comp.Description ) -eq " ")
+                    {
                         $Description = ""
-                    } else {
-                        $Description = "  ($($comp.Description))"
+                    }
+                    else
+                    {
+                        $Description = "  ($( $comp.Description ))"
                     }
 
-                    [System.Management.Automation.CompletionResult]::new("$($comp.Name)$Description", "$($comp.Name)$Description", 'ParameterValue', "$($comp.Description)")
+                    [System.Management.Automation.CompletionResult]::new("$( $comp.Name )$Description", "$( $comp.Name )$Description", 'ParameterValue', "$( $comp.Description )")
                 }
-             }
+            }
 
             # zsh like
             "MenuComplete" {
                 # insert space after value
                 # MenuComplete will automatically show the ToolTip of
                 # the highlighted value at the bottom of the suggestions.
-                [System.Management.Automation.CompletionResult]::new($($comp.Name | __mangal_escapeStringWithSpecialChars) + $Space, "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                [System.Management.Automation.CompletionResult]::new($( $comp.Name | __mangal_escapeStringWithSpecialChars ) + $Space, "$( $comp.Name )", 'ParameterValue', "$( $comp.Description )")
             }
 
             # TabCompleteNext and in case we get something unknown
@@ -220,7 +244,7 @@ Register-ArgumentCompleter -CommandName 'mangal' -ScriptBlock {
                 # Like MenuComplete but we don't want to add a space here because
                 # the user need to press space anyway to get the completion.
                 # Description will not be shown because that's not possible with TabCompleteNext
-                [System.Management.Automation.CompletionResult]::new($($comp.Name | __mangal_escapeStringWithSpecialChars), "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
+                [System.Management.Automation.CompletionResult]::new($( $comp.Name | __mangal_escapeStringWithSpecialChars ), "$( $comp.Name )", 'ParameterValue', "$( $comp.Description )")
             }
         }
 

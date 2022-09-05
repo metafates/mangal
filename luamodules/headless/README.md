@@ -18,7 +18,6 @@ it will be downloaded and installed automatically on the first launch.
 |----------|---------|
 | browser  | browser |
 
-
 ### Browser
 
 | Function | Arguments                 | Return |
@@ -40,7 +39,6 @@ it will be downloaded and installed automatically on the first launch.
 | eval                 | string         | Evaluate js function on the page. Will return a value if any is returned                                                                                                                                                              | string    |
 | html                 | string         | HTML of the page                                                                                                                                                                                                                      | string    |
 
-
 ### Element
 
 | Function  | Arguments | Description                                                                                                                                                                                                 | Return |
@@ -54,7 +52,6 @@ it will be downloaded and installed automatically on the first launch.
 |           |           |                                                                                                                                                                                                             |        |
 
 > [Property vs Attribute](https://stackoverflow.com/questions/6003819/what-is-the-difference-between-properties-and-attributes-in-html)
-
 
 ## Example
 
