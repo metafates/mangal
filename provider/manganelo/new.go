@@ -85,15 +85,18 @@ func New() source.Source {
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
 		url := e.Request.AbsoluteURL(link)
+
 		var (
 			volume string
 			name   = e.Text
 		)
+
 		if strings.HasPrefix(name, "Vol.") {
 			splitted := strings.Split(name, " ")
 			volume = splitted[0]
 			name = strings.Join(splitted[1:], " ")
 		}
+
 		chapter := source.Chapter{
 			Name:   name,
 			URL:    url,

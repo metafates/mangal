@@ -71,6 +71,11 @@ func (c *Chapter) DownloadPages() error {
 func (c *Chapter) formattedName() (name string) {
 	name = viper.GetString(constant.DownloaderChapterNameTemplate)
 
+	var sourceName string
+	if c.Source() != nil {
+		sourceName = c.Source().Name()
+	}
+
 	for variable, value := range map[string]string{
 		"manga":          c.Manga.Name,
 		"chapter":        c.Name,
@@ -78,7 +83,7 @@ func (c *Chapter) formattedName() (name string) {
 		"padded-index":   fmt.Sprintf("%04d", c.Index),
 		"chapters-count": fmt.Sprintf("%d", len(c.Manga.Chapters)),
 		"volume":         c.Volume,
-		"source":         c.Source().Name(),
+		"source":         sourceName,
 	} {
 		name = strings.ReplaceAll(name, fmt.Sprintf("{%s}", variable), value)
 	}

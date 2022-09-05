@@ -329,12 +329,12 @@ func (b *statefulBubble) updateSources(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			item := b.sourcesC.SelectedItem().(*listItem)
+			defer b.newState(loadingState)
 
 			if len(b.selectedProviders) == 0 {
-				b.selectedProviders[item.internal.(*provider.Provider)] = struct{}{}
+				return b, tea.Batch(b.startLoading(), b.loadSources([]*provider.Provider{item.internal.(*provider.Provider)}), b.waitForSourcesLoaded())
 			}
 
-			b.newState(loadingState)
 			return b, tea.Batch(b.startLoading(), b.loadSources(lo.Keys(b.selectedProviders)), b.waitForSourcesLoaded())
 		}
 	}
@@ -391,9 +391,11 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []*source.Chapter:
 		items := make([]list.Item, len(msg))
 		for i, c := range msg {
+			title := c.Name
+
 			items[i] = &listItem{
 				internal:    c,
-				title:       c.Name,
+				title:       title,
 				description: c.URL,
 			}
 		}
@@ -440,12 +442,10 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for _, item := range b.chaptersC.Items() {
 				item := item.(*listItem)
 				if item.internal.(*source.Chapter).Volume == chapter.Volume {
-					item.toggleMark()
-					if item.marked {
+					if !item.marked {
 						b.selectedChapters[item.internal.(*source.Chapter)] = struct{}{}
-					} else {
-						delete(b.selectedChapters, item.internal.(*source.Chapter))
 					}
+					item.marked = true
 				}
 			}
 		case key.Matches(msg, b.keymap.selectOne):

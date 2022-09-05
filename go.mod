@@ -15,7 +15,7 @@ require (
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/ka-weihe/fast-levenshtein v0.0.0-20201227151214-4c99ee36a1ba
 	github.com/pdfcpu/pdfcpu v0.3.13
-	github.com/samber/lo v1.27.1
+	github.com/samber/lo v1.28.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/afero v1.9.2

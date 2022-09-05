@@ -362,14 +362,14 @@ For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist
 - [ani-cli](https://github.com/pystardust/ani-cli) - A cli tool to browse and play anime
 - [manga-py](https://github.com/manga-py/manga-py) - Universal manga downloader
 - [animdl](https://github.com/justfoolingaround/animdl) - A highly efficient, fast, powerful and light-weight anime downloader and streamer
-- [saikou](https://github.com/saikou-app/saikou) - An Android Anilist only client, which lets you stream & download Anime & Manga.
+- [tachiyomi](https://github.com/tachiyomiorg/tachiyomi) - Free and open source manga reader for Android
 
 ### Libraries
 
 - [bubbletea](https://github.com/charmbracelet/bubbletea), [bubbles](https://github.com/charmbracelet/bubbles) & [lipgloss](https://github.com/charmbracelet/lipgloss) - Made mangal shine! The best TUI libraries ever ✨
 - [gopher-lua](https://github.com/yuin/gopher-lua) - Made it possible to write custom scrapers with Lua ❤️
-- [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) - Responsible for the best CLI & config experience 🛠 
-- [pdfcpu](https://github.com/pdfcpu/pdfcpu) - the best Go pdf processor 📄
+- [cobra](https://github.com/spf13/cobra) and [viper](https://github.com/spf13/viper) - Responsible for the awesome CLI & config experience 🛠 
+- [pdfcpu](https://github.com/pdfcpu/pdfcpu) - Fast pdf processor in pure go 📄
 - _And many others!_
 
 The project would definitely not be complete or even in a working state if it weren't for these dependencies.
