@@ -9,7 +9,6 @@ import (
 	"github.com/samber/lo"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/viper"
-	"io"
 	"io/fs"
 	"path/filepath"
 	"testing"
@@ -92,7 +91,7 @@ func SampleChapter(t *testing.T) *source.Chapter {
 				Index:     0,
 				Extension: filepath.Ext(path),
 				Chapter:   &chapter,
-				Contents:  io.NopCloser(bytes.NewReader(image)),
+				Contents:  bytes.NewBuffer(image),
 			}
 			chapter.Pages = append(chapter.Pages, &page)
 

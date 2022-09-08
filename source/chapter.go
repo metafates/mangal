@@ -5,7 +5,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
 	"os"
@@ -30,6 +30,8 @@ type Chapter struct {
 	Manga *Manga `json:"-"`
 	// Pages of the chapter.
 	Pages []*Page
+
+	size uint64
 }
 
 func (c *Chapter) String() string {
@@ -38,8 +40,13 @@ func (c *Chapter) String() string {
 
 // DownloadPages downloads the Pages contents of the Chapter.
 // Pages needs to be set before calling this function.
-func (c *Chapter) DownloadPages() error {
-	log.Debugf("Downloading %d pages of chapter \"%s\"", len(c.Pages), c.Name)
+func (c *Chapter) DownloadPages(progress func(string)) error {
+	c.size = 0
+	status := func() string {
+		return fmt.Sprintf("Downloading %s %s", util.Quantity(len(c.Pages), "page"), style.Faint(c.SizeHuman()))
+	}
+
+	progress(status())
 	wg := sync.WaitGroup{}
 	wg.Add(len(c.Pages))
 
@@ -54,6 +61,8 @@ func (c *Chapter) DownloadPages() error {
 			}
 
 			err = page.Download()
+			c.size += page.Size
+			progress(status())
 		}
 
 		if viper.GetBool(constant.DownloaderAsync) {
@@ -91,24 +100,9 @@ func (c *Chapter) formattedName() (name string) {
 	return
 }
 
-// Size of the chapter in bytes.
-func (c *Chapter) Size() uint64 {
-	var n uint64
-
-	for _, page := range c.Pages {
-		n += page.Size
-	}
-
-	return n
-}
-
 // SizeHuman is the same as Size but returns a human-readable string.
 func (c *Chapter) SizeHuman() string {
-	if size := c.Size(); size == 0 {
-		return "Unknown size"
-	} else {
-		return humanize.Bytes(size)
-	}
+	return humanize.Bytes(c.size)
 }
 
 func (c *Chapter) Filename() (filename string) {

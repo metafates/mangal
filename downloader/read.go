@@ -30,9 +30,7 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		return err
 	}
 
-	log.Info("downloading " + fmt.Sprintf("%d", len(pages)) + " pages")
-	progress(fmt.Sprintf("Downloading %d pages", len(pages)))
-	err = chapter.DownloadPages()
+	err = chapter.DownloadPages(progress)
 	if err != nil {
 		log.Error(err)
 		return err

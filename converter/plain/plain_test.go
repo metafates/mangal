@@ -7,7 +7,6 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	. "github.com/smartystreets/goconvey/convey"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -98,7 +97,7 @@ func SampleChapter(t *testing.T) *source.Chapter {
 				Index:     0,
 				Extension: filepath.Ext(path),
 				Chapter:   &chapter,
-				Contents:  io.NopCloser(bytes.NewReader(image)),
+				Contents:  bytes.NewBuffer(image),
 			}
 			chapter.Pages = append(chapter.Pages, &page)
 
