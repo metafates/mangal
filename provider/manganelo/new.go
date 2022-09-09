@@ -1,12 +1,14 @@
 package manganelo
 
 import (
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -48,20 +50,25 @@ func New() source.Source {
 	})
 
 	// Get mangas
-	mangasCollector.OnHTML(mangasSelector, func(e *colly.HTMLElement) {
-		link := e.Attr("href")
+	mangasCollector.OnHTML("html", func(e *colly.HTMLElement) {
+		elements := e.DOM.Find(mangasSelector)
 		path := e.Request.URL.String()
-		url := e.Request.AbsoluteURL(link)
-		manga := source.Manga{
-			Name:     e.Text,
-			URL:      url,
-			Index:    uint16(e.Index),
-			Chapters: make([]*source.Chapter, 0),
-			ID:       filepath.Base(url),
-			Source:   &manganelo,
-		}
+		manganelo.mangas[path] = make([]*source.Manga, elements.Length())
 
-		manganelo.mangas[path] = append(manganelo.mangas[path], &manga)
+		elements.Each(func(i int, selection *goquery.Selection) {
+			link, _ := selection.Attr("href")
+			url := e.Request.AbsoluteURL(link)
+			manga := source.Manga{
+				Name:     selection.Text(),
+				URL:      url,
+				Index:    uint16(e.Index),
+				Chapters: make([]*source.Chapter, 0),
+				ID:       filepath.Base(url),
+				Source:   &manganelo,
+			}
+
+			manganelo.mangas[path][i] = &manga
+		})
 	})
 
 	_ = mangasCollector.Limit(&colly.LimitRule{
@@ -80,35 +87,58 @@ func New() source.Source {
 	})
 
 	// Get chapters
-	chaptersCollector.OnHTML(chaptersSelector, func(e *colly.HTMLElement) {
-		link := e.Attr("href")
+	chaptersCollector.OnHTML("html", func(e *colly.HTMLElement) {
+		elements := e.DOM.Find(chaptersSelector)
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
+		manganelo.chapters[path] = make([]*source.Chapter, elements.Length())
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
-		url := e.Request.AbsoluteURL(link)
+		manga.Chapters = make([]*source.Chapter, elements.Length())
 
-		var (
-			volume string
-			name   = e.Text
-		)
+		summary, _ := e.DOM.Find("#panel-story-info-description").Html()
+		// remove html tags
+		manga.Summary = regexp.MustCompile(`<.*?>`).ReplaceAllString(summary, "")
 
-		if strings.HasPrefix(name, "Vol.") {
-			splitted := strings.Split(name, " ")
-			volume = splitted[0]
-			name = strings.Join(splitted[1:], " ")
-		}
+		genres := e.
+			DOM.
+			Find("body > div.body-site > div.container.container-main > div.container-main-left > div.panel-story-info > div.story-info-right > table > tbody > tr:nth-child(4) > td.table-value a").
+			Map(func(_ int, selection *goquery.Selection) string {
+				return selection.Text()
+			})
+		manga.Genres = genres
 
-		chapter := source.Chapter{
-			Name:   name,
-			URL:    url,
-			Index:  uint16(e.Index),
-			Pages:  make([]*source.Page, 0),
-			ID:     filepath.Base(url),
-			Manga:  manga,
-			Volume: volume,
-		}
-		manga.Chapters = append(manga.Chapters, &chapter)
+		author := e.
+			DOM.
+			Find("body > div.body-site > div.container.container-main > div.container-main-left > div.panel-story-info > div.story-info-right > table > tbody > tr:nth-child(2) > td.table-value > a").
+			Text()
+		manga.Author = author
 
-		manganelo.chapters[path] = append(manganelo.chapters[path], &chapter)
+		elements.Each(func(i int, selection *goquery.Selection) {
+			link, _ := selection.Attr("href")
+			url := e.Request.AbsoluteURL(link)
+
+			var (
+				volume string
+				name   = selection.Text()
+			)
+
+			if strings.HasPrefix(name, "Vol.") {
+				splitted := strings.Split(name, " ")
+				volume = splitted[0]
+				name = strings.Join(splitted[1:], " ")
+			}
+
+			chapter := source.Chapter{
+				Name:   name,
+				URL:    url,
+				Index:  uint16(e.Index),
+				Pages:  make([]*source.Page, 0),
+				ID:     filepath.Base(url),
+				Manga:  manga,
+				Volume: volume,
+			}
+			manga.Chapters[i] = &chapter
+			manganelo.chapters[path][i] = &chapter
+		})
 	})
 	_ = chaptersCollector.Limit(&colly.LimitRule{
 		Parallelism: parallelism,
@@ -125,20 +155,26 @@ func New() source.Source {
 	})
 
 	// Get pages
-	pagesCollector.OnHTML(pageSelector, func(e *colly.HTMLElement) {
-		link := e.Attr("data-src")
-		ext := filepath.Ext(link)
+	pagesCollector.OnHTML("html", func(e *colly.HTMLElement) {
+		elements := e.DOM.Find(pageSelector)
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
+		manganelo.pages[path] = make([]*source.Page, elements.Length())
 		chapter := e.Request.Ctx.GetAny("chapter").(*source.Chapter)
-		page := source.Page{
-			URL:       link,
-			Index:     uint16(e.Index),
-			Chapter:   chapter,
-			Extension: ext,
-		}
-		chapter.Pages = append(chapter.Pages, &page)
+		chapter.Pages = make([]*source.Page, elements.Length())
 
-		manganelo.pages[path] = append(manganelo.pages[path], &page)
+		elements.Each(func(i int, selection *goquery.Selection) {
+			link, _ := selection.Attr("data-src")
+			ext := filepath.Ext(link)
+			page := source.Page{
+				URL:       link,
+				Index:     uint16(i),
+				Chapter:   chapter,
+				Extension: ext,
+			}
+			chapter.Pages[i] = &page
+			manganelo.pages[path][i] = &page
+		})
+
 	})
 	_ = pagesCollector.Limit(&colly.LimitRule{
 		Parallelism: parallelism,

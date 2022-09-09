@@ -8,6 +8,7 @@ import (
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"io"
+	"strings"
 	"text/template"
 )
 
@@ -52,17 +53,24 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 }
 
 func comicInfo(chapter *source.Chapter) *bytes.Buffer {
-	t := `<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	t := `
+<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<Title>{{ .Name }}</Title>
   	<Series>{{ .Manga.Name }}</Series>
-  	<Genre>Web Comic</Genre>
   	<Web>{{ .Manga.URL }}</Web>
+	<Genre>{{ join .Manga.Genres "," }}</Genre>
 	<PageCount>{{ len .Pages }}</PageCount>
+	<Summary>{{ .Manga.Summary }}</Summary>
 	<Count>{{ len .Manga.Chapters }}</Count>
+	<Writer>{{ .Manga.Author }}</Writer>
   	<Manga>YesAndRightToLeft</Manga>
 </ComicInfo>`
 
-	parsed := lo.Must(template.New("ComicInfo").Parse(t))
+	funcs := template.FuncMap{
+		"join": strings.Join,
+	}
+
+	parsed := lo.Must(template.New("ComicInfo").Funcs(funcs).Parse(t))
 	buf := bytes.NewBufferString("")
 	lo.Must0(parsed.Execute(buf, chapter))
 

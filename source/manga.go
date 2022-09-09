@@ -24,6 +24,8 @@ type Manga struct {
 	Chapters       []*Chapter
 	Source         Source `json:"-"`
 	Genres         []string
+	Summary        string
+	Author         string
 	cachedTempPath string
 }
 

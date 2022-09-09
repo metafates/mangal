@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.8.0
+
+- New manga metadata fields: `genres`, `author`, `summary`
+- Better progress message while downloading in TUI mode
+
 ## 3.7.0
 
 - Add support for volumes - now you can select chapters by volume (in TUI mode only). #90
