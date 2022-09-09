@@ -23,6 +23,7 @@ type Manga struct {
 	// Chapters of the manga
 	Chapters       []*Chapter
 	Source         Source `json:"-"`
+	Genres         []string
 	cachedTempPath string
 }
 
