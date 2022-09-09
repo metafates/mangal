@@ -84,7 +84,7 @@ func pageFromTable(table *lua.LTable, chapter *source.Chapter) (page *source.Pag
 
 	mappings := map[string]mapping{
 		"url": {A: lua.LTString, B: true, C: func(v string) error { page.URL = v; return nil }},
-		"index": {A: lua.LTNumber, B: false, C: func(v string) error {
+		"index": {A: lua.LTNumber, B: true, C: func(v string) error {
 			num, err := strconv.ParseUint(v, 10, 16)
 			if err != nil {
 				return err
