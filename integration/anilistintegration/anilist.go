@@ -1,4 +1,4 @@
-package anilist
+package anilistintegration
 
 import (
 	"github.com/metafates/mangal/constant"
@@ -7,13 +7,10 @@ import (
 
 type Anilist struct {
 	token string
-	cache map[string]*anilistManga
 }
 
 func New() *Anilist {
-	return &Anilist{
-		cache: make(map[string]*anilistManga),
-	}
+	return &Anilist{}
 }
 
 func (a *Anilist) id() string {

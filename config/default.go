@@ -8,13 +8,15 @@ var defaultValues = map[string]any{
 	constant.DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
 	constant.DownloaderAsync:               true,
 	constant.DownloaderCreateMangaDir:      true,
-	constant.DownloaderCreateVolumeDir:     true,
+	constant.DownloaderCreateVolumeDir:     false,
 	constant.DownloaderDefaultSource:       "",
 	constant.DownloaderStopOnError:         false,
+	constant.DownloaderDownloadCover:       false,
 
 	// Formats
 	constant.FormatsUse:                   "pdf",
 	constant.FormatsSkipUnsupportedImages: true,
+	constant.FormatsFetchAnilistMetadata:  true,
 
 	// Mini-mode
 	constant.MiniSearchLimit: 20,

@@ -1,9 +1,10 @@
-package anilist
+package anilistintegration
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"net/http"
@@ -11,9 +12,9 @@ import (
 )
 
 var markReadQuery = `
-mutation ($id: Int, $progress: Int) {
-	SaveMediaListEntry (mediaId: $id, progress: $progress, status: CURRENT) {
-		id
+mutation ($ID: Int, $progress: Int) {
+	SaveMediaListEntry (mediaId: $ID, progress: $progress, status: CURRENT) {
+		ID
 	}
 }
 `
@@ -27,7 +28,7 @@ func (a *Anilist) MarkRead(chapter *source.Chapter) error {
 		}
 	}
 
-	manga, err := a.findClosestMangaOnAnilist(chapter.Manga)
+	manga, err := anilist.FindClosest(chapter.Manga.Name)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -37,7 +38,7 @@ func (a *Anilist) MarkRead(chapter *source.Chapter) error {
 	body := map[string]interface{}{
 		"query": markReadQuery,
 		"variables": map[string]interface{}{
-			"id":       manga.id,
+			"ID":       manga.ID,
 			"progress": chapter.Index,
 		},
 	}
@@ -51,7 +52,7 @@ func (a *Anilist) MarkRead(chapter *source.Chapter) error {
 
 	// make request
 	req, err := http.NewRequest(
-		"POST",
+		http.MethodPost,
 		"https://graphql.anilist.co",
 		bytes.NewBuffer(jsonBody),
 	)
@@ -83,7 +84,7 @@ func (a *Anilist) MarkRead(chapter *source.Chapter) error {
 	var response struct {
 		Data struct {
 			SaveMediaListEntry struct {
-				ID int `json:"id"`
+				ID int `json:"ID"`
 			} `json:"SaveMediaListEntry"`
 		} `json:"data"`
 	}

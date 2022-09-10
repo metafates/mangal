@@ -7,8 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 3.8.0
 
-- New manga metadata fields: `genres`, `author`, `summary`
+- Support for more manga metadata fields such as summary, genres, tags, and more.
+- Fetch manga metadata from anilist.
+  `formats.fetch_anilist_metadata` (default: `true`) 
+- Support for downloading manga covers.
+  `downloader.download_cover` (default: `false`)
 - Better progress message while downloading in TUI mode
+- Set option `downloader.create_volume_dir` to `false` by default
 
 ## 3.7.0
 

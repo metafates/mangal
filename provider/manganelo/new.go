@@ -8,7 +8,6 @@ import (
 	"github.com/samber/lo"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -93,24 +92,6 @@ func New() source.Source {
 		manganelo.chapters[path] = make([]*source.Chapter, elements.Length())
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
 		manga.Chapters = make([]*source.Chapter, elements.Length())
-
-		summary, _ := e.DOM.Find("#panel-story-info-description").Html()
-		// remove html tags
-		manga.Summary = regexp.MustCompile(`<.*?>`).ReplaceAllString(summary, "")
-
-		genres := e.
-			DOM.
-			Find("body > div.body-site > div.container.container-main > div.container-main-left > div.panel-story-info > div.story-info-right > table > tbody > tr:nth-child(4) > td.table-value a").
-			Map(func(_ int, selection *goquery.Selection) string {
-				return selection.Text()
-			})
-		manga.Genres = genres
-
-		author := e.
-			DOM.
-			Find("body > div.body-site > div.container.container-main > div.container-main-left > div.panel-story-info > div.story-info-right > table > tbody > tr:nth-child(2) > td.table-value > a").
-			Text()
-		manga.Author = author
 
 		elements.Each(func(i int, selection *goquery.Selection) {
 			link, _ := selection.Attr("href")

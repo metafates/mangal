@@ -1,4 +1,4 @@
-package anilist
+package anilistintegration
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ func (a *Anilist) login() error {
 	log.Info("Logging in to Anilist")
 
 	if a.id() == "" {
-		e := fmt.Errorf("no id set")
+		e := fmt.Errorf("no ID set")
 		log.Error(e)
 		return e
 	}
@@ -44,7 +44,7 @@ func (a *Anilist) login() error {
 
 	// create request
 	log.Info("Sending login request to Anilist")
-	req, err := http.NewRequest("POST", "https://anilist.co/api/v2/oauth/token", bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPost, "https://anilist.co/api/v2/oauth/token", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		log.Error(err)
 		return err

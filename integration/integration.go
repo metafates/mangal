@@ -1,7 +1,7 @@
 package integration
 
 import (
-	"github.com/metafates/mangal/integration/anilist"
+	"github.com/metafates/mangal/integration/anilistintegration"
 	"github.com/metafates/mangal/source"
 )
 
@@ -10,5 +10,5 @@ type Integrator interface {
 }
 
 var (
-	Anilist Integrator = anilist.New()
+	Anilist Integrator = anilistintegration.New()
 )

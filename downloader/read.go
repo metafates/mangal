@@ -58,6 +58,7 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 
 	err = openRead(path, progress)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 

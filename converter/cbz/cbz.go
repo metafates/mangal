@@ -48,21 +48,32 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		}
 	}
 
-	err = addToZip(zipWriter, comicInfo(chapter), "ComicInfo.xml")
+	info, err := comicInfo(chapter)
+	if err != nil {
+		return
+	}
+
+	err = addToZip(zipWriter, info, "ComicInfo.xml")
 	return
 }
 
-func comicInfo(chapter *source.Chapter) *bytes.Buffer {
+func comicInfo(chapter *source.Chapter) (*bytes.Buffer, error) {
 	t := `
 <ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<Title>{{ .Name }}</Title>
   	<Series>{{ .Manga.Name }}</Series>
+	<Number>{{ .Index }}</Number>
   	<Web>{{ .Manga.URL }}</Web>
-	<Genre>{{ join .Manga.Genres "," }}</Genre>
+	<Genre>{{ join .Manga.Metadata.Genres "," }}</Genre>
 	<PageCount>{{ len .Pages }}</PageCount>
-	<Summary>{{ .Manga.Summary }}</Summary>
+	<Summary>{{ .Manga.Metadata.Summary }}</Summary>
 	<Count>{{ len .Manga.Chapters }}</Count>
-	<Writer>{{ .Manga.Author }}</Writer>
+	<Writer>{{ .Manga.Metadata.Author }}</Writer>
+	<Characters>{{ join .Manga.Metadata.Characters "," }}</Characters>
+	<Year>{{ .Manga.Metadata.StartDate.Year }}</Year>
+	<Month>{{ .Manga.Metadata.StartDate.Month }}</Month>
+	<Day>{{ .Manga.Metadata.StartDate.Day }}</Day>
+	<Tags>{{ join .Manga.Metadata.Tags "," }}</Tags>
   	<Manga>YesAndRightToLeft</Manga>
 </ComicInfo>`
 
@@ -74,7 +85,7 @@ func comicInfo(chapter *source.Chapter) *bytes.Buffer {
 	buf := bytes.NewBufferString("")
 	lo.Must0(parsed.Execute(buf, chapter))
 
-	return buf
+	return buf, nil
 }
 
 func addToZip(writer *zip.Writer, file io.Reader, name string) error {

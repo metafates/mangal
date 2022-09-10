@@ -28,6 +28,18 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 		return "", err
 	}
 
+	if viper.GetBool(constant.FormatsFetchAnilistMetadata) {
+		progress("Fetching metadata from anilist")
+		err := chapter.Manga.PopulateMetadata()
+		if err != nil {
+			log.Warn(err)
+		}
+	}
+
+	if viper.GetBool(constant.DownloaderDownloadCover) {
+		_ = chapter.Manga.DownloadCover(progress)
+	}
+
 	log.Info("getting " + viper.GetString(constant.FormatsUse) + " converter")
 	progress(fmt.Sprintf(
 		"Converting %d pages to %s %s",

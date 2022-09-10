@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/metafates/mangal/constant"
-	"github.com/metafates/mangal/integration/anilist"
+	"github.com/metafates/mangal/integration/anilistintegration"
 	"github.com/metafates/mangal/log"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
@@ -102,7 +102,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 		}
 
 		if viper.GetString(constant.AnilistCode) == "" {
-			fmt.Println(anilist.New().AuthURL())
+			fmt.Println(anilistintegration.New().AuthURL())
 			input := survey.Input{
 				Message: "Anilsit code is not set. Please copy it from the link above and paste in here:",
 				Help:    "",

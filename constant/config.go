@@ -8,11 +8,13 @@ const (
 	DownloaderCreateVolumeDir     = "downloader.create_volume_dir"
 	DownloaderDefaultSource       = "downloader.default_source"
 	DownloaderStopOnError         = "downloader.stop_on_error"
+	DownloaderDownloadCover       = "downloader.download_cover"
 )
 
 const (
 	FormatsUse                   = "formats.use"
 	FormatsSkipUnsupportedImages = "formats.skip_unsupported_images"
+	FormatsFetchAnilistMetadata  = "formats.fetch_anilist_metadata"
 )
 
 const (

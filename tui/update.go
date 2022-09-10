@@ -159,11 +159,7 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []*source.Manga:
 		items := make([]list.Item, len(msg))
 		for i, m := range msg {
-			items[i] = &listItem{
-				internal:    m,
-				title:       m.Name,
-				description: m.URL,
-			}
+			items[i] = &listItem{internal: m}
 		}
 
 		cmds = append(cmds, b.mangasC.SetItems(items))
@@ -224,11 +220,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 
 		for i, c := range msg {
-			items[i] = &listItem{
-				internal:    c,
-				title:       c.Name,
-				description: c.URL,
-			}
+			items[i] = &listItem{internal: c}
 		}
 
 		cmd = b.chaptersC.SetItems(items)
@@ -391,13 +383,8 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []*source.Chapter:
 		items := make([]list.Item, len(msg))
 		for i, c := range msg {
-			title := c.Name
 
-			items[i] = &listItem{
-				internal:    c,
-				title:       title,
-				description: c.URL,
-			}
+			items[i] = &listItem{internal: c}
 		}
 
 		cmd = b.chaptersC.SetItems(items)
