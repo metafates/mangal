@@ -35,7 +35,7 @@ func jsonUpdateChapters(manga *source.Manga, options *Options) error {
 	}
 
 	if viper.GetBool(constant.MetadataFetchAnilist) {
-		_ = manga.PopulateMetadata()
+		_ = manga.PopulateMetadata(func(string) {})
 	}
 
 	return nil

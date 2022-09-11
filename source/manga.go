@@ -147,16 +147,19 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 	return filesystem.Get().WriteFile(path, data, os.ModePerm)
 }
 
-func (m *Manga) PopulateMetadata() error {
+func (m *Manga) PopulateMetadata(progress func(string)) error {
 	if m.populated {
 		return nil
 	}
+	m.populated = true
 
+	progress("Fetching metadata from anilist")
 	log.Infof("Populating metadata for %s", m.Name)
 
 	manga, err := anilist.FindClosest(m.Name)
 	if err != nil {
 		log.Error(err)
+		progress("Failed to fetch metadata")
 		return err
 	}
 
@@ -207,7 +210,6 @@ func (m *Manga) PopulateMetadata() error {
 	urls = append(urls, fmt.Sprintf("https://myanimelist.net/manga/%d", manga.IDMal))
 	m.Metadata.URLs = urls
 
-	m.populated = true
 	return nil
 }
 

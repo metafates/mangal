@@ -32,8 +32,7 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	}
 
 	if viper.GetBool(constant.MetadataFetchAnilist) {
-		progress("Fetching metadata from anilist")
-		err := chapter.Manga.PopulateMetadata()
+		err := chapter.Manga.PopulateMetadata(progress)
 		if err != nil {
 			log.Warn(err)
 		}
