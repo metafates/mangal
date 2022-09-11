@@ -2,7 +2,7 @@ package config
 
 import "github.com/metafates/mangal/constant"
 
-var defaultValues = map[string]any{
+var DefaultValues = map[string]any{
 	// Downloader
 	constant.DownloaderPath:                ".",
 	constant.DownloaderChapterNameTemplate: "[{padded-index}] {chapter}",
