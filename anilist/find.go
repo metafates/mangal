@@ -39,7 +39,13 @@ func FindClosest(name string) (*Manga, error) {
 		retries++
 		words := strings.Split(name, " ")
 		// one word less
-		alternateName := strings.Join(words[:util.Max(len(words)-1, 0)], " ")
+		if len(words) == 1 {
+			retries = limit
+			return FindClosest("")
+		}
+
+		alternateName := strings.Join(words[:util.Max(len(words)-1, 1)], " ")
+		log.Infof(`No results found on Anilist for manga "%s", trying "%s"`, name, alternateName)
 		return FindClosest(alternateName)
 	}
 
