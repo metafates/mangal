@@ -88,7 +88,7 @@ mangal config set --key "formats.use" --value cbz
 			} else if v == "false" {
 				value = false
 			} else {
-				handleErr(fmt.Errorf("invalid boolean value: %s", v))
+				handleErr(fmt.Errorf("invalid boolean value %s", style.Yellow(v)))
 			}
 		} else if isInt {
 			var err error
@@ -99,14 +99,14 @@ mangal config set --key "formats.use" --value cbz
 		}
 
 		if _, ok := config.DefaultValues[key]; !ok {
-			handleErr(fmt.Errorf(`unknown key "%s"`, key))
+			handleErr(fmt.Errorf(`unknown key %s`, style.Red(key)))
 		}
 
 		expectedType := reflect.TypeOf(config.DefaultValues[key])
 		actualType := reflect.TypeOf(value)
 
 		if expectedType != actualType {
-			handleErr(fmt.Errorf(`expected type "%s" but got "%s"`, expectedType, actualType))
+			handleErr(fmt.Errorf(`expected type %s but got %s`, style.Blue(expectedType.String()), style.Red(actualType.String())))
 		}
 
 		viper.Set(key, value)
