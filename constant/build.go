@@ -3,7 +3,7 @@ package constant
 const Version = "3.8.0"
 
 var (
-	BuiltAt   string
-	BuiltBy  string
-	Revision string
+	BuiltAt  = "Unknown"
+	BuiltBy  = "Unknown"
+	Revision = "Unknown"
 )
