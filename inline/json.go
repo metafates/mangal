@@ -2,26 +2,17 @@ package inline
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
-	"os"
 )
 
-func printAsJson(manga []*source.Manga) error {
-	marshalled, err := json.Marshal(&struct {
+func asJson(manga []*source.Manga) (marshalled []byte, err error) {
+	return json.Marshal(&struct {
 		Manga []*source.Manga
 	}{
 		Manga: manga,
 	})
-
-	if err != nil {
-		return err
-	}
-
-	_, err = fmt.Fprint(os.Stdout, string(marshalled))
-	return err
 }
 
 func jsonUpdateChapters(manga *source.Manga, options *Options) error {
