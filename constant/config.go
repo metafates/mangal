@@ -14,7 +14,12 @@ const (
 const (
 	FormatsUse                   = "formats.use"
 	FormatsSkipUnsupportedImages = "formats.skip_unsupported_images"
-	FormatsFetchAnilistMetadata  = "formats.fetch_anilist_metadata"
+)
+
+const (
+	MetadataFetchAnilist = "metadata.fetch_anilist"
+	MetadataComicInfoXML = "metadata.comic_info_xml"
+	MetadataSeriesJSON   = "metadata.series_json"
 )
 
 const (

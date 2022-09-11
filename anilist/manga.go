@@ -1,5 +1,11 @@
 package anilist
 
+type date struct {
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Day   int `json:"day"`
+}
+
 type Manga struct {
 	URL   string `json:"url"`
 	Title struct {
@@ -23,12 +29,16 @@ type Manga struct {
 			} `json:"name"`
 		} `json:"nodes"`
 	} `json:"characters"`
-	StartDate struct {
-		Year  int `json:"year"`
-		Month int `json:"month"`
-		Day   int `json:"day"`
-	} `json:"startDate"`
-	Status string `json:"status"`
+	StartDate date     `json:"startDate"`
+	EndDate   date     `json:"endDate"`
+	Synonyms  []string `json:"synonyms"`
+	Status    string   `json:"status"`
+	IDMal     int      `json:"idMal"`
+	SiteURL   string   `json:"siteUrl"`
+	Country   string   `json:"countryOfOrigin"`
+	External  []struct {
+		URL string `json:"url"`
+	} `json:"externalLinks"`
 }
 
 func (m *Manga) Name() string {

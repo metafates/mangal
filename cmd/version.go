@@ -3,6 +3,8 @@ package cmd
 import (
 	"github.com/metafates/mangal/constant"
 	"github.com/spf13/cobra"
+	"os"
+	"runtime"
 )
 
 func init() {
@@ -14,6 +16,14 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of mangal",
 	Long:  `All software has versions. This is mangal's`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Println("mangal version " + constant.Version)
+		cmd.SetOut(os.Stdout)
+		cmd.Printf(`Mangal - The ultimate manga downloader
+
+Version:    %s
+OS:         %s
+Arch:       %s
+Built:      %s
+Git Commit: %s
+`, constant.Version, runtime.GOOS, runtime.GOARCH, constant.Built, constant.GitCommit)
 	},
 }

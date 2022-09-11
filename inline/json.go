@@ -3,7 +3,9 @@ package inline
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
+	"github.com/spf13/viper"
 	"os"
 )
 
@@ -39,6 +41,10 @@ func jsonUpdateChapters(manga *source.Manga, options *Options) error {
 				return err
 			}
 		}
+	}
+
+	if viper.GetBool(constant.MetadataFetchAnilist) {
+		_ = manga.PopulateMetadata()
 	}
 
 	return nil

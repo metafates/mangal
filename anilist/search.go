@@ -14,6 +14,7 @@ query ($query: String) {
 	Page (page: 1, perPage: 30) {
 		media (search: $query, type: MANGA) {
 			id
+			idMal
 			title {
 				romaji
 				english
@@ -39,7 +40,18 @@ query ($query: String) {
 				month	
 				day
 			}
+			endDate {
+				year
+				month	
+				day
+			}
 			status
+			synonyms
+			siteUrl
+			countryOfOrigin
+			externalLinks {
+				url
+			}
 		}
 	}
 }

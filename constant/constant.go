@@ -2,7 +2,6 @@ package constant
 
 const (
 	Mangal           = "mangal"
-	Version          = "3.8.0"
 	UserAgent        = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
 	InstallScriptURL = "https://raw.githubusercontent.com/metafates/mangal/main/scripts/install"
 )

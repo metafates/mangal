@@ -1,0 +1,33 @@
+MAKEFLAGS += --silent
+
+ldflags := -X 'github.com/metafates/mangal/constant.Built=$(shell date)'
+ldflags += -X 'github.com/metafates/mangal/constant.GitCommit=$(shell git rev-parse HEAD)'
+ldflags += -s
+ldlags  += -w
+
+build_flags := -ldflags=${ldflags}
+
+all: help
+
+help:
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  build        Build the mangal binary"
+	@echo "  install      Install the mangal binary"
+	@echo "  test         Run the tests"
+	@echo "  help         Show this help message"
+	@echo ""
+
+install:
+	@go install "$(build_flags)"
+
+
+build:
+	@go build "$(build_flags)"
+
+test:
+	@go test -v ./...
+
+uninstall:
+	@rm -f $(shell which mangal)

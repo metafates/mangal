@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="LanguageInjectionConfiguration">
+    <injection language="gotemplate" injector-id="go">
+      <display-name>New Go Injection</display-name>
+      <single-file value="false" />
+    </injection>
+  </component>
+</project>

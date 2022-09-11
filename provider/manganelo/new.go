@@ -92,6 +92,7 @@ func New() source.Source {
 		manganelo.chapters[path] = make([]*source.Chapter, elements.Length())
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
 		manga.Chapters = make([]*source.Chapter, elements.Length())
+		manga.Metadata.Cover = e.Request.AbsoluteURL(e.DOM.Find("body > div.body-site > div.container.container-main > div.container-main-left > div.panel-story-info > div.story-info-left > span.info-image > img").AttrOr("src", ""))
 
 		elements.Each(func(i int, selection *goquery.Selection) {
 			link, _ := selection.Attr("href")

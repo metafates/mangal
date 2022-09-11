@@ -16,7 +16,11 @@ var defaultValues = map[string]any{
 	// Formats
 	constant.FormatsUse:                   "pdf",
 	constant.FormatsSkipUnsupportedImages: true,
-	constant.FormatsFetchAnilistMetadata:  true,
+
+	// Metadata
+	constant.MetadataFetchAnilist: true,
+	constant.MetadataComicInfoXML: true,
+	constant.MetadataSeriesJSON:   false,
 
 	// Mini-mode
 	constant.MiniSearchLimit: 20,

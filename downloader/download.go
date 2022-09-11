@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
 	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
 )
 
 // Download the chapter using given source.
@@ -28,11 +31,31 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 		return "", err
 	}
 
-	if viper.GetBool(constant.FormatsFetchAnilistMetadata) {
+	if viper.GetBool(constant.MetadataFetchAnilist) {
 		progress("Fetching metadata from anilist")
 		err := chapter.Manga.PopulateMetadata()
 		if err != nil {
 			log.Warn(err)
+		}
+	}
+
+	if viper.GetBool(constant.MetadataSeriesJSON) {
+		path, err := chapter.Manga.Path(false)
+		if err != nil {
+			log.Warn(err)
+		} else {
+			path = filepath.Join(path, "series.json")
+			exists, err := filesystem.Get().Exists(path)
+			if err != nil {
+				log.Warn(err)
+			} else if !exists {
+				progress("Generating series.json")
+				data := chapter.Manga.SeriesJSON()
+				err = filesystem.Get().WriteFile(path, data.Bytes(), os.ModePerm)
+				if err != nil {
+					log.Warn(err)
+				}
+			}
 		}
 	}
 

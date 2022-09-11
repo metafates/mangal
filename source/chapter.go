@@ -1,17 +1,21 @@
 package source
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
+	"github.com/samber/lo"
 	"github.com/spf13/viper"
+	"html"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"text/template"
 )
 
 // Chapter is a struct that represents a chapter of a manga.
@@ -40,17 +44,20 @@ func (c *Chapter) String() string {
 
 // DownloadPages downloads the Pages contents of the Chapter.
 // Pages needs to be set before calling this function.
-func (c *Chapter) DownloadPages(progress func(string)) error {
+func (c *Chapter) DownloadPages(progress func(string)) (err error) {
 	c.size = 0
 	status := func() string {
-		return fmt.Sprintf("Downloading %s %s", util.Quantity(len(c.Pages), "page"), style.Faint(c.SizeHuman()))
+		return fmt.Sprintf(
+			"Downloading %s %s",
+			util.Quantity(len(c.Pages), "page"),
+			style.Faint(c.SizeHuman()),
+		)
 	}
 
 	progress(status())
 	wg := sync.WaitGroup{}
 	wg.Add(len(c.Pages))
 
-	var err error
 	for _, page := range c.Pages {
 		d := func(page *Page) {
 			defer wg.Done()
@@ -73,7 +80,7 @@ func (c *Chapter) DownloadPages(progress func(string)) error {
 	}
 
 	wg.Wait()
-	return err
+	return
 }
 
 // formattedName of the chapter according to the template in the config.
@@ -137,4 +144,38 @@ func (c *Chapter) Path(temp bool) (path string, err error) {
 
 func (c *Chapter) Source() Source {
 	return c.Manga.Source
+}
+
+func (c *Chapter) ComicInfoXML() *bytes.Buffer {
+	// language=gotemplate
+	t := `
+<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Title>{{ escape .Name }}</Title>
+  	<Series>{{ escape .Manga.Name }}</Series>
+	<Number>{{ .Index }}</Number>
+	<Web>{{ .URL }}</Web>
+	<Genre>{{ join .Manga.Metadata.Genres "," }}</Genre>
+	<PageCount>{{ len .Pages }}</PageCount>
+	<Summary>{{ escape .Manga.Metadata.Summary }}</Summary>
+	<Count>{{ len .Manga.Chapters }}</Count>
+	<Writer>{{ .Manga.Metadata.Author }}</Writer>
+	<Characters>{{ join .Manga.Metadata.Characters "," }}</Characters>
+	<Year>{{ .Manga.Metadata.StartDate.Year }}</Year>
+	<Month>{{ .Manga.Metadata.StartDate.Month }}</Month>
+	<Day>{{ .Manga.Metadata.StartDate.Day }}</Day>
+	<Tags>{{ join .Manga.Metadata.Tags "," }}</Tags>
+	<Notes>Downloaded with Mangal. https://github.com/metafates/mangal</Notes>
+  	<Manga>YesAndRightToLeft</Manga>
+</ComicInfo>`
+
+	funcs := template.FuncMap{
+		"join":   strings.Join,
+		"escape": html.EscapeString,
+	}
+
+	parsed := lo.Must(template.New("ComicInfo").Funcs(funcs).Parse(t))
+	buf := bytes.NewBufferString("")
+	lo.Must0(parsed.Execute(buf, c))
+
+	return buf
 }

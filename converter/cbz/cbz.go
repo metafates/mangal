@@ -2,14 +2,12 @@ package cbz
 
 import (
 	"archive/zip"
-	"bytes"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
-	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"io"
-	"strings"
-	"text/template"
 )
 
 type CBZ struct{}
@@ -48,44 +46,11 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		}
 	}
 
-	info, err := comicInfo(chapter)
-	if err != nil {
-		return
+	if viper.GetBool(constant.MetadataComicInfoXML) {
+		err = addToZip(zipWriter, chapter.ComicInfoXML(), "ComicInfo.xml")
 	}
 
-	err = addToZip(zipWriter, info, "ComicInfo.xml")
 	return
-}
-
-func comicInfo(chapter *source.Chapter) (*bytes.Buffer, error) {
-	t := `
-<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Title>{{ .Name }}</Title>
-  	<Series>{{ .Manga.Name }}</Series>
-	<Number>{{ .Index }}</Number>
-  	<Web>{{ .Manga.URL }}</Web>
-	<Genre>{{ join .Manga.Metadata.Genres "," }}</Genre>
-	<PageCount>{{ len .Pages }}</PageCount>
-	<Summary>{{ .Manga.Metadata.Summary }}</Summary>
-	<Count>{{ len .Manga.Chapters }}</Count>
-	<Writer>{{ .Manga.Metadata.Author }}</Writer>
-	<Characters>{{ join .Manga.Metadata.Characters "," }}</Characters>
-	<Year>{{ .Manga.Metadata.StartDate.Year }}</Year>
-	<Month>{{ .Manga.Metadata.StartDate.Month }}</Month>
-	<Day>{{ .Manga.Metadata.StartDate.Day }}</Day>
-	<Tags>{{ join .Manga.Metadata.Tags "," }}</Tags>
-  	<Manga>YesAndRightToLeft</Manga>
-</ComicInfo>`
-
-	funcs := template.FuncMap{
-		"join": strings.Join,
-	}
-
-	parsed := lo.Must(template.New("ComicInfo").Funcs(funcs).Parse(t))
-	buf := bytes.NewBufferString("")
-	lo.Must0(parsed.Execute(buf, chapter))
-
-	return buf, nil
 }
 
 func addToZip(writer *zip.Writer, file io.Reader, name string) error {

@@ -9,7 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 - Support for more manga metadata fields such as summary, genres, tags, and more.
 - Fetch manga metadata from anilist.
-  `formats.fetch_anilist_metadata` (default: `true`) 
+  `metadata.fetch_anilist` (default: `true`) 
+- Generate `series.json` file.
+  `metadata.series_json` (default: `false`)
+- Generate `ComicInfo.xml` file (for CBZ only)
+  `metadata.comic_info_xml` (default: `true`)
 - Support for downloading manga covers.
   `downloader.download_cover` (default: `false`)
 - Better progress message while downloading in TUI mode

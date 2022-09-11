@@ -1,12 +1,16 @@
 package source
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
+	"github.com/samber/lo"
 	"github.com/spf13/viper"
 	"io"
 	"net/http"
@@ -15,6 +19,12 @@ import (
 	"regexp"
 	"strings"
 )
+
+type date struct {
+	Year  int
+	Month int
+	Day   int
+}
 
 // Manga is a manga from a source.
 type Manga struct {
@@ -37,11 +47,10 @@ type Manga struct {
 		Tags       []string
 		Characters []string
 		Status     string
-		StartDate  struct {
-			Year  int
-			Month int
-			Day   int
-		}
+		StartDate  date
+		EndDate    date
+		Synonyms   []string
+		URLs       []string
 	}
 	cachedTempPath  string
 	populated       bool
@@ -82,11 +91,11 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 	if m.coverDownloaded {
 		return nil
 	}
+	m.coverDownloaded = true
 
 	log.Info("Downloading cover for ", m.Name)
 	progress("Downloading cover")
 
-	m.coverDownloaded = true
 	if m.Metadata.Cover == "" {
 		log.Warn("No cover to download")
 		return nil
@@ -178,14 +187,74 @@ func (m *Manga) PopulateMetadata() error {
 	m.Metadata.Tags = tags
 
 	m.Metadata.Cover = manga.CoverImage.ExtraLarge
-	m.Metadata.StartDate = struct {
-		Year  int
-		Month int
-		Day   int
-	}(manga.StartDate)
+	m.Metadata.StartDate = date(manga.StartDate)
+	m.Metadata.EndDate = date(manga.EndDate)
 
 	m.Metadata.Status = strings.ReplaceAll(manga.Status, "_", " ")
+	m.Metadata.Synonyms = manga.Synonyms
+
+	urls := []string{manga.URL}
+	if manga.SiteURL != "" {
+		urls = append(urls, manga.SiteURL)
+	}
+
+	for _, e := range manga.External {
+		if e.URL != "" {
+			urls = append(urls, e.URL)
+		}
+	}
+
+	urls = append(urls, fmt.Sprintf("https://myanimelist.net/manga/%d", manga.IDMal))
+	m.Metadata.URLs = urls
 
 	m.populated = true
 	return nil
+}
+
+func (m *Manga) SeriesJSON() *bytes.Buffer {
+	type metadata struct {
+		Type                 string `json:"type"`
+		Name                 string `json:"name"`
+		DescriptionFormatted string `json:"description_formatted"`
+		DescriptionText      string `json:"description_text"`
+		Status               string `json:"status"`
+		Year                 int    `json:"year"`
+		ComicImage           string `json:"ComicImage"`
+		Publisher            string `json:"publisher"`
+		ComicID              int    `json:"comicId"`
+		BookType             string `json:"booktype"`
+		TotalIssues          int    `json:"total_issues"`
+		PublicationRun       string `json:"publication_run"`
+	}
+
+	var status string
+	switch m.Metadata.Status {
+	case "FINISHED":
+		status = "Ended"
+	case "RELEASING":
+		status = "Continuing"
+	default:
+		status = "Unknown"
+	}
+
+	seriesJSON := struct {
+		Metadata metadata `json:"metadata"`
+	}{
+		Metadata: metadata{
+			Type:                 "comicSeries",
+			Name:                 m.Name,
+			DescriptionFormatted: m.Metadata.Summary,
+			Status:               status,
+			Year:                 m.Metadata.StartDate.Year,
+			ComicImage:           m.Metadata.Cover,
+			Publisher:            m.Metadata.Author,
+			BookType:             "Print",
+			TotalIssues:          len(m.Chapters),
+			PublicationRun:       fmt.Sprintf("%d %d - %d %d", m.Metadata.StartDate.Month, m.Metadata.StartDate.Year, m.Metadata.EndDate.Month, m.Metadata.EndDate.Year),
+		},
+	}
+
+	var buf bytes.Buffer
+	lo.Must0(json.NewEncoder(&buf).Encode(seriesJSON))
+	return &buf
 }
