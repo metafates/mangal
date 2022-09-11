@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
   `downloader.download_cover` (default: `false`)
 - Better progress message while downloading in TUI mode
 - Set option `downloader.create_volume_dir` to `false` by default
+- Version command now show more information (such as build date, commit hash, etc.)
 
 ## 3.7.0
 

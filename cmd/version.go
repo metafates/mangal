@@ -22,8 +22,8 @@ var versionCmd = &cobra.Command{
 Version:    %s
 OS:         %s
 Arch:       %s
-Built:      %s
+Built:      %s by %s
 Git Commit: %s
-`, constant.Version, runtime.GOOS, runtime.GOARCH, constant.Built, constant.GitCommit)
+`, constant.Version, runtime.GOOS, runtime.GOARCH, constant.BuiltAt, constant.BuiltBy, constant.GitCommit)
 	},
 }

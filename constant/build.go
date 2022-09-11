@@ -3,6 +3,7 @@ package constant
 const Version = "3.8.0"
 
 var (
-	Built     string
+	BuiltAt   string
+	BuiltBy   string
 	GitCommit string
 )
