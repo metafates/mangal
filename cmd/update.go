@@ -13,6 +13,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(updateCmd)
+	updateCmd.SetOut(os.Stdout)
 }
 
 var updateCmd = &cobra.Command{
@@ -20,7 +21,6 @@ var updateCmd = &cobra.Command{
 	Short:   "Update mangal",
 	Aliases: []string{"upgrade"},
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.SetOut(os.Stdout)
 
 		msg := fmt.Sprintf("%s %s", icon.Get(icon.Progress), "Fetching latest version...")
 		erase := util.PrintErasable(msg)

@@ -8,7 +8,6 @@ import (
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-
 	runCmd.Flags().BoolP("lenient", "l", false, "do not warn about missing functions")
 }
 

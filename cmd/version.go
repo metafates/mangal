@@ -9,6 +9,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+	versionCmd.SetOut(os.Stdout)
 }
 
 var versionCmd = &cobra.Command{
@@ -16,7 +17,6 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of mangal",
 	Long:  `All software has versions. This is mangal's`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.SetOut(os.Stdout)
 		cmd.Printf(`Mangal - The ultimate manga downloader
 
 Version:    %s
