@@ -22,6 +22,35 @@ contains() {
     fi
 }
 
+install_completions() {
+    COMPLETIONS="$1"
+
+    if has zsh;
+    then
+        info "Installing zsh completions"
+        TARGET="/usr/share/zsh/vendor-completions"
+        mkdir -p "$TARGET"
+        cp "$COMPLETIONS/mangal.zsh" "$TARGET/_mangal"
+    fi
+
+    if has fish;
+    then
+        info "Installing fish completions"
+        TARGET="/usr/share/fish/completions"
+        mkdir -p "$TARGET"
+        cp "$COMPLETIONS/mangal.fish" "$TARGET/mangal.fish"
+    fi
+
+    if has bash;
+    then
+        info "Installing bash completions"
+        TARGET="/usr/share/bash-completion/completions"
+
+        mkdir -p $TARGET
+        cp "$COMPLETIONS/mangal.bash" "$TARGET/mangal"
+    fi
+}
+
 create_termux_alias() {
     ALIAS="mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
     BASHRC="$PREFIX/etc/bash.bashrc"
@@ -274,6 +303,7 @@ install_binary() {
     OUT="/usr/local/bin/"
     info "Moving to ${OUT}"
     sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
+    install_completions "$TMPDIR/completions"
 }
 
 pre_install() {
