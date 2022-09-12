@@ -67,7 +67,6 @@ func (a *anilistCache) Init() error {
 }
 
 func (a *anilistCache) Get(name string) (*Manga, bool) {
-	log.Debugf("%v", a.Mem)
 	if a.file == nil {
 		_ = a.Init()
 	}
