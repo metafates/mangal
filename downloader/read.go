@@ -16,7 +16,6 @@ import (
 // Read the chapter by downloading it with the given source
 // and opening it with the configured reader.
 func Read(chapter *source.Chapter, progress func(string)) error {
-
 	if viper.GetBool(constant.ReaderReadInBrowser) {
 		return open.Start(chapter.URL)
 	}

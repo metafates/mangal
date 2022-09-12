@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/inline"
 	"github.com/metafates/mangal/provider"
@@ -61,6 +62,10 @@ When using the json flag manga selector could be omitted. That way, it will sele
 
 		if lo.Must(cmd.Flags().GetBool("populate-pages")) {
 			lo.Must0(cmd.MarkFlagRequired("json"))
+		}
+
+		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {
+			handleErr(err)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
