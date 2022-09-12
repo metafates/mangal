@@ -31,6 +31,9 @@ func init() {
 	lo.Must0(configSetCmd.MarkFlagRequired("key"))
 	configSetCmd.MarkFlagsMutuallyExclusive("bool", "int")
 	lo.Must0(configSetCmd.MarkFlagRequired("value"))
+	lo.Must0(configSetCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
+	}))
 }
 
 var configCmd = &cobra.Command{
