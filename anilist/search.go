@@ -18,9 +18,7 @@ type anilistResponse struct {
 }
 
 func Search(name string) ([]*Manga, error) {
-	if mangas, ok := cache.Get(name); ok {
-		return mangas, nil
-	}
+	log.Info("No cached data found in anilist cacher for " + name)
 
 	// prepare body
 	log.Info("Searching anilist for manga: " + name)
@@ -65,7 +63,6 @@ func Search(name string) ([]*Manga, error) {
 	}
 
 	mangas := response.Data.Page.Media
-	_ = cache.Set(name, mangas)
 	log.Info("Got response from Anilist, found " + strconv.Itoa(len(mangas)) + " results")
 	return mangas, nil
 }

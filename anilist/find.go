@@ -22,10 +22,9 @@ func FindClosest(name string) (*Manga, error) {
 		return nil, err
 	}
 
-	//if cached, ok := cache[name]; ok {
-	//	log.Info("Found cached manga: " + cached.Name())
-	//	return cached, nil
-	//}
+	if manga, ok := cache.Get(name); ok {
+		return manga, nil
+	}
 
 	// search for manga on anilist
 	urls, err := Search(name)
@@ -56,7 +55,7 @@ func FindClosest(name string) (*Manga, error) {
 	})
 
 	log.Info("Found closest match: " + closest.Name())
-	//cache[name] = closest
 	retries = 0
+	_ = cache.Set(name, closest)
 	return closest, nil
 }
