@@ -28,7 +28,7 @@ build:
 	@go build "$(build_flags)"
 
 test:
-	@go test -v ./...
+	@go test ./...
 
 uninstall:
 	@rm -f $(shell which mangal)
