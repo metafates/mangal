@@ -9,55 +9,19 @@ import (
 	"strconv"
 )
 
-var searchQuery = `
-query ($query: String) {
-	Page (page: 1, perPage: 30) {
-		media (search: $query, type: MANGA) {
-			id
-			idMal
-			title {
-				romaji
-				english
-				native
-			}
-			description(asHtml: false)
-			tags {
-				name
-			}
-			genres
-			coverImage {
-				extraLarge
-			}
-			characters (page: 1, perPage: 10, role: MAIN) {
-				nodes {
-					name {
-						full
-					}
-				}
-			}
-			startDate {
-				year
-				month	
-				day
-			}
-			endDate {
-				year
-				month	
-				day
-			}
-			status
-			synonyms
-			siteUrl
-			countryOfOrigin
-			externalLinks {
-				url
-			}
-		}
-	}
+type anilistResponse struct {
+	Data struct {
+		Page struct {
+			Media []*Manga `json:"media"`
+		} `json:"page"`
+	} `json:"data"`
 }
-`
 
 func Search(name string) ([]*Manga, error) {
+	if mangas, ok := cache.Get(name); ok {
+		return mangas, nil
+	}
+
 	// prepare body
 	log.Info("Searching anilist for manga: " + name)
 	body := map[string]interface{}{
@@ -93,19 +57,15 @@ func Search(name string) ([]*Manga, error) {
 	}
 
 	// decode response
-	var response struct {
-		Data struct {
-			Page struct {
-				Media []*Manga `json:"media"`
-			} `json:"page"`
-		} `json:"data"`
-	}
+	var response anilistResponse
 
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		log.Error(err)
 		return nil, err
 	}
 
-	log.Info("Got response from Anilist, found " + strconv.Itoa(len(response.Data.Page.Media)) + " results")
-	return response.Data.Page.Media, nil
+	mangas := response.Data.Page.Media
+	_ = cache.Set(name, mangas)
+	log.Info("Got response from Anilist, found " + strconv.Itoa(len(mangas)) + " results")
+	return mangas, nil
 }

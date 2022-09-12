@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Version command now shows more information (such as build date, commit hash, etc.)
 - New flag for inline mode: `--output/-o` to redirect output to file (will use STDOUT if not set)
 - New `mangal config set` command to set config values. See `mangal help config set` for more info.
+- New `mangal config get` command. See `mangal help config get` for more info 
 
 ## 3.7.0
 

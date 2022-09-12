@@ -34,6 +34,13 @@ func init() {
 	lo.Must0(configSetCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
 	}))
+
+	configCmd.AddCommand(configGetCmd)
+	configGetCmd.Flags().StringP("key", "k", "", "key to get")
+	lo.Must0(configGetCmd.MarkFlagRequired("key"))
+	lo.Must0(configGetCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
+	}))
 }
 
 var configCmd = &cobra.Command{
@@ -121,5 +128,21 @@ mangal config set --key "formats.use" --value cbz
 		}
 
 		fmt.Printf("%s set %s to %s\n", icon.Get(icon.Success), style.Magenta(key), style.Yellow(v))
+	},
+}
+
+var configGetCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Get config value",
+	Long: `Get config value. Example:
+mangal config get --key "formats.use"
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		key := lo.Must(cmd.Flags().GetString("key"))
+		if _, ok := config.DefaultValues[key]; !ok {
+			handleErr(fmt.Errorf(`unknown key %s`, style.Red(key)))
+		}
+
+		fmt.Println(viper.Get(key))
 	},
 }
