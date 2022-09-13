@@ -54,7 +54,7 @@ func init() {
 
 func errUnknownKey(key string) error {
 	closest := lo.MinBy(lo.Keys(config.DefaultValues), func(a string, b string) bool {
-		return levenshtein.Distance(a, key) < levenshtein.Distance(b, key)
+		return levenshtein.Distance(key, a) < levenshtein.Distance(key, b)
 	})
 	msg := fmt.Sprintf(`unknown key %s, did you mean %s?`, style.Red(key), style.Yellow(closest))
 	return errors.New(msg)
