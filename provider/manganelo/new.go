@@ -5,8 +5,7 @@ import (
 	"github.com/gocolly/colly"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
-	"github.com/samber/lo"
-	"os"
+	"github.com/metafates/mangal/where"
 	"path/filepath"
 	"strings"
 	"time"
@@ -28,12 +27,10 @@ func New() source.Source {
 		pages:    make(map[string][]*source.Page),
 	}
 
-	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constant.CachePrefix)
-
 	collectorOptions := []func(*colly.Collector){
 		colly.AllowURLRevisit(),
 		colly.Async(true),
-		colly.CacheDir(cacheDir),
+		colly.CacheDir(where.Cache()),
 	}
 
 	baseCollector := colly.NewCollector(collectorOptions...)

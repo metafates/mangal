@@ -2,16 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"io/fs"
-	"os"
-	"strings"
 )
 
 func init() {
@@ -51,48 +47,52 @@ var clearCmd = &cobra.Command{
 }
 
 func clearCache() {
-	cacheDir, err := os.UserCacheDir()
-	handleErr(err)
-
-	err = filesystem.Get().Walk(cacheDir, func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-
-		if strings.HasPrefix(info.Name(), constant.CachePrefix) {
-			if info.IsDir() {
-				return filesystem.Get().RemoveAll(path)
-			} else {
-				return filesystem.Get().Remove(path)
-			}
-		}
-
-		return nil
-	})
-
-	handleErr(err)
+	handleErr(filesystem.Get().RemoveAll(where.Cache()))
+	//
+	//cacheDir, err := os.UserCacheDir()
+	//handleErr(err)
+	//
+	//err = filesystem.Get().Walk(cacheDir, func(path string, info fs.FileInfo, err error) error {
+	//	if err != nil {
+	//		return nil
+	//	}
+	//
+	//	if strings.HasPrefix(info.Name(), constant.CachePrefix) {
+	//		if info.IsDir() {
+	//			return filesystem.Get().RemoveAll(path)
+	//		} else {
+	//			return filesystem.Get().Remove(path)
+	//		}
+	//	}
+	//
+	//	return nil
+	//})
+	//
+	//handleErr(err)
 }
 
 func clearTemp() {
-	tempDir := os.TempDir()
-
-	err := filesystem.Get().Walk(tempDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-
-		if strings.HasPrefix(info.Name(), constant.TempPrefix) {
-			if info.IsDir() {
-				return filesystem.Get().RemoveAll(path)
-			} else {
-				return filesystem.Get().Remove(path)
-			}
-		}
-
-		return nil
-	})
-
-	handleErr(err)
+	handleErr(filesystem.Get().RemoveAll(where.Temp()))
+	//
+	//tempDir := os.TempDir()
+	//
+	//err := filesystem.Get().Walk(tempDir, func(path string, info os.FileInfo, err error) error {
+	//	if err != nil {
+	//		return nil
+	//	}
+	//
+	//	if strings.HasPrefix(info.Name(), constant.TempPrefix) {
+	//		if info.IsDir() {
+	//			return filesystem.Get().RemoveAll(path)
+	//		} else {
+	//			return filesystem.Get().Remove(path)
+	//		}
+	//	}
+	//
+	//	return nil
+	//})
+	//
+	//handleErr(err)
 }
 
 func clearHistory() {

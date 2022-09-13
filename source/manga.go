@@ -71,8 +71,7 @@ func (m *Manga) Path(temp bool) (path string, err error) {
 			return
 		}
 
-		path, err = filesystem.Get().TempDir("", constant.TempPrefix)
-
+		path = where.Temp()
 		m.cachedTempPath = path
 		return
 	}

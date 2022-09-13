@@ -36,7 +36,7 @@ func (p *Page) Download() error {
 		return nil
 	}
 
-	log.Debugf("Downloading page #%d (%s)", p.Index, p.URL)
+	log.Tracef("Downloading page #%d (%s)", p.Index, p.URL)
 
 	req, err := http.NewRequest(http.MethodGet, p.URL, nil)
 	if err != nil {
@@ -72,7 +72,7 @@ func (p *Page) Download() error {
 	p.Contents = bytes.NewBuffer(body)
 	p.Size = uint64(util.Max(resp.ContentLength, 0))
 
-	log.Debugf("Page #%d downloaded - %s", p.Index, humanize.Bytes(p.Size))
+	log.Tracef("Page #%d downloaded - %s", p.Index, humanize.Bytes(p.Size))
 	return nil
 }
 

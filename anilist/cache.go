@@ -2,9 +2,9 @@ package anilist
 
 import (
 	"encoding/json"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/where"
 	"github.com/spf13/afero"
 	"io"
 	"os"
@@ -28,13 +28,8 @@ func (a *anilistCache) Init() error {
 
 	log.Debug("Initializing anilist cacher")
 
-	cacheDir, err := os.UserCacheDir()
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
-
-	path := filepath.Join(cacheDir, constant.CachePrefix+"anilist_cache.json")
+	var err error
+	path := filepath.Join(where.Cache(), "anilist_cache.json")
 	log.Debugf("Opening anilist cache file at %s", path)
 	a.file, err = filesystem.Get().OpenFile(path, os.O_RDWR|os.O_CREATE, os.ModePerm)
 

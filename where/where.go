@@ -43,10 +43,12 @@ func Logs() string {
 
 // History path to the file
 func History() string {
-	cacheDir := filepath.Join(lo.Must(os.UserCacheDir()), constant.CachePrefix)
-	lo.Must0(filesystem.Get().MkdirAll(filepath.Dir(cacheDir), os.ModePerm))
+	genericCacheDir, err := os.UserCacheDir()
+	if err != nil {
+		genericCacheDir = "."
+	}
 
-	path := filepath.Join(mkdir(cacheDir), "history.json")
+	path := filepath.Join(genericCacheDir, constant.CachePrefix+"history.json")
 
 	exists := lo.Must(filesystem.Get().Exists(path))
 	if !exists {
@@ -68,4 +70,19 @@ func Downloads() string {
 	}
 
 	return mkdir(path)
+}
+
+func Cache() string {
+	genericCacheDir, err := os.UserCacheDir()
+	if err != nil {
+		genericCacheDir = "."
+	}
+
+	cacheDir := filepath.Join(genericCacheDir, constant.CachePrefix)
+	return mkdir(cacheDir)
+}
+
+func Temp() string {
+	tempDir := filepath.Join(os.TempDir(), constant.TempPrefix)
+	return mkdir(tempDir)
 }
