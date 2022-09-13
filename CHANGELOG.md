@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - New `mangal config set` command to set config values. See `mangal help config set` for more info.
 - New `mangal config get` command. See `mangal help config get` for more info 
 - Improve `mangal clear` command. It's more accurate and faster now. 
+- Better cache & temp files handling
 
 ## 3.7.0
 
