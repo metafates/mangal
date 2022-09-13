@@ -9,6 +9,7 @@ import (
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 func init() {
@@ -22,23 +23,22 @@ var clearCmd = &cobra.Command{
 	Short: "Clears a sidelined files",
 	Run: func(cmd *cobra.Command, args []string) {
 		var anyCleared bool
-		doClearCache := lo.Must(cmd.Flags().GetBool("cache"))
-		doClearHistory := lo.Must(cmd.Flags().GetBool("history"))
 
-		if doClearCache {
-			anyCleared = true
-			e := util.PrintErasable(fmt.Sprintf("%s Clearing cache...", icon.Get(icon.Progress)))
-			clearCache()
-			e()
-			fmt.Printf("%s Cache cleared\n", icon.Get(icon.Success))
+		doClear := func(what string) bool {
+			return lo.Must(cmd.Flags().GetBool(what))
 		}
 
-		if doClearHistory {
-			anyCleared = true
-			e := util.PrintErasable(fmt.Sprintf("%s Clearing history...", icon.Get(icon.Progress)))
-			clearHistory()
-			e()
-			fmt.Printf("%s History cleared\n", icon.Get(icon.Success))
+		for name, clear := range map[string]func(){
+			"cache":   clearCache,
+			"history": clearHistory,
+		} {
+			if doClear(name) {
+				anyCleared = true
+				e := util.PrintErasable(fmt.Sprintf("%s Clearing %s...", icon.Get(icon.Progress), strings.Title(name)))
+				clear()
+				e()
+				fmt.Printf("%s %s cleared\n", icon.Get(icon.Success), strings.Title(name))
+			}
 		}
 
 		if !anyCleared {
