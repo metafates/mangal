@@ -22,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - New flag for inline mode: `--output/-o` to redirect output to file (will use STDOUT if not set)
 - New `mangal config set` command to set config values. See `mangal help config set` for more info.
 - New `mangal config get` command to get config values. See `mangal help config get` for more info 
-- New `mangal config list` command to list all available config fields.
+- New `mangal config list` command to list all available config fields with description for each.
 - Improve `mangal clear` command. It's more accurate and faster now. 
 - Better cache & temp files handling
 - Fix `mangal update` command when it was not able to update using script. 

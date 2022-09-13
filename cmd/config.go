@@ -44,6 +44,10 @@ func init() {
 	}))
 
 	configCmd.AddCommand(configListCmd)
+	configListCmd.Flags().StringP("key", "k", "", "show only this key")
+	lo.Must0(configListCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
+	}))
 }
 
 var configCmd = &cobra.Command{
@@ -115,7 +119,7 @@ mangal config set --key "formats.use" --value cbz
 			handleErr(fmt.Errorf(`unknown key %s`, style.Red(key)))
 		}
 
-		expectedType := reflect.TypeOf(config.DefaultValues[key])
+		expectedType := reflect.TypeOf(config.DefaultValues[key].Value)
 		actualType := reflect.TypeOf(value)
 
 		if expectedType != actualType {
@@ -136,8 +140,8 @@ mangal config set --key "formats.use" --value cbz
 
 var configGetCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Api config value",
-	Long: `Api config value. Example:
+	Short: "Get config value",
+	Long: `Get config value. Example:
 mangal config get --key "formats.use"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -152,28 +156,34 @@ mangal config get --key "formats.use"
 
 var configListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List config values and their types",
+	Short: "List config values, their types and description",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			i     int
-			items = make([]lo.Tuple2[string, any], len(config.DefaultValues))
+			fields = make([]config.Field, len(config.DefaultValues))
+			key    = lo.Must(cmd.Flags().GetString("key"))
 		)
 
-		for key, value := range config.DefaultValues {
-			items[i] = lo.Tuple2[string, any]{A: key, B: value}
+		i := 0
+		for _, v := range config.DefaultValues {
+			fields[i] = v
 			i++
 		}
 
-		sort.Slice(items, func(i, j int) bool {
-			return items[i].A < items[j].A
+		if key != "" {
+			if field, ok := config.DefaultValues[key]; ok {
+				fmt.Print(field.Pretty())
+				return
+			}
+			handleErr(fmt.Errorf(`unknown key %s`, style.Red(key)))
+		}
+
+		sort.Slice(fields, func(i, j int) bool {
+			return fields[i].Name < fields[j].Name
 		})
 
-		for _, item := range items {
-			fmt.Printf(
-				"%s: %s\n",
-				style.Magenta(item.A),
-				style.Yellow(reflect.TypeOf(item.B).String()),
-			)
+		for _, field := range fields {
+			// extra newline
+			fmt.Printf("%s\n", field.Pretty())
 		}
 	},
 }

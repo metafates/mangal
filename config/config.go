@@ -64,8 +64,8 @@ func setEnvs() {
 func setDefaults() {
 	viper.SetTypeByDefaultValue(true)
 
-	for field, value := range DefaultValues {
-		viper.SetDefault(field, value)
+	for name, field := range DefaultValues {
+		viper.SetDefault(name, field.Value)
 	}
 }
 
