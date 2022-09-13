@@ -33,6 +33,8 @@ var DefaultValues = map[string]any{
 	constant.ReaderCBZ:           "",
 	constant.ReaderZIP:           "",
 	constant.RaderPlain:          "",
+	constant.ReaderBrowser:       "",
+	constant.ReaderFolder:        "",
 	constant.ReaderReadInBrowser: false,
 
 	// History

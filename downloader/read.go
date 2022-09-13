@@ -10,14 +10,16 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
 	"github.com/spf13/viper"
-	"path/filepath"
 )
 
 // Read the chapter by downloading it with the given source
 // and opening it with the configured reader.
 func Read(chapter *source.Chapter, progress func(string)) error {
 	if viper.GetBool(constant.ReaderReadInBrowser) {
-		return open.Start(chapter.URL)
+		return open.StartWith(
+			chapter.URL,
+			viper.GetString(constant.ReaderBrowser),
+		)
 	}
 
 	log.Info(fmt.Sprintf("downloading %s for reading. Provider is %s", chapter.Name, chapter.Source().ID()))
@@ -83,35 +85,31 @@ func openRead(path string, progress func(string)) error {
 	)
 
 	switch viper.GetString(constant.FormatsUse) {
-	case "pdf":
+	case constant.PDF:
 		reader = viper.GetString(constant.ReaderPDF)
-	case "cbz":
+	case constant.CBZ:
 		reader = viper.GetString(constant.ReaderCBZ)
-	case "zip":
+	case constant.ZIP:
 		reader = viper.GetString(constant.ReaderZIP)
-	case "plain":
+	case constant.Plain:
 		reader = viper.GetString(constant.RaderPlain)
 	}
 
 	if reader != "" {
 		log.Info("opening with " + reader)
 		progress(fmt.Sprintf("Opening %s", reader))
-		err = open.RunWith(path, reader)
-		if err != nil {
-			log.Error(err)
-			return fmt.Errorf("could not open %s with %s: %s", path, reader, err.Error())
-		}
-		log.Info("opened without errors")
 	} else {
 		log.Info("no reader specified. opening with default")
 		progress("Opening")
-		err = open.Run(path)
-		if err != nil {
-			log.Error(err)
-			return fmt.Errorf("error opening %s: %s", filepath.Base(path), err.Error())
-		}
-		log.Info("opened without errors")
 	}
+
+	err = open.RunWith(path, reader)
+	if err != nil {
+		log.Error(err)
+		return fmt.Errorf("could not open %s with %s: %s", path, reader, err.Error())
+	}
+
+	log.Info("opened without errors")
 
 	return nil
 }

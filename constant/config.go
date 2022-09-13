@@ -27,6 +27,8 @@ const (
 	ReaderCBZ           = "reader.cbz"
 	ReaderZIP           = "reader.zip"
 	RaderPlain          = "reader.plain"
+	ReaderBrowser       = "reader.browser"
+	ReaderFolder        = "reader.folder"
 	ReaderReadInBrowser = "reader.read_in_browser"
 )
 
