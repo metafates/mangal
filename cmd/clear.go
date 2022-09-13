@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
@@ -47,55 +48,17 @@ var clearCmd = &cobra.Command{
 }
 
 func clearCache() {
+	log.Infof("Clearing cache at %s", where.Cache())
 	handleErr(filesystem.Get().RemoveAll(where.Cache()))
-	//
-	//cacheDir, err := os.UserCacheDir()
-	//handleErr(err)
-	//
-	//err = filesystem.Get().Walk(cacheDir, func(path string, info fs.FileInfo, err error) error {
-	//	if err != nil {
-	//		return nil
-	//	}
-	//
-	//	if strings.HasPrefix(info.Name(), constant.CachePrefix) {
-	//		if info.IsDir() {
-	//			return filesystem.Get().RemoveAll(path)
-	//		} else {
-	//			return filesystem.Get().Remove(path)
-	//		}
-	//	}
-	//
-	//	return nil
-	//})
-	//
-	//handleErr(err)
 }
 
 func clearTemp() {
+	log.Infof("Clearing temp files at %s", where.Temp())
 	handleErr(filesystem.Get().RemoveAll(where.Temp()))
-	//
-	//tempDir := os.TempDir()
-	//
-	//err := filesystem.Get().Walk(tempDir, func(path string, info os.FileInfo, err error) error {
-	//	if err != nil {
-	//		return nil
-	//	}
-	//
-	//	if strings.HasPrefix(info.Name(), constant.TempPrefix) {
-	//		if info.IsDir() {
-	//			return filesystem.Get().RemoveAll(path)
-	//		} else {
-	//			return filesystem.Get().Remove(path)
-	//		}
-	//	}
-	//
-	//	return nil
-	//})
-	//
-	//handleErr(err)
 }
 
 func clearHistory() {
 	historyFile := where.History()
+	log.Infof("Removing history file at %s", historyFile)
 	handleErr(filesystem.Get().Remove(historyFile))
 }
