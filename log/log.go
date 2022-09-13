@@ -31,10 +31,10 @@ func Setup() error {
 
 	today := time.Now().Format("2006-01-02")
 	logFilePath := filepath.Join(logsPath, fmt.Sprintf("%s.log", today))
-	if !lo.Must(filesystem.Get().Exists(logFilePath)) {
-		lo.Must(filesystem.Get().Create(logFilePath))
+	if !lo.Must(filesystem.Api().Exists(logFilePath)) {
+		lo.Must(filesystem.Api().Create(logFilePath))
 	}
-	logFile, err := filesystem.Get().OpenFile(logFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err := filesystem.Api().OpenFile(logFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}

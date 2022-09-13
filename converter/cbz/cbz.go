@@ -30,7 +30,7 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	cbzFile, err := filesystem.Get().Create(path)
+	cbzFile, err := filesystem.Api().Create(path)
 	if err != nil {
 		return
 	}

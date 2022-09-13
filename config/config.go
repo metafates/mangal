@@ -42,7 +42,7 @@ func setName() {
 }
 
 func setFs() {
-	viper.SetFs(filesystem.Get())
+	viper.SetFs(filesystem.Api())
 }
 
 // setPaths sets the paths to the config files

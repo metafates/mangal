@@ -32,7 +32,7 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	file, err := filesystem.Get().Create(path)
+	file, err := filesystem.Api().Create(path)
 	if err != nil {
 		return
 	}

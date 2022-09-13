@@ -56,7 +56,7 @@ var configInitCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		force := lo.Must(cmd.Flags().GetBool("force"))
 		if force {
-			err := filesystem.Get().Remove(filepath.Join(where.Config(), "mangal.toml"))
+			err := filesystem.Api().Remove(filepath.Join(where.Config(), "mangal.toml"))
 			handleErr(err)
 		}
 
@@ -71,8 +71,8 @@ var configRemoveCmd = &cobra.Command{
 		mangalDir := where.Config()
 		configPath := filepath.Join(mangalDir, constant.Mangal+".toml")
 
-		if lo.Must(filesystem.Get().Exists(configPath)) {
-			handleErr(filesystem.Get().Remove(configPath))
+		if lo.Must(filesystem.Api().Exists(configPath)) {
+			handleErr(filesystem.Api().Remove(configPath))
 		}
 	},
 }
@@ -133,8 +133,8 @@ mangal config set --key "formats.use" --value cbz
 
 var configGetCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get config value",
-	Long: `Get config value. Example:
+	Short: "Api config value",
+	Long: `Api config value. Example:
 mangal config get --key "formats.use"
 `,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -36,7 +36,7 @@ func Get() (chapters map[string]*SavedChapter, err error) {
 
 	// decode json into slice of structs
 	log.Info("Reading history file")
-	contents, err := filesystem.Get().ReadFile(historyFile)
+	contents, err := filesystem.Api().ReadFile(historyFile)
 	if err != nil {
 		log.Error(err)
 		return
@@ -71,7 +71,7 @@ func Save(chapter *source.Chapter) error {
 	// decode json into slice of structs
 	var chapters map[string]*SavedChapter
 	log.Info("Reading history file")
-	contents, err := filesystem.Get().ReadFile(historyFile)
+	contents, err := filesystem.Api().ReadFile(historyFile)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -108,7 +108,7 @@ func Save(chapter *source.Chapter) error {
 
 	// write to file
 	log.Info("Writing history to file")
-	err = filesystem.Get().WriteFile(historyFile, encoded, os.ModePerm)
+	err = filesystem.Api().WriteFile(historyFile, encoded, os.ModePerm)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -126,7 +126,7 @@ func Remove(chapter *SavedChapter) error {
 	// decode json into slice of structs
 	var chapters map[string]*SavedChapter
 	log.Info("Reading history file")
-	contents, err := filesystem.Get().ReadFile(historyFile)
+	contents, err := filesystem.Api().ReadFile(historyFile)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -151,7 +151,7 @@ func Remove(chapter *SavedChapter) error {
 
 	// write to file
 	log.Info("Writing history to file")
-	err = filesystem.Get().WriteFile(historyFile, encoded, os.ModePerm)
+	err = filesystem.Api().WriteFile(historyFile, encoded, os.ModePerm)
 	if err != nil {
 		log.Error(err)
 		return err

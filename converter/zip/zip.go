@@ -29,7 +29,7 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	zipFile, err := filesystem.Get().Create(path)
+	zipFile, err := filesystem.Api().Create(path)
 	if err != nil {
 		return
 	}

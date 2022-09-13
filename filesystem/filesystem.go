@@ -19,8 +19,8 @@ func SetMemMapFs() {
 	}
 }
 
-// Get returns the filesystem
-func Get() afero.Afero {
+// Api returns the filesystem api
+func Api() afero.Afero {
 	return wrapper
 }
 

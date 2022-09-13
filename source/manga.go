@@ -82,7 +82,7 @@ func (m *Manga) Path(temp bool) (path string, err error) {
 		path = filepath.Join(path, m.Filename())
 	}
 
-	_ = filesystem.Get().MkdirAll(path, os.ModePerm)
+	_ = filesystem.Api().MkdirAll(path, os.ModePerm)
 	return
 }
 
@@ -113,7 +113,7 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 
 	path = filepath.Join(path, "cover"+extension)
 
-	exists, err := filesystem.Get().Exists(path)
+	exists, err := filesystem.Api().Exists(path)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -143,7 +143,7 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 		return err
 	}
 
-	return filesystem.Get().WriteFile(path, data, os.ModePerm)
+	return filesystem.Api().WriteFile(path, data, os.ModePerm)
 }
 
 func (m *Manga) PopulateMetadata(progress func(string)) error {

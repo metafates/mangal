@@ -84,7 +84,7 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		output := lo.Must(cmd.Flags().GetString("output"))
 		var writer io.Writer
 		if output != "" {
-			writer, err = filesystem.Get().Create(output)
+			writer, err = filesystem.Api().Create(output)
 			handleErr(err)
 		} else {
 			writer = os.Stdout

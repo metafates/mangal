@@ -14,7 +14,7 @@ const EnvConfigPath = "MANGAL_CONFIG_PATH"
 // mkdir creates a directory and all parent directories if they don't exist
 // will return the path of the directory
 func mkdir(path string) string {
-	lo.Must0(filesystem.Get().MkdirAll(path, os.ModePerm))
+	lo.Must0(filesystem.Api().MkdirAll(path, os.ModePerm))
 	return path
 }
 
@@ -50,9 +50,9 @@ func History() string {
 
 	path := filepath.Join(genericCacheDir, constant.CachePrefix+"history.json")
 
-	exists := lo.Must(filesystem.Get().Exists(path))
+	exists := lo.Must(filesystem.Api().Exists(path))
 	if !exists {
-		lo.Must0(filesystem.Get().WriteFile(path, []byte("{}"), os.ModePerm))
+		lo.Must0(filesystem.Api().WriteFile(path, []byte("{}"), os.ModePerm))
 	}
 
 	return path

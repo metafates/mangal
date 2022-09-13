@@ -132,7 +132,7 @@ func (c *Chapter) Path(temp bool) (path string, err error) {
 
 	if c.Volume != "" && viper.GetBool(constant.DownloaderCreateVolumeDir) {
 		path = filepath.Join(path, util.SanitizeFilename(c.Volume))
-		err = filesystem.Get().MkdirAll(path, os.ModePerm)
+		err = filesystem.Api().MkdirAll(path, os.ModePerm)
 		if err != nil {
 			return
 		}

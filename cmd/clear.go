@@ -49,16 +49,16 @@ var clearCmd = &cobra.Command{
 
 func clearCache() {
 	log.Infof("Clearing cache at %s", where.Cache())
-	handleErr(filesystem.Get().RemoveAll(where.Cache()))
+	handleErr(filesystem.Api().RemoveAll(where.Cache()))
 }
 
 func clearTemp() {
 	log.Infof("Clearing temp files at %s", where.Temp())
-	handleErr(filesystem.Get().RemoveAll(where.Temp()))
+	handleErr(filesystem.Api().RemoveAll(where.Temp()))
 }
 
 func clearHistory() {
 	historyFile := where.History()
 	log.Infof("Removing history file at %s", historyFile)
-	handleErr(filesystem.Get().Remove(historyFile))
+	handleErr(filesystem.Api().Remove(historyFile))
 }

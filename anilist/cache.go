@@ -31,7 +31,7 @@ func (a *anilistCache) Init() error {
 	var err error
 	path := filepath.Join(where.Cache(), "anilist_cache.json")
 	log.Debugf("Opening anilist cache file at %s", path)
-	a.file, err = filesystem.Get().OpenFile(path, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	a.file, err = filesystem.Api().OpenFile(path, os.O_RDWR|os.O_CREATE, os.ModePerm)
 
 	if err != nil {
 		log.Warn(err)

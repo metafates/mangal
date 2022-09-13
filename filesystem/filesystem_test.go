@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func TestGet(t *testing.T) {
-	Convey("When getting the filesystem", t, func() {
-		fs := Get()
-		Convey("Then the filesystem should be returned", func() {
-			So(fs, ShouldNotBeNil)
+func TestApi(t *testing.T) {
+	Convey("When getting the filesystem API", t, func() {
+		api := Api()
+		Convey("Then the filesystem API should be returned", func() {
+			So(api, ShouldNotBeNil)
 		})
 	})
 }
@@ -18,9 +18,9 @@ func TestSetMemMapFs(t *testing.T) {
 	Convey("When setting the filesystem to MemMapFS", t, func() {
 		SetMemMapFs()
 		Convey("Then the filesystem should be MemMapFS", func() {
-			fs := Get()
-			So(fs, ShouldNotBeNil)
-			So(fs.Name(), ShouldEqual, "MemMapFS")
+			api := Api()
+			So(api, ShouldNotBeNil)
+			So(api.Name(), ShouldEqual, "MemMapFS")
 		})
 	})
 }
@@ -29,9 +29,9 @@ func TestSetOsFs(t *testing.T) {
 	Convey("When setting the filesystem to OsFs", t, func() {
 		SetOsFs()
 		Convey("Then the filesystem should be OsFs", func() {
-			fs := Get()
-			So(fs, ShouldNotBeNil)
-			So(fs.Name(), ShouldEqual, "OsFs")
+			api := Api()
+			So(api, ShouldNotBeNil)
+			So(api.Name(), ShouldEqual, "OsFs")
 		})
 	})
 }

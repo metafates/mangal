@@ -29,7 +29,7 @@ func Test(t *testing.T) {
 				So(err, ShouldBeNil)
 				Convey("And the result should be a path pointing to a directory", func() {
 					So(result, ShouldNotBeEmpty)
-					isDir, err := filesystem.Get().IsDir(result)
+					isDir, err := filesystem.Api().IsDir(result)
 
 					if err != nil {
 						t.Fatal(err)
@@ -38,7 +38,7 @@ func Test(t *testing.T) {
 					So(isDir, ShouldBeTrue)
 
 					Convey("And the directory should contain the chapter's pages", func() {
-						files, err := filesystem.Get().ReadDir(result)
+						files, err := filesystem.Api().ReadDir(result)
 						if err != nil {
 							t.Fatal(err)
 						}
@@ -78,16 +78,16 @@ func SampleChapter(t *testing.T) *source.Chapter {
 	defer filesystem.SetMemMapFs()
 
 	// get all images from ../assets/testdata
-	err := filesystem.Get().Walk(
+	err := filesystem.Api().Walk(
 		// ../../assets/testdata
 		// I wish windows used a normal path separator instead of whatever this \ is
 		filepath.Join(filepath.Dir(filepath.Dir(lo.Must(filepath.Abs(".")))), filepath.Join("assets", "testdata")),
 		func(path string, info fs.FileInfo, _ error) error {
-			if lo.Must(filesystem.Get().IsDir(path)) || filepath.Ext(path) != ".jpg" {
+			if lo.Must(filesystem.Api().IsDir(path)) || filepath.Ext(path) != ".jpg" {
 				return nil
 			}
 
-			image, err := filesystem.Get().ReadFile(path)
+			image, err := filesystem.Api().ReadFile(path)
 			if err != nil {
 				t.Fatal(err)
 			}
