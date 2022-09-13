@@ -19,6 +19,7 @@ func mkdir(path string) string {
 }
 
 // Config path
+// Will create the directory if it doesn't exist
 func Config() string {
 	var path string
 
@@ -32,16 +33,19 @@ func Config() string {
 }
 
 // Sources path
+// Will create the directory if it doesn't exist
 func Sources() string {
 	return mkdir(filepath.Join(Config(), "sources"))
 }
 
 // Logs path
+// Will create the directory if it doesn't exist
 func Logs() string {
 	return mkdir(filepath.Join(Config(), "logs"))
 }
 
 // History path to the file
+// Will create the directory if it doesn't exist
 func History() string {
 	genericCacheDir, err := os.UserCacheDir()
 	if err != nil {
@@ -59,6 +63,7 @@ func History() string {
 }
 
 // Downloads path
+// Will create the directory if it doesn't exist
 func Downloads() string {
 	path, err := filepath.Abs(viper.GetString(constant.DownloaderPath))
 
@@ -72,6 +77,8 @@ func Downloads() string {
 	return mkdir(path)
 }
 
+// Cache path
+// Will create the directory if it doesn't exist
 func Cache() string {
 	genericCacheDir, err := os.UserCacheDir()
 	if err != nil {
@@ -82,6 +89,8 @@ func Cache() string {
 	return mkdir(cacheDir)
 }
 
+// Temp path
+// Will create the directory if it doesn't exist
 func Temp() string {
 	tempDir := filepath.Join(os.TempDir(), constant.TempPrefix)
 	return mkdir(tempDir)
