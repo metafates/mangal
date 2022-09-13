@@ -59,4 +59,7 @@ var DefaultValues = map[string]any{
 
 	// Anilist
 	constant.AnilistEnable: false,
+	constant.AnilistCode:   "",
+	constant.AnilistID:     "",
+	constant.AnilistSecret: "",
 }
