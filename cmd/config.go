@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	levenshtein "github.com/ka-weihe/fast-levenshtein"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
@@ -43,11 +45,19 @@ func init() {
 		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
 	}))
 
-	configCmd.AddCommand(configListCmd)
-	configListCmd.Flags().StringP("key", "k", "", "show only this key")
-	lo.Must0(configListCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	configCmd.AddCommand(configInfoCmd)
+	configInfoCmd.Flags().StringP("key", "k", "", "show only this key")
+	lo.Must0(configInfoCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
 	}))
+}
+
+func errUnknownKey(key string) error {
+	closest := lo.MinBy(lo.Keys(config.DefaultValues), func(a string, b string) bool {
+		return levenshtein.Distance(a, key) < levenshtein.Distance(b, key)
+	})
+	msg := fmt.Sprintf(`unknown key %s, did you mean %s?`, style.Red(key), style.Yellow(closest))
+	return errors.New(msg)
 }
 
 var configCmd = &cobra.Command{
@@ -116,7 +126,7 @@ mangal config set --key "formats.use" --value cbz
 		}
 
 		if _, ok := config.DefaultValues[key]; !ok {
-			handleErr(fmt.Errorf(`unknown key %s`, style.Red(key)))
+			handleErr(errUnknownKey(key))
 		}
 
 		expectedType := reflect.TypeOf(config.DefaultValues[key].Value)
@@ -147,16 +157,16 @@ mangal config get --key "formats.use"
 	Run: func(cmd *cobra.Command, args []string) {
 		key := lo.Must(cmd.Flags().GetString("key"))
 		if _, ok := config.DefaultValues[key]; !ok {
-			handleErr(fmt.Errorf(`unknown key %s`, style.Red(key)))
+			handleErr(errUnknownKey(key))
 		}
 
 		fmt.Println(viper.Get(key))
 	},
 }
 
-var configListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List config values, their types and description",
+var configInfoCmd = &cobra.Command{
+	Use:   "info",
+	Short: "List all config values with their types and descriptions",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			fields = make([]config.Field, len(config.DefaultValues))
@@ -174,7 +184,7 @@ var configListCmd = &cobra.Command{
 				fmt.Print(field.Pretty())
 				return
 			}
-			handleErr(fmt.Errorf(`unknown key %s`, style.Red(key)))
+			handleErr(errUnknownKey(key))
 		}
 
 		sort.Slice(fields, func(i, j int) bool {

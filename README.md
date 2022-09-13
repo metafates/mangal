@@ -209,7 +209,7 @@ Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
 |----------------------|--------------------------------------------------|
 | `mangal config get`  | Get config value for specific key                |
 | `mangal config set`  | Set config value for specific key                |
-| `mangal config list` | List all config fields with description for each |
+| `mangal config info` | List all config fields with description for each |
 | `mangal config init` | Write current config to a file                   |
 
 ## Custom scrapers
