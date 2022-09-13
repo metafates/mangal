@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/icon"
-	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
@@ -49,18 +48,15 @@ var clearCmd = &cobra.Command{
 
 func clearCache() {
 	path := where.Cache()
-	log.Infof("Clearing cache at %s", path)
 	handleErr(filesystem.Api().RemoveAll(path))
 }
 
 func clearTemp() {
 	path := where.Temp()
-	log.Infof("Clearing temp files at %s", path)
 	handleErr(filesystem.Api().RemoveAll(path))
 }
 
 func clearHistory() {
 	path := where.History()
-	log.Infof("Removing history file at %s", path)
 	handleErr(filesystem.Api().Remove(path))
 }
