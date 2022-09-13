@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -28,7 +29,7 @@ func Update() (err error) {
 		fmt.Printf("%s Script installation detected", icon.Get(icon.Progress))
 		return updateScript()
 	case Unknown:
-		return errors.New("Unknown installation method, can't update")
+		return errors.New("unknown installation method, can't update")
 	}
 
 	return
@@ -61,8 +62,10 @@ func updateScript() (err error) {
 		return fmt.Errorf("error fetching Script: status code %d", res.StatusCode)
 	}
 
-	var scriptSource []byte
-	_, err = res.Body.Read(scriptSource)
+	scriptSource, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
 
 	cmd := exec.Command("sh", "-c", string(scriptSource))
 	cmd.Stdout = os.Stdout

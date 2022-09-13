@@ -3,7 +3,7 @@ package open
 func Run(input string) error {
 	cmd, ok := open(input)
 	if !ok {
-		return unsupportedOSError
+		return errUnsupportedOS
 	}
 
 	return cmd.Run()
@@ -12,7 +12,7 @@ func Run(input string) error {
 func RunWith(input, with string) error {
 	cmd, ok := openWith(input, with)
 	if !ok {
-		return unsupportedOSError
+		return errUnsupportedOS
 	}
 
 	return cmd.Run()

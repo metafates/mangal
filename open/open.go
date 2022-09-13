@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	unsupportedOSError = fmt.Errorf("can't open on this OS: %s", runtime.GOOS)
-	runDll32           = filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
+	errUnsupportedOS = fmt.Errorf("can't open on this OS: %s", runtime.GOOS)
+	runDll32         = filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
 )
 
 func open(input string) (cmd *exec.Cmd, osSupported bool) {

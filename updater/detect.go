@@ -1,7 +1,6 @@
 package updater
 
 import (
-	"bytes"
 	"github.com/metafates/mangal/constant"
 	"github.com/samber/lo"
 	"os"
@@ -100,15 +99,4 @@ func isUnderGo() (ok bool) {
 func has(command string) bool {
 	ok, err := exec.LookPath(command)
 	return err == nil && ok != ""
-}
-
-// execute the command and returns the output as string.
-func execute(command string, arguments ...string) (output string, err error) {
-	stdout := bytes.NewBufferString("")
-
-	cmd := exec.Command(command, arguments...)
-	cmd.Stdout = stdout
-	err = cmd.Run()
-
-	return stdout.String(), err
 }

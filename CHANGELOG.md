@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - New `mangal config get` command. See `mangal help config get` for more info 
 - Improve `mangal clear` command. It's more accurate and faster now. 
 - Better cache & temp files handling
+- Fix `mangal update` command when it was not able to update using script. 
 
 ## 3.7.0
 

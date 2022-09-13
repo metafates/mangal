@@ -144,7 +144,10 @@ func pageFromTable(table *lua.LTable, chapter *source.Chapter) (page *source.Pag
 	}
 
 	err = translate(table, mappings)
+	if err != nil {
+		return
+	}
 
 	chapter.Pages = append(chapter.Pages, page)
-	return page, nil
+	return
 }
