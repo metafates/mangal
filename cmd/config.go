@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strconv"
 )
 
@@ -41,6 +42,8 @@ func init() {
 	lo.Must0(configGetCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
 	}))
+
+	configCmd.AddCommand(configListCmd)
 }
 
 var configCmd = &cobra.Command{
@@ -144,5 +147,33 @@ mangal config get --key "formats.use"
 		}
 
 		fmt.Println(viper.Get(key))
+	},
+}
+
+var configListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List config values and their types",
+	Run: func(cmd *cobra.Command, args []string) {
+		var (
+			i     int
+			items = make([]lo.Tuple2[string, any], len(config.DefaultValues))
+		)
+
+		for key, value := range config.DefaultValues {
+			items[i] = lo.Tuple2[string, any]{A: key, B: value}
+			i++
+		}
+
+		sort.Slice(items, func(i, j int) bool {
+			return items[i].A < items[j].A
+		})
+
+		for _, item := range items {
+			fmt.Printf(
+				"%s: %s\n",
+				style.Magenta(item.A),
+				style.Yellow(reflect.TypeOf(item.B).String()),
+			)
+		}
 	},
 }
