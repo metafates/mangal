@@ -140,9 +140,14 @@ func Min[T constraints.Ordered](items ...T) (min T) {
 
 // PrintErasable prints a string that can be erased by calling a returned function.
 func PrintErasable(msg string) (eraser func()) {
-	fmt.Fprintf(os.Stdout, "\r%s", msg)
+	_, _ = fmt.Fprintf(os.Stdout, "\r%s", msg)
 
 	return func() {
 		_, _ = fmt.Fprintf(os.Stdout, "\r%s\r", strings.Repeat(" ", len(msg)))
 	}
+}
+
+// Capitalize returns a string with the first letter capitalized.
+func Capitalize(s string) string {
+	return strings.ToUpper(s[:1]) + s[1:]
 }

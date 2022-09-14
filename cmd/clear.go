@@ -8,7 +8,6 @@ import (
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 func init() {
@@ -33,10 +32,10 @@ var clearCmd = &cobra.Command{
 		} {
 			if doClear(name) {
 				anyCleared = true
-				e := util.PrintErasable(fmt.Sprintf("%s Clearing %s...", icon.Get(icon.Progress), strings.Title(name)))
+				e := util.PrintErasable(fmt.Sprintf("%s Clearing %s...", icon.Get(icon.Progress), util.Capitalize(name)))
 				clear()
 				e()
-				fmt.Printf("%s %s cleared\n", icon.Get(icon.Success), strings.Title(name))
+				fmt.Printf("%s %s cleared\n", icon.Get(icon.Success), util.Capitalize(name))
 			}
 		}
 
