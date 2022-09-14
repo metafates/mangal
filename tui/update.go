@@ -573,8 +573,8 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return b, tea.Quit
 		case key.Matches(msg, b.keymap.openFolder):
 			err := open.StartWith(
-				viper.GetString(constant.ReaderFolder),
 				lo.Must(b.currentDownloadingChapter.Manga.Path(false)),
+				viper.GetString(constant.ReaderFolder),
 			)
 
 			if err != nil {
