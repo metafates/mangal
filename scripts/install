@@ -23,6 +23,8 @@ contains() {
 }
 
 install_completions() {
+    test "$OS" = "Darwin" && return 0
+
     COMPLETIONS="$1"
 
     if has zsh;
