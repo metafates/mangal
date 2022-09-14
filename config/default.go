@@ -111,52 +111,135 @@ It will also cache the results to not spam the API`,
 			false,
 			`Generate series.json file for each manga`,
 		},
-
 		{
 			constant.MiniSearchLimit,
 			20,
 			`Limit of search results to show`,
 		},
-
 		{
 			constant.IconsVariant,
 			"plain",
 			`Icons variant.
 Available options are: emoji, kaomoji, plain, squares, nerd (nerd-font required)`,
 		},
-		{constant.ReaderPDF, "", "What app to use to open pdf files"},
-		{constant.ReaderCBZ, "", "What app to use to open cbz files"},
-		{constant.ReaderZIP, "", "What app to use to open zip files"},
-		{constant.RaderPlain, "", "What app to use to open folders"},
-		{constant.ReaderBrowser, "", "What browser to use to open webpages"},
-		{constant.ReaderFolder, "", "What app to use to open folders"},
-		{constant.ReaderReadInBrowser, false, "Open chapter url in browser instead of downloading it"},
-		{constant.HistorySaveOnRead, true, "Save history on chapter read"},
-		{constant.HistorySaveOnDownload, false, "Save history on chapter download"},
+		{
+			constant.ReaderPDF,
+			"",
+			"What app to use to open pdf files",
+		},
+		{
+			constant.ReaderCBZ,
+			"",
+			"What app to use to open cbz files",
+		},
+		{
+			constant.ReaderZIP,
+			"",
+			"What app to use to open zip files",
+		},
+		{
+			constant.RaderPlain,
+			"",
+			"What app to use to open folders",
+		},
+		{
+			constant.ReaderBrowser,
+			"",
+			"What browser to use to open webpages",
+		},
+		{
+			constant.ReaderFolder,
+			"",
+			"What app to use to open folders",
+		},
+		{
+			constant.ReaderReadInBrowser,
+			false,
+			"Open chapter url in browser instead of downloading it",
+		},
+		{
+			constant.HistorySaveOnRead,
+			true,
+			"Save history on chapter read",
+		},
+
+		{
+			constant.HistorySaveOnDownload,
+			false,
+			"Save history on chapter download",
+		},
 		{
 			constant.MangadexLanguage,
 			"en",
 			`Preferred language for mangadex
 Use "any" to show all languages`,
 		},
-		{constant.MangadexNSFW, false, "Show NSFW content"},
-		{constant.MangadexShowUnavailableChapters, false, "Show chapters that cannot be downloaded"},
-		{constant.InstallerUser, "metafates", "Custom scrapers repository owner"},
-		{constant.InstallerRepo, "mangal-scrapers", "Custom scrapers repository name"},
-		{constant.InstallerBranch, "main", "Custom scrapers repository branch"},
-		{constant.GenAuthor, "", "Name to use in generated scrapers as author"},
-		{constant.LogsWrite, false, "Write logs"},
+		{
+			constant.MangadexNSFW,
+			false,
+			"Show NSFW content",
+		},
+		{
+			constant.MangadexShowUnavailableChapters,
+			false,
+			"Show chapters that cannot be downloaded",
+		},
+		{
+			constant.InstallerUser,
+			"metafates",
+			"Custom scrapers repository owner",
+		},
+		{
+			constant.InstallerRepo,
+			"mangal-scrapers",
+			"Custom scrapers repository name",
+		},
+		{
+			constant.InstallerBranch,
+			"main",
+			"Custom scrapers repository branch",
+		},
+		{
+			constant.GenAuthor,
+			"",
+			"Name to use in generated scrapers as author",
+		},
+		{
+			constant.LogsWrite,
+			false,
+			"Write logs",
+		},
 		{
 			constant.LogsLevel,
 			"info",
 			`Available options are: (from less to most verbose)
 panic, fatal, error, warn, info, debug, trace`,
 		},
-		{constant.LogsJson, false, "Use json format for logs"},
-		{constant.AnilistEnable, false, "Enable Anilist integration"},
-		{constant.AnilistCode, "", "Anilist code to use for authentication"},
-		{constant.AnilistID, "", "Anilist ID to use for authentication"},
-		{constant.AnilistSecret, "", "Anilist secret to use for authentication"},
+		{
+			constant.LogsJson,
+			false,
+			"Use json format for logs",
+		},
+		{
+			constant.AnilistEnable,
+			false,
+			"Enable Anilist integration",
+		},
+		{
+			constant.AnilistCode,
+			"",
+			"Anilist code to use for authentication",
+		},
+		{
+			constant.AnilistID,
+			"",
+			"Anilist ID to use for authentication",
+		},
+		{
+			constant.AnilistSecret,
+			"",
+			"Anilist secret to use for authentication",
+		},
 	}
 
 	for _, field := range fields {
