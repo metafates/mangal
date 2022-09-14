@@ -4,39 +4,101 @@ import (
 	"errors"
 	"fmt"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/style"
+	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/where"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 )
+
+var erase func()
+
+func info(format string, args ...any) (erase func()) {
+	return util.PrintErasable(
+		fmt.Sprintf(
+			"%s %s",
+			icon.Get(icon.Progress),
+			fmt.Sprintf(format, args...),
+		),
+	)
+}
 
 // Update updates mangal to the latest version.
 func Update() (err error) {
+	erase = info("Fetching latest version")
+	version, err := LatestVersion()
+	if err != nil {
+		return
+	}
+
+	erase()
+	if constant.Version >= version {
+		fmt.Printf(
+			"%s %s %s\n",
+			style.Green("Congrats!"),
+			"You're already on the latest version of "+constant.Mangal,
+			style.Faint("(which is "+constant.Version+")"),
+		)
+		return
+	}
+
 	method := DetectInstallationMethod()
 
 	switch method {
 	case Homebrew:
-		fmt.Printf("%s Homebrew installation detected", icon.Get(icon.Progress))
-		return updateHomebrew()
+		erase = info("Homebrew installation detected")
+		err = updateHomebrew()
 	case Scoop:
-		fmt.Printf("%s Scoop installation detected", icon.Get(icon.Progress))
-		return updateScoop()
-	case Termux:
-		fmt.Printf("%s Termux installation detected", icon.Get(icon.Progress))
-		return updateScript()
-	case Script:
-		fmt.Printf("%s Script installation detected", icon.Get(icon.Progress))
-		return updateScript()
-	case Unknown:
-		return errors.New("unknown installation method, can't update")
+		erase = info("Scoop installation detected")
+		err = updateScoop()
+	case Termux, Go, Standalone:
+		erase = info("Non-package manager installation detected")
+		err = update()
+	default:
+		err = errors.New("unknown installation method, can't update")
+		return
 	}
+
+	if err != nil {
+		return
+	}
+
+	fmt.Printf(`Updated.
+
+%s
+
+Report any bugs:
+
+    %s
+
+What's new:
+
+    %s
+
+Changelog:
+
+    %s
+`,
+		style.Combined(style.Bold, style.Green)("Welcome to mangal v"+version),
+		style.Faint("https://github.com/metafates/mangal/issues"),
+		style.Cyan("https://github.com/metafates/mangal/releases/tag/v"+version),
+		style.Faint(fmt.Sprintf("https://github.com/metafates/mangal/compare/v%s...v%s", constant.Version, version)),
+	)
 
 	return
 }
 
 // updateHomebrew updates mangal using Homebrew.
 func updateHomebrew() (err error) {
+	erase()
+	info("Running %s", style.Yellow("brew upgrade mangal"))
 	cmd := exec.Command("brew", "upgrade", constant.Mangal)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -45,30 +107,110 @@ func updateHomebrew() (err error) {
 
 // updateScoop updates mangal using Scoop.
 func updateScoop() (err error) {
+	erase()
+	info("Running %s", style.Yellow("scoop update mangal"))
 	cmd := exec.Command("Scoop", "update", constant.Mangal)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
-// updateScript updates mangal using the Script.
-func updateScript() (err error) {
-	res, err := http.Get(constant.InstallScriptURL)
+// update mangal by downloading it directly.
+func update() (err error) {
+	erase()
+	log.Info("Updating mangal to the latest version")
+
+	var (
+		version  string
+		arch     string
+		selfPath string
+	)
+
+	if selfPath, err = os.Executable(); err != nil {
+		return
+	}
+
+	if version, err = LatestVersion(); err != nil {
+		return
+	}
+
+	switch runtime.GOARCH {
+	case "amd64":
+		arch = "x86_64"
+	case "386":
+		arch = "i386"
+	default:
+		arch = runtime.GOARCH
+	}
+
+	tarName := fmt.Sprintf("%s_%s_%s_%s.tar.gz", constant.Mangal, version, util.Capitalize(runtime.GOOS), arch)
+	url := fmt.Sprintf(
+		"https://github.com/metafates/%s/releases/download/v%s/%s",
+		constant.Mangal,
+		version,
+		tarName,
+	)
+
+	erase = info("Downloading %s", style.Yellow(url))
+
+	res, err := http.Get(url)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("error fetching Script: status code %d", res.StatusCode)
+		err = fmt.Errorf("error downloading binary: status code %d", res.StatusCode)
+		log.Error(err)
+		return
 	}
 
-	scriptSource, err := io.ReadAll(res.Body)
+	defer util.Ignore(res.Body.Close)
+
+	erase()
+	erase = info("Extracting %s", style.Yellow(tarName))
+	out := filepath.Join(where.Temp(), "mangal_update")
+	err = util.UntarGZ(res.Body, out)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
-	cmd := exec.Command("sh", "-c", string(scriptSource))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	erase()
+	erase = info("Replacing %s", style.Yellow(selfPath))
+	// remove the old binary
+	// it should not interrupt the running process
+	file, err := filesystem.Api().OpenFile(selfPath, os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	if err != nil {
+		log.Error(err)
+		err = errors.New("error removing old binary, try running this as a root user")
+		return err
+	}
+
+	newMangal, err := filesystem.Api().OpenFile(filepath.Join(out, constant.Mangal), os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	stat, err := newMangal.Stat()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	if stat.Size() == 0 {
+		log.Error(err)
+		return err
+	}
+
+	_, err = io.Copy(file, newMangal)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	erase()
+
+	return
 }

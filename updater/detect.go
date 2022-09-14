@@ -1,24 +1,21 @@
 package updater
 
 import (
-	"github.com/metafates/mangal/constant"
 	"github.com/samber/lo"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
 type InstallationMethod int
 
 const (
-	Unknown InstallationMethod = iota
-	Go
+	Go InstallationMethod = iota
 	Homebrew
 	Scoop
 	Termux
-	Script
+	Standalone
 )
 
 // DetectInstallationMethod detects the installation method.
@@ -34,18 +31,7 @@ func DetectInstallationMethod() InstallationMethod {
 		}
 	}
 
-	if lo.Contains([]string{"darwin", "linux"}, runtime.GOOS) {
-		path, err := os.Executable()
-		if err != nil {
-			return Unknown
-		}
-
-		if path == "/usr/local/bin/"+constant.Mangal || path == "/usr/bin/"+constant.Mangal {
-			return Script
-		}
-	}
-
-	return Unknown
+	return Standalone
 }
 
 // isUnderTermux returns true if mangal is running under Termux.
