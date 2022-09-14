@@ -76,7 +76,7 @@ func Run(options *Options) error {
 				return err
 			}
 
-			_, err = options.Out.Write([]byte(path))
+			_, err = options.Out.Write([]byte(path + "\n"))
 			if err != nil {
 				log.Warn(err)
 			}
