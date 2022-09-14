@@ -40,7 +40,7 @@ func DetectInstallationMethod() InstallationMethod {
 			return Unknown
 		}
 
-		if path == "/usr/local/bin/"+constant.Mangal {
+		if path == "/usr/local/bin/"+constant.Mangal || path == "/usr/bin/"+constant.Mangal {
 			return Script
 		}
 	}

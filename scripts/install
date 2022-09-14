@@ -300,7 +300,13 @@ install_binary() {
 
     tar -xf "$TAR_FILE" -C "$TMPDIR"
 
-    OUT="/usr/bin/"
+    if [ -d "/usr/local/bin/" ];
+    then
+        OUT="/usr/local/bin/"
+    else
+        OUT="/usr/bin/"
+    fi
+
     info "Moving to ${OUT}"
     sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
     install_completions "$TMPDIR/completions"
