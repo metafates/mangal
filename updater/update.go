@@ -121,9 +121,11 @@ func update() (err error) {
 	log.Info("Updating mangal to the latest version")
 
 	var (
-		version  string
-		arch     string
-		selfPath string
+		version     string
+		arch        string
+		selfPath    string
+		archiveName string
+		archiveType string
 	)
 
 	if selfPath, err = os.Executable(); err != nil {
@@ -143,12 +145,18 @@ func update() (err error) {
 		arch = runtime.GOARCH
 	}
 
-	tarName := fmt.Sprintf("%s_%s_%s_%s.tar.gz", constant.Mangal, version, util.Capitalize(runtime.GOOS), arch)
+	if runtime.GOOS == "windows" {
+		archiveType = "zip"
+	} else {
+		archiveType = "tar.gz"
+	}
+
+	archiveName = fmt.Sprintf("%s_%s_%s_%s.%s", constant.Mangal, version, util.Capitalize(runtime.GOOS), arch, archiveType)
 	url := fmt.Sprintf(
 		"https://github.com/metafates/%s/releases/download/v%s/%s",
 		constant.Mangal,
 		version,
-		tarName,
+		archiveName,
 	)
 
 	erase = info("Downloading %s", style.Yellow(url))
@@ -168,9 +176,29 @@ func update() (err error) {
 	defer util.Ignore(res.Body.Close)
 
 	erase()
-	erase = info("Extracting %s", style.Yellow(tarName))
+	erase = info("Extracting %s", style.Yellow(archiveName))
 	out := filepath.Join(where.Temp(), "mangal_update")
-	err = util.UntarGZ(res.Body, out)
+
+	switch archiveType {
+	case "zip":
+		archive, err := io.ReadAll(res.Body)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+
+		archivePath := filepath.Join(out, archiveName)
+		err = filesystem.Api().WriteFile(archivePath, archive, os.ModePerm)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+
+		err = util.Unzip(archivePath, out)
+	case "tar.gz":
+		err = util.UntarGZ(res.Body, out)
+	}
+
 	if err != nil {
 		log.Error(err)
 		return err
