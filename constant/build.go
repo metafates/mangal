@@ -1,6 +1,6 @@
 package constant
 
-const Version = "3.8.1"
+const Version = "3.8.2"
 
 var (
 	BuiltAt  = "Unknown"
