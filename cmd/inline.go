@@ -4,12 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/inline"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io"
+	"os"
 )
 
 func init() {
@@ -21,6 +25,7 @@ func init() {
 	inlineCmd.Flags().BoolP("download", "d", false, "download chapters")
 	inlineCmd.Flags().BoolP("json", "j", false, "JSON output")
 	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages")
+	inlineCmd.Flags().StringP("output", "o", "", "output file")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	lo.Must0(inlineCmd.MarkFlagRequired("chapters"))
@@ -58,6 +63,10 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		if lo.Must(cmd.Flags().GetBool("populate-pages")) {
 			lo.Must0(cmd.MarkFlagRequired("json"))
 		}
+
+		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {
+			handleErr(err)
+		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		sourceName := viper.GetString(constant.DownloaderDefaultSource)
@@ -71,6 +80,15 @@ When using the json flag manga selector could be omitted. That way, it will sele
 
 		src, err := p.CreateSource()
 		handleErr(err)
+
+		output := lo.Must(cmd.Flags().GetString("output"))
+		var writer io.Writer
+		if output != "" {
+			writer, err = filesystem.Api().Create(output)
+			handleErr(err)
+		} else {
+			writer = os.Stdout
+		}
 
 		mangaFlag := lo.Must(cmd.Flags().GetString("manga"))
 		mangaPicker := util.None[inline.MangaPicker]()
@@ -91,6 +109,7 @@ When using the json flag manga selector could be omitted. That way, it will sele
 			PopulatePages:  lo.Must(cmd.Flags().GetBool("populate-pages")),
 			MangaPicker:    mangaPicker,
 			ChaptersFilter: chapterFilter,
+			Out:            writer,
 		}
 
 		handleErr(inline.Run(options))

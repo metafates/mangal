@@ -2,7 +2,6 @@ package constant
 
 const (
 	Mangal           = "mangal"
-	Version          = "3.7.0"
 	UserAgent        = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
 	InstallScriptURL = "https://raw.githubusercontent.com/metafates/mangal/main/scripts/install"
 )
@@ -51,24 +50,46 @@ const SourceTemplate = `{{ $divider := repeat "-" (plus (max (len .URL) (len .Na
 ----- MAIN -----
 
 --- Searches for manga with given query.
+--[[
+Manga fields:
+	name - string, required
+ 	url - string, required
+	author - string, optional
+	genres - string (multiple genres are divided by comma ','), optional
+	summary - string, optional
+--]]
 -- @param query Query to search for
--- @return Table of tables with the following fields: name, url
+-- @return Table of mangas
 function {{ .SearchMangaFn }}(query)
 	return {}
 end
 
 
 --- Gets the list of all manga chapters.
+--[[
+Chapter fields:
+	name - string, required
+	url - string, required
+	volume - string, optional
+	manga_summary - string, optional (in case you can't get it from search page)
+	manga_author - string, optional 
+	manga_genres - string (multiple genres are divided by comma ','), optional
+--]]
 -- @param mangaURL URL of the manga
--- @return Table of tables with the following fields: name, url (optional: volume)
+-- @return Table of chapters
 function {{ .MangaChaptersFn }}(mangaURL)
 	return {}
 end
 
 
 --- Gets the list of all pages of a chapter.
+--[[
+Page fields:
+	url - string, required
+	index - uint, required
+--]]
 -- @param chapterURL URL of the chapter
--- @return Table of tables with the following fields: url, index
+-- @return Table of pages
 function {{ .ChapterPagesFn }}(chapterURL)
 	return {}
 end

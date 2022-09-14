@@ -2,16 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 func init() {
@@ -24,59 +20,42 @@ var clearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "Clears a sidelined files",
 	Run: func(cmd *cobra.Command, args []string) {
-		var any bool
-		doClearCache := lo.Must(cmd.Flags().GetBool("cache"))
-		doClearHistory := lo.Must(cmd.Flags().GetBool("history"))
+		var anyCleared bool
 
-		if doClearCache {
-			any = true
-			e := util.PrintErasable(fmt.Sprintf("%s Clearing cache...", icon.Get(icon.Progress)))
-			clearCache()
-			e()
-			fmt.Printf("%s Cache cleared\n", icon.Get(icon.Success))
+		doClear := func(what string) bool {
+			return lo.Must(cmd.Flags().GetBool(what))
 		}
 
-		if doClearHistory {
-			any = true
-			e := util.PrintErasable(fmt.Sprintf("%s Clearing history...", icon.Get(icon.Progress)))
-			clearHistory()
-			e()
-			fmt.Printf("%s History cleared\n", icon.Get(icon.Success))
+		for name, clear := range map[string]func(){
+			"cache":   clearCache,
+			"history": clearHistory,
+		} {
+			if doClear(name) {
+				anyCleared = true
+				e := util.PrintErasable(fmt.Sprintf("%s Clearing %s...", icon.Get(icon.Progress), util.Capitalize(name)))
+				clear()
+				e()
+				fmt.Printf("%s %s cleared\n", icon.Get(icon.Success), util.Capitalize(name))
+			}
 		}
 
-		if !any {
+		if !anyCleared {
 			handleErr(cmd.Help())
 		}
 	},
 }
 
 func clearCache() {
-	cacheDir := lo.Must(os.UserCacheDir())
-	cacheDir = filepath.Join(cacheDir, constant.CachePrefix)
-	handleErr(filesystem.Get().RemoveAll(cacheDir))
+	path := where.Cache()
+	handleErr(filesystem.Api().RemoveAll(path))
 }
 
 func clearTemp() {
-	tempDir := os.TempDir()
-
-	_ = filesystem.Get().Walk(tempDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-
-		if strings.HasPrefix(info.Name(), constant.TempPrefix) {
-			if info.IsDir() {
-				return filesystem.Get().RemoveAll(path)
-			} else {
-				return filesystem.Get().Remove(path)
-			}
-		}
-
-		return nil
-	})
+	path := where.Temp()
+	handleErr(filesystem.Api().RemoveAll(path))
 }
 
 func clearHistory() {
-	historyFile := where.History()
-	handleErr(filesystem.Get().Remove(historyFile))
+	path := where.History()
+	handleErr(filesystem.Api().Remove(path))
 }

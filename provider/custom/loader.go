@@ -51,7 +51,7 @@ func LoadSource(path string, validate bool) (source.Source, error) {
 }
 
 func Compile(path string) (*lua.FunctionProto, error) {
-	file, err := filesystem.Get().Open(path)
+	file, err := filesystem.Api().Open(path)
 
 	if err != nil {
 		return nil, err

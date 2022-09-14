@@ -1,7 +1,6 @@
 package updater
 
 import (
-	"bytes"
 	"github.com/metafates/mangal/constant"
 	"github.com/samber/lo"
 	"os"
@@ -11,22 +10,24 @@ import (
 	"strings"
 )
 
-type installationMethod int
+type InstallationMethod int
 
 const (
-	unknown installationMethod = iota
-	homebrew
-	scoop
-	termux
-	script
+	Unknown InstallationMethod = iota
+	Go
+	Homebrew
+	Scoop
+	Termux
+	Script
 )
 
-// detectInstallationMethod detects the installation method.
-func detectInstallationMethod() installationMethod {
-	for _, t := range []lo.Tuple2[installationMethod, func() bool]{
-		{scoop, isUnderScoop},
-		{homebrew, isUnderHomebrew},
-		{termux, isUnderTermux},
+// DetectInstallationMethod detects the installation method.
+func DetectInstallationMethod() InstallationMethod {
+	for _, t := range []lo.Tuple2[InstallationMethod, func() bool]{
+		{Scoop, isUnderScoop},
+		{Homebrew, isUnderHomebrew},
+		{Termux, isUnderTermux},
+		{Go, isUnderGo},
 	} {
 		if t.B() {
 			return t.A
@@ -36,39 +37,39 @@ func detectInstallationMethod() installationMethod {
 	if lo.Contains([]string{"darwin", "linux"}, runtime.GOOS) {
 		path, err := os.Executable()
 		if err != nil {
-			return unknown
+			return Unknown
 		}
 
 		if path == "/usr/local/bin/"+constant.Mangal {
-			return script
+			return Script
 		}
 	}
 
-	return unknown
+	return Unknown
 }
 
-// isUnderTermux returns true if mangal is running under termux.
+// isUnderTermux returns true if mangal is running under Termux.
 func isUnderTermux() (ok bool) {
-	return has("termux-setup-storage")
+	return has("Termux-setup-storage")
 }
 
-// isUnderHomebrew returns true if mangal is running under homebrew.
+// isUnderHomebrew returns true if mangal is running under Homebrew.
 func isUnderHomebrew() (ok bool) {
 	if !has("brew") {
 		return
 	}
 
-	out, err := execute("brew", "list", "--formula")
+	path, err := os.Executable()
 	if err != nil {
 		return false
 	}
 
-	return strings.Contains(out, constant.Mangal)
+	return strings.Contains(path, filepath.Join("homebrew", "bin"))
 }
 
-// isUnderScoop returns true if mangal is running under scoop.
+// isUnderScoop returns true if mangal is running under Scoop.
 func isUnderScoop() (ok bool) {
-	if !has("scoop") {
+	if !has("Scoop") {
 		return false
 	}
 
@@ -77,22 +78,25 @@ func isUnderScoop() (ok bool) {
 		return false
 	}
 
-	return strings.Contains(path, filepath.Join("scoop", "shims"))
+	return strings.Contains(path, filepath.Join("Scoop", "shims"))
+}
+
+// isUnderGo returns true if mangal is running under Go.
+func isUnderGo() (ok bool) {
+	if !has("go") {
+		return false
+	}
+
+	path, err := os.Executable()
+	if err != nil {
+		return false
+	}
+
+	return strings.Contains(path, filepath.Join("go", "bin"))
 }
 
 // has returns true if the command exists.
 func has(command string) bool {
 	ok, err := exec.LookPath(command)
 	return err == nil && ok != ""
-}
-
-// execute the command and returns the output as string.
-func execute(command string, arguments ...string) (output string, err error) {
-	stdout := bytes.NewBufferString("")
-
-	cmd := exec.Command(command, arguments...)
-	cmd.Stdout = stdout
-	err = cmd.Run()
-
-	return stdout.String(), err
 }

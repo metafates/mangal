@@ -53,7 +53,7 @@ func DefaultProviders() map[string]*Provider {
 }
 
 func CustomProviders() map[string]*Provider {
-	files, err := filesystem.Get().ReadDir(where.Sources())
+	files, err := filesystem.Api().ReadDir(where.Sources())
 
 	if err != nil {
 		return make(map[string]*Provider)

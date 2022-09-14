@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.8.0
+
+- Support for more manga metadata fields such as summary, genres, tags, and more.
+- Fetch manga metadata from anilist.
+  `metadata.fetch_anilist` (default: `true`) 
+- Generate `series.json` file.
+  `metadata.series_json` (default: `false`)
+- Generate `ComicInfo.xml` file (for CBZ only)
+  `metadata.comic_info_xml` (default: `true`)
+- Support for downloading manga covers.
+  `downloader.download_cover` (default: `false`)
+- Better progress message while downloading in TUI mode
+- Set option `downloader.create_volume_dir` to `false` by default
+- Version command now shows more information (such as build date, commit hash, etc.)
+- New flag for inline mode: `--output/-o` to redirect output to file (will use STDOUT if not set)
+- New `mangal config set` command to set config values. See `mangal help config set` for more info.
+- New `mangal config get` command to get config values. See `mangal help config get` for more info 
+- New `mangal config info` command to list all available config fields with description for each.
+- Improve `mangal clear` command. It's more accurate and faster now. 
+- Better cache & temp files handling
+- Fix `mangal update` command when it was not able to update using script. 
+- Expose every config field as ENV variable (see `mangal env` to show all of them)
+
 ## 3.7.0
 
 - Add support for volumes - now you can select chapters by volume (in TUI mode only). #90

@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
@@ -24,6 +25,8 @@ func (t *listItem) Title() (title string) {
 		title = fmt.Sprintf("%s %s", e.Name, style.Faint(e.Volume))
 	case *source.Manga:
 		title = e.Name
+	case *history.SavedChapter:
+		title = e.MangaName
 	default:
 		title = t.title
 	}
@@ -36,11 +39,16 @@ func (t *listItem) Title() (title string) {
 }
 
 func (t *listItem) Description() string {
-	if t.description != "" {
+	switch e := t.internal.(type) {
+	case *source.Chapter:
+		return e.URL
+	case *source.Manga:
+		return e.URL
+	case *history.SavedChapter:
+		return fmt.Sprintf("%s : %d / %d", e.Name, e.Index, e.MangaChaptersTotal)
+	default:
 		return t.description
 	}
-
-	return ""
 }
 
 func (t *listItem) FilterValue() string {

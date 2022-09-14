@@ -40,3 +40,14 @@ func TestChapter_Filename(t *testing.T) {
 		})
 	})
 }
+
+func TestChapter_ComicInfoXML(t *testing.T) {
+	Convey("Given a chapter", t, func() {
+		Convey("When ComicInfoXML is called", func() {
+			Convey("It should return a ComicInfo XML", func() {
+				xml := testChapter.ComicInfoXML()
+				So(xml, ShouldNotBeEmpty)
+			})
+		})
+	})
+}

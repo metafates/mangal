@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
 	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
 )
 
 // Download the chapter using given source.
@@ -22,12 +25,41 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	}
 	log.Info("found " + fmt.Sprintf("%d", len(pages)) + " pages")
 
-	log.Info("downloading " + fmt.Sprintf("%d", len(pages)) + " pages")
-	progress(fmt.Sprintf("Downloading %d pages", len(pages)))
-	err = chapter.DownloadPages()
+	err = chapter.DownloadPages(progress)
 	if err != nil {
 		log.Error(err)
 		return "", err
+	}
+
+	if viper.GetBool(constant.MetadataFetchAnilist) {
+		err := chapter.Manga.PopulateMetadata(progress)
+		if err != nil {
+			log.Warn(err)
+		}
+	}
+
+	if viper.GetBool(constant.MetadataSeriesJSON) {
+		path, err := chapter.Manga.Path(false)
+		if err != nil {
+			log.Warn(err)
+		} else {
+			path = filepath.Join(path, "series.json")
+			exists, err := filesystem.Api().Exists(path)
+			if err != nil {
+				log.Warn(err)
+			} else if !exists {
+				progress("Generating series.json")
+				data := chapter.Manga.SeriesJSON()
+				err = filesystem.Api().WriteFile(path, data.Bytes(), os.ModePerm)
+				if err != nil {
+					log.Warn(err)
+				}
+			}
+		}
+	}
+
+	if viper.GetBool(constant.DownloaderDownloadCover) {
+		_ = chapter.Manga.DownloadCover(progress)
 	}
 
 	log.Info("getting " + viper.GetString(constant.FormatsUse) + " converter")

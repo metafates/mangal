@@ -2,13 +2,12 @@ package cbz
 
 import (
 	"archive/zip"
-	"bytes"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
-	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"io"
-	"text/template"
 )
 
 type CBZ struct{}
@@ -31,7 +30,7 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	cbzFile, err := filesystem.Get().Create(path)
+	cbzFile, err := filesystem.Api().Create(path)
 	if err != nil {
 		return
 	}
@@ -47,26 +46,11 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		}
 	}
 
-	err = addToZip(zipWriter, comicInfo(chapter), "ComicInfo.xml")
+	if viper.GetBool(constant.MetadataComicInfoXML) {
+		err = addToZip(zipWriter, chapter.ComicInfoXML(), "ComicInfo.xml")
+	}
+
 	return
-}
-
-func comicInfo(chapter *source.Chapter) *bytes.Buffer {
-	t := `<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Title>{{ .Name }}</Title>
-  	<Series>{{ .Manga.Name }}</Series>
-  	<Genre>Web Comic</Genre>
-  	<Web>{{ .Manga.URL }}</Web>
-	<PageCount>{{ len .Pages }}</PageCount>
-	<Count>{{ len .Manga.Chapters }}</Count>
-  	<Manga>YesAndRightToLeft</Manga>
-</ComicInfo>`
-
-	parsed := lo.Must(template.New("ComicInfo").Parse(t))
-	buf := bytes.NewBufferString("")
-	lo.Must0(parsed.Execute(buf, chapter))
-
-	return buf
 }
 
 func addToZip(writer *zip.Writer, file io.Reader, name string) error {

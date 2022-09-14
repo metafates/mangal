@@ -29,7 +29,7 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	err = filesystem.Get().Mkdir(path, os.ModePerm)
+	err = filesystem.Api().Mkdir(path, os.ModePerm)
 	if err != nil {
 		return
 	}
@@ -53,7 +53,7 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 }
 
 func savePage(page *source.Page, to string) error {
-	file, err := filesystem.Get().Create(filepath.Join(to, page.Filename()))
+	file, err := filesystem.Api().Create(filepath.Join(to, page.Filename()))
 	if err != nil {
 		return err
 	}

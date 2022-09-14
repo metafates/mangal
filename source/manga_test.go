@@ -37,7 +37,7 @@ func (t testSource) PagesOf(*Chapter) (pages []*Page, err error) {
 }
 
 var testManga = Manga{
-	Name:     "test manga",
+	Name:     "Death Note",
 	URL:      "https://example.com",
 	Index:    1,
 	ID:       "test",
@@ -66,7 +66,7 @@ func TestManga_Path(t *testing.T) {
 					So(path, ShouldNotBeEmpty)
 
 					Convey("It should be a directory", func() {
-						So(lo.Must(filesystem.Get().IsDir(path)), ShouldBeTrue)
+						So(lo.Must(filesystem.Api().IsDir(path)), ShouldBeTrue)
 					})
 				})
 			})
@@ -81,14 +81,43 @@ func TestManga_Path(t *testing.T) {
 					So(path, ShouldNotBeEmpty)
 
 					Convey("It should be a directory", func() {
-						So(lo.Must(filesystem.Get().IsDir(path)), ShouldBeTrue)
+						So(lo.Must(filesystem.Api().IsDir(path)), ShouldBeTrue)
 
 						Convey("It should be a temp directory", func() {
-							isTemp := lo.Must(filesystem.Get().Exists(filepath.Join(os.TempDir(), filepath.Base(path))))
+							isTemp := lo.Must(filesystem.Api().Exists(filepath.Join(os.TempDir(), filepath.Base(path))))
 							So(isTemp, ShouldBeTrue)
 						})
 					})
 				})
+			})
+		})
+	})
+}
+
+func TestManga_PopulateMetadata(t *testing.T) {
+	Convey("Given a manga", t, func() {
+		Convey("When PopulateMetadata is called", func() {
+			err := testManga.PopulateMetadata(func(string) {})
+			Convey("It should not return an error", func() {
+				So(err, ShouldBeNil)
+
+				Convey("It should fetch the metadata", func() {
+					So(testManga.Metadata.Cover, ShouldNotBeEmpty)
+					So(testManga.Metadata.Summary, ShouldNotBeEmpty)
+					So(len(testManga.Metadata.Genres), ShouldNotBeEmpty)
+					So(len(testManga.Metadata.Tags), ShouldNotBeEmpty)
+				})
+			})
+		})
+	})
+}
+
+func TestManga_SeriesJSON(t *testing.T) {
+	Convey("Given a manga", t, func() {
+		Convey("When SeriesJSON is called", func() {
+			buf := testManga.SeriesJSON()
+			Convey("It should return a json buffer", func() {
+				So(buf, ShouldNotBeEmpty)
 			})
 		})
 	})

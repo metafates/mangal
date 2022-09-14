@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/mini"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -20,6 +23,11 @@ var miniCmd = &cobra.Command{
 	Short: "Launch in the mini mode",
 	Long: `Launch mangal in the mini mode.
 Will try to mimic ani-cli.`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {
+			handleErr(err)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		options := mini.Options{
 			Download: lo.Must(cmd.Flags().GetBool("download")),

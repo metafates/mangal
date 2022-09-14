@@ -1,12 +1,14 @@
 package source
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"
+	_ "image/gif"
 	"io"
 	"net/http"
 )
@@ -22,7 +24,7 @@ type Page struct {
 	// Size of the page in bytes
 	Size uint64 `json:"-"`
 	// Contents of the page
-	Contents io.ReadCloser `json:"-"`
+	Contents *bytes.Buffer `json:"-"`
 	// Chapter that the page belongs to.
 	Chapter *Chapter `json:"-"`
 }
@@ -34,7 +36,7 @@ func (p *Page) Download() error {
 		return nil
 	}
 
-	log.Debugf("Downloading page #%d (%s)", p.Index, p.URL)
+	log.Tracef("Downloading page #%d (%s)", p.Index, p.URL)
 
 	req, err := http.NewRequest(http.MethodGet, p.URL, nil)
 	if err != nil {
@@ -63,23 +65,29 @@ func (p *Page) Download() error {
 		return err
 	}
 
-	p.Contents = resp.Body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	p.Contents = bytes.NewBuffer(body)
 	p.Size = uint64(util.Max(resp.ContentLength, 0))
 
-	log.Debugf("Page #%d downloaded - %s", p.Index, humanize.Bytes(p.Size))
+	log.Tracef("Page #%d downloaded - %s", p.Index, humanize.Bytes(p.Size))
 	return nil
 }
 
 // Close closes the page contents.
 func (p *Page) Close() error {
-	return p.Contents.Close()
+	return nil
 }
 
 // Read reads from the page contents.
 func (p *Page) Read(b []byte) (int, error) {
 	log.Debugf("Reading page contents #%d", p.Index)
 	if p.Contents == nil {
-		return 0, errors.New("page not downloaded")
+		err := errors.New("page not downloaded")
+		log.Error(err)
+		return 0, err
 	}
 
 	return p.Contents.Read(b)

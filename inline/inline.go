@@ -1,14 +1,19 @@
 package inline
 
 import (
-	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
+	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
+	"os"
 )
 
 func Run(options *Options) error {
+	if options.Out == nil {
+		options.Out = os.Stdout
+	}
+
 	mangas, err := options.Source.Search(options.Query)
 	if err != nil {
 		return err
@@ -23,7 +28,13 @@ func Run(options *Options) error {
 			}
 		}
 
-		return printAsJson(mangas)
+		marshalled, err := asJson(mangas)
+		if err != nil {
+			return err
+		}
+
+		_, err = options.Out.Write(marshalled)
+		return err
 	}
 
 	var chapters []*source.Chapter
@@ -48,7 +59,13 @@ func Run(options *Options) error {
 				return err
 			}
 
-			return printAsJson([]*source.Manga{manga})
+			marshalled, err := asJson([]*source.Manga{manga})
+			if err != nil {
+				return err
+			}
+
+			_, err = options.Out.Write(marshalled)
+			return err
 		}
 	}
 
@@ -59,7 +76,10 @@ func Run(options *Options) error {
 				return err
 			}
 
-			fmt.Println(path)
+			_, err = options.Out.Write([]byte(path + "\n"))
+			if err != nil {
+				log.Warn(err)
+			}
 		} else {
 			err := downloader.Read(chapter, func(string) {})
 			if err != nil {

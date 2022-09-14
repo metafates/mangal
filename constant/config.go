@@ -8,6 +8,7 @@ const (
 	DownloaderCreateVolumeDir     = "downloader.create_volume_dir"
 	DownloaderDefaultSource       = "downloader.default_source"
 	DownloaderStopOnError         = "downloader.stop_on_error"
+	DownloaderDownloadCover       = "downloader.download_cover"
 )
 
 const (
@@ -16,10 +17,18 @@ const (
 )
 
 const (
+	MetadataFetchAnilist = "metadata.fetch_anilist"
+	MetadataComicInfoXML = "metadata.comic_info_xml"
+	MetadataSeriesJSON   = "metadata.series_json"
+)
+
+const (
 	ReaderPDF           = "reader.pdf"
 	ReaderCBZ           = "reader.cbz"
 	ReaderZIP           = "reader.zip"
 	RaderPlain          = "reader.plain"
+	ReaderBrowser       = "reader.browser"
+	ReaderFolder        = "reader.folder"
 	ReaderReadInBrowser = "reader.read_in_browser"
 )
 

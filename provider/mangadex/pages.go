@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"github.com/metafates/mangal/source"
-	"io"
 	"path/filepath"
 )
 
@@ -34,7 +33,7 @@ func (m *Mangadex) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 			Index:     uint16(i),
 			Chapter:   chapter,
 			Extension: filepath.Ext(name),
-			Contents:  io.NopCloser(bytes.NewReader(image)),
+			Contents:  bytes.NewBuffer(image),
 			Size:      uint64(len(image)),
 		}
 

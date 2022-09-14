@@ -84,5 +84,5 @@ func (s *Scraper) Install() error {
 		return err
 	}
 
-	return filesystem.Get().WriteFile(s.Path(), []byte(s.Contents), os.ModePerm)
+	return filesystem.Api().WriteFile(s.Path(), []byte(s.Contents), os.ModePerm)
 }

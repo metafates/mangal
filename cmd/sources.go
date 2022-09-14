@@ -10,8 +10,8 @@ import (
 
 func init() {
 	rootCmd.AddCommand(sourcesCmd)
-
 	sourcesCmd.Flags().BoolP("raw", "r", false, "do not print headers")
+	sourcesCmd.SetOut(os.Stdout)
 }
 
 var sourcesCmd = &cobra.Command{
@@ -19,7 +19,6 @@ var sourcesCmd = &cobra.Command{
 	Short:   "List an available sources",
 	Example: "mangal sources",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.SetOut(os.Stdout)
 
 		printHeader := !lo.Must(cmd.Flags().GetBool("raw"))
 		headerStyle := style.Combined(style.Bold, style.HiBlue)

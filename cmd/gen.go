@@ -68,7 +68,7 @@ var genCmd = &cobra.Command{
 		handleErr(err)
 
 		target := filepath.Join(where.Sources(), util.SanitizeFilename(s.Name)+".lua")
-		f, err := filesystem.Get().Create(target)
+		f, err := filesystem.Api().Create(target)
 		handleErr(err)
 
 		defer util.Ignore(f.Close)

@@ -5,6 +5,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,6 +17,7 @@ type (
 )
 
 type Options struct {
+	Out            io.Writer
 	Source         source.Source
 	Download       bool
 	Json           bool

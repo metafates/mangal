@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/open"
@@ -13,6 +14,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"time"
 )
@@ -159,11 +161,7 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []*source.Manga:
 		items := make([]list.Item, len(msg))
 		for i, m := range msg {
-			items[i] = &listItem{
-				internal:    m,
-				title:       m.Name,
-				description: m.URL,
-			}
+			items[i] = &listItem{internal: m}
 		}
 
 		cmds = append(cmds, b.mangasC.SetItems(items))
@@ -224,11 +222,7 @@ func (b *statefulBubble) updateHistory(msg tea.Msg) (tea.Model, tea.Cmd) {
 		selected := b.historyC.SelectedItem().(*listItem).internal.(*history.SavedChapter)
 
 		for i, c := range msg {
-			items[i] = &listItem{
-				internal:    c,
-				title:       c.Name,
-				description: c.URL,
-			}
+			items[i] = &listItem{internal: c}
 		}
 
 		cmd = b.chaptersC.SetItems(items)
@@ -391,13 +385,8 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []*source.Chapter:
 		items := make([]list.Item, len(msg))
 		for i, c := range msg {
-			title := c.Name
 
-			items[i] = &listItem{
-				internal:    c,
-				title:       title,
-				description: c.URL,
-			}
+			items[i] = &listItem{internal: c}
 		}
 
 		cmd = b.chaptersC.SetItems(items)
@@ -583,7 +572,11 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.quit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keymap.openFolder):
-			err := open.Start(lo.Must(b.currentDownloadingChapter.Manga.Path(false)))
+			err := open.StartWith(
+				lo.Must(b.currentDownloadingChapter.Manga.Path(false)),
+				viper.GetString(constant.ReaderFolder),
+			)
+
 			if err != nil {
 				b.raiseError(err)
 			}

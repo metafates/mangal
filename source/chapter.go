@@ -1,17 +1,21 @@
 package source
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
+	"github.com/samber/lo"
 	"github.com/spf13/viper"
+	"html"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"text/template"
 )
 
 // Chapter is a struct that represents a chapter of a manga.
@@ -30,6 +34,8 @@ type Chapter struct {
 	Manga *Manga `json:"-"`
 	// Pages of the chapter.
 	Pages []*Page
+
+	size uint64
 }
 
 func (c *Chapter) String() string {
@@ -38,12 +44,20 @@ func (c *Chapter) String() string {
 
 // DownloadPages downloads the Pages contents of the Chapter.
 // Pages needs to be set before calling this function.
-func (c *Chapter) DownloadPages() error {
-	log.Debugf("Downloading %d pages of chapter \"%s\"", len(c.Pages), c.Name)
+func (c *Chapter) DownloadPages(progress func(string)) (err error) {
+	c.size = 0
+	status := func() string {
+		return fmt.Sprintf(
+			"Downloading %s %s",
+			util.Quantity(len(c.Pages), "page"),
+			style.Faint(c.SizeHuman()),
+		)
+	}
+
+	progress(status())
 	wg := sync.WaitGroup{}
 	wg.Add(len(c.Pages))
 
-	var err error
 	for _, page := range c.Pages {
 		d := func(page *Page) {
 			defer wg.Done()
@@ -54,6 +68,8 @@ func (c *Chapter) DownloadPages() error {
 			}
 
 			err = page.Download()
+			c.size += page.Size
+			progress(status())
 		}
 
 		if viper.GetBool(constant.DownloaderAsync) {
@@ -64,7 +80,7 @@ func (c *Chapter) DownloadPages() error {
 	}
 
 	wg.Wait()
-	return err
+	return
 }
 
 // formattedName of the chapter according to the template in the config.
@@ -91,24 +107,9 @@ func (c *Chapter) formattedName() (name string) {
 	return
 }
 
-// Size of the chapter in bytes.
-func (c *Chapter) Size() uint64 {
-	var n uint64
-
-	for _, page := range c.Pages {
-		n += page.Size
-	}
-
-	return n
-}
-
 // SizeHuman is the same as Size but returns a human-readable string.
 func (c *Chapter) SizeHuman() string {
-	if size := c.Size(); size == 0 {
-		return "Unknown size"
-	} else {
-		return humanize.Bytes(size)
-	}
+	return humanize.Bytes(c.size)
 }
 
 func (c *Chapter) Filename() (filename string) {
@@ -131,7 +132,7 @@ func (c *Chapter) Path(temp bool) (path string, err error) {
 
 	if c.Volume != "" && viper.GetBool(constant.DownloaderCreateVolumeDir) {
 		path = filepath.Join(path, util.SanitizeFilename(c.Volume))
-		err = filesystem.Get().MkdirAll(path, os.ModePerm)
+		err = filesystem.Api().MkdirAll(path, os.ModePerm)
 		if err != nil {
 			return
 		}
@@ -143,4 +144,38 @@ func (c *Chapter) Path(temp bool) (path string, err error) {
 
 func (c *Chapter) Source() Source {
 	return c.Manga.Source
+}
+
+func (c *Chapter) ComicInfoXML() *bytes.Buffer {
+	// language=gotemplate
+	t := `
+<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Title>{{ escape .Name }}</Title>
+  	<Series>{{ escape .Manga.Name }}</Series>
+	<Number>{{ .Index }}</Number>
+	<Web>{{ .URL }}</Web>
+	<Genre>{{ join .Manga.Metadata.Genres "," }}</Genre>
+	<PageCount>{{ len .Pages }}</PageCount>
+	<Summary>{{ escape .Manga.Metadata.Summary }}</Summary>
+	<Count>{{ len .Manga.Chapters }}</Count>
+	<Writer>{{ .Manga.Metadata.Author }}</Writer>
+	<Characters>{{ join .Manga.Metadata.Characters "," }}</Characters>
+	<Year>{{ .Manga.Metadata.StartDate.Year }}</Year>
+	<Month>{{ .Manga.Metadata.StartDate.Month }}</Month>
+	<Day>{{ .Manga.Metadata.StartDate.Day }}</Day>
+	<Tags>{{ join .Manga.Metadata.Tags "," }}</Tags>
+	<Notes>Downloaded with Mangal. https://github.com/metafates/mangal</Notes>
+  	<Manga>YesAndRightToLeft</Manga>
+</ComicInfo>`
+
+	funcs := template.FuncMap{
+		"join":   strings.Join,
+		"escape": html.EscapeString,
+	}
+
+	parsed := lo.Must(template.New("ComicInfo").Funcs(funcs).Parse(t))
+	buf := bytes.NewBufferString("")
+	lo.Must0(parsed.Execute(buf, c))
+
+	return buf
 }

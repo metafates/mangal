@@ -10,7 +10,6 @@ import (
 	"github.com/samber/lo"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/viper"
-	"io"
 	"io/fs"
 	"path/filepath"
 	"testing"
@@ -36,7 +35,7 @@ func TestCBZ(t *testing.T) {
 					So(filepath.Ext(result), ShouldEqual, ".zip")
 
 					Convey("A path that can be read", func() {
-						file, err := filesystem.Get().Open(result)
+						file, err := filesystem.Api().Open(result)
 						So(err, ShouldBeNil)
 						So(file, ShouldNotBeNil)
 
@@ -77,16 +76,16 @@ func SampleChapter(t *testing.T) *source.Chapter {
 	defer filesystem.SetMemMapFs()
 
 	// get all images from ../assets/testdata
-	err := filesystem.Get().Walk(
+	err := filesystem.Api().Walk(
 		// ../../assets/testdata
 		// I wish windows used a normal path separator instead of whatever this \ is
 		filepath.Join(filepath.Dir(filepath.Dir(lo.Must(filepath.Abs(".")))), filepath.Join("assets", "testdata")),
 		func(path string, info fs.FileInfo, _ error) error {
-			if lo.Must(filesystem.Get().IsDir(path)) || filepath.Ext(path) != ".jpeg" {
+			if lo.Must(filesystem.Api().IsDir(path)) || filepath.Ext(path) != ".jpeg" {
 				return nil
 			}
 
-			image, err := filesystem.Get().ReadFile(path)
+			image, err := filesystem.Api().ReadFile(path)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -96,7 +95,7 @@ func SampleChapter(t *testing.T) *source.Chapter {
 				Index:     0,
 				Extension: filepath.Ext(path),
 				Chapter:   &chapter,
-				Contents:  io.NopCloser(bytes.NewReader(image)),
+				Contents:  bytes.NewBuffer(image),
 			}
 			chapter.Pages = append(chapter.Pages, &page)
 

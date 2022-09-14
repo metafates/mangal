@@ -8,6 +8,7 @@ import (
 	"github.com/metafates/mangal/converter/plain"
 	"github.com/metafates/mangal/converter/zip"
 	"github.com/metafates/mangal/source"
+	"strings"
 )
 
 // Converter is the interface that all converters must implement.
@@ -40,5 +41,5 @@ func Get(name string) (Converter, error) {
 		return converter, nil
 	}
 
-	return nil, fmt.Errorf("unkown format \"%s\"", name)
+	return nil, fmt.Errorf("unkown format \"%s\", available options are %s", name, strings.Join(Available(), ", "))
 }

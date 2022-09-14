@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -281,9 +280,7 @@ func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
 	var items []list.Item
 	for _, s := range saved {
 		items = append(items, &listItem{
-			title:       s.MangaName,
-			description: fmt.Sprintf("%s : %d / %d", s.Name, s.Index, s.MangaChaptersTotal),
-			internal:    s,
+			internal: s,
 		})
 	}
 
