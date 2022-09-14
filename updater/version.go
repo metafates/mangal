@@ -2,6 +2,7 @@ package updater
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/metafates/mangal/util"
 	"net/http"
 )
@@ -26,6 +27,11 @@ func LatestVersion() (version string, err error) {
 	}
 
 	// remove the v from the tag name
+	if release.TagName == "" {
+		err = errors.New("empty tag name")
+		return
+	}
+
 	version = release.TagName[1:]
 	return
 }
