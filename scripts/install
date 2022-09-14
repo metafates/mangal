@@ -29,16 +29,16 @@ install_completions() {
     then
         info "Installing zsh completions"
         TARGET="/usr/share/zsh/vendor-completions"
-        mkdir -p "$TARGET"
-        cp "$COMPLETIONS/mangal.zsh" "$TARGET/_mangal"
+        sudo mkdir -p "$TARGET"
+        sudo cp "$COMPLETIONS/mangal.zsh" "$TARGET/_mangal"
     fi
 
     if has fish;
     then
         info "Installing fish completions"
         TARGET="/usr/share/fish/completions"
-        mkdir -p "$TARGET"
-        cp "$COMPLETIONS/mangal.fish" "$TARGET/mangal.fish"
+        sudo mkdir -p "$TARGET"
+        sudo cp "$COMPLETIONS/mangal.fish" "$TARGET/mangal.fish"
     fi
 
     if has bash;
@@ -46,8 +46,8 @@ install_completions() {
         info "Installing bash completions"
         TARGET="/usr/share/bash-completion/completions"
 
-        mkdir -p $TARGET
-        cp "$COMPLETIONS/mangal.bash" "$TARGET/mangal"
+        sudo mkdir -p $TARGET
+        sudo cp "$COMPLETIONS/mangal.bash" "$TARGET/mangal"
     fi
 }
 
@@ -300,7 +300,7 @@ install_binary() {
 
     tar -xf "$TAR_FILE" -C "$TMPDIR"
 
-    OUT="/usr/local/bin/"
+    OUT="/usr/bin/"
     info "Moving to ${OUT}"
     sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
     install_completions "$TMPDIR/completions"
