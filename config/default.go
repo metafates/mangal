@@ -161,6 +161,7 @@ panic, fatal, error, warn, info, debug, trace`,
 
 	for _, field := range fields {
 		DefaultValues[field.Name] = field
+		EnvExposed = append(EnvExposed, field.Name)
 	}
 }
 

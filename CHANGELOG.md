@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Improve `mangal clear` command. It's more accurate and faster now. 
 - Better cache & temp files handling
 - Fix `mangal update` command when it was not able to update using script. 
+- Expose every config field as ENV variable (see `mangal env` to show all of them)
 
 ## 3.7.0
 
