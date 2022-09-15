@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.9.0
+
+- New sources: [Mangakakalot](https://mangakakalot.com) & [Mangapill](https://mangapill.com)
+- Fix termux installation detection by [@2096779623](https://github.com/2096779623) #94
+- Change the way `mangal update` works.
+  If mangal wasn't installed via package manager it will get the current location of running binary and replace it with the new one.
+  Previously it was assumed that mangal was installed in `/usr/local/bin` which is not always the case.
+  Doesn't work on Termux yet because it requires specific variation of Go compiler which is troublesome to configure with automatic release system that mangal uses.
+  Will be fixed in the future.
+
 ## 3.8.1
 
 - Fix installation method detection

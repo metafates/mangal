@@ -27,8 +27,8 @@ var versionCmd = &cobra.Command{
 			installedWith = "Scoop"
 		case updater.Termux:
 			installedWith = "Termux"
-		case updater.Script:
-			installedWith = "Script"
+		case updater.Standalone:
+			installedWith = "Standalone"
 		case updater.Go:
 			installedWith = "From source (" + runtime.Version() + ")"
 		default:

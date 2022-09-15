@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/constant"
 	"github.com/samber/lo"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/term"
@@ -85,12 +86,12 @@ func ClearScreen() {
 	}
 
 	switch runtime.GOOS {
-	case "linux", "darwin":
+	case constant.Linux, constant.Darwin:
 		err := run("tput", "clear")
 		if err != nil {
 			_ = run("clear")
 		}
-	case "windows":
+	case constant.Windows:
 		_ = run("cls")
 	}
 }

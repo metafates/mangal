@@ -1,4 +1,4 @@
-package manganelo
+package mangakakalot
 
 import (
 	"fmt"
@@ -10,34 +10,35 @@ import (
 )
 
 var Config = &generic.Configuration{
-	Name:            "Manganelo",
+	Name:            "Mangakakalot",
 	Delay:           50 * time.Millisecond,
 	Parallelism:     50,
 	ReverseChapters: true,
-	BaseURL:         "https://ww5.manganelo.tv/",
+	BaseURL:         "https://mangakakalot.com/",
 	GenerateSearchURL: func(query string) string {
+		query = strings.ReplaceAll(query, " ", "_")
 		query = strings.TrimSpace(query)
 		query = strings.ToLower(query)
 		query = url.QueryEscape(query)
-		template := "https://ww5.manganelo.tv/search/%s"
+		template := "https://mangakakalot.com/search/story/%s"
 		return fmt.Sprintf(template, query)
 	},
 	MangaExtractor: &generic.Extractor{
-		Selector: ".search-story-item",
+		Selector: "div.story_item",
 		Name: func(selection *goquery.Selection) string {
-			return selection.Find("a.item-title").Text()
+			return strings.TrimSpace(selection.Find(".story_name > a").Text())
 		},
 		URL: func(selection *goquery.Selection) string {
-			return selection.Find("a.item-title").AttrOr("href", "")
+			return selection.Find(".story_name > a").AttrOr("href", "")
 		},
 		Cover: func(selection *goquery.Selection) string {
-			return selection.Find(".item-img img").AttrOr("src", "")
+			return selection.Find("img").AttrOr("src", "")
 		},
 	},
 	ChapterExtractor: &generic.Extractor{
 		Selector: "li.a-h",
 		Name: func(selection *goquery.Selection) string {
-			name := selection.Find(".chapter-name").Text()
+			name := selection.Find("a").Text()
 			if strings.HasPrefix(name, "Vol.") {
 				splitted := strings.Split(name, " ")
 				name = strings.Join(splitted[1:], " ")
@@ -45,10 +46,10 @@ var Config = &generic.Configuration{
 			return name
 		},
 		URL: func(selection *goquery.Selection) string {
-			return selection.Find(".chapter-name").AttrOr("href", "")
+			return selection.Find("a").AttrOr("href", "")
 		},
 		Volume: func(selection *goquery.Selection) string {
-			name := selection.Find(".chapter-name").Text()
+			name := selection.Find("a").Text()
 			if strings.HasPrefix(name, "Vol.") {
 				splitted := strings.Split(name, " ")
 				return splitted[0]
@@ -58,9 +59,8 @@ var Config = &generic.Configuration{
 	},
 	PageExtractor: &generic.Extractor{
 		Selector: ".container-chapter-reader img",
-		Name:     nil,
 		URL: func(selection *goquery.Selection) string {
-			return selection.AttrOr("data-src", "")
+			return selection.AttrOr("src", "")
 		},
 	},
 }

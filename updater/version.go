@@ -7,9 +7,15 @@ import (
 	"net/http"
 )
 
+var cachedLatestVersion string
+
 // LatestVersion returns the latest version of mangal.
 // It will fetch the latest version from the GitHub API.
 func LatestVersion() (version string, err error) {
+	if cachedLatestVersion != "" {
+		return cachedLatestVersion, nil
+	}
+
 	resp, err := http.Get("https://api.github.com/repos/metafates/mangal/releases/latest")
 	if err != nil {
 		return
@@ -33,5 +39,6 @@ func LatestVersion() (version string, err error) {
 	}
 
 	version = release.TagName[1:]
+	cachedLatestVersion = version
 	return
 }

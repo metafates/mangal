@@ -3,8 +3,11 @@ package provider
 import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/provider/custom"
+	"github.com/metafates/mangal/provider/generic"
 	"github.com/metafates/mangal/provider/mangadex"
+	"github.com/metafates/mangal/provider/mangakakalot"
 	"github.com/metafates/mangal/provider/manganelo"
+	"github.com/metafates/mangal/provider/mangapill"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
@@ -12,6 +15,23 @@ import (
 	"os"
 	"path/filepath"
 )
+
+func init() {
+	for _, conf := range []*generic.Configuration{
+		manganelo.Config,
+		mangakakalot.Config,
+		mangapill.Config,
+	} {
+		conf := conf
+		defaultProviders = append(defaultProviders, &Provider{
+			ID:   conf.ID(),
+			Name: conf.Name,
+			CreateSource: func() (source.Source, error) {
+				return generic.New(conf), nil
+			},
+		})
+	}
+}
 
 type Provider struct {
 	ID           string
@@ -26,13 +46,6 @@ func (p Provider) String() string {
 var customProviderExtension = ".lua"
 
 var defaultProviders = []*Provider{
-	{
-		ID:   manganelo.ID,
-		Name: manganelo.Name,
-		CreateSource: func() (source.Source, error) {
-			return manganelo.New(), nil
-		},
-	},
 	{
 		ID:   mangadex.ID,
 		Name: mangadex.Name,

@@ -16,7 +16,7 @@ https://user-images.githubusercontent.com/62389790/190131616-09d1f134-7ccd-4f0f-
 ## Try it!
 
 ```shell
-curl -sL mangal.metafates.one/run | sh
+curl -sSL mangal.metafates.one/run | sh
 ```
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
@@ -36,7 +36,7 @@ curl -sL mangal.metafates.one/run | sh
 
 - __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with
   __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
-- [Mangadex](https://mangadex.org) + [Manganelo](https://m.manganelo.com/wwww) Built-In
+- __4 Built-in sources__ - [Mangadex](https://mangadex.org), [Manganelo](https://m.manganelo.com/wwww), [Mangakakalot](https://mangakakalot.com/wwww), [Mangakakalot](https://mangakakalot.com) & [Mangapill](https://mangapill.com)
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
 - __3 Different modes__ - TUI, Mini and Inline
@@ -53,14 +53,11 @@ curl -sL mangal.metafates.one/run | sh
 Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
 
 ```shell
-curl -sL mangal.metafates.one/install | sh
+curl -sSL mangal.metafates.one/install | sh
 ```
 
 This script will automatically detect OS & Distro and use the best option available.
 For example, on macOS it will try to use Homebrew, on Ubuntu it will install the `.deb` package and so on...
-
-> Termux support is limited to downloading manga only.
-> You can't read chapters or use headless chrome based scrapers
 
 <details>
 <summary>😡 I hate scripts! Show me how to install it manually</summary>
@@ -89,11 +86,24 @@ Install using [Homebrew](https://brew.sh/)
 
 #### Termux
 
-1. Download the arm64 linux binary from the [release page](https://github.com/metafates/mangal/releases/latest)
-2. Move it to the `$PREFIX/bin`
-3. Install `resolve-conf` & `proot` (`pkg install -y resolve-conf proot`)
-4. Run mangal with `proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf mangal` (install script will create an alias for
-   this automatically)
+You'll have to compile mangal from source in order to use full functionality.
+
+```shell
+# Install Go
+pkg install -y golang
+
+# Install git
+pkg install -y git
+
+# Clone the repository
+git clone --depth 1 https://github.com/metafates/mangal.git && cd mangal
+
+# Build the binary
+go build -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)' -X 'github.com/metafates/mangal/constant.BuiltBy=$(whoami)' -X 'github.com/metafates/mangal/constant.Revision=$(git rev-parse --short HEAD)' -s -w"
+
+# Install the binary
+install -Dm755 mangal "$PREFIX/bin/mangal"
+```
 
 #### Pre-compiled
 
