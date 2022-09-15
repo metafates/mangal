@@ -50,7 +50,7 @@ func DetectInstallationMethod() InstallationMethod {
 
 // isUnderTermux returns true if mangal is running under Termux.
 func isUnderTermux() (ok bool) {
-	return has("Termux-setup-storage")
+	return has("termux-setup-storage")
 }
 
 // isUnderHomebrew returns true if mangal is running under Homebrew.
