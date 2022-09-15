@@ -59,7 +59,7 @@ func Update() (err error) {
 		erase = info("Scoop installation detected")
 		err = updateScoop()
 	case Termux:
-		err = errors.New("self-updating is not supported on termux yet, please update mangal manually")
+		err = fmt.Errorf("self-updating is not supported on termux yet, please update mangal manually. https://github.com/metafates/mangal/releases/tag/v%s", version)
 	case Go, Standalone:
 		erase = info("Non-package manager installation detected")
 		err = update()
