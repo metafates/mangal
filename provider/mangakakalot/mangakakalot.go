@@ -24,12 +24,12 @@ var Config = &generic.Configuration{
 		return fmt.Sprintf(template, query)
 	},
 	MangaExtractor: &generic.Extractor{
-		Selector: ".story-item",
+		Selector: "div.story_item",
 		Name: func(selection *goquery.Selection) string {
-			return selection.Find(".story-name a").Text()
+			return strings.TrimSpace(selection.Find(".story_name > a").Text())
 		},
 		URL: func(selection *goquery.Selection) string {
-			return selection.Find(".story-name a").AttrOr("href", "")
+			return selection.Find(".story_name > a").AttrOr("href", "")
 		},
 		Cover: func(selection *goquery.Selection) string {
 			return selection.Find("img").AttrOr("src", "")
