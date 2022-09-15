@@ -1,4 +1,4 @@
-package manganelo
+package mangapill
 
 import (
 	"github.com/metafates/mangal/provider/generic"
@@ -7,10 +7,10 @@ import (
 )
 
 func TestManganelo(t *testing.T) {
-	Convey("Given a manganelo instance", t, func() {
-		manganelo := generic.New(Config)
+	Convey("Given a mangapill instance", t, func() {
+		mangapill := generic.New(Config)
 		Convey("When searching for a manga", func() {
-			mangas, err := manganelo.Search("Death Note")
+			mangas, err := mangapill.Search("Death Note")
 			Convey("Then the error should be nil", func() {
 				So(err, ShouldBeNil)
 
@@ -25,7 +25,7 @@ func TestManganelo(t *testing.T) {
 					})
 
 					Convey("When gettings chapters for the first manga", func() {
-						chapters, err := manganelo.ChaptersOf(mangas[0])
+						chapters, err := mangapill.ChaptersOf(mangas[0])
 						Convey("Then the error should be nil", func() {
 							So(err, ShouldBeNil)
 
@@ -41,7 +41,7 @@ func TestManganelo(t *testing.T) {
 								})
 
 								Convey("When getting pages for the first chapter", func() {
-									pages, err := manganelo.PagesOf(chapters[0])
+									pages, err := mangapill.PagesOf(chapters[0])
 									Convey("Then the error should be nil", func() {
 										So(err, ShouldBeNil)
 
