@@ -58,12 +58,13 @@ func Update() (err error) {
 	case Scoop:
 		erase = info("Scoop installation detected")
 		err = updateScoop()
-	case Termux, Go, Standalone:
+	case Termux:
+		err = errors.New("self-updating is not supported on termux yet, please update mangal manually")
+	case Go, Standalone:
 		erase = info("Non-package manager installation detected")
 		err = update()
 	default:
 		err = errors.New("unknown installation method, can't update")
-		return
 	}
 
 	if err != nil {
