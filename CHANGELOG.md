@@ -10,8 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Change the way `mangal update` works.
   If mangal wasn't installed via package manager it will get the current location of running binary and replace it with the new one.
   Previously it was assumed that mangal was installed in `/usr/local/bin` which is not always the case.
-- New source: [Mangakakalot](https://mangakakalot.com)
-- New source: [Mangapill](https://mangapill.com)
+- New sources: [Mangakakalot](https://mangakakalot.com) &  [Mangapill](https://mangapill.com)
 - Fix termux installation detection by [@2096779623](https://github.com/2096779623) #94
 
 ## 3.8.1

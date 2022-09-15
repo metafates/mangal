@@ -1,11 +1,12 @@
 package manganelo
 
 import (
+	"github.com/metafates/mangal/provider/generic"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
 
-var manganelo = New()
+var manganelo = generic.New(Config)
 
 func TestManganelo(t *testing.T) {
 	Convey("Given a manganelo instance", t, func() {
