@@ -160,10 +160,6 @@ install_termux() {
     warn "Wait for 5 seconds to continue"
     sleep 5
 
-    if [ "$CONTINUE" != "y" ]; then
-        die "Aborted"
-    fi
-
     if ! has go; then
         info "Installing golang"
         pkg install golang -y
