@@ -157,7 +157,7 @@ install_termux() {
     info "Installing for Termux"
     warn "In order to use full functionality on Termux, you'll need to compile mangal from source"
     warn "To do that, you'll need to install the following packages: golang, git"
-    echo -n "Continue? [y/N] "
+    echo "Continue? [y/N] "
     read -r CONTINUE
 
     if [ "$CONTINUE" != "y" ]; then
