@@ -145,9 +145,10 @@ func update() (err error) {
 		arch = runtime.GOARCH
 	}
 
-	if runtime.GOOS == "windows" {
+	switch runtime.GOOS {
+	case constant.Windows:
 		archiveType = "zip"
-	} else {
+	default:
 		archiveType = "tar.gz"
 	}
 

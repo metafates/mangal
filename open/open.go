@@ -2,6 +2,7 @@ package open
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/constant"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,13 +17,13 @@ var (
 
 func open(input string) (cmd *exec.Cmd, osSupported bool) {
 	switch runtime.GOOS {
-	case "windows":
+	case constant.Windows:
 		return exec.Command(runDll32, "url.dll,FileProtocolHandler", input), true
-	case "darwin":
+	case constant.Darwin:
 		return exec.Command("open", input), true
-	case "linux":
+	case constant.Linux:
 		return exec.Command("xdg-open", input), true
-	case "android":
+	case constant.Android:
 		return exec.Command("termux-open", input), true
 	default:
 		return nil, false
@@ -31,13 +32,13 @@ func open(input string) (cmd *exec.Cmd, osSupported bool) {
 
 func openWith(input, with string) (cmd *exec.Cmd, osSupported bool) {
 	switch runtime.GOOS {
-	case "windows":
+	case constant.Windows:
 		return exec.Command("cmd", "/C", "start", "", with, strings.ReplaceAll(input, "&", "^&")), true
-	case "darwin":
+	case constant.Darwin:
 		return exec.Command("open", "-a", with, input), true
-	case "linux":
+	case constant.Linux:
 		return exec.Command(with, input), true
-	case "android":
+	case constant.Android:
 		return exec.Command("termux-open", "--choose", input), true
 	default:
 		return nil, false
