@@ -198,11 +198,13 @@ func update() (err error) {
 
 		_, err = file.Write(archive)
 		if err != nil {
+			log.Error(err)
 			return err
 		}
 
 		stat, err := file.Stat()
 		if err != nil {
+			log.Error(err)
 			return err
 		}
 

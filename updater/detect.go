@@ -1,7 +1,6 @@
 package updater
 
 import (
-	"github.com/samber/lo"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,18 +19,18 @@ const (
 
 // DetectInstallationMethod detects the installation method.
 func DetectInstallationMethod() InstallationMethod {
-	for _, t := range []lo.Tuple2[InstallationMethod, func() bool]{
-		{Scoop, isUnderScoop},
-		{Homebrew, isUnderHomebrew},
-		{Termux, isUnderTermux},
-		{Go, isUnderGo},
-	} {
-		if t.B() {
-			return t.A
-		}
+	switch {
+	case isUnderScoop():
+		return Scoop
+	case isUnderHomebrew():
+		return Homebrew
+	case isUnderTermux():
+		return Termux
+	case isUnderGo():
+		return Go
+	default:
+		return Standalone
 	}
-
-	return Standalone
 }
 
 // isUnderTermux returns true if mangal is running under Termux.
