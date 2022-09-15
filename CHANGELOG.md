@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
-## 3.8.2
+## 3.9.0
 
 - Change the way `mangal update` works.
   If mangal wasn't installed via package manager it will get the current location of running binary and replace it with the new one.
   Previously it was assumed that mangal was installed in `/usr/local/bin` which is not always the case.
+- New source: [Mangakakalot](https://mangakakalot.com)
 
 ## 3.8.1
 
