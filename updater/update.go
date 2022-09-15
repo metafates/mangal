@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/open"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
@@ -59,7 +60,9 @@ func Update() (err error) {
 		erase = info("Scoop installation detected")
 		err = updateScoop()
 	case Termux:
-		err = fmt.Errorf("self-updating is not supported on termux yet, please update mangal manually. https://github.com/metafates/mangal/releases/tag/v%s", version)
+		releaseURL := fmt.Sprintf("https://github.com/metafates/mangal/releases/tag/v%s", version)
+		err = fmt.Errorf("self-updating is not supported on termux yet, please update mangal manually. %s", releaseURL)
+		_ = open.Start(releaseURL)
 	case Go, Standalone:
 		erase = info("Non-package manager installation detected")
 		err = update()
