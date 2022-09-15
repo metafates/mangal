@@ -22,6 +22,7 @@ func init() {
 		mangakakalot.Config,
 		mangapill.Config,
 	} {
+		conf := conf
 		defaultProviders = append(defaultProviders, &Provider{
 			ID:   conf.ID(),
 			Name: conf.Name,

@@ -23,12 +23,12 @@ var Config = &generic.Configuration{
 		return fmt.Sprintf(template, url.QueryEscape(query))
 	},
 	MangaExtractor: &generic.Extractor{
-		Selector: "body > div.container.py-3 > div.my-3.grid.justify-end.gap-3.grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-5 div",
+		Selector: "body > div.container.py-3 > div.my-3.grid.justify-end.gap-3.grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-5 > div",
 		Name: func(selection *goquery.Selection) string {
-			return selection.Find("div > a").Text()
+			return strings.TrimSpace(selection.Find("div a div.leading-tight").Text())
 		},
 		URL: func(selection *goquery.Selection) string {
-			return selection.Find("div > a").AttrOr("href", "")
+			return selection.Find("div a:first-child").AttrOr("href", "")
 		},
 		Volume: func(selection *goquery.Selection) string {
 			return ""
@@ -38,12 +38,12 @@ var Config = &generic.Configuration{
 		},
 	},
 	ChapterExtractor: &generic.Extractor{
-		Selector: "body > div.container.py-3 > div.my-3.grid.justify-end.gap-3.grid-cols-2.md\\:grid-cols-3.lg\\:grid-cols-5 div",
+		Selector: "div[data-filter-list] a",
 		Name: func(selection *goquery.Selection) string {
-			return selection.Find("div > a").Text()
+			return strings.TrimSpace(selection.Text())
 		},
 		URL: func(selection *goquery.Selection) string {
-			return selection.Find("div > a").AttrOr("href", "")
+			return selection.AttrOr("href", "")
 		},
 		Volume: func(selection *goquery.Selection) string {
 			return ""
