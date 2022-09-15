@@ -188,13 +188,25 @@ func update() (err error) {
 		}
 
 		archivePath := filepath.Join(out, archiveName)
-		err = filesystem.Api().WriteFile(archivePath, archive, os.ModePerm)
+		file, err := filesystem.Api().OpenFile(archivePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
 
-		err = util.Unzip(archivePath, out)
+		defer util.Ignore(file.Close)
+
+		_, err = file.Write(archive)
+		if err != nil {
+			return err
+		}
+
+		stat, err := file.Stat()
+		if err != nil {
+			return err
+		}
+
+		err = util.Unzip(file, stat.Size(), out)
 	case "tar.gz":
 		err = util.UntarGZ(res.Body, out)
 	}

@@ -10,17 +10,11 @@ import (
 	"strings"
 )
 
-func Unzip(src, dest string) error {
-	r, err := zip.OpenReader(src)
+func Unzip(zipStream io.ReaderAt, size int64, dest string) error {
+	r, err := zip.NewReader(zipStream, size)
 	if err != nil {
 		return err
 	}
-
-	defer func() {
-		if err := r.Close(); err != nil {
-			panic(err)
-		}
-	}()
 
 	err = filesystem.Api().MkdirAll(dest, os.ModePerm)
 	if err != nil {
