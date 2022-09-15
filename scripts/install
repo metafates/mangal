@@ -156,9 +156,9 @@ install_deb() {
 install_termux() {
     info "Installing for Termux"
     warn "In order to use full functionality on Termux, you'll need to compile mangal from source"
-    warn "To do that, you'll need to install the following packages: golang, git"
-    echo "Continue? [y/N] "
-    read -r CONTINUE
+    warn "To do that, the following packages will be installed: golang, git"
+    warn "Wait for 5 seconds to continue"
+    sleep 5
 
     if [ "$CONTINUE" != "y" ]; then
         die "Aborted"
