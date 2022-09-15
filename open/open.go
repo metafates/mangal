@@ -38,7 +38,7 @@ func openWith(input, with string) (cmd *exec.Cmd, osSupported bool) {
 	case "linux":
 		return exec.Command(with, input), true
 	case "android":
-		return exec.Command("termux-open", input), true
+		return exec.Command("termux-open", "--choose", input), true
 	default:
 		return nil, false
 	}
