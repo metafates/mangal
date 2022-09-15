@@ -4,6 +4,7 @@ import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/provider/custom"
 	"github.com/metafates/mangal/provider/mangadex"
+	"github.com/metafates/mangal/provider/mangakakalot"
 	"github.com/metafates/mangal/provider/manganelo"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -31,6 +32,13 @@ var defaultProviders = []*Provider{
 		Name: manganelo.Name,
 		CreateSource: func() (source.Source, error) {
 			return manganelo.New(), nil
+		},
+	},
+	{
+		ID:   mangakakalot.ID,
+		Name: mangakakalot.Name,
+		CreateSource: func() (source.Source, error) {
+			return mangakakalot.New(), nil
 		},
 	},
 	{
