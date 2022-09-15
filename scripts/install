@@ -155,54 +155,34 @@ install_deb() {
 
 install_termux() {
     info "Installing for Termux"
-    warn "Termux support is experimental. Some features won't work."
+    warn "In order to use full functionality on Termux, you'll need to compile mangal from source"
+    warn "To do that, you'll need to install the following packages: golang, git"
+    warn "Continue? [y/N]"
+    read -r CONTINUE
 
-    case "$ARCH" in
-    aarch64)
-        ARCH="arm64"
-        ;;
-    armv*)
-        ARCH="armv6"
-        ;;
-    amd64)
-        ARCH="x86_64"
-        ;;
-    esac
+    if [ "$CONTINUE" != "y" ]; then
+        die "Aborted"
+    fi
 
-    TAR_NAME="${FILE_BASENAME}_${VERSION}_${OS}_${ARCH}.tar.gz"
-    TAR_FILE="$TMPDIR/$TAR_NAME"
+    if ! has go; then
+        info "Installing golang"
+        pkg install golang -y
+    fi
 
-    export TAR_NAME TAR_FILE
+    if ! has git; then
+        info "Installing git"
+        pkg install git -y
+    fi
 
-    (
-        cd "$TMPDIR"
+    info "Cloning mangal repository"
+    git clone --depth 1 https://github.com/metafates/mangal.git
+    cd mangal
 
-        info "Downloading $TAR_NAME"
-        download "$TAR_FILE" "$RELEASES_URL/download/$TAG/$TAR_NAME"
+    info "Building mangal"
+    go build -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)' -X 'github.com/metafates/mangal/constant.BuiltBy=$(whoami)' -X 'github.com/metafates/mangal/constant.Revision=$(git rev-parse --short HEAD)' -s -w"
 
-        info "Downloading checksums"
-        download "checksums.txt" "$RELEASES_URL/download/$TAG/checksums.txt"
-
-        verify_checksums
-    )
-
-    tar -xf "$TAR_FILE" -C "$TMPDIR"
-
-    OUT="$PREFIX/bin"
-    info "Moving to ${OUT}"
-    sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
-
-    contains "$(pkg list-installed 2>/dev/null)" "resolv-conf" || {
-        info "Installing resolv-conf"
-        pkg install resolv-conf -y >/dev/null 2>&1
-    }
-
-    contains "$(pkg list-installed 2>/dev/null)" "proot" || {
-        info "Installing proot"
-        pkg install proot -y >/dev/null 2>&1
-    }
-
-    create_termux_alias
+    info "Installing mangal"
+    install -Dm755 mangal "$PREFIX/bin/mangal"
 }
 
 install_macos() {
