@@ -9,11 +9,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 - New feature: you can choose what anilist manga to link by pressing <kbd>a</kbd> in the manga chapters list.
   TUI mode only. This will affect what metadata is downloaded for the manga and what manga would be marked as read on your anilist profile.
+- Pressing <kbd>enter</kbd> on the chapter will now open it for reading if other chapters aren't selected.
+  Can be disabled with `mangal config set -k tui.read_on_enter -bv false`
+- Add an option to change spacing between items in the TUI.
+  Can be changed with `mangal config set -k tui.item_spacing -iv 1` (1 is default)
 
 ## 3.9.1
 
 - Fix version comparison mechanism for `update` command.
-  Not it compares each fragment separately (major, minor, patch) instead of comparing two versions as strings lexicographically.
+  Now it compares each fragment separately (major, minor, patch) instead of comparing two versions as strings lexicographically.
 
 ## 3.9.0
 

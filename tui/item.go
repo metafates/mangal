@@ -7,7 +7,6 @@ import (
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
-	"github.com/samber/lo"
 )
 
 type listItem struct {
@@ -30,9 +29,7 @@ func (t *listItem) Title() (title string) {
 	case *history.SavedChapter:
 		title = e.MangaName
 	case *anilist.Manga:
-		title, _ = lo.Find([]string{e.Title.English, e.Title.Romaji, e.Title.Native}, func(t string) bool {
-			return t != ""
-		})
+		title = e.Name()
 	default:
 		title = t.title
 	}
@@ -44,19 +41,21 @@ func (t *listItem) Title() (title string) {
 	return
 }
 
-func (t *listItem) Description() string {
+func (t *listItem) Description() (description string) {
 	switch e := t.internal.(type) {
 	case *source.Chapter:
-		return e.URL
+		description = e.URL
 	case *source.Manga:
-		return e.URL
+		description = e.URL
 	case *history.SavedChapter:
-		return fmt.Sprintf("%s : %d / %d", e.Name, e.Index, e.MangaChaptersTotal)
+		description = fmt.Sprintf("%s : %d / %d", e.Name, e.Index, e.MangaChaptersTotal)
 	case *anilist.Manga:
-		return e.SiteURL
+		description = e.SiteURL
 	default:
-		return t.description
+		description = t.description
 	}
+
+	return
 }
 
 func (t *listItem) FilterValue() string {

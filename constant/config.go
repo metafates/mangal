@@ -59,6 +59,11 @@ const (
 )
 
 const (
+	TUIItemSpacing = "tui.item_spacing"
+	TUIReadOnEnter = "tui.read_on_enter"
+)
+
+const (
 	InstallerUser   = "installer.user"
 	InstallerRepo   = "installer.repo"
 	InstallerBranch = "installer.branch"

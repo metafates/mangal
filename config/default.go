@@ -240,6 +240,16 @@ panic, fatal, error, warn, info, debug, trace`,
 			"",
 			"Anilist secret to use for authentication",
 		},
+		{
+			constant.TUIItemSpacing,
+			1,
+			"Spacing between items in the TUI",
+		},
+		{
+			constant.TUIReadOnEnter,
+			true,
+			"Read chapter on enter if other chapters aren't selected",
+		},
 	}
 
 	for _, field := range fields {

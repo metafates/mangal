@@ -46,12 +46,12 @@ Revision:       %s
 Installed With: %s
 `,
 			constant.AsciiArtLogo,
-			style.Italic(constant.Version),
-			style.Italic(runtime.GOOS),
-			style.Italic(runtime.GOARCH),
-			style.Italic(constant.BuiltAt), style.Faint(constant.BuiltBy),
-			style.Italic(constant.Revision),
-			style.Italic(installedWith),
+			constant.Version,
+			runtime.GOOS,
+			runtime.GOARCH,
+			constant.BuiltAt, style.Faint(constant.BuiltBy),
+			constant.Revision,
+			installedWith,
 		)
 	},
 }

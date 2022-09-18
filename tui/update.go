@@ -9,7 +9,6 @@ import (
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/open"
 	"github.com/metafates/mangal/provider"
@@ -165,10 +164,17 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.previousState()
 		}
 	case []*anilist.Manga:
+		manga, ok := anilist.GetRelation(b.selectedManga.Name)
+		id := -1
+		if ok {
+			id = manga.ID
+		}
+
 		items := make([]list.Item, len(msg))
 		for i, manga := range msg {
 			items[i] = &listItem{
 				internal: manga,
+				marked:   manga.ID == id,
 			}
 		}
 
@@ -513,6 +519,14 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.confirm):
 			if len(b.selectedChapters) != 0 {
 				b.newState(confirmState)
+			} else if viper.GetBool(constant.TUIReadOnEnter) {
+				if b.chaptersC.SelectedItem() == nil {
+					break
+				}
+
+				chapter := b.chaptersC.SelectedItem().(*listItem).internal.(*source.Chapter)
+				b.newState(readState)
+				return b, tea.Batch(b.readChapter(chapter), b.waitForChapterRead(), b.startLoading())
 			}
 		}
 	}
@@ -527,6 +541,8 @@ func (b *statefulBubble) updateAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case b.anilistC.FilterState() == list.Filtering:
+			break
 		case key.Matches(msg, b.keymap.openURL):
 			if b.anilistC.SelectedItem() == nil {
 				break
@@ -550,7 +566,7 @@ func (b *statefulBubble) updateAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			b.newState(chaptersState)
-			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`%s linked %s to %s`, icon.Get(icon.Success), style.Magenta(b.selectedManga.Name), style.Blue(manga.Title.English)))
+			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Magenta(b.selectedManga.Name), style.Blue(manga.Title.English), style.Faint(manga.SiteURL)))
 			return b, cmd
 		}
 	}

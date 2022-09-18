@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/metafates/mangal/anilist"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/installer"
@@ -17,6 +18,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"strings"
 	"time"
@@ -94,6 +96,7 @@ func (b *statefulBubble) newState(s state) {
 		downloadDoneState,
 		downloadState,
 		confirmState,
+		anilistSelectState,
 	}, b.state) {
 		b.statesHistory.Push(b.state)
 	}
@@ -183,6 +186,7 @@ func newBubble() *statefulBubble {
 
 	makeList := func(title string) list.Model {
 		delegate := list.NewDefaultDelegate()
+		delegate.SetSpacing(viper.GetInt(constant.TUIItemSpacing))
 		delegate.Styles.SelectedTitle = lipgloss.NewStyle().
 			Border(lipgloss.ThickBorder(), false, false, false, true).
 			BorderForeground(lipgloss.Color("5")).
