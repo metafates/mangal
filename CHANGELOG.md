@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.9.1
+
+- Fix version comparison mechanism for `update` command.
+  Not it compares each fragment separately (major, minor, patch) instead of comparing two versions as strings lexicographically.
+
 ## 3.9.0
 
 - New sources: [Mangakakalot](https://mangakakalot.com) & [Mangapill](https://mangapill.com)

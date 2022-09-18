@@ -40,7 +40,13 @@ func Update() (err error) {
 	}
 
 	erase()
-	if constant.Version >= version {
+
+	comp, err := util.CompareVersions(constant.Version, version)
+	if err != nil {
+		return err
+	}
+
+	if comp >= 0 {
 		fmt.Printf(
 			"%s %s %s\n",
 			style.Green("Congrats!"),
@@ -49,6 +55,8 @@ func Update() (err error) {
 		)
 		return
 	}
+
+	fmt.Printf("%s %s is out! You're on %s\n", style.Bold(constant.Mangal), style.Cyan(version), style.Blue(constant.Version))
 
 	method := DetectInstallationMethod()
 
@@ -74,8 +82,7 @@ func Update() (err error) {
 		return
 	}
 
-	fmt.Printf(`Updated.
-
+	fmt.Printf(`
 %s
 
 Report any bugs:
