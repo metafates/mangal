@@ -4,41 +4,47 @@ import (
 	"encoding/json"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
-	"github.com/spf13/afero"
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 var cache = anilistCache{
-	Mem: make(map[string]*Manga),
+	data: &anilistCacheData{Mangas: make(map[string]*Manga)},
+}
+
+type anilistCacheData struct {
+	Mangas map[string]*Manga `json:"mangas"`
 }
 
 type anilistCache struct {
-	Mem  map[string]*Manga `json:"mangas"`
-	file afero.File
+	data        *anilistCacheData
+	path        string
+	initialized bool
 }
 
 func (a *anilistCache) Init() error {
-	if a.file != nil {
+	if a.initialized {
 		return nil
 	}
 
 	log.Debug("Initializing anilist cacher")
 
-	var err error
 	path := filepath.Join(where.Cache(), "anilist_cache.json")
+	a.path = path
 	log.Debugf("Opening anilist cache file at %s", path)
-	a.file, err = filesystem.Api().OpenFile(path, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	file, err := filesystem.Api().OpenFile(path, os.O_RDONLY|os.O_CREATE, os.ModePerm)
 
 	if err != nil {
 		log.Warn(err)
 		return err
 	}
 
-	contents, err := io.ReadAll(a.file)
+	defer util.Ignore(file.Close)
+
+	contents, err := io.ReadAll(file)
 	if err != nil {
 		log.Warn(err)
 		return err
@@ -49,43 +55,40 @@ func (a *anilistCache) Init() error {
 		return nil
 	}
 
-	var temp anilistCache
-	err = json.Unmarshal(contents, &temp)
+	err = json.Unmarshal(contents, a.data)
 	if err != nil {
 		log.Warn(err)
 		return err
 	}
 
-	log.Debugf("Anilist cache file unmarshalled successfully, len is %d", len(temp.Mem))
-	a.Mem = temp.Mem
+	log.Debugf("Anilist cache file unmarshalled successfully, len is %d", len(a.data.Mangas))
 	return nil
 }
 
 func (a *anilistCache) Get(name string) (*Manga, bool) {
-	if a.file == nil {
-		_ = a.Init()
-	}
-	mangas, ok := a.Mem[a.formatName(name)]
+	_ = a.Init()
+
+	mangas, ok := a.data.Mangas[normalizeName(name)]
 	return mangas, ok
 }
 
 func (a *anilistCache) Set(name string, manga *Manga) error {
+	_ = a.Init()
+
 	log.Debug("Setting anilist cacher entry")
-	a.Mem[a.formatName(name)] = manga
-	marshalled, err := json.Marshal(a)
+	a.data.Mangas[normalizeName(name)] = manga
+	marshalled, err := json.Marshal(a.data)
 	if err != nil {
 		log.Warn(err)
 		return err
 	}
 
-	_, _ = a.file.Seek(0, 0)
-	_, err = a.file.Write(marshalled)
+	file, err := filesystem.Api().OpenFile(a.path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+
+	_, err = file.Write(marshalled)
 	if err != nil {
 		log.Warn(err)
 	}
-	return err
-}
 
-func (a *anilistCache) formatName(name string) string {
-	return strings.TrimSpace(strings.ToLower(name))
+	return err
 }

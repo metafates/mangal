@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/source"
@@ -27,6 +28,8 @@ func (t *listItem) Title() (title string) {
 		title = e.Name
 	case *history.SavedChapter:
 		title = e.MangaName
+	case *anilist.Manga:
+		title = e.Title.English
 	default:
 		title = t.title
 	}
@@ -46,6 +49,8 @@ func (t *listItem) Description() string {
 		return e.URL
 	case *history.SavedChapter:
 		return fmt.Sprintf("%s : %d / %d", e.Name, e.Index, e.MangaChaptersTotal)
+	case *anilist.Manga:
+		return e.SiteURL
 	default:
 		return t.description
 	}

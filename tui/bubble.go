@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/installer"
@@ -36,6 +37,7 @@ type statefulBubble struct {
 	sourcesC         list.Model
 	mangasC          list.Model
 	chaptersC        list.Model
+	anilistC         list.Model
 	progressC        progress.Model
 	helpC            help.Model
 
@@ -44,14 +46,15 @@ type statefulBubble struct {
 	selectedManga     *source.Manga
 	selectedChapters  map[*source.Chapter]struct{} // mathematical set
 
-	scrapersLoadedChannel   chan []*installer.Scraper
-	scraperInstalledChannel chan *installer.Scraper
-	sourcesLoadedChannel    chan []source.Source
-	foundMangasChannel      chan []*source.Manga
-	foundChaptersChannel    chan []*source.Chapter
-	chapterReadChannel      chan struct{}
-	chapterDownloadChannel  chan struct{}
-	errorChannel            chan error
+	scrapersLoadedChannel       chan []*installer.Scraper
+	scraperInstalledChannel     chan *installer.Scraper
+	sourcesLoadedChannel        chan []source.Source
+	foundMangasChannel          chan []*source.Manga
+	foundChaptersChannel        chan []*source.Chapter
+	fetchedAnilistMangasChannel chan []*anilist.Manga
+	chapterReadChannel          chan struct{}
+	chapterDownloadChannel      chan struct{}
+	errorChannel                chan error
 
 	progressStatus string
 
@@ -132,6 +135,9 @@ func (b *statefulBubble) resize(width, height int) {
 	b.chaptersC.SetSize(listWidth, listHeight)
 	b.chaptersC.Help.Width = listWidth
 
+	b.anilistC.SetSize(listWidth, listHeight)
+	b.anilistC.Help.Width = listWidth
+
 	b.progressC.Width = listWidth
 
 	b.width = styledWidth
@@ -157,14 +163,15 @@ func newBubble() *statefulBubble {
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
 
-		scrapersLoadedChannel:   make(chan []*installer.Scraper),
-		scraperInstalledChannel: make(chan *installer.Scraper),
-		sourcesLoadedChannel:    make(chan []source.Source),
-		foundMangasChannel:      make(chan []*source.Manga),
-		foundChaptersChannel:    make(chan []*source.Chapter),
-		chapterReadChannel:      make(chan struct{}),
-		chapterDownloadChannel:  make(chan struct{}),
-		errorChannel:            make(chan error),
+		scrapersLoadedChannel:       make(chan []*installer.Scraper),
+		scraperInstalledChannel:     make(chan *installer.Scraper),
+		sourcesLoadedChannel:        make(chan []source.Source),
+		foundMangasChannel:          make(chan []*source.Manga),
+		foundChaptersChannel:        make(chan []*source.Chapter),
+		fetchedAnilistMangasChannel: make(chan []*anilist.Manga),
+		chapterReadChannel:          make(chan struct{}),
+		chapterDownloadChannel:      make(chan struct{}),
+		errorChannel:                make(chan error),
 
 		selectedProviders:  make(map[*provider.Provider]struct{}),
 		selectedChapters:   make(map[*source.Chapter]struct{}),
@@ -173,9 +180,6 @@ func newBubble() *statefulBubble {
 		failedChapters:   make([]*source.Chapter, 0),
 		succededChapters: make([]*source.Chapter, 0),
 	}
-
-	defer func() {
-	}()
 
 	makeList := func(title string) list.Model {
 		delegate := list.NewDefaultDelegate()
@@ -227,6 +231,9 @@ func newBubble() *statefulBubble {
 
 	bubble.chaptersC = makeList("Chapters")
 	bubble.chaptersC.SetStatusBarItemName("chapter", "chapters")
+
+	bubble.anilistC = makeList("Anilist Mangas")
+	bubble.anilistC.SetStatusBarItemName("manga", "mangas")
 
 	if w, h, err := util.TerminalSize(); err == nil {
 		bubble.resize(w, h)

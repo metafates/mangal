@@ -15,7 +15,7 @@ var (
 )
 
 func normalizeName(name string) string {
-	return strings.ToLower(name)
+	return strings.ToLower(strings.TrimSpace(name))
 }
 
 func SetRelation(name string, to *Manga) error {

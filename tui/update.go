@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/installer"
@@ -45,6 +46,14 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.chaptersC.ResetSelected()
 				b.chaptersC.ResetFilter()
 				b.selectedChapters = make(map[*source.Chapter]struct{})
+			case anilistSelectState:
+				if b.anilistC.FilterState() != list.Unfiltered {
+					b.anilistC, cmd = b.anilistC.Update(msg)
+					return b, cmd
+				}
+
+				b.anilistC.ResetSelected()
+				b.anilistC.ResetFilter()
 			case mangasState:
 				if b.mangasC.FilterState() != list.Unfiltered {
 					b.mangasC, cmd = b.mangasC.Update(msg)
@@ -91,6 +100,8 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return b.updateMangas(msg)
 	case chaptersState:
 		return b.updateChapters(msg)
+	case anilistSelectState:
+		return b.updaterAnilistSelect(msg)
 	case confirmState:
 		return b.updateConfirm(msg)
 	case readState:
@@ -151,6 +162,17 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.back):
 			b.previousState()
 		}
+	case []*anilist.Manga:
+		items := make([]list.Item, len(msg))
+		for i, manga := range msg {
+			items[i] = &listItem{
+				internal: manga,
+			}
+		}
+
+		cmd = b.anilistC.SetItems(items)
+		b.newState(anilistSelectState)
+		return b, tea.Batch(cmd, b.stopLoading())
 	case []*installer.Scraper:
 		b.newState(scrapersInstallState)
 		return b, b.stopLoading()
@@ -417,6 +439,9 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				b.raiseError(err)
 			}
+		case key.Matches(msg, b.keymap.anilistSelect):
+			b.newState(loadingState)
+			return b, tea.Batch(b.startLoading(), b.fetchAnilist(b.selectedManga), b.waitForAnilist())
 		case key.Matches(msg, b.keymap.selectVolume):
 			if b.chaptersC.SelectedItem() == nil {
 				break
@@ -491,6 +516,34 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	b.chaptersC, cmd = b.chaptersC.Update(msg)
+	return b, cmd
+}
+
+func (b *statefulBubble) updaterAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, b.keymap.confirm):
+			if b.anilistC.SelectedItem() == nil {
+				break
+			}
+
+			manga := b.anilistC.SelectedItem().(*listItem).internal.(*anilist.Manga)
+			err := anilist.SetRelation(b.selectedManga.Name, manga)
+			if err != nil {
+				b.raiseError(err)
+				break
+			}
+
+			b.newState(chaptersState)
+			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf("Successfully linked %s to %s", b.selectedManga.Name, manga.Title.English))
+			return b, cmd
+		}
+	}
+
+	b.anilistC, cmd = b.anilistC.Update(msg)
 	return b, cmd
 }
 
