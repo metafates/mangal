@@ -9,10 +9,12 @@ import (
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
+	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/open"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
@@ -101,7 +103,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case chaptersState:
 		return b.updateChapters(msg)
 	case anilistSelectState:
-		return b.updaterAnilistSelect(msg)
+		return b.updateAnilistSelect(msg)
 	case confirmState:
 		return b.updateConfirm(msg)
 	case readState:
@@ -519,12 +521,22 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, cmd
 }
 
-func (b *statefulBubble) updaterAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (b *statefulBubble) updateAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
+		case key.Matches(msg, b.keymap.openURL):
+			if b.anilistC.SelectedItem() == nil {
+				break
+			}
+
+			m, _ := b.anilistC.SelectedItem().(*listItem).internal.(*anilist.Manga)
+			err := open.Start(m.SiteURL)
+			if err != nil {
+				b.raiseError(err)
+			}
 		case key.Matches(msg, b.keymap.confirm):
 			if b.anilistC.SelectedItem() == nil {
 				break
@@ -538,7 +550,7 @@ func (b *statefulBubble) updaterAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) 
 			}
 
 			b.newState(chaptersState)
-			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf("Successfully linked %s to %s", b.selectedManga.Name, manga.Title.English))
+			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`%s linked %s to %s`, icon.Get(icon.Success), style.Magenta(b.selectedManga.Name), style.Blue(manga.Title.English)))
 			return b, cmd
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
+	"github.com/samber/lo"
 )
 
 type listItem struct {
@@ -29,7 +30,9 @@ func (t *listItem) Title() (title string) {
 	case *history.SavedChapter:
 		title = e.MangaName
 	case *anilist.Manga:
-		title = e.Title.English
+		title, _ = lo.Find([]string{e.Title.English, e.Title.Romaji, e.Title.Native}, func(t string) bool {
+			return t != ""
+		})
 	default:
 		title = t.title
 	}

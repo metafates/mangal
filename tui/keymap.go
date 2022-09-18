@@ -157,7 +157,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 		download := withDescription(k.confirm, "download selected")
 		return h(k.read, k.selectOne, k.selectAll, download, k.back), h(k.read, k.selectOne, k.selectAll, k.clearSelection, k.openURL, download, k.selectVolume, k.anilistSelect, k.back)
 	case anilistSelectState:
-		return to2(h(k.confirm, k.back))
+		return to2(h(k.confirm, k.openURL, k.back))
 	case confirmState:
 		return to2(h(k.confirm, k.back, k.quit))
 	case readState:

@@ -22,6 +22,10 @@ func SetRelation(name string, to *Manga) error {
 	return cache.Set(name, to)
 }
 
+func GetRelation(name string) (*Manga, bool) {
+	return cache.Get(name)
+}
+
 func FindClosest(name string) (*Manga, error) {
 	if retries >= limit {
 		retries = 0
