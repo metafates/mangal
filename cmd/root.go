@@ -53,7 +53,7 @@ var rootCmd = &cobra.Command{
 	Use:     constant.Mangal,
 	Version: constant.Version,
 	Short:   "The ultimate manga downloader",
-	Long: style.Combined(style.Yellow, style.Bold)(constant.AssciiArtLogo) + "\n" +
+	Long: constant.AsciiArtLogo + "\n" +
 		style.Combined(style.HiRed, style.Italic)("    - The ultimate cli manga downloader"),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {

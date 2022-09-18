@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
-## 3.10.1
+## 3.10.0
+
+- New feature: you can choose what anilist manga to link by pressing <kbd>a</kbd> in the manga chapters list.
+  TUI mode only. This will affect what metadata is downloaded for the manga and what manga would be marked as read on your anilist profile.
 
 ## 3.9.1
 
@@ -190,7 +193,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 - Command to check for update added `mangal check-update` #26
 - Scraper system improved
-- Fixed bug where chapters with colon in title would not open for read on windows #24
+- Fixed bug where chapters with colon in title would not open for read on Windows #24
 - Various bug fixes
 
 ## 1.5.1
