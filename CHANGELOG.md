@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.10.0
+
+- New feature: you can select what anilist manga to link by pressing <kbd>a</kbd> in the manga chapters list (TUI mode only).
+  This affects what metadata would be fetched from anilist and what manga would be marked as read with anilist integration enabled.
+
 ## 3.9.0
 
 - New sources: [Mangakakalot](https://mangakakalot.com) & [Mangapill](https://mangapill.com)
