@@ -186,9 +186,10 @@ func newBubble() *statefulBubble {
 		succededChapters: make([]*source.Chapter, 0),
 	}
 
-	makeList := func(title string) list.Model {
+	makeList := func(title string, description bool) list.Model {
 		delegate := list.NewDefaultDelegate()
 		delegate.SetSpacing(viper.GetInt(constant.TUIItemSpacing))
+		delegate.ShowDescription = description
 		delegate.Styles.SelectedTitle = lipgloss.NewStyle().
 			Border(lipgloss.ThickBorder(), false, false, false, true).
 			BorderForeground(lipgloss.Color("5")).
@@ -225,22 +226,23 @@ func newBubble() *statefulBubble {
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 
-	bubble.scrapersInstallC = makeList("Install Scrapers")
+	bubble.scrapersInstallC = makeList("Install Scrapers", true)
 	bubble.scrapersInstallC.SetStatusBarItemName("scraper", "scrapers")
 
-	bubble.historyC = makeList("History")
+	bubble.historyC = makeList("History", true)
 	bubble.sourcesC.SetStatusBarItemName("chapter", "chapters")
 
-	bubble.sourcesC = makeList("Select Source")
+	bubble.sourcesC = makeList("Select Source", true)
 	bubble.sourcesC.SetStatusBarItemName("source", "sources")
 
-	bubble.mangasC = makeList("Mangas")
+	showURLs := viper.GetBool(constant.TUIShowURLs)
+	bubble.mangasC = makeList("Mangas", showURLs)
 	bubble.mangasC.SetStatusBarItemName("manga", "mangas")
 
-	bubble.chaptersC = makeList("Chapters")
+	bubble.chaptersC = makeList("Chapters", showURLs)
 	bubble.chaptersC.SetStatusBarItemName("chapter", "chapters")
 
-	bubble.anilistC = makeList("Anilist Mangas")
+	bubble.anilistC = makeList("Anilist Mangas", showURLs)
 	bubble.anilistC.SetStatusBarItemName("manga", "mangas")
 
 	if w, h, err := util.TerminalSize(); err == nil {

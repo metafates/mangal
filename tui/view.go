@@ -154,13 +154,23 @@ func (b *statefulBubble) viewDownloadDone() string {
 		msg = fmt.Sprintf("%s, %s", s, f)
 	}
 
+	lines := []string{
+		style.Title("Finish"),
+		"",
+		msg,
+	}
+
+	if succeded > 0 {
+		path, err := b.selectedManga.Path(false)
+		if err == nil {
+			lines = append(lines, "")
+			lines = append(lines, fmt.Sprintf("Downloaded to %s", style.Faint(path)))
+		}
+	}
+
 	return b.renderLines(
 		true,
-		[]string{
-			style.Title("Finish"),
-			"",
-			msg,
-		},
+		lines,
 	)
 }
 

@@ -260,6 +260,11 @@ panic, fatal, error, warn, info, debug, trace`,
 			"> ",
 			"Search prompt string to use",
 		},
+		{
+			constant.TUIShowURLs,
+			true,
+			"Show URLs under list items",
+		},
 	}
 
 	for _, field := range fields {

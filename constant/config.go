@@ -63,6 +63,7 @@ const (
 	TUIItemSpacing        = "tui.item_spacing"
 	TUIReadOnEnter        = "tui.read_on_enter"
 	TUISearchPromptString = "tui.search_prompt"
+	TUIShowURLs           = "tui.show_urls"
 )
 
 const (

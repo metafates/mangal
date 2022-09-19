@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Add an option to change spacing between items in the TUI.
   Can be changed with `mangal config set -k tui.item_spacing -iv 1` (1 is default)
 - List filtering in the TUI works better now by stripping the icon
+- Option to hide list items urls in TUI. To hide: `mangal config set -k tui.show_urls -bv false`
+- After downloading of chapters is done, mangal will show the output path
 
 ## 3.9.1
 
