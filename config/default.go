@@ -241,6 +241,11 @@ panic, fatal, error, warn, info, debug, trace`,
 			"Anilist secret to use for authentication",
 		},
 		{
+			constant.AnilistLinkOnMangaSelect,
+			true,
+			"Show link to Anilist on manga select",
+		},
+		{
 			constant.TUIItemSpacing,
 			1,
 			"Spacing between items in the TUI",
@@ -249,6 +254,11 @@ panic, fatal, error, warn, info, debug, trace`,
 			constant.TUIReadOnEnter,
 			true,
 			"Read chapter on enter if other chapters aren't selected",
+		},
+		{
+			constant.TUISearchPromptString,
+			"> ",
+			"Search prompt string to use",
 		},
 	}
 

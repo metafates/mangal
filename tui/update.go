@@ -45,6 +45,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				b.chaptersC.ResetSelected()
+				b.chaptersC.NewStatusMessage("")
 				b.chaptersC.ResetFilter()
 				b.selectedChapters = make(map[*source.Chapter]struct{})
 			case anilistSelectState:
@@ -53,6 +54,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return b, cmd
 				}
 
+				b.anilistC.NewStatusMessage("")
 				b.anilistC.ResetSelected()
 				b.anilistC.ResetFilter()
 			case mangasState:
@@ -61,6 +63,7 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return b, cmd
 				}
 
+				b.mangasC.NewStatusMessage("")
 				b.mangasC.ResetSelected()
 				b.mangasC.ResetFilter()
 			case historyState:
@@ -68,16 +71,22 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					b.historyC, cmd = b.historyC.Update(msg)
 					return b, cmd
 				}
+
+				b.historyC.NewStatusMessage("")
 			case sourcesState:
 				if b.sourcesC.FilterState() != list.Unfiltered {
 					b.sourcesC, cmd = b.sourcesC.Update(msg)
 					return b, cmd
 				}
+
+				b.sourcesC.NewStatusMessage("")
 			case scrapersInstallState:
 				if b.scrapersInstallC.FilterState() != list.Unfiltered {
 					b.scrapersInstallC, cmd = b.scrapersInstallC.Update(msg)
 					return b, cmd
 				}
+
+				b.scrapersInstallC.NewStatusMessage("")
 			}
 
 			b.previousState()
@@ -421,8 +430,12 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		cmd = b.chaptersC.SetItems(items)
 		b.newState(chaptersState)
-		b.stopLoading()
-		return b, cmd
+
+		if viper.GetBool(constant.AnilistLinkOnMangaSelect) {
+			return b, tea.Batch(cmd, b.fetchAndSetAnilist(b.selectedManga), b.waitForAnilistFetchAndSet())
+		}
+
+		return b, tea.Batch(cmd, b.stopLoading())
 	}
 
 	b.mangasC, cmd = b.mangasC.Update(msg)
@@ -433,6 +446,9 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case *anilist.Manga:
+		cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Magenta(b.selectedManga.Name), style.Blue(msg.Name()), style.Faint(msg.SiteURL)))
+		return b, tea.Batch(cmd, b.stopLoading())
 	case tea.KeyMsg:
 		switch {
 		case b.chaptersC.FilterState() == list.Filtering:
@@ -565,8 +581,8 @@ func (b *statefulBubble) updateAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 				break
 			}
 
-			b.newState(chaptersState)
-			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Magenta(b.selectedManga.Name), style.Blue(manga.Title.English), style.Faint(manga.SiteURL)))
+			b.previousState()
+			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Magenta(b.selectedManga.Name), style.Blue(manga.Name()), style.Faint(manga.SiteURL)))
 			return b, cmd
 		}
 	}

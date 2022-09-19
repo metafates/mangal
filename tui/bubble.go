@@ -54,6 +54,7 @@ type statefulBubble struct {
 	foundMangasChannel          chan []*source.Manga
 	foundChaptersChannel        chan []*source.Chapter
 	fetchedAnilistMangasChannel chan []*anilist.Manga
+	closestAnilistMangaChannel  chan *anilist.Manga
 	chapterReadChannel          chan struct{}
 	chapterDownloadChannel      chan struct{}
 	errorChannel                chan error
@@ -172,6 +173,7 @@ func newBubble() *statefulBubble {
 		foundMangasChannel:          make(chan []*source.Manga),
 		foundChaptersChannel:        make(chan []*source.Chapter),
 		fetchedAnilistMangasChannel: make(chan []*anilist.Manga),
+		closestAnilistMangaChannel:  make(chan *anilist.Manga),
 		chapterReadChannel:          make(chan struct{}),
 		chapterDownloadChannel:      make(chan struct{}),
 		errorChannel:                make(chan error),
@@ -204,7 +206,8 @@ func newBubble() *statefulBubble {
 		}
 		listC.Title = title
 		listC.Styles.NoItems = paddingStyle
-		listC.StatusMessageLifetime = time.Second * 5
+		//listC.StatusMessageLifetime = time.Second * 5
+		listC.StatusMessageLifetime = time.Hour * 999 // forever
 
 		return listC
 	}
@@ -218,6 +221,7 @@ func newBubble() *statefulBubble {
 	bubble.inputC = textinput.New()
 	bubble.inputC.Placeholder = "Search"
 	bubble.inputC.CharLimit = 60
+	bubble.inputC.Prompt = viper.GetString(constant.TUISearchPromptString)
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 

@@ -52,15 +52,17 @@ const (
 )
 
 const (
-	AnilistEnable = "anilist.enable"
-	AnilistID     = "anilist.id"
-	AnilistSecret = "anilist.secret"
-	AnilistCode   = "anilist.code"
+	AnilistEnable            = "anilist.enable"
+	AnilistID                = "anilist.id"
+	AnilistSecret            = "anilist.secret"
+	AnilistCode              = "anilist.code"
+	AnilistLinkOnMangaSelect = "anilist.link_on_manga_select"
 )
 
 const (
-	TUIItemSpacing = "tui.item_spacing"
-	TUIReadOnEnter = "tui.read_on_enter"
+	TUIItemSpacing        = "tui.item_spacing"
+	TUIReadOnEnter        = "tui.read_on_enter"
+	TUISearchPromptString = "tui.search_prompt"
 )
 
 const (
