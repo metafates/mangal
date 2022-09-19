@@ -423,9 +423,15 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case []*source.Chapter:
 		items := make([]list.Item, len(msg))
-		for i, c := range msg {
 
-			items[i] = &listItem{internal: c}
+		if viper.GetBool(constant.TUIReverseChapters) {
+			for i, c := range msg {
+				items[len(msg)-i-1] = &listItem{internal: c}
+			}
+		} else {
+			for i, c := range msg {
+				items[i] = &listItem{internal: c}
+			}
 		}
 
 		cmd = b.chaptersC.SetItems(items)

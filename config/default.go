@@ -265,6 +265,11 @@ panic, fatal, error, warn, info, debug, trace`,
 			true,
 			"Show URLs under list items",
 		},
+		{
+			constant.TUIReverseChapters,
+			false,
+			"Reverse chapters order",
+		},
 	}
 
 	for _, field := range fields {

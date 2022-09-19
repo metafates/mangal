@@ -11,13 +11,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
   TUI mode only. This will affect what metadata is downloaded for the manga and what manga would be marked as read on your anilist profile.
 - Pressing <kbd>enter</kbd> on the chapter will now open it for reading if other chapters aren't selected.
   Can be disabled with `mangal config set -k tui.read_on_enter -bv false`
-- The chapter selection page now shows which manga from the anilist it is linked to
+- The chapter selection page now shows which manga from the anilist it is linked to.
   Can be disabled with `mangal config set -k anilist.link_on_manga_select -bv false`
 - Add an option to change spacing between items in the TUI.
   Can be changed with `mangal config set -k tui.item_spacing -iv 1` (1 is default)
 - List filtering in the TUI works better now by stripping the icon
 - Option to hide list items urls in TUI. To hide: `mangal config set -k tui.show_urls -bv false`
 - After downloading of chapters is done, mangal will show the output path
+- Option to reverse order of the chapters in the TUI. `mangal config set -k tui.reverse_chapters -bv true` to enable
 
 ## 3.9.1
 
