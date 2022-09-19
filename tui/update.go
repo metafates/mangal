@@ -430,12 +430,13 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		cmd = b.chaptersC.SetItems(items)
 		b.newState(chaptersState)
+		b.stopLoading()
 
 		if viper.GetBool(constant.AnilistLinkOnMangaSelect) {
 			return b, tea.Batch(cmd, b.fetchAndSetAnilist(b.selectedManga), b.waitForAnilistFetchAndSet())
 		}
 
-		return b, tea.Batch(cmd, b.stopLoading())
+		return b, cmd
 	}
 
 	b.mangasC, cmd = b.mangasC.Update(msg)
@@ -448,7 +449,7 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case *anilist.Manga:
 		cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Magenta(b.selectedManga.Name), style.Blue(msg.Name()), style.Faint(msg.SiteURL)))
-		return b, tea.Batch(cmd, b.stopLoading())
+		return b, cmd
 	case tea.KeyMsg:
 		switch {
 		case b.chaptersC.FilterState() == list.Filtering:

@@ -284,8 +284,8 @@ func (b *statefulBubble) fetchAndSetAnilist(manga *source.Manga) tea.Cmd {
 	return func() tea.Msg {
 		alManga, err := anilist.FindClosest(manga.Name)
 		if err != nil {
-			b.errorChannel <- err
-			log.Error(err)
+			// this error is not that important, we can ignore t
+			log.Warn(err)
 		} else {
 			b.closestAnilistMangaChannel <- alManga
 		}
@@ -296,13 +296,7 @@ func (b *statefulBubble) fetchAndSetAnilist(manga *source.Manga) tea.Cmd {
 
 func (b *statefulBubble) waitForAnilistFetchAndSet() tea.Cmd {
 	return func() tea.Msg {
-		select {
-		case res := <-b.closestAnilistMangaChannel:
-			return res
-		case err := <-b.errorChannel:
-			b.lastError = err
-			return err
-		}
+		return <-b.closestAnilistMangaChannel
 	}
 }
 

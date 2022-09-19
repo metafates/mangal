@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
+	"strings"
 )
 
 type listItem struct {
@@ -23,7 +24,10 @@ func (t *listItem) toggleMark() {
 func (t *listItem) Title() (title string) {
 	switch e := t.internal.(type) {
 	case *source.Chapter:
-		title = fmt.Sprintf("%s %s", e.Name, style.Faint(e.Volume))
+		title = e.Name
+		if e.Volume != "" {
+			title += " " + style.Faint(e.Volume)
+		}
 	case *source.Manga:
 		title = e.Name
 	case *history.SavedChapter:
@@ -59,5 +63,10 @@ func (t *listItem) Description() (description string) {
 }
 
 func (t *listItem) FilterValue() string {
-	return t.Title()
+	// split by whitespace and remove the last element
+	// which is the icon
+	words := strings.Split(t.Title(), " ")
+	words = words[:len(words)-1]
+
+	return strings.Join(words, " ")
 }
