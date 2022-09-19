@@ -63,10 +63,5 @@ func (t *listItem) Description() (description string) {
 }
 
 func (t *listItem) FilterValue() string {
-	// split by whitespace and remove the last element
-	// which is the icon
-	words := strings.Split(t.Title(), " ")
-	words = words[:len(words)-1]
-
-	return strings.Join(words, " ")
+	return strings.Split(t.Title(), "\033")[0]
 }

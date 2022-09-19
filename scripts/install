@@ -53,24 +53,6 @@ install_completions() {
     fi
 }
 
-create_termux_alias() {
-    ALIAS="mangal='proot -b $PREFIX/etc/resolv.conf:/etc/resolv.conf $OUT/mangal'"
-    BASHRC="$PREFIX/etc/bash.bashrc"
-    ZSHRC="$HOME/.zshrc"
-
-    contains "$(cat "$BASHRC")" "alias mangal" || {
-        echo "alias $ALIAS" >> "$PREFIX/etc/bash.bashrc"
-        info "Alias for bash created"
-        info "Restart your shell or run 'source $BASHRC'"
-    }
-
-    contains "$(cat "$ZSHRC" 2> /dev/null)" "alias mangal" || {
-        echo "alias $ALIAS" >> "$HOME/.zshrc"
-        info "Alias for zsh created"
-        info "Restart your shell or run 'source $ZSHRC'"
-    }
-}
-
 info() {
     printf "\033[1;35m%s\033[0m %s\n" "info:" "$1"
 }
@@ -287,7 +269,7 @@ install_binary() {
     fi
 
     info "Moving to ${OUT}"
-    sudo sh -c "install '$TMPDIR/$FILE_BASENAME' '${OUT}'"
+    sudo sh -c "install -Dm755 '$TMPDIR/$FILE_BASENAME' '${OUT}'"
     install_completions "$TMPDIR/completions"
 }
 
@@ -334,12 +316,12 @@ install() {
         ;;
     Linux)
         case $(cat /etc/*release 2>/dev/null | tr "[:upper:]" "[:lower:]") in
-        *debian*)
-            info "Debian detected"
-            install_deb
-            ;;
         *ubuntu*)
             info "Ubuntu detected"
+            install_deb
+            ;;
+        *debian*)
+            info "Debian detected"
             install_deb
             ;;
         *fedora*)
@@ -351,7 +333,7 @@ install() {
                 info "Termux detected"
                 install_termux
             else
-                info "Unknown linux distro detected"
+                info "Linux detected"
                 install_binary
             fi
             ;;

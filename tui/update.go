@@ -448,7 +448,7 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case *anilist.Manga:
-		cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Magenta(b.selectedManga.Name), style.Blue(msg.Name()), style.Faint(msg.SiteURL)))
+		cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked to %s %s`, style.Blue(msg.Name()), style.Faint(msg.SiteURL)))
 		return b, cmd
 	case tea.KeyMsg:
 		switch {
