@@ -34,6 +34,12 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.forceQuit):
 			return b, tea.Quit
 		case key.Matches(msg, b.keymap.back):
+			onListBack := func(l *list.Model) tea.Cmd {
+				l.ResetSelected()
+				l.ResetFilter()
+
+				return tea.Batch(cmd, l.NewStatusMessage(""))
+			}
 
 			switch b.state {
 			case searchState:
@@ -44,56 +50,50 @@ func (b *statefulBubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return b, cmd
 				}
 
-				b.chaptersC.ResetSelected()
-				b.chaptersC.NewStatusMessage("")
-				b.chaptersC.ResetFilter()
 				b.selectedChapters = make(map[*source.Chapter]struct{})
+				cmd = onListBack(&b.chaptersC)
 			case anilistSelectState:
 				if b.anilistC.FilterState() != list.Unfiltered {
 					b.anilistC, cmd = b.anilistC.Update(msg)
 					return b, cmd
 				}
 
-				b.anilistC.NewStatusMessage("")
-				b.anilistC.ResetSelected()
-				b.anilistC.ResetFilter()
+				cmd = onListBack(&b.anilistC)
 			case mangasState:
 				if b.mangasC.FilterState() != list.Unfiltered {
 					b.mangasC, cmd = b.mangasC.Update(msg)
 					return b, cmd
 				}
 
-				b.mangasC.NewStatusMessage("")
-				b.mangasC.ResetSelected()
-				b.mangasC.ResetFilter()
+				cmd = onListBack(&b.mangasC)
 			case historyState:
 				if b.historyC.FilterState() != list.Unfiltered {
 					b.historyC, cmd = b.historyC.Update(msg)
 					return b, cmd
 				}
 
-				b.historyC.NewStatusMessage("")
+				cmd = onListBack(&b.historyC)
 			case sourcesState:
 				if b.sourcesC.FilterState() != list.Unfiltered {
 					b.sourcesC, cmd = b.sourcesC.Update(msg)
 					return b, cmd
 				}
 
-				b.sourcesC.NewStatusMessage("")
+				cmd = onListBack(&b.sourcesC)
 			case scrapersInstallState:
 				if b.scrapersInstallC.FilterState() != list.Unfiltered {
 					b.scrapersInstallC, cmd = b.scrapersInstallC.Update(msg)
 					return b, cmd
 				}
 
-				b.scrapersInstallC.NewStatusMessage("")
+				cmd = onListBack(&b.scrapersInstallC)
 			}
 
 			b.previousState()
 			b.stopLoading()
 			b.failedChapters = make([]*source.Chapter, 0)
 			b.succededChapters = make([]*source.Chapter, 0)
-			return b, nil
+			return b, cmd
 		}
 	}
 

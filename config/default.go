@@ -270,6 +270,11 @@ panic, fatal, error, warn, info, debug, trace`,
 			false,
 			"Reverse chapters order",
 		},
+		{
+			constant.TUIShowDownloadedPath,
+			true,
+			"Show path where chapters were downloaded",
+		},
 	}
 
 	for _, field := range fields {

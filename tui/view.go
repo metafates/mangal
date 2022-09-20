@@ -3,9 +3,11 @@ package tui
 import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
+	"github.com/spf13/viper"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -160,7 +162,7 @@ func (b *statefulBubble) viewDownloadDone() string {
 		msg,
 	}
 
-	if succeded > 0 {
+	if succeded > 0 && viper.GetBool(constant.TUIShowDownloadedPath) {
 		path, err := b.selectedManga.Path(false)
 		if err == nil {
 			lines = append(lines, "")

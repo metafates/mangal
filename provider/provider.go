@@ -43,7 +43,7 @@ func (p Provider) String() string {
 	return p.Name
 }
 
-var customProviderExtension = ".lua"
+const customProviderExtension = ".lua"
 
 var defaultProviders = []*Provider{
 	{
@@ -55,21 +55,15 @@ var defaultProviders = []*Provider{
 	},
 }
 
-func DefaultProviders() map[string]*Provider {
-	providers := make(map[string]*Provider, len(defaultProviders))
-
-	for _, provider := range defaultProviders {
-		providers[provider.Name] = provider
-	}
-
-	return providers
+func DefaultProviders() []*Provider {
+	return defaultProviders
 }
 
-func CustomProviders() map[string]*Provider {
+func CustomProviders() []*Provider {
 	files, err := filesystem.Api().ReadDir(where.Sources())
 
 	if err != nil {
-		return make(map[string]*Provider)
+		return make([]*Provider, 0)
 	}
 
 	paths := lo.FilterMap(files, func(f os.FileInfo, _ int) (string, bool) {
@@ -78,12 +72,12 @@ func CustomProviders() map[string]*Provider {
 		}
 		return "", false
 	})
-	providers := make(map[string]*Provider, len(paths))
+	providers := make([]*Provider, len(paths))
 
-	for _, path := range paths {
+	for i, path := range paths {
 		name := util.FileStem(path)
 		path := path
-		providers[name] = &Provider{
+		providers[i] = &Provider{
 			ID:   custom.IDfromName(name),
 			Name: name,
 			CreateSource: func() (source.Source, error) {
@@ -96,7 +90,7 @@ func CustomProviders() map[string]*Provider {
 }
 
 func Get(name string) (*Provider, bool) {
-	for _, provider := range defaultProviders {
+	for _, provider := range DefaultProviders() {
 		if provider.Name == name {
 			return provider, true
 		}

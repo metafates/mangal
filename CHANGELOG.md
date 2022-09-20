@@ -17,7 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
   Can be changed with `mangal config set -k tui.item_spacing -iv 1` (1 is default)
 - List filtering in the TUI works better now by stripping the icon
 - Option to hide list items urls in TUI. To hide: `mangal config set -k tui.show_urls -bv false`
-- After downloading of chapters is done, mangal will show the output path
+- After downloading of chapters is done, mangal will show the output path.
+  To disable: `mangal config set -k tui.show_downloaded_path -bv false`
 - Option to reverse order of the chapters in the TUI. `mangal config set -k tui.reverse_chapters -bv true` to enable
 
 ## 3.9.1
