@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - After downloading of chapters is done, mangal will show the output path.
   To disable: `mangal config set -k tui.show_downloaded_path -bv false`
 - Option to reverse order of the chapters in the TUI. `mangal config set -k tui.reverse_chapters -bv true` to enable
+- Reduce the size of the compiled binary by removing unused lua libraries
 
 ## 3.9.1
 

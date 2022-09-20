@@ -231,9 +231,9 @@ from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) 
 
 Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
 
-Check the [defined modules](luamodules) for more information.
+Check the [defined modules](https://github.com/metafates/mangal-lua-libs) for more information.
 
-For scraper examples, check the [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+For scrapers examples, check the [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 
 ### Creating a custom scraper
 
