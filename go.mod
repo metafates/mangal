@@ -15,7 +15,7 @@ require (
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/ka-weihe/fast-levenshtein v0.0.0-20201227151214-4c99ee36a1ba
 	github.com/pdfcpu/pdfcpu v0.3.13
-	github.com/samber/lo v1.28.0
+	github.com/samber/lo v1.28.2
 	github.com/sirupsen/logrus v1.9.0
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/afero v1.9.2
@@ -23,8 +23,8 @@ require (
 	github.com/spf13/viper v1.13.0
 	github.com/vadv/gopher-lua-libs v0.3.0
 	github.com/yuin/gopher-lua v0.0.0-20220504180219-658193537a64
-	golang.org/x/exp v0.0.0-20220909182711-5c715a9e8561
-	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035
+	golang.org/x/exp v0.0.0-20220916125017-b168a2c6b86b
+	golang.org/x/term v0.0.0-20220919170432-7a66f970e087
 )
 
 require (
@@ -35,7 +35,7 @@ require (
 	github.com/antchfx/xmlquery v1.3.12 // indirect
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
-	github.com/aws/aws-sdk-go v1.44.95 // indirect
+	github.com/aws/aws-sdk-go v1.44.101 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cbroglie/mustache v1.4.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -63,7 +63,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
-	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
@@ -95,8 +95,8 @@ require (
 	github.com/ysmood/leakless v0.8.0 // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7 // indirect
 	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69 // indirect
-	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
-	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
+	golang.org/x/net v0.0.0-20220919232410-f2f64ebce3c1 // indirect
+	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
