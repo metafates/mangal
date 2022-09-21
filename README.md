@@ -11,12 +11,13 @@
     The most advanced CLI manga downloader in the entire universe!
 </h3>
 
+https://user-images.githubusercontent.com/62389790/191430795-cb9859cc-5252-4155-b34b-ecf727003407.mp4
+
 ## Try it!
 
 ```shell
 curl -sSL mangal.metafates.one/run | sh
 ```
-<img width="613" alt="MINI" src="https://user-images.githubusercontent.com/62389790/191431628-078f107a-89ee-4ed1-a414-c2bca97a913e.png">
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
 > Not available on Windows.
