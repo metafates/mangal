@@ -1,4 +1,4 @@
-************<h1 align="center">Mangal 3 📜</h1>
+<h1 align="center">Mangal 3 📜</h1>
 
 <p align="center">
     <img alt="Linux" src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black">
