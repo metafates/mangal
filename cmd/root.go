@@ -35,10 +35,17 @@ func init() {
 
 	rootCmd.PersistentFlags().StringP("source", "S", "", "default source to use")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("source", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		d := lo.Keys(provider.DefaultProviders())
-		d = append(d, lo.Keys(provider.CustomProviders())...)
+		var sources []string
 
-		return d, cobra.ShellCompDirectiveDefault
+		for _, p := range provider.DefaultProviders() {
+			sources = append(sources, p.Name)
+		}
+
+		for _, p := range provider.CustomProviders() {
+			sources = append(sources, p.Name)
+		}
+
+		return sources, cobra.ShellCompDirectiveDefault
 	}))
 	lo.Must0(viper.BindPFlag(constant.DownloaderDefaultSource, rootCmd.PersistentFlags().Lookup("source")))
 
@@ -53,7 +60,7 @@ var rootCmd = &cobra.Command{
 	Use:     constant.Mangal,
 	Version: constant.Version,
 	Short:   "The ultimate manga downloader",
-	Long: style.Combined(style.Yellow, style.Bold)(constant.AssciiArtLogo) + "\n" +
+	Long: constant.AsciiArtLogo + "\n" +
 		style.Combined(style.HiRed, style.Italic)("    - The ultimate cli manga downloader"),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {

@@ -33,8 +33,8 @@ var sourcesCmd = &cobra.Command{
 		customProviders := provider.CustomProviders()
 
 		h("Builtin:")
-		for name := range defaultProviders {
-			cmd.Println(name)
+		for _, p := range defaultProviders {
+			cmd.Println(p.Name)
 		}
 
 		if len(customProviders) == 0 {
@@ -44,8 +44,8 @@ var sourcesCmd = &cobra.Command{
 		h("")
 
 		h("Custom:")
-		for name := range provider.CustomProviders() {
-			cmd.Println(name)
+		for _, p := range provider.CustomProviders() {
+			cmd.Println(p.Name)
 		}
 	},
 }

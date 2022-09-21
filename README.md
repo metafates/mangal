@@ -1,4 +1,4 @@
-<h1 align="center">Mangal 3 📜</h1>
+<h1 align="center">Mangal 3 🪐</h1>
 
 <p align="center">
     <img alt="Linux" src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black">
@@ -11,7 +11,7 @@
     The most advanced CLI manga downloader in the entire universe!
 </h3>
 
-https://user-images.githubusercontent.com/62389790/190131616-09d1f134-7ccd-4f0f-bd4d-15517b8dd2a0.mp4
+https://user-images.githubusercontent.com/62389790/191430795-cb9859cc-5252-4155-b34b-ecf727003407.mp4
 
 ## Try it!
 
@@ -161,25 +161,29 @@ Just run `mangal` and you're ready to go.
 <details>
 <summary>Keybinds</summary>
 
-| Bind                                                        | Description   |
-|-------------------------------------------------------------|---------------|
-| <kbd>?</kbd>                                                | Show help     |
-| <kbd>↑/j</kbd> <kbd>↓/k</kbd> <kbd>→/l</kbd> <kbd>←/h</kbd> | Navigate      |
-| <kbd>g</kbd>                                                | Go to first   |
-| <kbd>G</kbd>                                                | Go to last    |
-| <kbd>/</kbd>                                                | Filter        |
-| <kbd>esc</kbd>                                              | Back          |
-| <kbd>space</kbd>                                            | Select one    |
-| <kbd>tab</kbd>                                              | Select all    |
-| <kbd>v</kbd>                                                | Select volume |
-| <kbd>backspace</kbd>                                        | Unselect all  |
-| <kbd>enter</kbd>                                            | Confirm       |
-| <kbd>o</kbd>                                                | Open URL      |
-| <kbd>r</kbd>                                                | Read          |
-| <kbd>q</kbd>                                                | Quit          |
-| <kbd>ctrl+c</kbd>                                           | Force quit    |
+| Bind                                                        | Description                          |
+|-------------------------------------------------------------|--------------------------------------|
+| <kbd>?</kbd>                                                | Show help                            |
+| <kbd>↑/j</kbd> <kbd>↓/k</kbd> <kbd>→/l</kbd> <kbd>←/h</kbd> | Navigate                             |
+| <kbd>g</kbd>                                                | Go to first                          |
+| <kbd>G</kbd>                                                | Go to last                           |
+| <kbd>/</kbd>                                                | Filter                               |
+| <kbd>esc</kbd>                                              | Back                                 |
+| <kbd>space</kbd>                                            | Select one                           |
+| <kbd>tab</kbd>                                              | Select all                           |
+| <kbd>v</kbd>                                                | Select volume                        |
+| <kbd>backspace</kbd>                                        | Unselect all                         |
+| <kbd>enter</kbd>                                            | Confirm                              |
+| <kbd>o</kbd>                                                | Open URL                             |
+| <kbd>r</kbd>                                                | Read                                 |
+| <kbd>q</kbd>                                                | Quit                                 |
+| <kbd>ctrl+c</kbd>                                           | Force quit                           |
+| <kbd>a</kbd>                                                | Select Anilist manga (chapters list) |
+| <kbd>d</kbd>                                                | Delete single history entry          |
 
 </details>
+
+<img width="1280" alt="TUI" src="https://user-images.githubusercontent.com/62389790/191431456-462ef83d-52be-4fbe-8176-f5e5ecf5954e.png">
 
 ### Mini
 
@@ -187,7 +191,7 @@ Mini mode tries to mimic [ani-cli](https://github.com/pystardust/ani-cli)
 
 To run: `mangal mini`
 
-<img width="254" alt="Screenshot 2022-08-14 at 09 37 14" src="https://user-images.githubusercontent.com/62389790/184524070-88fd36f7-9875-4a41-904c-04caad110549.png">
+<img width="613" alt="MINI" src="https://user-images.githubusercontent.com/62389790/191431713-a753743c-a4b2-4787-a054-4da322d70304.png">
 
 ### Inline
 
@@ -200,6 +204,8 @@ Example of usage:
 > This will download all chapters of the "Death Note" from Manganelo.
 
 Type `mangal help inline` for more information
+
+<img width="1249" alt="INLINE" src="https://user-images.githubusercontent.com/62389790/191431913-863fc67e-b30f-4656-b9b3-e2645915f86c.png">
 
 ### Other
 
@@ -231,9 +237,9 @@ from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) 
 
 Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
 
-Check the [defined modules](luamodules) for more information.
+Check the [defined modules](https://github.com/metafates/mangal-lua-libs) for more information.
 
-For scraper examples, check the [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
+For scrapers examples, check the [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
 
 ### Creating a custom scraper
 

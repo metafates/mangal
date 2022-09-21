@@ -5,10 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.10.0
+
+- New feature: you can choose what anilist manga to link by pressing <kbd>a</kbd> in the manga chapters list.
+  TUI mode only. This will affect what metadata is downloaded for the manga and what manga would be marked as read on your anilist profile.
+- Pressing <kbd>enter</kbd> on the chapter will now open it for reading if other chapters aren't selected.
+  Can be disabled with `mangal config set -k tui.read_on_enter -bv false`
+- The chapter selection page now shows which manga from the anilist it is linked to.
+  Can be disabled with `mangal config set -k anilist.link_on_manga_select -bv false`
+- Add an option to change spacing between items in the TUI.
+  Can be changed with `mangal config set -k tui.item_spacing -iv 1` (1 is default)
+- List filtering in the TUI works better now by stripping the icon
+- Option to hide list items urls in TUI. To hide: `mangal config set -k tui.show_urls -bv false`
+- After downloading of chapters is done, mangal will show the output path.
+  To disable: `mangal config set -k tui.show_downloaded_path -bv false`
+- Option to reverse order of the chapters in the TUI. `mangal config set -k tui.reverse_chapters -bv true` to enable
+- Reduce the size of the compiled binary by removing unused lua libraries. May break some lua scripts, but I don't think you were using AWS to scrape manga :)
+
 ## 3.9.1
 
 - Fix version comparison mechanism for `update` command.
-  Not it compares each fragment separately (major, minor, patch) instead of comparing two versions as strings lexicographically.
+  Now it compares each fragment separately (major, minor, patch) instead of comparing two versions as strings lexicographically.
 
 ## 3.9.0
 
@@ -188,7 +205,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 - Command to check for update added `mangal check-update` #26
 - Scraper system improved
-- Fixed bug where chapters with colon in title would not open for read on windows #24
+- Fixed bug where chapters with colon in title would not open for read on Windows #24
 - Various bug fixes
 
 ## 1.5.1

@@ -16,6 +16,7 @@ help:
 	@echo "Targets:"
 	@echo "  build        Build the mangal binary"
 	@echo "  install      Install the mangal binary"
+	@echo "  uninstall    Uninstall the mangal binary"
 	@echo "  test         Run the tests"
 	@echo "  help         Show this help message"
 	@echo ""

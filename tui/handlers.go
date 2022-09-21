@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
@@ -271,6 +273,55 @@ func (b *statefulBubble) waitForChapterDownload() tea.Cmd {
 		select {
 		case res := <-b.chapterDownloadChannel:
 			return res
+		case err := <-b.errorChannel:
+			b.lastError = err
+			return err
+		}
+	}
+}
+
+func (b *statefulBubble) fetchAndSetAnilist(manga *source.Manga) tea.Cmd {
+	return func() tea.Msg {
+		alManga, err := anilist.FindClosest(manga.Name)
+		if err != nil {
+			// this error is not that important, we can ignore t
+			log.Warn(err)
+		} else {
+			b.closestAnilistMangaChannel <- alManga
+		}
+
+		return nil
+	}
+}
+
+func (b *statefulBubble) waitForAnilistFetchAndSet() tea.Cmd {
+	return func() tea.Msg {
+		return <-b.closestAnilistMangaChannel
+	}
+}
+
+func (b *statefulBubble) fetchAnilist(manga *source.Manga) tea.Cmd {
+	return func() tea.Msg {
+		log.Info("fetching anilist for " + manga.Name)
+		b.progressStatus = fmt.Sprintf("Fetching anilist for %s", style.Magenta(manga.Name))
+		mangas, err := anilist.Search(manga.Name)
+		if err != nil {
+			log.Error(err)
+			b.errorChannel <- err
+		} else {
+			log.Infof("found %s", util.Quantity(len(mangas), "manga"))
+			b.fetchedAnilistMangasChannel <- mangas
+		}
+
+		return nil
+	}
+}
+
+func (b *statefulBubble) waitForAnilist() tea.Cmd {
+	return func() tea.Msg {
+		select {
+		case found := <-b.fetchedAnilistMangasChannel:
+			return found
 		case err := <-b.errorChannel:
 			b.lastError = err
 			return err

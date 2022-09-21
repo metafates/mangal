@@ -3,9 +3,11 @@ package tui
 import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
+	"github.com/spf13/viper"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -27,6 +29,8 @@ func (b *statefulBubble) View() string {
 		return b.viewMangas()
 	case chaptersState:
 		return b.viewChapters()
+	case anilistSelectState:
+		return b.viewAniList()
 	case confirmState:
 		return b.viewConfirm()
 	case readState:
@@ -78,6 +82,10 @@ func (b *statefulBubble) viewMangas() string {
 
 func (b *statefulBubble) viewChapters() string {
 	return listExtraPaddingStyle.Render(b.chaptersC.View())
+}
+
+func (b *statefulBubble) viewAniList() string {
+	return listExtraPaddingStyle.Render(b.anilistC.View())
 }
 
 func (b *statefulBubble) viewConfirm() string {
@@ -148,13 +156,23 @@ func (b *statefulBubble) viewDownloadDone() string {
 		msg = fmt.Sprintf("%s, %s", s, f)
 	}
 
+	lines := []string{
+		style.Title("Finish"),
+		"",
+		msg,
+	}
+
+	if succeded > 0 && viper.GetBool(constant.TUIShowDownloadedPath) {
+		path, err := b.selectedManga.Path(false)
+		if err == nil {
+			lines = append(lines, "")
+			lines = append(lines, fmt.Sprintf("Downloaded to %s", style.Faint(path)))
+		}
+	}
+
 	return b.renderLines(
 		true,
-		[]string{
-			style.Title("Finish"),
-			"",
-			msg,
-		},
+		lines,
 	)
 }
 

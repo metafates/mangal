@@ -9,6 +9,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/anilist"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/installer"
@@ -16,6 +18,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"strings"
 	"time"
@@ -36,6 +39,7 @@ type statefulBubble struct {
 	sourcesC         list.Model
 	mangasC          list.Model
 	chaptersC        list.Model
+	anilistC         list.Model
 	progressC        progress.Model
 	helpC            help.Model
 
@@ -44,14 +48,17 @@ type statefulBubble struct {
 	selectedManga     *source.Manga
 	selectedChapters  map[*source.Chapter]struct{} // mathematical set
 
-	scrapersLoadedChannel   chan []*installer.Scraper
-	scraperInstalledChannel chan *installer.Scraper
-	sourcesLoadedChannel    chan []source.Source
-	foundMangasChannel      chan []*source.Manga
-	foundChaptersChannel    chan []*source.Chapter
-	chapterReadChannel      chan struct{}
-	chapterDownloadChannel  chan struct{}
-	errorChannel            chan error
+	cancelCurrentOperation      bool
+	scrapersLoadedChannel       chan []*installer.Scraper
+	scraperInstalledChannel     chan *installer.Scraper
+	sourcesLoadedChannel        chan []source.Source
+	foundMangasChannel          chan []*source.Manga
+	foundChaptersChannel        chan []*source.Chapter
+	fetchedAnilistMangasChannel chan []*anilist.Manga
+	closestAnilistMangaChannel  chan *anilist.Manga
+	chapterReadChannel          chan struct{}
+	chapterDownloadChannel      chan struct{}
+	errorChannel                chan error
 
 	progressStatus string
 
@@ -91,6 +98,7 @@ func (b *statefulBubble) newState(s state) {
 		downloadDoneState,
 		downloadState,
 		confirmState,
+		anilistSelectState,
 	}, b.state) {
 		b.statesHistory.Push(b.state)
 	}
@@ -132,6 +140,9 @@ func (b *statefulBubble) resize(width, height int) {
 	b.chaptersC.SetSize(listWidth, listHeight)
 	b.chaptersC.Help.Width = listWidth
 
+	b.anilistC.SetSize(listWidth, listHeight)
+	b.anilistC.Help.Width = listWidth
+
 	b.progressC.Width = listWidth
 
 	b.width = styledWidth
@@ -157,14 +168,16 @@ func newBubble() *statefulBubble {
 		statesHistory: util.Stack[state]{},
 		keymap:        keymap,
 
-		scrapersLoadedChannel:   make(chan []*installer.Scraper),
-		scraperInstalledChannel: make(chan *installer.Scraper),
-		sourcesLoadedChannel:    make(chan []source.Source),
-		foundMangasChannel:      make(chan []*source.Manga),
-		foundChaptersChannel:    make(chan []*source.Chapter),
-		chapterReadChannel:      make(chan struct{}),
-		chapterDownloadChannel:  make(chan struct{}),
-		errorChannel:            make(chan error),
+		scrapersLoadedChannel:       make(chan []*installer.Scraper),
+		scraperInstalledChannel:     make(chan *installer.Scraper),
+		sourcesLoadedChannel:        make(chan []source.Source),
+		foundMangasChannel:          make(chan []*source.Manga),
+		foundChaptersChannel:        make(chan []*source.Chapter),
+		fetchedAnilistMangasChannel: make(chan []*anilist.Manga),
+		closestAnilistMangaChannel:  make(chan *anilist.Manga),
+		chapterReadChannel:          make(chan struct{}),
+		chapterDownloadChannel:      make(chan struct{}),
+		errorChannel:                make(chan error),
 
 		selectedProviders:  make(map[*provider.Provider]struct{}),
 		selectedChapters:   make(map[*source.Chapter]struct{}),
@@ -174,11 +187,10 @@ func newBubble() *statefulBubble {
 		succededChapters: make([]*source.Chapter, 0),
 	}
 
-	defer func() {
-	}()
-
-	makeList := func(title string) list.Model {
+	makeList := func(title string, description bool) list.Model {
 		delegate := list.NewDefaultDelegate()
+		delegate.SetSpacing(viper.GetInt(constant.TUIItemSpacing))
+		delegate.ShowDescription = description
 		delegate.Styles.SelectedTitle = lipgloss.NewStyle().
 			Border(lipgloss.ThickBorder(), false, false, false, true).
 			BorderForeground(lipgloss.Color("5")).
@@ -196,7 +208,8 @@ func newBubble() *statefulBubble {
 		}
 		listC.Title = title
 		listC.Styles.NoItems = paddingStyle
-		listC.StatusMessageLifetime = time.Second * 5
+		//listC.StatusMessageLifetime = time.Second * 5
+		listC.StatusMessageLifetime = time.Hour * 999 // forever
 
 		return listC
 	}
@@ -210,23 +223,28 @@ func newBubble() *statefulBubble {
 	bubble.inputC = textinput.New()
 	bubble.inputC.Placeholder = "Search"
 	bubble.inputC.CharLimit = 60
+	bubble.inputC.Prompt = viper.GetString(constant.TUISearchPromptString)
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 
-	bubble.scrapersInstallC = makeList("Install Scrapers")
+	bubble.scrapersInstallC = makeList("Install Scrapers", true)
 	bubble.scrapersInstallC.SetStatusBarItemName("scraper", "scrapers")
 
-	bubble.historyC = makeList("History")
+	bubble.historyC = makeList("History", true)
 	bubble.sourcesC.SetStatusBarItemName("chapter", "chapters")
 
-	bubble.sourcesC = makeList("Select Source")
+	bubble.sourcesC = makeList("Select Source", true)
 	bubble.sourcesC.SetStatusBarItemName("source", "sources")
 
-	bubble.mangasC = makeList("Mangas")
+	showURLs := viper.GetBool(constant.TUIShowURLs)
+	bubble.mangasC = makeList("Mangas", showURLs)
 	bubble.mangasC.SetStatusBarItemName("manga", "mangas")
 
-	bubble.chaptersC = makeList("Chapters")
+	bubble.chaptersC = makeList("Chapters", showURLs)
 	bubble.chaptersC.SetStatusBarItemName("chapter", "chapters")
+
+	bubble.anilistC = makeList("Anilist Mangas", showURLs)
+	bubble.anilistC.SetStatusBarItemName("manga", "mangas")
 
 	if w, h, err := util.TerminalSize(); err == nil {
 		bubble.resize(w, h)

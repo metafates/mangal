@@ -2,8 +2,8 @@ package custom
 
 import (
 	"fmt"
+	libs "github.com/metafates/mangal-lua-libs"
 	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/luamodules"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	lua "github.com/yuin/gopher-lua"
@@ -21,7 +21,7 @@ func LoadSource(path string, validate bool) (source.Source, error) {
 	}
 
 	state := lua.NewState()
-	luamodules.PreloadAll(state)
+	libs.Preload(state)
 
 	lfunc := state.NewFunctionFromProto(proto)
 	state.Push(lfunc)

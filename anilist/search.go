@@ -17,8 +17,12 @@ type anilistResponse struct {
 	} `json:"data"`
 }
 
+var searchCache = make(map[string][]*Manga)
+
 func Search(name string) ([]*Manga, error) {
-	log.Info("No cached data found in anilist cacher for " + name)
+	if mangas, ok := searchCache[name]; ok {
+		return mangas, nil
+	}
 
 	// prepare body
 	log.Info("Searching anilist for manga: " + name)
@@ -64,5 +68,6 @@ func Search(name string) ([]*Manga, error) {
 
 	mangas := response.Data.Page.Media
 	log.Info("Got response from Anilist, found " + strconv.Itoa(len(mangas)) + " results")
+	searchCache[name] = mangas
 	return mangas, nil
 }

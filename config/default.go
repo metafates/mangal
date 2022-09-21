@@ -240,6 +240,41 @@ panic, fatal, error, warn, info, debug, trace`,
 			"",
 			"Anilist secret to use for authentication",
 		},
+		{
+			constant.AnilistLinkOnMangaSelect,
+			true,
+			"Show link to Anilist on manga select",
+		},
+		{
+			constant.TUIItemSpacing,
+			1,
+			"Spacing between items in the TUI",
+		},
+		{
+			constant.TUIReadOnEnter,
+			true,
+			"Read chapter on enter if other chapters aren't selected",
+		},
+		{
+			constant.TUISearchPromptString,
+			"> ",
+			"Search prompt string to use",
+		},
+		{
+			constant.TUIShowURLs,
+			true,
+			"Show URLs under list items",
+		},
+		{
+			constant.TUIReverseChapters,
+			false,
+			"Reverse chapters order",
+		},
+		{
+			constant.TUIShowDownloadedPath,
+			true,
+			"Show path where chapters were downloaded",
+		},
 	}
 
 	for _, field := range fields {

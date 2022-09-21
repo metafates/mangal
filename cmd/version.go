@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/updater"
 	"github.com/spf13/cobra"
 	"os"
@@ -44,11 +45,11 @@ Built:          %s by %s
 Revision:       %s
 Installed With: %s
 `,
-			constant.AssciiArtLogo,
+			constant.AsciiArtLogo,
 			constant.Version,
 			runtime.GOOS,
 			runtime.GOARCH,
-			constant.BuiltAt, constant.BuiltBy,
+			constant.BuiltAt, style.Faint(constant.BuiltBy),
 			constant.Revision,
 			installedWith,
 		)

@@ -2,10 +2,12 @@ package tui
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
+	"strings"
 )
 
 type listItem struct {
@@ -22,11 +24,16 @@ func (t *listItem) toggleMark() {
 func (t *listItem) Title() (title string) {
 	switch e := t.internal.(type) {
 	case *source.Chapter:
-		title = fmt.Sprintf("%s %s", e.Name, style.Faint(e.Volume))
+		title = e.Name
+		if e.Volume != "" {
+			title += " " + style.Faint(e.Volume)
+		}
 	case *source.Manga:
 		title = e.Name
 	case *history.SavedChapter:
 		title = e.MangaName
+	case *anilist.Manga:
+		title = e.Name()
 	default:
 		title = t.title
 	}
@@ -38,19 +45,23 @@ func (t *listItem) Title() (title string) {
 	return
 }
 
-func (t *listItem) Description() string {
+func (t *listItem) Description() (description string) {
 	switch e := t.internal.(type) {
 	case *source.Chapter:
-		return e.URL
+		description = e.URL
 	case *source.Manga:
-		return e.URL
+		description = e.URL
 	case *history.SavedChapter:
-		return fmt.Sprintf("%s : %d / %d", e.Name, e.Index, e.MangaChaptersTotal)
+		description = fmt.Sprintf("%s : %d / %d", e.Name, e.Index, e.MangaChaptersTotal)
+	case *anilist.Manga:
+		description = e.SiteURL
 	default:
-		return t.description
+		description = t.description
 	}
+
+	return
 }
 
 func (t *listItem) FilterValue() string {
-	return t.Title()
+	return strings.Split(t.Title(), "\033")[0]
 }

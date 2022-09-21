@@ -14,6 +14,18 @@ var (
 	limit   uint8 = 3
 )
 
+func normalizeName(name string) string {
+	return strings.ToLower(strings.TrimSpace(name))
+}
+
+func SetRelation(name string, to *Manga) error {
+	return cache.Set(name, to)
+}
+
+func GetRelation(name string) (*Manga, bool) {
+	return cache.Get(name)
+}
+
 func FindClosest(name string) (*Manga, error) {
 	if retries >= limit {
 		retries = 0
@@ -22,18 +34,20 @@ func FindClosest(name string) (*Manga, error) {
 		return nil, err
 	}
 
+	name = normalizeName(name)
+
 	if manga, ok := cache.Get(name); ok {
 		return manga, nil
 	}
 
 	// search for manga on anilist
-	urls, err := Search(name)
+	mangas, err := Search(name)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
 
-	if len(urls) == 0 {
+	if len(mangas) == 0 {
 		// try again with a different name
 		retries++
 		words := strings.Split(name, " ")
@@ -50,8 +64,14 @@ func FindClosest(name string) (*Manga, error) {
 	}
 
 	// find the closest match
-	closest := lo.MinBy(urls, func(a, b *Manga) bool {
-		return levenshtein.Distance(name, a.Name()) < levenshtein.Distance(name, b.Name())
+	closest := lo.MinBy(mangas, func(a, b *Manga) bool {
+		return levenshtein.Distance(
+			name,
+			normalizeName(a.Name()),
+		) < levenshtein.Distance(
+			name,
+			normalizeName(b.Name()),
+		)
 	})
 
 	log.Info("Found closest match: " + closest.Name())

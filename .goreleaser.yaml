@@ -146,7 +146,7 @@ release:
 
     To install:
     ```sh
-    curl -sL mangal.metafates.one/install | sh
+    curl -sSL mangal.metafates.one/install | sh
     ```
 
     <details>
@@ -154,13 +154,14 @@ release:
       Run the install script (you can run it multiple times):
 
       ```sh
-      curl -sL mangal.metafates.one/install | sh
+      curl -sSL mangal.metafates.one/install | sh
       ```
     </details>
 
     ## What's new?
 
   footer: |
+
     **Full Changelog**: https://github.com/metafates/mangal/compare/{{ .PreviousTag }}...{{ .Tag }}
 
     ---
