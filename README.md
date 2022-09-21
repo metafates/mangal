@@ -1,4 +1,4 @@
-<h1 align="center">Mangal 3 📜</h1>
+************<h1 align="center">Mangal 3 📜</h1>
 
 <p align="center">
     <img alt="Linux" src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black">
@@ -161,23 +161,25 @@ Just run `mangal` and you're ready to go.
 <details>
 <summary>Keybinds</summary>
 
-| Bind                                                        | Description   |
-|-------------------------------------------------------------|---------------|
-| <kbd>?</kbd>                                                | Show help     |
-| <kbd>↑/j</kbd> <kbd>↓/k</kbd> <kbd>→/l</kbd> <kbd>←/h</kbd> | Navigate      |
-| <kbd>g</kbd>                                                | Go to first   |
-| <kbd>G</kbd>                                                | Go to last    |
-| <kbd>/</kbd>                                                | Filter        |
-| <kbd>esc</kbd>                                              | Back          |
-| <kbd>space</kbd>                                            | Select one    |
-| <kbd>tab</kbd>                                              | Select all    |
-| <kbd>v</kbd>                                                | Select volume |
-| <kbd>backspace</kbd>                                        | Unselect all  |
-| <kbd>enter</kbd>                                            | Confirm       |
-| <kbd>o</kbd>                                                | Open URL      |
-| <kbd>r</kbd>                                                | Read          |
-| <kbd>q</kbd>                                                | Quit          |
-| <kbd>ctrl+c</kbd>                                           | Force quit    |
+| Bind                                                        | Description                          |
+|-------------------------------------------------------------|--------------------------------------|
+| <kbd>?</kbd>                                                | Show help                            |
+| <kbd>↑/j</kbd> <kbd>↓/k</kbd> <kbd>→/l</kbd> <kbd>←/h</kbd> | Navigate                             |
+| <kbd>g</kbd>                                                | Go to first                          |
+| <kbd>G</kbd>                                                | Go to last                           |
+| <kbd>/</kbd>                                                | Filter                               |
+| <kbd>esc</kbd>                                              | Back                                 |
+| <kbd>space</kbd>                                            | Select one                           |
+| <kbd>tab</kbd>                                              | Select all                           |
+| <kbd>v</kbd>                                                | Select volume                        |
+| <kbd>backspace</kbd>                                        | Unselect all                         |
+| <kbd>enter</kbd>                                            | Confirm                              |
+| <kbd>o</kbd>                                                | Open URL                             |
+| <kbd>r</kbd>                                                | Read                                 |
+| <kbd>q</kbd>                                                | Quit                                 |
+| <kbd>ctrl+c</kbd>                                           | Force quit                           |
+| <kbd>a</kbd>                                                | Select Anilist manga (chapters list) |
+| <kbd>d</kbd>                                                | Delete single history entry          |
 
 </details>
 
