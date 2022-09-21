@@ -18,6 +18,7 @@ https://user-images.githubusercontent.com/62389790/191430795-cb9859cc-5252-4155-
 ```shell
 curl -sSL mangal.metafates.one/run | sh
 ```
+<img width="613" alt="MINI" src="https://user-images.githubusercontent.com/62389790/191431628-078f107a-89ee-4ed1-a414-c2bca97a913e.png">
 
 > **Note** This script does not install anything, it just downloads, verifies and runs Mangal.
 > Not available on Windows.
@@ -183,13 +184,15 @@ Just run `mangal` and you're ready to go.
 
 </details>
 
+<img width="1280" alt="TUI" src="https://user-images.githubusercontent.com/62389790/191431456-462ef83d-52be-4fbe-8176-f5e5ecf5954e.png">
+
 ### Mini
 
 Mini mode tries to mimic [ani-cli](https://github.com/pystardust/ani-cli)
 
 To run: `mangal mini`
 
-<img width="254" alt="Screenshot 2022-08-14 at 09 37 14" src="https://user-images.githubusercontent.com/62389790/184524070-88fd36f7-9875-4a41-904c-04caad110549.png">
+<img width="613" alt="MINI" src="https://user-images.githubusercontent.com/62389790/191431713-a753743c-a4b2-4787-a054-4da322d70304.png">
 
 ### Inline
 
@@ -202,6 +205,8 @@ Example of usage:
 > This will download all chapters of the "Death Note" from Manganelo.
 
 Type `mangal help inline` for more information
+
+<img width="1249" alt="INLINE" src="https://user-images.githubusercontent.com/62389790/191431913-863fc67e-b30f-4656-b9b3-e2645915f86c.png">
 
 ### Other
 
