@@ -11,8 +11,6 @@
     The most advanced CLI manga downloader in the entire universe!
 </h3>
 
-https://user-images.githubusercontent.com/62389790/191430795-cb9859cc-5252-4155-b34b-ecf727003407.mp4
-
 ## Try it!
 
 ```shell

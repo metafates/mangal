@@ -22,7 +22,7 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0
 	github.com/yuin/gopher-lua v0.0.0-20220504180219-658193537a64
-	golang.org/x/exp v0.0.0-20220916125017-b168a2c6b86b
+	golang.org/x/exp v0.0.0-20220921023135-46d9e7742f1e
 	golang.org/x/term v0.0.0-20220919170432-7a66f970e087
 )
 
@@ -80,7 +80,7 @@ require (
 	github.com/ysmood/leakless v0.8.0 // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7 // indirect
 	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69 // indirect
-	golang.org/x/net v0.0.0-20220920191752-2e0b12c274b7 // indirect
+	golang.org/x/net v0.0.0-20220920203100-d0c6ba3f52d9 // indirect
 	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
