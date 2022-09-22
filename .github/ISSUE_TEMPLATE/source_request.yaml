@@ -11,6 +11,7 @@ body:
       required: true
   - type: checkboxes
     attributes:
+      label: Checks
       options:
         - label: This source is SFW
           required: true
