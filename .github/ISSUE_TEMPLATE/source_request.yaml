@@ -1,0 +1,22 @@
+name: Source Request
+description: Request for a new built-in source
+title: 'Request a new built-in source'
+body:
+  - type: input
+    attributes:
+      label: Source URL
+      description: URL of the site you want to be added
+      placeholder: https://example.com
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      options:
+        - label: This source is SFW
+          required: true
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Anything else you want to be added
+      placeholder: Site has cloudfare protection and blah blah....
+

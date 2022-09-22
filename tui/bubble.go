@@ -48,7 +48,6 @@ type statefulBubble struct {
 	selectedManga     *source.Manga
 	selectedChapters  map[*source.Chapter]struct{} // mathematical set
 
-	cancelCurrentOperation      bool
 	scrapersLoadedChannel       chan []*installer.Scraper
 	scraperInstalledChannel     chan *installer.Scraper
 	sourcesLoadedChannel        chan []source.Source

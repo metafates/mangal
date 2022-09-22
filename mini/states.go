@@ -46,15 +46,9 @@ func (m *mini) handleSourceSelectState() error {
 		defaultProviders := provider.DefaultProviders()
 		customProviders := provider.CustomProviders()
 
-		var providers = make([]*provider.Provider, 0)
-
-		for _, p := range defaultProviders {
-			providers = append(providers, p)
-		}
-
-		for _, p := range customProviders {
-			providers = append(providers, p)
-		}
+		var providers = make([]*provider.Provider, len(defaultProviders)+len(customProviders))
+		providers = append(providers, provider.DefaultProviders()...)
+		providers = append(providers, provider.CustomProviders()...)
 
 		slices.SortFunc(providers, func(a *provider.Provider, b *provider.Provider) bool {
 			return strings.Compare(a.String(), b.String()) < 0
@@ -389,15 +383,9 @@ func (m *mini) handleHistorySelectState() error {
 	defaultProviders := provider.DefaultProviders()
 	customProviders := provider.CustomProviders()
 
-	var providers = make([]*provider.Provider, 0)
-
-	for _, p := range defaultProviders {
-		providers = append(providers, p)
-	}
-
-	for _, p := range customProviders {
-		providers = append(providers, p)
-	}
+	var providers = make([]*provider.Provider, len(defaultProviders)+len(customProviders))
+	providers = append(providers, defaultProviders...)
+	providers = append(providers, customProviders...)
 
 	p, _ := lo.Find(providers, func(p *provider.Provider) bool {
 		return p.ID == c.SourceID
