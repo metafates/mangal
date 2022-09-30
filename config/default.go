@@ -278,9 +278,9 @@ panic, fatal, error, warn, info, debug, trace`,
 	}
 
 	for _, field := range fields {
-		DefaultValues[field.Name] = field
+		Default[field.Name] = field
 		EnvExposed = append(EnvExposed, field.Name)
 	}
 }
 
-var DefaultValues = make(map[string]Field)
+var Default = make(map[string]Field)
