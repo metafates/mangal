@@ -27,9 +27,14 @@ if (Test-Path -path $loc)
 }
 
 Write-Host "Downloading Mangal version $tag" -ForegroundColor DarkCyan
-Invoke-WebRequest $url -outfile mangal.zip
-Expand-Archive mangal.zip
 
-.\mangal\mangal.exe
+# download mangal to temp folder
+$zip = "$env:TEMP\mangal.zip"
+Invoke-WebRequest -Uri $url -OutFile $zip
 
-Remove-Item mangal* -Recurse -Force
+# extract mangal at temp folder
+Expand-Archive -Path $zip -DestinationPath $env:TEMP
+
+# run mangal binary from the unzipped folder
+$bin = "$env:TEMP\mangal\mangal.exe"
+Start-Process $bin

@@ -1,79 +1,57 @@
 package cmd
 
 import (
+	"os"
+
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
+	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"os"
 )
+
+var wherePaths = []lo.Tuple2[string, func() string]{
+	{"downloads", where.Downloads},
+	{"config", where.Config},
+	{"sources", where.Sources},
+	{"logs", where.Logs},
+}
 
 func init() {
 	rootCmd.AddCommand(whereCmd)
 
-	whereCmd.Flags().BoolP("config", "c", false, "configuration path")
-	whereCmd.Flags().BoolP("sources", "s", false, "sources path")
-	whereCmd.Flags().BoolP("logs", "l", false, "logs path")
-	whereCmd.Flags().BoolP("downloads", "d", false, "downloads path")
-	whereCmd.MarkFlagsMutuallyExclusive("config", "sources", "logs", "downloads")
+	for _, n := range wherePaths {
+		whereCmd.Flags().BoolP(n.A, string(n.A[0]), false, n.A+" path")
+	}
+
+	whereCmd.MarkFlagsMutuallyExclusive(lo.Map(wherePaths, func(t lo.Tuple2[string, func() string], _ int) string {
+		return t.A
+	})...)
+
+	whereCmd.SetOut(os.Stdout)
 }
 
 var whereCmd = &cobra.Command{
 	Use:   "where",
-	Short: "Show the paths for a files related to the mangal",
+	Short: "Show the paths for a files related to the " + constant.Mangal,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.SetOut(os.Stdout)
+		headerStyle := style.Combined(style.Bold, style.HiMagenta)
 
-		headerStyle := style.Combined(style.Bold, style.HiBlue)
-
-		whereConfig := lo.Must(cmd.Flags().GetBool("config"))
-		whereSources := lo.Must(cmd.Flags().GetBool("sources"))
-		whereLogs := lo.Must(cmd.Flags().GetBool("logs"))
-		whereDownloads := lo.Must(cmd.Flags().GetBool("downloads"))
-
-		title := func(do bool, what, arg string) {
-			if do {
-				cmd.Printf("%s %s\n", headerStyle(what+"?"), style.Yellow(arg))
+		for _, n := range wherePaths {
+			if lo.Must(cmd.Flags().GetBool(n.A)) {
+				cmd.Println(n.B())
+				return
 			}
 		}
 
-		printConfigPath := func(header bool) {
-			title(header, "Configuration", "--config")
-			cmd.Println(where.Config())
-		}
+		for i, n := range wherePaths {
+			cmd.Printf("%s %s\n", headerStyle(util.Capitalize(n.A)+"?"), style.Yellow("--"+n.A))
+			cmd.Println(n.B())
 
-		printSourcesPath := func(header bool) {
-			title(header, "Sources", "--sources")
-			cmd.Println(where.Sources())
-		}
-
-		printLogsPath := func(header bool) {
-			title(header, "Logs", "--logs")
-			cmd.Println(where.Logs())
-		}
-
-		printDownloadsPath := func(header bool) {
-			title(header, "Downloads", "--downloads")
-			cmd.Println(where.Downloads())
-		}
-
-		switch {
-		case whereConfig:
-			printConfigPath(false)
-		case whereSources:
-			printSourcesPath(false)
-		case whereLogs:
-			printLogsPath(false)
-		case whereDownloads:
-			printDownloadsPath(false)
-		default:
-			printConfigPath(true)
-			cmd.Println()
-			printSourcesPath(true)
-			cmd.Println()
-			printLogsPath(true)
-			cmd.Println()
-			printDownloadsPath(true)
+			if i < len(wherePaths)-1 {
+				cmd.Println()
+			}
 		}
 	},
 }
