@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 3.11.0
 
-- Add an option to search mangas with inline mode. `mangal inline -q "..." -j` will output search results without chapters.
+- Add an option to search mangas with inline mode. `mangal inline -q "..." -j` will output search results without chapters. #97
 - `config` cmd improved. Now, `config set` will automatically parse the value to  the expected type. 
 - Internal improvements.
 
