@@ -16,11 +16,13 @@ func asJson(manga []*source.Manga) (marshalled []byte, err error) {
 }
 
 func jsonUpdateChapters(manga *source.Manga, options *Options) error {
+	var err error
 	chapters, _ := options.Source.ChaptersOf(manga)
-	chapters, err := options.ChaptersFilter(chapters)
-
-	if err != nil {
-		return err
+	if options.ChaptersFilter.IsSome() {
+		chapters, err = options.ChaptersFilter.Unwrap()(chapters)
+		if err != nil {
+			return err
+		}
 	}
 
 	manga.Chapters = chapters

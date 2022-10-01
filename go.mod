@@ -22,7 +22,7 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0
 	github.com/yuin/gopher-lua v0.0.0-20220504180219-658193537a64
-	golang.org/x/exp v0.0.0-20220921023135-46d9e7742f1e
+	golang.org/x/exp v0.0.0-20220930202632-ec3f01382ef9
 	golang.org/x/term v0.0.0-20220919170432-7a66f970e087
 )
 
@@ -33,12 +33,13 @@ require (
 	github.com/antchfx/xmlquery v1.3.12 // indirect
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
+	github.com/aymanbagabas/go-osc52 v1.0.3 // indirect
 	github.com/cbroglie/mustache v1.4.0 // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/go-rod/rod v0.109.3 // indirect
+	github.com/go-rod/rod v0.111.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -62,7 +63,7 @@ require (
 	github.com/muesli/ansi v0.0.0-20211031195517-c9f0611b6c70 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
-	github.com/muesli/termenv v0.12.0 // indirect
+	github.com/muesli/termenv v0.13.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -80,8 +81,8 @@ require (
 	github.com/ysmood/leakless v0.8.0 // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7 // indirect
 	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69 // indirect
-	golang.org/x/net v0.0.0-20220920203100-d0c6ba3f52d9 // indirect
-	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
+	golang.org/x/net v0.0.0-20220930213112-107f3e3c3b0b // indirect
+	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect

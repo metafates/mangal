@@ -196,15 +196,14 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	m.Metadata.Synonyms = manga.Synonyms
 
 	urls := []string{manga.URL}
-	if manga.SiteURL != "" {
-		urls = append(urls, manga.SiteURL)
+	urls = append(urls, manga.SiteURL)
+	for _, e := range manga.External {
+		urls = append(urls, e.URL)
 	}
 
-	for _, e := range manga.External {
-		if e.URL != "" {
-			urls = append(urls, e.URL)
-		}
-	}
+	urls = lo.Filter(urls, func(url string, _ int) bool {
+		return url != ""
+	})
 
 	urls = append(urls, fmt.Sprintf("https://myanimelist.net/manga/%d", manga.IDMal))
 	m.Metadata.URLs = urls

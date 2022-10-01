@@ -24,7 +24,7 @@ type Options struct {
 	PopulatePages  bool
 	Query          string
 	MangaPicker    util.Option[MangaPicker]
-	ChaptersFilter ChaptersFilter
+	ChaptersFilter util.Option[ChaptersFilter]
 }
 
 func ParseMangaPicker(description string) (MangaPicker, error) {

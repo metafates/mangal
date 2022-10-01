@@ -14,129 +14,116 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"path/filepath"
-	"reflect"
-	"sort"
 	"strconv"
 )
 
-func init() {
-	rootCmd.AddCommand(configCmd)
-	configCmd.AddCommand(configInitCmd)
-	configInitCmd.Flags().BoolP("force", "f", false, "overwrite existing config")
-
-	configCmd.AddCommand(configRemoveCmd)
-	configCmd.AddCommand(configSetCmd)
-	configSetCmd.Flags().StringP("key", "k", "", "key to set")
-	configSetCmd.Flags().StringP("value", "v", "", "value to set")
-	configSetCmd.Flags().BoolP("bool", "b", false, "value is a boolean")
-	configSetCmd.Flags().BoolP("int", "i", false, "value is an integer")
-
-	lo.Must0(configSetCmd.MarkFlagRequired("key"))
-	configSetCmd.MarkFlagsMutuallyExclusive("bool", "int")
-	lo.Must0(configSetCmd.MarkFlagRequired("value"))
-	lo.Must0(configSetCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
-	}))
-
-	configCmd.AddCommand(configGetCmd)
-	configGetCmd.Flags().StringP("key", "k", "", "key to get")
-	lo.Must0(configGetCmd.MarkFlagRequired("key"))
-	lo.Must0(configGetCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
-	}))
-
-	configCmd.AddCommand(configInfoCmd)
-	configInfoCmd.Flags().StringP("key", "k", "", "show only this key")
-	lo.Must0(configInfoCmd.RegisterFlagCompletionFunc("key", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return lo.Keys(config.DefaultValues), cobra.ShellCompDirectiveNoFileComp
-	}))
-}
-
 func errUnknownKey(key string) error {
-	closest := lo.MinBy(lo.Keys(config.DefaultValues), func(a string, b string) bool {
+	closest := lo.MinBy(lo.Keys(config.Default), func(a string, b string) bool {
 		return levenshtein.Distance(key, a) < levenshtein.Distance(key, b)
 	})
-	msg := fmt.Sprintf(`unknown key %s, did you mean %s?`, style.Red(key), style.Yellow(closest))
+	msg := fmt.Sprintf(
+		"unknown key %s, did you mean %s?",
+		style.Red(key),
+		style.Yellow(closest),
+	)
+
 	return errors.New(msg)
+}
+
+func completionConfigKeys(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+	return lo.Keys(config.Default), cobra.ShellCompDirectiveNoFileComp
+}
+
+func init() {
+	rootCmd.AddCommand(configCmd)
 }
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Various config actions",
-	Long:  `Various config actions`,
+	Short: "Various config commands",
 }
 
-var configInitCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize config",
-	Long:  `Initialize default config`,
+func init() {
+	configCmd.AddCommand(configInfoCmd)
+	configInfoCmd.Flags().StringP("key", "k", "", "The key to get the value for")
+	_ = configInfoCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
+}
+
+var configInfoCmd = &cobra.Command{
+	Use:   "info",
+	Short: "Show the info for each config field with description",
 	Run: func(cmd *cobra.Command, args []string) {
-		force := lo.Must(cmd.Flags().GetBool("force"))
-		if force {
-			err := filesystem.Api().Remove(filepath.Join(where.Config(), "mangal.toml"))
-			handleErr(err)
+		var (
+			key    = lo.Must(cmd.Flags().GetString("key"))
+			fields = lo.Values(config.Default)
+		)
+
+		if key != "" {
+			if field, ok := config.Default[key]; ok {
+				fields = []config.Field{field}
+			} else {
+				handleErr(errUnknownKey(key))
+			}
 		}
 
-		handleErr(viper.SafeWriteConfig())
+		for i, field := range fields {
+			fmt.Print(field.Pretty())
+
+			if i < len(fields)-1 {
+				fmt.Println()
+			}
+		}
 	},
 }
 
-var configRemoveCmd = &cobra.Command{
-	Use:   "remove",
-	Short: "Removes config file",
-	Run: func(cmd *cobra.Command, args []string) {
-		mangalDir := where.Config()
-		configPath := filepath.Join(mangalDir, constant.Mangal+".toml")
+func init() {
+	configCmd.AddCommand(configSetCmd)
+	configSetCmd.Flags().StringP("key", "k", "", "The key to set the value for")
+	lo.Must0(configSetCmd.MarkFlagRequired("key"))
+	_ = configSetCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
 
-		if lo.Must(filesystem.Api().Exists(configPath)) {
-			handleErr(filesystem.Api().Remove(configPath))
-		}
-	},
+	configSetCmd.Flags().StringP("value", "v", "", "The value to set")
+	lo.Must0(configSetCmd.MarkFlagRequired("value"))
+
+	// deprecated flags for backwards compatibility
+	configSetCmd.Flags().BoolP("bool", "b", false, "Set the value type to bool")
+	configSetCmd.Flags().IntP("int", "i", 0, "Set the value type to int")
 }
 
 var configSetCmd = &cobra.Command{
 	Use:   "set",
-	Short: "Set config value",
-	Long: `Set config value. Example:
-mangal config set --key "formats.use" --value cbz
-`,
+	Short: "Set a config value",
 	Run: func(cmd *cobra.Command, args []string) {
-		key := lo.Must(cmd.Flags().GetString("key"))
-		isBool := lo.Must(cmd.Flags().GetBool("bool"))
-		isInt := lo.Must(cmd.Flags().GetBool("int"))
+		var (
+			key   = lo.Must(cmd.Flags().GetString("key"))
+			value = lo.Must(cmd.Flags().GetString("value"))
+		)
 
-		v := lo.Must(cmd.Flags().GetString("value"))
-
-		var value any
-
-		if isBool {
-			if v == "true" {
-				value = true
-			} else if v == "false" {
-				value = false
-			} else {
-				handleErr(fmt.Errorf("invalid boolean value %s", style.Yellow(v)))
-			}
-		} else if isInt {
-			var err error
-			value, err = strconv.Atoi(v)
-			handleErr(err)
-		} else {
-			value = v
-		}
-
-		if _, ok := config.DefaultValues[key]; !ok {
+		if _, ok := config.Default[key]; !ok {
 			handleErr(errUnknownKey(key))
 		}
 
-		expectedType := reflect.TypeOf(config.DefaultValues[key].Value)
-		actualType := reflect.TypeOf(value)
+		var v any
+		switch config.Default[key].Value.(type) {
+		case string:
+			v = value
+		case int:
+			parsedInt, err := strconv.ParseInt(value, 10, 64)
+			if err != nil {
+				handleErr(fmt.Errorf("invalid integer value: %s", value))
+			}
 
-		if expectedType != actualType {
-			handleErr(fmt.Errorf(`expected type %s but got %s`, style.Blue(expectedType.String()), style.Red(actualType.String())))
+			v = int(parsedInt)
+		case bool:
+			parsedBool, err := strconv.ParseBool(value)
+			if err != nil {
+				handleErr(fmt.Errorf("invalid boolean value: %s", value))
+			}
+
+			v = parsedBool
 		}
 
-		viper.Set(key, value)
+		viper.Set(key, v)
 		switch err := viper.WriteConfig(); err.(type) {
 		case viper.ConfigFileNotFoundError:
 			handleErr(viper.SafeWriteConfig())
@@ -144,19 +131,31 @@ mangal config set --key "formats.use" --value cbz
 			handleErr(err)
 		}
 
-		fmt.Printf("%s set %s to %s\n", icon.Get(icon.Success), style.Magenta(key), style.Yellow(v))
+		fmt.Printf(
+			"%s set %s to %s\n",
+			style.Green(icon.Get(icon.Success)),
+			style.Magenta(key),
+			style.Yellow(fmt.Sprintf("%v", v)),
+		)
 	},
+}
+
+func init() {
+	configCmd.AddCommand(configGetCmd)
+	configGetCmd.Flags().StringP("key", "k", "", "The key to get the value for")
+	lo.Must0(configGetCmd.MarkFlagRequired("key"))
+	_ = configGetCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
 }
 
 var configGetCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get config value",
-	Long: `Get config value. Example:
-mangal config get --key "formats.use"
-`,
+	Short: "Get a config value",
 	Run: func(cmd *cobra.Command, args []string) {
-		key := lo.Must(cmd.Flags().GetString("key"))
-		if _, ok := config.DefaultValues[key]; !ok {
+		var (
+			key = lo.Must(cmd.Flags().GetString("key"))
+		)
+
+		if _, ok := config.Default[key]; !ok {
 			handleErr(errUnknownKey(key))
 		}
 
@@ -164,36 +163,62 @@ mangal config get --key "formats.use"
 	},
 }
 
-var configInfoCmd = &cobra.Command{
-	Use:   "info",
-	Short: "List all config values with their types and descriptions",
+func init() {
+	configCmd.AddCommand(configWriteCmd)
+	configWriteCmd.Flags().BoolP("force", "f", false, "Force overwrite of existing config file")
+}
+
+var configWriteCmd = &cobra.Command{
+	Use:   "write",
+	Short: "Write current config to the file",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			fields = make([]config.Field, len(config.DefaultValues))
-			key    = lo.Must(cmd.Flags().GetString("key"))
+			force          = lo.Must(cmd.Flags().GetBool("force"))
+			configFilePath = filepath.Join(
+				where.Config(),
+				fmt.Sprintf("%s.%s", constant.Mangal, "toml"),
+			)
 		)
 
-		i := 0
-		for _, v := range config.DefaultValues {
-			fields[i] = v
-			i++
+		if force {
+			err := filesystem.
+				Api().
+				Remove(configFilePath)
+
+			handleErr(err)
 		}
 
-		if key != "" {
-			if field, ok := config.DefaultValues[key]; ok {
-				fmt.Print(field.Pretty())
-				return
-			}
-			handleErr(errUnknownKey(key))
-		}
+		handleErr(viper.SafeWriteConfig())
+		fmt.Printf(
+			"%s wrote config to %s\n",
+			style.Green(icon.Get(icon.Success)),
+			configFilePath,
+		)
+	},
+}
 
-		sort.Slice(fields, func(i, j int) bool {
-			return fields[i].Name < fields[j].Name
-		})
+func init() {
+	configCmd.AddCommand(configDeleteCmd)
+}
 
-		for _, field := range fields {
-			// extra newline
-			fmt.Printf("%s\n", field.Pretty())
-		}
+var configDeleteCmd = &cobra.Command{
+	Use:     "delete",
+	Short:   "Delete the config file",
+	Aliases: []string{"remove"},
+	Run: func(cmd *cobra.Command, args []string) {
+		err := filesystem.
+			Api().
+			Remove(
+				filepath.Join(
+					where.Config(),
+					fmt.Sprintf("%s.%s", constant.Mangal, "toml"),
+				),
+			)
+
+		handleErr(err)
+		fmt.Printf(
+			"%s deleted config\n",
+			style.Green(icon.Get(icon.Success)),
+		)
 	},
 }
