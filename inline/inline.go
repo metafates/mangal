@@ -20,6 +20,12 @@ func Run(options *Options) error {
 	}
 
 	if options.MangaPicker.IsNone() && options.ChaptersFilter.IsNone() {
+		if viper.GetBool(constant.MetadataFetchAnilist) {
+			for _, manga := range mangas {
+				_ = manga.PopulateMetadata(func(string) {})
+			}
+		}
+
 		marshalled, err := asJson(mangas)
 		if err != nil {
 			return err

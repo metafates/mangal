@@ -25,6 +25,9 @@ func init() {
 	inlineCmd.Flags().BoolP("download", "d", false, "download chapters")
 	inlineCmd.Flags().BoolP("json", "j", false, "JSON output")
 	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages")
+	inlineCmd.Flags().BoolP("fetch-metadata", "f", false, "Populate manga metadata")
+	lo.Must0(viper.BindPFlag(constant.MetadataFetchAnilist, inlineCmd.Flags().Lookup("fetch-metadata")))
+
 	inlineCmd.Flags().StringP("output", "o", "", "output file")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
