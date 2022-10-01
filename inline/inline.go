@@ -19,6 +19,16 @@ func Run(options *Options) error {
 		return err
 	}
 
+	if options.MangaPicker.IsNone() && options.ChaptersFilter.IsNone() {
+		marshalled, err := asJson(mangas)
+		if err != nil {
+			return err
+		}
+
+		_, err = options.Out.Write(marshalled)
+		return err
+	}
+
 	// manga picker can only be none if json is set
 	if options.MangaPicker.IsNone() {
 		// preload all chapters
@@ -49,9 +59,11 @@ func Run(options *Options) error {
 			return err
 		}
 
-		chapters, err = options.ChaptersFilter(chapters)
-		if err != nil {
-			return err
+		if options.ChaptersFilter.IsSome() {
+			chapters, err = options.ChaptersFilter.Unwrap()(chapters)
+			if err != nil {
+				return err
+			}
 		}
 
 		if options.Json {

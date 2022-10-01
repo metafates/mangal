@@ -28,7 +28,6 @@ func init() {
 	inlineCmd.Flags().StringP("output", "o", "", "output file")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
-	lo.Must0(inlineCmd.MarkFlagRequired("chapters"))
 	inlineCmd.MarkFlagsMutuallyExclusive("download", "json")
 }
 
@@ -98,8 +97,13 @@ When using the json flag manga selector could be omitted. That way, it will sele
 			mangaPicker = util.Some(fn)
 		}
 
-		chapterFilter, err := inline.ParseChaptersFilter(lo.Must(cmd.Flags().GetString("chapters")))
-		handleErr(err)
+		chapterFlag := lo.Must(cmd.Flags().GetString("chapters"))
+		chapterFilter := util.None[inline.ChaptersFilter]()
+		if chapterFlag != "" {
+			fn, err := inline.ParseChaptersFilter(chapterFlag)
+			handleErr(err)
+			chapterFilter = util.Some(fn)
+		}
 
 		options := &inline.Options{
 			Source:         src,

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.11.0
+
+- Add an option to search mangas with inline mode. `mangal inline -q "..." -j` will output search results without chapters.
+- `config` cmd improved. Now, `config set` will automatically parse the value to  the expected type. 
+- Internal improvements.
+
+
 ## 3.10.0
 
 - New feature: you can choose what anilist manga to link by pressing <kbd>a</kbd> in the manga chapters list.
