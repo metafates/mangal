@@ -1,12 +1,14 @@
 package cmd
 
 import (
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
-	"github.com/metafates/mangal/updater"
-	"github.com/spf13/cobra"
 	"os"
 	"runtime"
+	"text/template"
+
+	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/updater"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -36,22 +38,39 @@ var versionCmd = &cobra.Command{
 			installedWith = "Unknown"
 		}
 
-		cmd.Printf(`%s
+		versionInfo := struct {
+			Version       string
+			InstalledWith string
+			OS            string
+			Arch          string
+			BuiltAt       string
+			BuiltBy       string
+			Ascii         string
+			Revision      string
+		}{
+			Ascii:         constant.AsciiArtLogo,
+			Version:       constant.Version,
+			InstalledWith: installedWith,
+			OS:            runtime.GOOS,
+			Arch:          runtime.GOARCH,
+			BuiltAt:       constant.BuiltAt,
+			BuiltBy:       constant.BuiltBy,
+			Revision:      constant.Revision,
+		}
 
-Version:        %s
-OS:             %s
-Arch:           %s
-Built:          %s by %s
-Revision:       %s
-Installed With: %s
-`,
-			constant.AsciiArtLogo,
-			constant.Version,
-			runtime.GOOS,
-			runtime.GOARCH,
-			constant.BuiltAt, style.Faint(constant.BuiltBy),
-			constant.Revision,
-			installedWith,
-		)
+		t, err := template.New("version").Funcs(map[string]any{
+			"faint":   style.Faint,
+			"bold":    style.Bold,
+			"magenta": style.Magenta,
+		}).Parse(`{{ .Ascii }}
+
+Version: {{ magenta .Version }}
+Installed with: {{ .InstalledWith }}
+OS/Arch: {{ .OS }}/{{ .Arch }}
+Revision: {{ .Revision }}
+Built: {{ .BuiltAt }} by {{ faint .BuiltBy }}
+`)
+		handleErr(err)
+		handleErr(t.Execute(cmd.OutOrStdout(), versionInfo))
 	},
 }

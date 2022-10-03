@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
+	"github.com/muesli/reflow/wrap"
 	"github.com/spf13/viper"
 	"math/rand"
 	"strconv"
@@ -177,7 +178,7 @@ func (b *statefulBubble) viewDownloadDone() string {
 }
 
 func (b *statefulBubble) viewError() string {
-	errorMsg := util.Wrap(style.Combined(style.Italic, style.Red)(b.lastError.Error()), b.width)
+	errorMsg := wrap.String(style.Combined(style.Italic, style.Red)(b.lastError.Error()), b.width)
 	return b.renderLines(
 		true,
 		append([]string{
@@ -186,7 +187,7 @@ func (b *statefulBubble) viewError() string {
 			icon.Get(icon.Fail) + " Uggh, something went wrong. Maybe try again?",
 			"",
 		},
-			strings.Split(util.Wrap(style.Italic(b.errorPlot), b.width)+"\n\n"+errorMsg, "\n")...,
+			strings.Split(wrap.String(style.Italic(b.errorPlot), b.width)+"\n\n"+errorMsg, "\n")...,
 		),
 	)
 }

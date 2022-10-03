@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.11.1
+
+- Fixed critical bug when mangal would crash when using mini mode
+- Slightly change `version` command output
+- Use better text wrapping
+
 ## 3.11.0
 
 - Add an option to search mangas with inline mode. `mangal inline -q "..." -j` will output search results without chapters. #97

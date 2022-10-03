@@ -59,22 +59,6 @@ func FileStem(path string) string {
 	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 }
 
-// Wrap wraps a string with the given width.
-// Will break lines at word boundaries.
-func Wrap(s string, width int) string {
-	var lines []string
-	for len(s) > width {
-		i := strings.LastIndex(s[:width], " ")
-		if i == -1 {
-			i = width
-		}
-		lines = append(lines, s[:i])
-		s = s[i:]
-	}
-	lines = append(lines, s)
-	return strings.Join(lines, "\n")
-}
-
 // ClearScreen clears the terminal screen.
 func ClearScreen() {
 	run := func(name string, args ...string) error {
