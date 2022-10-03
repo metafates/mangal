@@ -38,27 +38,6 @@ func TestPadZero(t *testing.T) {
 	})
 }
 
-func TestWrap(t *testing.T) {
-	s := "1234567890"
-	Convey("Given a string "+s, t, func() {
-		Convey("When wrapping with a width of 3", func() {
-			expected := "123\n456\n789\n0"
-			result := Wrap(s, 3)
-			Convey("Then the result should be "+expected, func() {
-				So(result, ShouldEqual, expected)
-			})
-		})
-
-		Convey("When wrapping with a width of 2", func() {
-			result := Wrap(s, 2)
-			expected := "12\n34\n56\n78\n90"
-			Convey("Then the result should be "+expected, func() {
-				So(result, ShouldEqual, expected)
-			})
-		})
-	})
-}
-
 func TestFileStem(t *testing.T) {
 	Convey("When the file name is 'foo.bar'", t, func() {
 		result := FileStem("foo.bar")

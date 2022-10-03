@@ -43,10 +43,7 @@ func (m *mini) handleSourceSelectState() error {
 			return err
 		}
 	} else {
-		defaultProviders := provider.DefaultProviders()
-		customProviders := provider.CustomProviders()
-
-		var providers = make([]*provider.Provider, len(defaultProviders)+len(customProviders))
+		var providers []*provider.Provider
 		providers = append(providers, provider.DefaultProviders()...)
 		providers = append(providers, provider.CustomProviders()...)
 
