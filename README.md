@@ -140,6 +140,14 @@ Use my bucket
 
 </details>
 
+### Nix 
+
+Thanks to [@bertof](https://github.com/bertof) for adding it to the [nixpkgs](https://github.com/NixOS/nixpkgs)
+
+```shell
+nix-env -i mangal
+```
+
 ### Docker
 
 Install using... well, you know. (thanks to [@ArabCoders](https://github.com/ArabCoders) for reference)
