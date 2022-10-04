@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## Unreleased
+
+- Sort config fields in `config info` command
+
 ## 3.11.1
 
 - Fixed critical bug when mangal would crash when using mini mode
