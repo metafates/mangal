@@ -99,7 +99,8 @@ pkg install -y git
 git clone --depth 1 https://github.com/metafates/mangal.git && cd mangal
 
 # Build the binary
-go build -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)' -X 'github.com/metafates/mangal/constant.BuiltBy=$(whoami)' -X 'github.com/metafates/mangal/constant.Revision=$(git rev-parse --short HEAD)' -s -w"
+# If you don't have "make" install it with "pkg install make"
+make build
 
 # Install the binary
 install -Dm755 mangal "$PREFIX/bin/mangal"
@@ -114,10 +115,10 @@ and copy them to the desired location.
 
 Visit this link to install [Go](https://go.dev/doc/install)
 
-```bash
+```shell
 git clone --depth 1 https://github.com/metafates/mangal.git
 cd mangal
-go install -ldflags="-s -w"
+make install
 ```
 
 </details>
@@ -142,7 +143,9 @@ Use my bucket
 
 ### Nix 
 
-Thanks to [@bertof](https://github.com/bertof) for adding it to the [nixpkgs](https://github.com/NixOS/nixpkgs)
+Install using [Nix](https://nixos.org/download.html#download-nix). Thanks to [@bertof](https://github.com/bertof) for adding it to the [nixpkgs](https://github.com/NixOS/nixpkgs)
+
+> `mangal update` command may not work properly
 
 #### NixOS
 
@@ -155,6 +158,8 @@ nix-env -iA nixos.mangal
 ```shell
 nix-env -iA nixpkgs.mangal
 ```
+
+
 
 ### Docker
 
