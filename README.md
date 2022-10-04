@@ -144,8 +144,16 @@ Use my bucket
 
 Thanks to [@bertof](https://github.com/bertof) for adding it to the [nixpkgs](https://github.com/NixOS/nixpkgs)
 
+#### NixOS
+
 ```shell
-nix-env -i mangal
+nix-env -iA nixos.mangal
+```
+
+#### Non NixOS
+
+```shell
+nix-env -iA nixpkgs.mangal
 ```
 
 ### Docker
