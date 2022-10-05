@@ -64,7 +64,7 @@ var versionCmd = &cobra.Command{
 			"bold":    style.Bold,
 			"magenta": style.Magenta,
 			"repeat":  strings.Repeat,
-		}).Parse(`{{ magenta "▇▇" }}  {{ magenta .Mangal }} 
+		}).Parse(`{{ magenta "▇▇▇" }} {{ magenta .Mangal }} 
 
   {{ faint "Version" }}        {{ .Version }}
   {{ faint "Git Commit" }}     {{ .Revision }} 
