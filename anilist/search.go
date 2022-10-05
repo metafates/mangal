@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/network"
 	"net/http"
 	"strconv"
 )
@@ -42,11 +43,13 @@ func Search(name string) ([]*Manga, error) {
 
 	// send request
 	log.Info("Sending request to Anilist")
-	resp, err := http.Post(
-		"https://graphql.anilist.co",
-		"application/json",
-		bytes.NewBuffer(jsonBody),
-	)
+	req, err := http.NewRequest(http.MethodPost, "https://graphql.anilist.co", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	resp, err := network.Client.Do(req)
 
 	if err != nil {
 		log.Error(err)

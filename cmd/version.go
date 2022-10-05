@@ -4,6 +4,7 @@ import (
 	"github.com/metafates/mangal/style"
 	"os"
 	"runtime"
+	"strings"
 	"text/template"
 
 	"github.com/metafates/mangal/constant"
@@ -45,15 +46,15 @@ var versionCmd = &cobra.Command{
 			Arch          string
 			BuiltAt       string
 			BuiltBy       string
-			Ascii         string
 			Revision      string
+			Mangal        string
 		}{
-			Ascii:         constant.AsciiArtLogo,
 			Version:       constant.Version,
+			Mangal:        constant.Mangal,
 			InstalledWith: installedWith,
 			OS:            runtime.GOOS,
 			Arch:          runtime.GOARCH,
-			BuiltAt:       constant.BuiltAt,
+			BuiltAt:       strings.TrimSpace(constant.BuiltAt),
 			BuiltBy:       constant.BuiltBy,
 			Revision:      constant.Revision,
 		}
@@ -62,13 +63,15 @@ var versionCmd = &cobra.Command{
 			"faint":   style.Faint,
 			"bold":    style.Bold,
 			"magenta": style.Magenta,
-		}).Parse(`{{ .Ascii }}
+			"repeat":  strings.Repeat,
+		}).Parse(`{{ magenta "▇▇" }}  {{ magenta .Mangal }} 
 
-Version: {{ magenta .Version }}
-Installed with: {{ .InstalledWith }}
-OS/Arch: {{ .OS }}/{{ .Arch }}
-Revision: {{ .Revision }}
-Built: {{ .BuiltAt }} by {{ faint .BuiltBy }}
+  {{ faint "Version" }}        {{ .Version }}
+  {{ faint "Git Commit" }}     {{ .Revision }} 
+  {{ faint "Build Date" }} 	 {{ .BuiltAt }}
+  {{ faint "Built By" }}       {{ .BuiltBy }}
+  {{ faint "Installed With" }} {{ .InstalledWith }} 
+  {{ faint "Platform" }}       {{ .OS }}/{{ .Arch }}
 `)
 		handleErr(err)
 		handleErr(t.Execute(cmd.OutOrStdout(), versionInfo))

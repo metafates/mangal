@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/network"
 	"github.com/samber/lo"
 	"net/http"
 	"strconv"
@@ -55,7 +56,7 @@ func (a *Anilist) login() error {
 	req.Header.Set("Accept", "application/json")
 
 	// send request
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := network.Client.Do(req)
 
 	// check for error
 	if err != nil {
