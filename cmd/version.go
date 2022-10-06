@@ -47,10 +47,10 @@ var versionCmd = &cobra.Command{
 			BuiltAt       string
 			BuiltBy       string
 			Revision      string
-			Mangal        string
+			App           string
 		}{
 			Version:       constant.Version,
-			Mangal:        constant.Mangal,
+			App:           constant.Mangal,
 			InstalledWith: installedWith,
 			OS:            runtime.GOOS,
 			Arch:          runtime.GOARCH,
@@ -64,14 +64,14 @@ var versionCmd = &cobra.Command{
 			"bold":    style.Bold,
 			"magenta": style.Magenta,
 			"repeat":  strings.Repeat,
-		}).Parse(`{{ magenta "▇▇▇" }} {{ magenta .Mangal }} 
+		}).Parse(`{{ magenta "▇▇▇" }} {{ magenta .App }} 
 
-  {{ faint "Version" }}        {{ .Version }}
-  {{ faint "Git Commit" }}     {{ .Revision }} 
-  {{ faint "Build Date" }} 	 {{ .BuiltAt }}
-  {{ faint "Built By" }}       {{ .BuiltBy }}
-  {{ faint "Installed With" }} {{ .InstalledWith }} 
-  {{ faint "Platform" }}       {{ .OS }}/{{ .Arch }}
+  {{ faint "Version" }}         {{ bold .Version }}
+  {{ faint "Git Commit" }}      {{ bold .Revision }} 
+  {{ faint "Build Date" }}  	  {{ bold .BuiltAt }}
+  {{ faint "Built By" }}        {{ bold .BuiltBy }}
+  {{ faint "Installed With" }}  {{ bold .InstalledWith }} 
+  {{ faint "Platform" }}        {{ bold .OS }}/{{ .Arch }}
 `)
 		handleErr(err)
 		handleErr(t.Execute(cmd.OutOrStdout(), versionInfo))
