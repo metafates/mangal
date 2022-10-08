@@ -71,7 +71,7 @@ var versionCmd = &cobra.Command{
   {{ faint "Build Date" }}  	  {{ bold .BuiltAt }}
   {{ faint "Built By" }}        {{ bold .BuiltBy }}
   {{ faint "Installed With" }}  {{ bold .InstalledWith }} 
-  {{ faint "Platform" }}        {{ bold .OS }}/{{ .Arch }}
+  {{ faint "Platform" }}        {{ bold .OS }}/{{ bold .Arch }}
 `)
 		handleErr(err)
 		handleErr(t.Execute(cmd.OutOrStdout(), versionInfo))
