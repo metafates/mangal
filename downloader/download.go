@@ -17,6 +17,33 @@ import (
 // Download the chapter using given source.
 func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	log.Info("downloading " + chapter.Name)
+
+	log.Info("checking if chapter is already downloaded")
+	path, err := chapter.Path(false)
+	if err != nil {
+		log.Error(err)
+		return "", err
+	}
+
+	exists, err := filesystem.Api().Exists(path)
+	if err != nil {
+		log.Error(err)
+		return "", err
+	}
+
+	if viper.GetBool(constant.DownloaderRedownloadExisting) {
+		log.Info("chapter already downloaded, deleting and redownloading")
+		err = filesystem.Api().Remove(path)
+		if err != nil {
+			log.Warn(err)
+		}
+	} else {
+		if exists {
+			log.Info("chapter already downloaded, skipping")
+			return path, nil
+		}
+	}
+
 	progress("Getting pages")
 	pages, err := chapter.Source().PagesOf(chapter)
 	if err != nil {
@@ -76,7 +103,7 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	}
 
 	log.Info("converting " + viper.GetString(constant.FormatsUse))
-	path, err := conv.Save(chapter)
+	path, err = conv.Save(chapter)
 	if err != nil {
 		log.Error(err)
 		return "", err

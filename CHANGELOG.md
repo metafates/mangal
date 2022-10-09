@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Faster and more optimized page downloader
 - Show current config field value in `config info` cmd
 - Optimize PDF converter
+- By default, mangal will not redownload chapters that already exists at the target path. Can be disabled with `mangal config set -k downloader.redownload_existing -v true` #100 
 - Sort config fields in `config info` command
 - Better looking `version` command
 

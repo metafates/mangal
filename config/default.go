@@ -67,6 +67,11 @@ Do no turn it off unless you have some issues`,
 			`Create a subdirectory for each volume`,
 		},
 		{
+			constant.DownloaderRedownloadExisting,
+			false,
+			`Redownload chapters that already exist`,
+		},
+		{
 			constant.DownloaderDefaultSource,
 			"",
 			`Default source to use.
