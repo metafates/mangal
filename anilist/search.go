@@ -49,6 +49,8 @@ func Search(name string) ([]*Manga, error) {
 		return nil, err
 	}
 
+	req.Header.Set("Content-Type", "application/json")
+
 	resp, err := network.Client.Do(req)
 
 	if err != nil {
