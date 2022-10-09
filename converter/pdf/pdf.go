@@ -88,12 +88,6 @@ func pagesToPDF(w io.Writer, pages []*source.Page) error {
 		ctx.PageCount++
 	}
 
-	if conf.ValidationMode != pdfcpu.ValidationNone {
-		if err = api.ValidateContext(ctx); err != nil {
-			return err
-		}
-	}
-
 	if err = api.WriteContext(ctx, w); err != nil {
 		return err
 	}

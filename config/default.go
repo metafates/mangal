@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
+	"github.com/spf13/viper"
 	"reflect"
 )
 
@@ -16,11 +17,12 @@ type Field struct {
 func (f *Field) Pretty() string {
 	return fmt.Sprintf(
 		`%s
-%s: %s
+%s: %s ~ %s
 `,
 		style.Faint(f.Description),
 		style.Magenta(f.Name),
 		style.Yellow(reflect.TypeOf(f.Value).String()),
+		style.Cyan(fmt.Sprintf("%v", viper.Get(f.Name))),
 	)
 }
 
