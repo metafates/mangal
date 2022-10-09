@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.12.0
+
+- Faster and more optimized page downloader
+- Show current config field value in `config info` cmd
+- Optimize PDF converter
+- By default, mangal will not redownload chapters that already exists at the target path. Can be disabled with `mangal config set -k downloader.redownload_existing -v true` #100 
+- Sort config fields in `config info` command
+- Better looking `version` command
+
 ## 3.11.1
 
 - Fixed critical bug when mangal would crash when using mini mode

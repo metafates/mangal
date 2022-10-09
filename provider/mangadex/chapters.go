@@ -32,8 +32,10 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	params.Add("includes[]", mangodex.ScanlationGroupRel)
 	params.Set("order[chapter]", "asc")
 
-	var chapters []*source.Chapter
-	var currOffset = 0
+	var (
+		chapters   []*source.Chapter
+		currOffset = 0
+	)
 
 	language := viper.GetString(constant.MangadexLanguage)
 

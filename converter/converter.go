@@ -8,6 +8,7 @@ import (
 	"github.com/metafates/mangal/converter/plain"
 	"github.com/metafates/mangal/converter/zip"
 	"github.com/metafates/mangal/source"
+	"github.com/samber/lo"
 	"strings"
 )
 
@@ -26,12 +27,7 @@ var converters = map[string]Converter{
 
 // Available returns a list of available converters.
 func Available() []string {
-	return []string{
-		constant.Plain,
-		constant.CBZ,
-		constant.PDF,
-		constant.ZIP,
-	}
+	return lo.Keys(converters)
 }
 
 // Get returns a converter by name.

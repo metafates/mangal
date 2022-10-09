@@ -3,6 +3,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
+	"sort"
+	"strconv"
+
 	levenshtein "github.com/ka-weihe/fast-levenshtein"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
@@ -13,8 +17,6 @@ import (
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"path/filepath"
-	"strconv"
 )
 
 func errUnknownKey(key string) error {
@@ -65,6 +67,10 @@ var configInfoCmd = &cobra.Command{
 				handleErr(errUnknownKey(key))
 			}
 		}
+
+		sort.Slice(fields, func(i, j int) bool {
+			return fields[i].Name < fields[j].Name
+		})
 
 		for i, field := range fields {
 			fmt.Print(field.Pretty())

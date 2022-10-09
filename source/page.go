@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/network"
 	"github.com/metafates/mangal/util"
 	_ "image/gif"
 	"io"
@@ -29,6 +29,18 @@ type Page struct {
 	Chapter *Chapter `json:"-"`
 }
 
+func (p *Page) request() (req *http.Request, err error) {
+	req, err = http.NewRequest(http.MethodGet, p.URL, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	req.Header.Set("Referer", p.Chapter.URL)
+	req.Header.Set("User-Agent", constant.UserAgent)
+	return
+}
+
 // Download Page contents.
 func (p *Page) Download() error {
 	if p.URL == "" {
@@ -38,20 +50,18 @@ func (p *Page) Download() error {
 
 	log.Tracef("Downloading page #%d (%s)", p.Index, p.URL)
 
-	req, err := http.NewRequest(http.MethodGet, p.URL, nil)
+	req, err := p.request()
+	if err != nil {
+		return err
+	}
+
+	resp, err := network.Client.Do(req)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	req.Header.Set("Referer", p.Chapter.URL)
-	req.Header.Set("User-Agent", constant.UserAgent)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+	defer util.Ignore(resp.Body.Close)
 
 	if resp.StatusCode != http.StatusOK {
 		err = errors.New("http error: " + resp.Status)
@@ -65,14 +75,29 @@ func (p *Page) Download() error {
 		return err
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	var (
+		buf           []byte
+		contentLength int64
+	)
+
+	// if the content length is unknown
+	if resp.ContentLength == -1 {
+		buf, err = io.ReadAll(resp.Body)
+		contentLength = int64(len(buf))
+	} else {
+		contentLength = resp.ContentLength
+		buf = make([]byte, resp.ContentLength)
+		_, err = io.ReadFull(resp.Body, buf)
+	}
+
 	if err != nil {
 		return err
 	}
-	p.Contents = bytes.NewBuffer(body)
-	p.Size = uint64(util.Max(resp.ContentLength, 0))
 
-	log.Tracef("Page #%d downloaded - %s", p.Index, humanize.Bytes(p.Size))
+	p.Contents = bytes.NewBuffer(buf)
+	p.Size = uint64(util.Max(contentLength, 0))
+
+	log.Tracef("Page #%d downloaded", p.Index)
 	return nil
 }
 

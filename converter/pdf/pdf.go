@@ -39,17 +39,12 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 
 	defer util.Ignore(file.Close)
 
-	var images = make([]io.Reader, len(chapter.Pages))
-	for i, page := range chapter.Pages {
-		images[i] = page
-	}
-
-	err = imagesToPDF(file, images)
+	err = pagesToPDF(file, chapter.Pages)
 	return
 }
 
-// imagesToPDF will convert images to PDF and write to w
-func imagesToPDF(w io.Writer, images []io.Reader) error {
+// pagesToPDF will convert images to PDF and write to w
+func pagesToPDF(w io.Writer, pages []*source.Page) error {
 	conf := pdfcpu.NewDefaultConfiguration()
 	conf.Cmd = pdfcpu.IMPORTIMAGES
 	imp := pdfcpu.DefaultImportConfig()
@@ -75,7 +70,7 @@ func imagesToPDF(w io.Writer, images []io.Reader) error {
 		return err
 	}
 
-	for _, r := range images {
+	for _, r := range pages {
 		indRef, err := pdfcpu.NewPageForImage(ctx.XRefTable, r, pagesIndRef, imp)
 
 		if err != nil {
@@ -91,12 +86,6 @@ func imagesToPDF(w io.Writer, images []io.Reader) error {
 		}
 
 		ctx.PageCount++
-	}
-
-	if conf.ValidationMode != pdfcpu.ValidationNone {
-		if err = api.ValidateContext(ctx); err != nil {
-			return err
-		}
 	}
 
 	if err = api.WriteContext(ctx, w); err != nil {

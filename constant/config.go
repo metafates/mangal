@@ -9,6 +9,7 @@ const (
 	DownloaderDefaultSource       = "downloader.default_source"
 	DownloaderStopOnError         = "downloader.stop_on_error"
 	DownloaderDownloadCover       = "downloader.download_cover"
+	DownloaderRedownloadExisting  = "downloader.redownload_existing"
 )
 
 const (
