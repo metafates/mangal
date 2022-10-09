@@ -29,6 +29,18 @@ type Page struct {
 	Chapter *Chapter `json:"-"`
 }
 
+func (p *Page) request() (req *http.Request, err error) {
+	req, err = http.NewRequest(http.MethodGet, p.URL, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	req.Header.Set("Referer", p.Chapter.URL)
+	req.Header.Set("User-Agent", constant.UserAgent)
+	return
+}
+
 // Download Page contents.
 func (p *Page) Download() error {
 	if p.URL == "" {
@@ -38,14 +50,10 @@ func (p *Page) Download() error {
 
 	log.Tracef("Downloading page #%d (%s)", p.Index, p.URL)
 
-	req, err := http.NewRequest(http.MethodGet, p.URL, nil)
+	req, err := p.request()
 	if err != nil {
-		log.Error(err)
 		return err
 	}
-
-	req.Header.Set("Referer", p.Chapter.URL)
-	req.Header.Set("User-Agent", constant.UserAgent)
 
 	resp, err := network.Client.Do(req)
 	if err != nil {

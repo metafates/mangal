@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 ## 3.12.0
 
 - Faster and more optimized page downloader
+- Optimize PDF converter
 - Sort config fields in `config info` command
 - Better looking `version` command
 
