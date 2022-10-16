@@ -123,6 +123,8 @@ Use my bucket
 
 Thanks to [@T-Dynamos](https://github.com/T-Dynamos) for adding it to the [termux-packages](https://github.com/termux/termux-packages)
 
+> `mangal update` command may not work properly
+
 ```shell
 pkg install mangal
 ```
