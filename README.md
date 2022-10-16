@@ -43,7 +43,7 @@ curl -sSL mangal.metafates.one/run | sh
 - __Fast?__ - YES.
 - __Monolith__ - ZERO runtime dependencies. Even Lua is built in.
 - __Fancy__ - (ﾉ>ω<)ﾉ :｡･::･ﾟ’★,｡･:･ﾟ’☆
-- __Cross-Platform__ - Linux, macOS, Windows, Termux (partially)
+- __Cross-Platform__ - Linux, macOS, Windows, Termux
 - __Anilist integration__ - Track your manga progress on Anilist when reading with Mangal.
 
 ## Installation
@@ -62,11 +62,6 @@ For example, on macOS it will try to use Homebrew, on Ubuntu it will install the
 <details>
 <summary>😡 I hate scripts! Show me how to install it manually</summary>
 
-#### Arch Linux
-
-[AUR package](https://aur.archlinux.org/packages/mangal-bin) (maintained by [@balajsra](https://github.com/balajsra),
-thank you)
-
 #### Ubuntu / Debian
 
 1. Download the `*.deb` file from the [release page](https://github.com/metafates/mangal/releases/latest)
@@ -76,35 +71,6 @@ thank you)
 
 1. Download the `*.rpm` file from the [release page](https://github.com/metafates/mangal/releases/latest)
 2. Run `sudo rpm --install ...` where `...` is the name of the file you downloaded
-
-#### MacOS
-
-Install using [Homebrew](https://brew.sh/)
-
-    brew tap metafates/mangal
-    brew install mangal
-
-#### Termux
-
-You'll have to compile mangal from source in order to use full functionality.
-
-```shell
-# Install Go
-pkg install -y golang
-
-# Install git
-pkg install -y git
-
-# Clone the repository
-git clone --depth 1 https://github.com/metafates/mangal.git && cd mangal
-
-# Build the binary
-# If you don't have "make" install it with "pkg install make"
-make build
-
-# Install the binary
-install -Dm755 mangal "$PREFIX/bin/mangal"
-```
 
 #### Pre-compiled
 
@@ -122,6 +88,18 @@ make install
 ```
 
 </details>
+
+### Arch Linux
+
+[AUR package](https://aur.archlinux.org/packages/mangal-bin) (maintained by [@balajsra](https://github.com/balajsra),
+thank you)
+
+### MacOS
+
+Install using [Homebrew](https://brew.sh/)
+
+    brew tap metafates/mangal
+    brew install mangal
 
 ### Windows
 
@@ -141,25 +119,27 @@ Use my bucket
 
 </details>
 
+### Termux
+
+Thanks to [@T-Dynamos](https://github.com/T-Dynamos) for adding it to the [termux-packages](https://github.com/termux/termux-packages)
+
+```shell
+pkg install mangal
+```
+
 ### Nix 
 
 Install using [Nix](https://nixos.org/download.html#download-nix). Thanks to [@bertof](https://github.com/bertof) for adding it to the [nixpkgs](https://github.com/NixOS/nixpkgs)
 
 > `mangal update` command may not work properly
 
-#### NixOS
-
 ```shell
+# NixOS
 nix-env -iA nixos.mangal
-```
 
-#### Non NixOS
-
-```shell
+# Non NixOS
 nix-env -iA nixpkgs.mangal
 ```
-
-
 
 ### Docker
 

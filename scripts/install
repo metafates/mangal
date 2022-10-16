@@ -137,31 +137,7 @@ install_deb() {
 
 install_termux() {
     info "Installing for Termux"
-    warn "In order to use full functionality on Termux, you'll need to compile mangal from source"
-    warn "To do that, the following packages will be installed: golang, git"
-    warn "Wait for 5 seconds to continue"
-    sleep 5
-
-    if ! has go; then
-        info "Installing golang"
-        pkg install golang -y
-    fi
-
-    if ! has git; then
-        info "Installing git"
-        pkg install git -y
-    fi
-
-    info "Cloning mangal repository"
-    rm -rf mangal
-    git clone --depth 1 https://github.com/metafates/mangal.git
-    cd mangal
-
-    info "Building mangal"
-    go build -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)' -X 'github.com/metafates/mangal/constant.BuiltBy=$(whoami)' -X 'github.com/metafates/mangal/constant.Revision=$(git rev-parse --short HEAD)' -s -w"
-
-    info "Installing mangal"
-    sh -c "install -Dm755 mangal '${PREFIX}'/bin/mangal"
+    pkg install mangal
 }
 
 install_macos() {
