@@ -17,7 +17,7 @@ type Field struct {
 func (f *Field) Pretty() string {
 	return fmt.Sprintf(
 		`%s
-%s: %s ~ %s
+%s: %s = %s
 `,
 		style.Faint(f.Description),
 		style.Magenta(f.Name),
@@ -33,8 +33,7 @@ func init() {
 			".",
 			`Where to download manga
 Absolute or relative.
-You can also use home variable 
-path = "~/..." or "$HOME/..."`,
+You can also use tilde (~) to refer to your home directory or use env variables.`,
 		},
 		{
 			constant.DownloaderChapterNameTemplate,

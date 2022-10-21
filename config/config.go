@@ -1,12 +1,14 @@
 package config
 
 import (
+	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -74,8 +76,13 @@ func resolveAliases() {
 	home := lo.Must(os.UserHomeDir())
 	path := viper.GetString(constant.DownloaderPath)
 
-	path = strings.ReplaceAll(path, "$HOME", home)
-	path = strings.ReplaceAll(path, "~", home)
+	if path == "~" {
+		path = home
+	} else if strings.HasPrefix(path, fmt.Sprintf("%c%c", '~', os.PathSeparator)) {
+		path = filepath.Join(home, path[2:])
+	}
+
+	path = os.ExpandEnv(path)
 
 	viper.Set(constant.DownloaderPath, path)
 }
