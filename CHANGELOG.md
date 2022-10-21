@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.13.0
+
+- Support environment variables for `downloader.path` config field
+
 ## 3.12.0
 
 - Faster and more optimized page downloader
