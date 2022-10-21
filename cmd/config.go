@@ -69,7 +69,7 @@ var configInfoCmd = &cobra.Command{
 		}
 
 		sort.Slice(fields, func(i, j int) bool {
-			return fields[i].Name < fields[j].Name
+			return fields[i].Key < fields[j].Key
 		})
 
 		for i, field := range fields {

@@ -150,8 +150,8 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
 	// language=gotemplate
 	t := `
 <ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Title>{{ escape .Name }}</Title>
-  	<Series>{{ escape .Manga.Name }}</Series>
+	<Title>{{ escape .Key }}</Title>
+  	<Series>{{ escape .Manga.Key }}</Series>
 	<Number>{{ .Index }}</Number>
 	<Web>{{ .URL }}</Web>
 	<Genre>{{ join .Manga.Metadata.Genres "," }}</Genre>

@@ -9,7 +9,7 @@ import (
 )
 
 type Field struct {
-	Name        string
+	Key         string
 	Value       any
 	Description string
 }
@@ -20,9 +20,9 @@ func (f *Field) Pretty() string {
 %s: %s = %s
 `,
 		style.Faint(f.Description),
-		style.Magenta(f.Name),
+		style.Magenta(f.Key),
 		style.Yellow(reflect.TypeOf(f.Value).String()),
-		style.Cyan(fmt.Sprintf("%v", viper.Get(f.Name))),
+		style.Cyan(fmt.Sprintf("%v", viper.Get(f.Key))),
 	)
 }
 
@@ -33,12 +33,13 @@ func init() {
 			".",
 			`Where to download manga
 Absolute or relative.
-You can also use tilde (~) to refer to your home directory or use env variables.`,
+You can also use tilde (~) to refer to your home directory or use env variables.
+Examples: ~/... or $HOME/... or ${MANGA_PATH}-mangal`,
 		},
 		{
 			constant.DownloaderChapterNameTemplate,
 			"[{padded-index}] {chapter}",
-			`Name template of the downloaded chapters
+			`Key template of the downloaded chapters
 Path forbidden symbols will be replaced with "_"
 Available variables:
 {index}          - index of the chapters
@@ -208,7 +209,7 @@ Use "any" to show all languages`,
 		{
 			constant.GenAuthor,
 			"",
-			"Name to use in generated scrapers as author",
+			"Key to use in generated scrapers as author",
 		},
 		{
 			constant.LogsWrite,
@@ -284,8 +285,8 @@ panic, fatal, error, warn, info, debug, trace`,
 	}
 
 	for _, field := range fields {
-		Default[field.Name] = field
-		EnvExposed = append(EnvExposed, field.Name)
+		Default[field.Key] = field
+		EnvExposed = append(EnvExposed, field.Key)
 	}
 }
 

@@ -1,7 +1,13 @@
 package constant
 
-const SourceTemplate = `{{ $divider := repeat "-" (plus (max (len .URL) (len .Name) (len .Author) 3) 12) }}{{ $divider }}
--- @name    {{ .Name }} 
+const (
+	SearchMangaFn   = "SearchManga"
+	MangaChaptersFn = "MangaChapters"
+	ChapterPagesFn  = "ChapterPages"
+)
+
+const SourceTemplate = `{{ $divider := repeat "-" (plus (max (len .URL) (len .Key) (len .Author) 3) 12) }}{{ $divider }}
+-- @name    {{ .Key }} 
 -- @url     {{ .URL }}
 -- @author  {{ .Author }} 
 -- @license MIT
@@ -76,4 +82,5 @@ end
 ----- HELPERS -----
 --- END HELPERS ---
 
--- ex: ts=4 sw=4 et filetype=lua`
+-- ex: ts=4 sw=4 et filetype=lua
+`
