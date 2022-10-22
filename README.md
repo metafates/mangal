@@ -272,6 +272,10 @@ For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist
 
 ## Honorable mentions
 
+### Projects using mangal
+
+- [kaizoku](https://github.com/oae/kaizoku) - Self-hosted manga downloader with mangal as its core 🚀
+
 ### Similar Projects
 
 - [mangadesk](https://github.com/darylhjd/mangadesk) - Terminal client for MangaDex
