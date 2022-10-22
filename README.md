@@ -236,7 +236,7 @@ Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
 TLDR; To browse and install a custom scraper
 from [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers) run
 
-    mangal install
+    mangal sources install
 
 Mangal has a Lua5.1 VM built-in + some useful libraries, such as headless chrome, http client, html parser and so on...
 

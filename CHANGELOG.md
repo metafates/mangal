@@ -7,7 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 3.13.0
 
-- Support environment variables for `downloader.path` config field
+- Support environment variables for `downloader.path` config field #103
+- Replace Mangakakalot with Manganato #102
+- Move `install` & `gen` commands to `sources` subcommands. E.g. if you used `mangal install` before use `mangal sources install`. Old commands are still present, but marked as deprecated.
+- New command `mangal sources remove <name>` to remove custom source
+- Minor performance improvements
 
 ## 3.12.0
 
