@@ -6,8 +6,8 @@ const (
 	ChapterPagesFn  = "ChapterPages"
 )
 
-const SourceTemplate = `{{ $divider := repeat "-" (plus (max (len .URL) (len .Key) (len .Author) 3) 12) }}{{ $divider }}
--- @name    {{ .Key }} 
+const SourceTemplate = `{{ $divider := repeat "-" (plus (max (len .URL) (len .Name) (len .Author) 3) 12) }}{{ $divider }}
+-- @name    {{ .Name }} 
 -- @url     {{ .URL }}
 -- @author  {{ .Author }} 
 -- @license MIT
