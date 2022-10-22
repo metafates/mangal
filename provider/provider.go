@@ -43,7 +43,7 @@ func (p Provider) String() string {
 	return p.Name
 }
 
-const customProviderExtension = ".lua"
+const CustomProviderExtension = ".lua"
 
 var defaultProviders = []*Provider{
 	{
@@ -67,7 +67,7 @@ func CustomProviders() []*Provider {
 	}
 
 	paths := lo.FilterMap(files, func(f os.FileInfo, _ int) (string, bool) {
-		if filepath.Ext(f.Name()) == customProviderExtension {
+		if filepath.Ext(f.Name()) == CustomProviderExtension {
 			return filepath.Join(where.Sources(), f.Name()), true
 		}
 		return "", false

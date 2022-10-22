@@ -23,7 +23,6 @@ func (s *Scraper) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 
 	if s.config.ReverseChapters {
 		// reverse chapters
-		// will happen only once for each manga
 		chapters := s.chapters[manga.URL]
 		reversed := make([]*source.Chapter, len(chapters))
 		for i, chapter := range chapters {
