@@ -1,4 +1,4 @@
-package mangakakalot
+package manganato
 
 import (
 	"fmt"
@@ -10,26 +10,26 @@ import (
 )
 
 var Config = &generic.Configuration{
-	Name:            "Mangakakalot",
+	Name:            "Manganato",
 	Delay:           50 * time.Millisecond,
 	Parallelism:     50,
 	ReverseChapters: true,
-	BaseURL:         "https://mangakakalot.com/",
+	BaseURL:         "https://manganato.com/",
 	GenerateSearchURL: func(query string) string {
 		query = strings.ReplaceAll(query, " ", "_")
 		query = strings.TrimSpace(query)
 		query = strings.ToLower(query)
 		query = url.QueryEscape(query)
-		template := "https://mangakakalot.com/search/story/%s"
+		template := "https://chapmanganato.com/https://manganato.com/search/story/%s"
 		return fmt.Sprintf(template, query)
 	},
 	MangaExtractor: &generic.Extractor{
-		Selector: "div.story_item",
+		Selector: "div.search-story-item",
 		Name: func(selection *goquery.Selection) string {
-			return strings.TrimSpace(selection.Find(".story_name > a").Text())
+			return strings.TrimSpace(selection.Find("a.item-title").Text())
 		},
 		URL: func(selection *goquery.Selection) string {
-			return selection.Find(".story_name > a").AttrOr("href", "")
+			return selection.Find("a.item-title").AttrOr("href", "")
 		},
 		Cover: func(selection *goquery.Selection) string {
 			return selection.Find("img").AttrOr("src", "")

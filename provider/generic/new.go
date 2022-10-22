@@ -2,7 +2,7 @@ package generic
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/v2"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/where"
@@ -18,7 +18,7 @@ func New(conf *Configuration) source.Source {
 		config:   conf,
 	}
 
-	collectorOptions := []func(*colly.Collector){
+	collectorOptions := []colly.CollectorOption{
 		colly.AllowURLRevisit(),
 		colly.Async(true),
 		colly.CacheDir(where.Cache()),
@@ -80,7 +80,6 @@ func New(conf *Configuration) source.Source {
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		s.chapters[path] = make([]*source.Chapter, elements.Length())
 		manga := e.Request.Ctx.GetAny("manga").(*source.Manga)
-		manga.Chapters = make([]*source.Chapter, elements.Length())
 
 		elements.Each(func(i int, selection *goquery.Selection) {
 			link := s.config.ChapterExtractor.URL(selection)
@@ -95,9 +94,9 @@ func New(conf *Configuration) source.Source {
 				Manga:  manga,
 				Volume: s.config.ChapterExtractor.Volume(selection),
 			}
-			manga.Chapters[i] = &chapter
 			s.chapters[path][i] = &chapter
 		})
+		manga.Chapters = s.chapters[path]
 	})
 	_ = chaptersCollector.Limit(&colly.LimitRule{
 		Parallelism: int(s.config.Parallelism),
@@ -119,7 +118,6 @@ func New(conf *Configuration) source.Source {
 		path := e.Request.AbsoluteURL(e.Request.URL.Path)
 		s.pages[path] = make([]*source.Page, elements.Length())
 		chapter := e.Request.Ctx.GetAny("chapter").(*source.Chapter)
-		chapter.Pages = make([]*source.Page, elements.Length())
 
 		elements.Each(func(i int, selection *goquery.Selection) {
 			link := s.config.PageExtractor.URL(selection)
@@ -130,9 +128,9 @@ func New(conf *Configuration) source.Source {
 				Chapter:   chapter,
 				Extension: ext,
 			}
-			chapter.Pages[i] = &page
 			s.pages[path][i] = &page
 		})
+		chapter.Pages = s.pages[path]
 	})
 	_ = pagesCollector.Limit(&colly.LimitRule{
 		Parallelism: int(s.config.Parallelism),
