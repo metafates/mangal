@@ -74,7 +74,7 @@ func GetByID(id int) (*Manga, error) {
 	}
 
 	manga := response.Data.Media
-	log.Infof("Got response from Anilist, found manga with id %s", manga.ID)
+	log.Infof("Got response from Anilist, found manga with id %d", manga.ID)
 	return manga, nil
 }
 
