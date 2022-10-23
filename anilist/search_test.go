@@ -9,7 +9,7 @@ func TestSearch(t *testing.T) {
 	Convey(`Given a query "Death Note"`, t, func() {
 		query := "Death Note"
 		Convey(`When I search for it`, func() {
-			results, err := Search(query)
+			results, err := SearchByName(query)
 			Convey(`Then I should get a result`, func() {
 				So(err, ShouldBeNil)
 				So(results, ShouldNotBeEmpty)

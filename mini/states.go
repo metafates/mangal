@@ -380,7 +380,7 @@ func (m *mini) handleHistorySelectState() error {
 	defaultProviders := provider.Builtins()
 	customProviders := provider.Customs()
 
-	var providers = make([]*provider.Provider, len(defaultProviders)+len(customProviders))
+	var providers = make([]*provider.Provider, 0)
 	providers = append(providers, defaultProviders...)
 	providers = append(providers, customProviders...)
 

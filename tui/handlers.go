@@ -304,7 +304,7 @@ func (b *statefulBubble) fetchAnilist(manga *source.Manga) tea.Cmd {
 	return func() tea.Msg {
 		log.Info("fetching anilist for " + manga.Name)
 		b.progressStatus = fmt.Sprintf("Fetching anilist for %s", style.Magenta(manga.Name))
-		mangas, err := anilist.Search(manga.Name)
+		mangas, err := anilist.SearchByName(manga.Name)
 		if err != nil {
 			log.Error(err)
 			b.errorChannel <- err

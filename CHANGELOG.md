@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.14.0
+
+- New commands related to the anilist manga linkage. Now you can set what anilist manga should be linked with what titles by id. See `mangal inline anilist` for more information. #106
+- Increase default http timeout to 20 seconds #108
+- Fixed nil panic when trying to resume reading from history with mini mode
+
 ## 3.13.0
 
 - Support environment variables for `downloader.path` config field #103
