@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.13.0
+
+- Support environment variables for `downloader.path` config field #103
+- Replace Mangakakalot with Manganato #102
+- Move `install` & `gen` commands to `sources` subcommands. E.g. if you used `mangal install` before use `mangal sources install`. Old commands are still present, but marked as deprecated.
+- New flags `--builtin` & `--custom` for `sources` command to filter sources by type.
+- New flag `--json` added for `config info` command to show fields in json format. 
+- New command `mangal sources remove <name>` to remove custom source.
+- Minor performance improvements.
+
 ## 3.12.0
 
 - Faster and more optimized page downloader

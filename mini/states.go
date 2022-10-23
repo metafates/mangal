@@ -44,8 +44,8 @@ func (m *mini) handleSourceSelectState() error {
 		}
 	} else {
 		var providers []*provider.Provider
-		providers = append(providers, provider.DefaultProviders()...)
-		providers = append(providers, provider.CustomProviders()...)
+		providers = append(providers, provider.Builtins()...)
+		providers = append(providers, provider.Customs()...)
 
 		slices.SortFunc(providers, func(a *provider.Provider, b *provider.Provider) bool {
 			return strings.Compare(a.String(), b.String()) < 0
@@ -377,8 +377,8 @@ func (m *mini) handleHistorySelectState() error {
 		return nil
 	}
 
-	defaultProviders := provider.DefaultProviders()
-	customProviders := provider.CustomProviders()
+	defaultProviders := provider.Builtins()
+	customProviders := provider.Customs()
 
 	var providers = make([]*provider.Provider, len(defaultProviders)+len(customProviders))
 	providers = append(providers, defaultProviders...)

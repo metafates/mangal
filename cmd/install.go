@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/metafates/mangal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -10,11 +9,10 @@ func init() {
 }
 
 var installCmd = &cobra.Command{
-	Use:   "install",
-	Short: "Browse and install custom scrapers",
+	Use:        "install",
+	Short:      "Browse and install custom scrapers",
+	Deprecated: "use `mangal sources install` instead.",
 	Long: `Browse and install custom scrapers from official GitHub repo.
 https://github.com/metafates/mangal-scrapers`,
-	Run: func(cmd *cobra.Command, args []string) {
-		handleErr(tui.Run(&tui.Options{Install: true}))
-	},
+	Run: sourcesInstallCmd.Run,
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/metafates/mangal/provider/custom"
 	"github.com/metafates/mangal/provider/generic"
 	"github.com/metafates/mangal/provider/mangadex"
-	"github.com/metafates/mangal/provider/mangakakalot"
+	"github.com/metafates/mangal/provider/manganato"
 	"github.com/metafates/mangal/provider/manganelo"
 	"github.com/metafates/mangal/provider/mangapill"
 	"github.com/metafates/mangal/source"
@@ -19,11 +19,11 @@ import (
 func init() {
 	for _, conf := range []*generic.Configuration{
 		manganelo.Config,
-		mangakakalot.Config,
+		manganato.Config,
 		mangapill.Config,
 	} {
 		conf := conf
-		defaultProviders = append(defaultProviders, &Provider{
+		builtinProviders = append(builtinProviders, &Provider{
 			ID:   conf.ID(),
 			Name: conf.Name,
 			CreateSource: func() (source.Source, error) {
@@ -43,9 +43,9 @@ func (p Provider) String() string {
 	return p.Name
 }
 
-const customProviderExtension = ".lua"
+const CustomProviderExtension = ".lua"
 
-var defaultProviders = []*Provider{
+var builtinProviders = []*Provider{
 	{
 		ID:   mangadex.ID,
 		Name: mangadex.Name,
@@ -55,11 +55,11 @@ var defaultProviders = []*Provider{
 	},
 }
 
-func DefaultProviders() []*Provider {
-	return defaultProviders
+func Builtins() []*Provider {
+	return builtinProviders
 }
 
-func CustomProviders() []*Provider {
+func Customs() []*Provider {
 	files, err := filesystem.Api().ReadDir(where.Sources())
 
 	if err != nil {
@@ -67,7 +67,7 @@ func CustomProviders() []*Provider {
 	}
 
 	paths := lo.FilterMap(files, func(f os.FileInfo, _ int) (string, bool) {
-		if filepath.Ext(f.Name()) == customProviderExtension {
+		if filepath.Ext(f.Name()) == CustomProviderExtension {
 			return filepath.Join(where.Sources(), f.Name()), true
 		}
 		return "", false
@@ -90,13 +90,13 @@ func CustomProviders() []*Provider {
 }
 
 func Get(name string) (*Provider, bool) {
-	for _, provider := range DefaultProviders() {
+	for _, provider := range Builtins() {
 		if provider.Name == name {
 			return provider, true
 		}
 	}
 
-	for _, provider := range CustomProviders() {
+	for _, provider := range Customs() {
 		if provider.Name == name {
 			return provider, true
 		}

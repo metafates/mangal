@@ -1,4 +1,4 @@
-package mangakakalot
+package manganato
 
 import (
 	"github.com/metafates/mangal/provider/generic"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestManganelo(t *testing.T) {
-	Convey("Given a mangakakalot instance", t, func() {
+	Convey("Given a manganato instance", t, func() {
 		mangakakalot := generic.New(Config)
 		Convey("When searching for a manga", func() {
 			mangas, err := mangakakalot.Search("Death Note")
