@@ -1,9 +1,11 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
+	"github.com/samber/lo"
 	"github.com/spf13/viper"
 	"reflect"
 )
@@ -12,6 +14,23 @@ type Field struct {
 	Key         string
 	Value       any
 	Description string
+}
+
+func (f *Field) Json() string {
+	field := struct {
+		Key         string `json:"key"`
+		Value       any    `json:"value"`
+		Description string `json:"description"`
+		Type        string `json:"type"`
+	}{
+		Key:         f.Key,
+		Value:       f.Value,
+		Description: f.Description,
+		Type:        reflect.TypeOf(f.Value).String(),
+	}
+
+	output := lo.Must(json.Marshal(field))
+	return string(output)
 }
 
 func (f *Field) Pretty() string {

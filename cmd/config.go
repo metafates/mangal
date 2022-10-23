@@ -48,6 +48,7 @@ var configCmd = &cobra.Command{
 func init() {
 	configCmd.AddCommand(configInfoCmd)
 	configInfoCmd.Flags().StringP("key", "k", "", "The key to get the value for")
+	configInfoCmd.Flags().BoolP("json", "j", false, "Output as JSON")
 	_ = configInfoCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
 }
 
@@ -57,6 +58,7 @@ var configInfoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			key    = lo.Must(cmd.Flags().GetString("key"))
+			asJson = lo.Must(cmd.Flags().GetBool("json"))
 			fields = lo.Values(config.Default)
 		)
 
@@ -73,10 +75,16 @@ var configInfoCmd = &cobra.Command{
 		})
 
 		for i, field := range fields {
-			fmt.Print(field.Pretty())
+			if asJson {
+				fmt.Println(field.Json())
+			} else {
+				fmt.Print(field.Pretty())
+			}
 
-			if i < len(fields)-1 {
-				fmt.Println()
+			if !asJson {
+				if i < len(fields)-1 {
+					fmt.Println()
+				}
 			}
 		}
 	},
