@@ -146,6 +146,11 @@ func init() {
 var inlineAnilistSearchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "Search anilist manga by name",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if !cmd.Flags().Changed("name") && !cmd.Flags().Changed("id") {
+			handleErr(errors.New("name or id flag is required"))
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		mangaName := lo.Must(cmd.Flags().GetString("name"))
 		mangaId := lo.Must(cmd.Flags().GetInt("id"))
@@ -169,7 +174,8 @@ var inlineAnilistSearchCmd = &cobra.Command{
 func init() {
 	inlineAnilistCmd.AddCommand(inlineAnilistGetCmd)
 
-	inlineAnilistGetCmd.Flags().StringP("name", "n", "", "manga name to get bind for")
+	inlineAnilistGetCmd.Flags().StringP("name", "n", "", "manga name to get the bind for")
+	lo.Must0(inlineAnilistGetCmd.MarkFlagRequired("name"))
 }
 
 var inlineAnilistGetCmd = &cobra.Command{
@@ -194,6 +200,9 @@ func init() {
 
 	inlineAnilistBindCmd.Flags().StringP("name", "n", "", "manga name")
 	inlineAnilistBindCmd.Flags().IntP("id", "i", 0, "anilist manga id")
+
+	lo.Must0(inlineAnilistBindCmd.MarkFlagRequired("name"))
+	lo.Must0(inlineAnilistBindCmd.MarkFlagRequired("id"))
 
 	inlineAnilistBindCmd.MarkFlagsRequiredTogether("name", "id")
 }

@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.14.1
+
+- Mark flags as required for `inline anilist` commands
+
 ## 3.14.0
 
 - New commands related to the anilist manga linkage. Now you can set what anilist manga should be linked with what titles by id. See `mangal inline anilist` for more information. #106
