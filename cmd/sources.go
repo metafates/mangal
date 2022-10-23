@@ -24,6 +24,10 @@ import (
 func init() {
 	rootCmd.AddCommand(sourcesCmd)
 	sourcesCmd.Flags().BoolP("raw", "r", false, "do not print headers")
+	sourcesCmd.Flags().BoolP("custom", "c", false, "show only custom sources")
+	sourcesCmd.Flags().BoolP("builtin", "b", false, "show only builtin sources")
+
+	sourcesCmd.MarkFlagsMutuallyExclusive("custom", "builtin")
 	sourcesCmd.SetOut(os.Stdout)
 }
 
@@ -40,23 +44,29 @@ var sourcesCmd = &cobra.Command{
 			}
 		}
 
-		defaultProviders := provider.DefaultProviders()
-		customProviders := provider.CustomProviders()
-
-		h("Builtin:")
-		for _, p := range defaultProviders {
-			cmd.Println(p.Name)
+		printBuiltin := func() {
+			h("Builtin:")
+			for _, p := range provider.DefaultProviders() {
+				cmd.Println(p.Name)
+			}
 		}
 
-		if len(customProviders) == 0 {
-			return
+		printCustom := func() {
+			h("Custom:")
+			for _, p := range provider.CustomProviders() {
+				cmd.Println(p.Name)
+			}
 		}
 
-		h("")
-
-		h("Custom:")
-		for _, p := range provider.CustomProviders() {
-			cmd.Println(p.Name)
+		switch {
+		case lo.Must(cmd.Flags().GetBool("builtin")):
+			printBuiltin()
+		case lo.Must(cmd.Flags().GetBool("custom")):
+			printCustom()
+		default:
+			printBuiltin()
+			cmd.Println()
+			printCustom()
 		}
 	},
 }
@@ -71,7 +81,7 @@ var sourcesRemoveCmd = &cobra.Command{
 	Example: "mangal sources remove <name>",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			cmd.Help()
+			handleErr(cmd.Help())
 			return
 		}
 
