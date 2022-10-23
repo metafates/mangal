@@ -48,7 +48,7 @@ curl -sSL mangal.metafates.one/run | sh
 
 ## Installation
 
-### Linux + MacOS + Termux
+### Script (Linux, MacOS, Termux)
 
 Install using [this shell script](https://github.com/metafates/mangal/blob/main/scripts/install)
 
@@ -58,36 +58,6 @@ curl -sSL mangal.metafates.one/install | sh
 
 This script will automatically detect OS & Distro and use the best option available.
 For example, on macOS it will try to use Homebrew, on Ubuntu it will install the `.deb` package and so on...
-
-<details>
-<summary>😡 I hate scripts! Show me how to install it manually</summary>
-
-#### Ubuntu / Debian
-
-1. Download the `*.deb` file from the [release page](https://github.com/metafates/mangal/releases/latest)
-2. Run `sudo dpkg --install ...` where `...` is the name of the file you downloaded
-
-#### Fedora / Any other rpm based distro
-
-1. Download the `*.rpm` file from the [release page](https://github.com/metafates/mangal/releases/latest)
-2. Run `sudo rpm --install ...` where `...` is the name of the file you downloaded
-
-#### Pre-compiled
-
-Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
-and copy them to the desired location.
-
-#### From source
-
-Visit this link to install [Go](https://go.dev/doc/install)
-
-```shell
-git clone --depth 1 https://github.com/metafates/mangal.git
-cd mangal
-make install
-```
-
-</details>
 
 ### Arch Linux
 
@@ -108,16 +78,6 @@ the official bucket)
 
     scoop bucket add extras
     scoop install mangal
-
-<details>
-<summary>In case it's outdated</summary>
-
-Use my bucket
-
-    scoop bucket add metafates https://github.com/metafates/scoop-metafates
-    scoop install mangal
-
-</details>
 
 ### Termux
 
@@ -145,7 +105,7 @@ nix-env -iA nixpkgs.mangal
 
 ### Docker
 
-Install using... well, you know. (thanks to [@ArabCoders](https://github.com/ArabCoders) for reference)
+Install using Docker. (thanks to [@ArabCoders](https://github.com/ArabCoders) for reference)
 
     docker pull metafates/mangal
 
@@ -154,6 +114,41 @@ To run
 ```shell
 docker run --rm -ti -e "TERM=xterm-256color" -v $(PWD)/mangal/downloads:/downloads -v $(PWD)/mangal/config:/config metafates/mangal
 ```
+
+### From source
+
+Visit this link to install [Go](https://go.dev/doc/install).
+
+Clone the repo
+```shell
+git clone --depth 1 https://github.com/metafates/mangal.git
+cd mangal
+```
+
+GNU Make **(Recommended)**
+```shell
+make install # if you want to compile and install mangal to path
+make build # if you want to just build the binary
+```
+
+If you don't have GNU Make use this
+```shell
+go install # to install
+go build # to build
+```
+
+If you want to build mangal for other architecture, say ARM, you'll have to set env variables `GOOS` and `GOARCH`
+
+```shell
+GOOS=linux GOARCH=arm64 make build
+```
+
+[Available GOOS and GOARCH combinations](https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63)
+
+### Pre-compiled
+
+Download the pre-compiled binaries from the [releases page](https://github.com/metafates/mangal/releases/latest)
+and copy them to the desired location.
 
 ## Usage
 
