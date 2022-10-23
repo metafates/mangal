@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/filesystem"
@@ -120,5 +122,91 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		}
 
 		handleErr(inline.Run(options))
+	},
+}
+
+func init() {
+	inlineCmd.AddCommand(inlineAnilistCmd)
+}
+
+var inlineAnilistCmd = &cobra.Command{
+	Use:   "anilist",
+	Short: "Anilist related commands",
+}
+
+func init() {
+	inlineAnilistCmd.AddCommand(inlineAnilistSearchCmd)
+
+	inlineAnilistSearchCmd.Flags().StringP("name", "n", "", "manga name to search")
+	inlineAnilistSearchCmd.Flags().IntP("id", "i", 0, "anilist manga id")
+
+	inlineAnilistSearchCmd.MarkFlagsMutuallyExclusive("name", "id")
+}
+
+var inlineAnilistSearchCmd = &cobra.Command{
+	Use:   "search",
+	Short: "Search anilist manga by name",
+	Run: func(cmd *cobra.Command, args []string) {
+		mangaName := lo.Must(cmd.Flags().GetString("name"))
+		mangaId := lo.Must(cmd.Flags().GetInt("id"))
+
+		var toEncode any
+
+		if mangaName != "" {
+			mangas, err := anilist.SearchByName(mangaName)
+			handleErr(err)
+			toEncode = mangas
+		} else {
+			manga, err := anilist.GetByID(mangaId)
+			handleErr(err)
+			toEncode = manga
+		}
+
+		handleErr(json.NewEncoder(os.Stdout).Encode(toEncode))
+	},
+}
+
+func init() {
+	inlineAnilistCmd.AddCommand(inlineAnilistGetCmd)
+
+	inlineAnilistGetCmd.Flags().StringP("name", "n", "", "manga name to get bind for")
+}
+
+var inlineAnilistGetCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Get anilist manga that is bind to manga name",
+	Run: func(cmd *cobra.Command, args []string) {
+		name := lo.Must(cmd.Flags().GetString("name"))
+		anilistManga, ok := anilist.GetRelation(name)
+
+		if !ok {
+			var err error
+			anilistManga, err = anilist.FindClosest(name)
+			handleErr(err)
+		}
+
+		handleErr(json.NewEncoder(os.Stdout).Encode(anilistManga))
+	},
+}
+
+func init() {
+	inlineAnilistCmd.AddCommand(inlineAnilistBindCmd)
+
+	inlineAnilistBindCmd.Flags().StringP("name", "n", "", "manga name")
+	inlineAnilistBindCmd.Flags().IntP("id", "i", 0, "anilist manga id")
+
+	inlineAnilistBindCmd.MarkFlagsRequiredTogether("name", "id")
+}
+
+var inlineAnilistBindCmd = &cobra.Command{
+	Use:   "set",
+	Short: "Bind manga name to the anilist manga by id",
+	Run: func(cmd *cobra.Command, args []string) {
+		anilistManga, err := anilist.GetByID(lo.Must(cmd.Flags().GetInt("id")))
+		handleErr(err)
+
+		mangaName := lo.Must(cmd.Flags().GetString("name"))
+
+		handleErr(anilist.SetRelation(mangaName, anilistManga))
 	},
 }

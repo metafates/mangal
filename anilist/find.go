@@ -41,7 +41,7 @@ func FindClosest(name string) (*Manga, error) {
 	}
 
 	// search for manga on anilist
-	mangas, err := Search(name)
+	mangas, err := SearchByName(name)
 	if err != nil {
 		log.Error(err)
 		return nil, err
