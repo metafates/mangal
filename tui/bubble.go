@@ -255,8 +255,8 @@ func newBubble() *statefulBubble {
 }
 
 func (b *statefulBubble) loadProviders() tea.Cmd {
-	providers := provider.DefaultProviders()
-	customProviders := provider.CustomProviders()
+	providers := provider.Builtins()
+	customProviders := provider.Customs()
 
 	var items []list.Item
 	for _, p := range providers {

@@ -46,14 +46,14 @@ var sourcesCmd = &cobra.Command{
 
 		printBuiltin := func() {
 			h("Builtin:")
-			for _, p := range provider.DefaultProviders() {
+			for _, p := range provider.Builtins() {
 				cmd.Println(p.Name)
 			}
 		}
 
 		printCustom := func() {
 			h("Custom:")
-			for _, p := range provider.CustomProviders() {
+			for _, p := range provider.Customs() {
 				cmd.Println(p.Name)
 			}
 		}

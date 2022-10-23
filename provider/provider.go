@@ -23,7 +23,7 @@ func init() {
 		mangapill.Config,
 	} {
 		conf := conf
-		defaultProviders = append(defaultProviders, &Provider{
+		builtinProviders = append(builtinProviders, &Provider{
 			ID:   conf.ID(),
 			Name: conf.Name,
 			CreateSource: func() (source.Source, error) {
@@ -45,7 +45,7 @@ func (p Provider) String() string {
 
 const CustomProviderExtension = ".lua"
 
-var defaultProviders = []*Provider{
+var builtinProviders = []*Provider{
 	{
 		ID:   mangadex.ID,
 		Name: mangadex.Name,
@@ -55,11 +55,11 @@ var defaultProviders = []*Provider{
 	},
 }
 
-func DefaultProviders() []*Provider {
-	return defaultProviders
+func Builtins() []*Provider {
+	return builtinProviders
 }
 
-func CustomProviders() []*Provider {
+func Customs() []*Provider {
 	files, err := filesystem.Api().ReadDir(where.Sources())
 
 	if err != nil {
@@ -90,13 +90,13 @@ func CustomProviders() []*Provider {
 }
 
 func Get(name string) (*Provider, bool) {
-	for _, provider := range DefaultProviders() {
+	for _, provider := range Builtins() {
 		if provider.Name == name {
 			return provider, true
 		}
 	}
 
-	for _, provider := range CustomProviders() {
+	for _, provider := range Customs() {
 		if provider.Name == name {
 			return provider, true
 		}
