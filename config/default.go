@@ -104,7 +104,7 @@ Type "mangal sources" to show available sources`,
 		},
 		{
 			constant.DownloaderDownloadCover,
-			false,
+			true,
 			`Whether to download manga cover or not`,
 		},
 		{
