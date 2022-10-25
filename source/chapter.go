@@ -158,11 +158,11 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
 	<PageCount>{{ len .Pages }}</PageCount>
 	<Summary>{{ escape .Manga.Metadata.Summary }}</Summary>
 	<Count>{{ len .Manga.Chapters }}</Count>
-	<Writer>{{ .Manga.Metadata.Author }}</Writer>
+	<Writer>{{ escape .Manga.Metadata.Author }}</Writer>
 	<Characters>{{ join .Manga.Metadata.Characters "," }}</Characters>
-	<Year>{{ .Manga.Metadata.StartDate.Year }}</Year>
-	<Month>{{ .Manga.Metadata.StartDate.Month }}</Month>
-	<Day>{{ .Manga.Metadata.StartDate.Day }}</Day>
+	{{ if geq .Manga.Metadata.StartDate.Year 1 }}<Year>{{ .Manga.Metadata.StartDate.Year }}</Year>{{ end }}
+	{{ if geq .Manga.Metadata.StartDate.Month 1 }}<Month>{{ .Manga.Metadata.StartDate.Month }}</Month>{{ end }}
+	{{ if geq .Manga.Metadata.StartDate.Day 1 }}<Day>{{ .Manga.Metadata.StartDate.Day }}</Day>{{ end }}
 	<Tags>{{ join .Manga.Metadata.Tags "," }}</Tags>
 	<Notes>Downloaded with Mangal. https://github.com/metafates/mangal</Notes>
   	<Manga>YesAndRightToLeft</Manga>
@@ -171,6 +171,7 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
 	funcs := template.FuncMap{
 		"join":   strings.Join,
 		"escape": html.EscapeString,
+		"geq":    func(a, b int) bool { return a >= b },
 	}
 
 	parsed := lo.Must(template.New("ComicInfo").Funcs(funcs).Parse(t))

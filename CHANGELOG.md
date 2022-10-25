@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 3.14.2
+
+- Do not put an invalid value for dates #114
+- Set `metadata.series_json` to `true` by default.
+  See `mangal config info -k metadata.series_json` for more info
+
 ## 3.14.1
 
 - Mark flags as required for `inline anilist` commands
