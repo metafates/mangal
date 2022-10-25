@@ -83,8 +83,6 @@ the official bucket)
 
 Thanks to [@T-Dynamos](https://github.com/T-Dynamos) for adding it to the [termux-packages](https://github.com/termux/termux-packages)
 
-> `mangal update` command may not work properly
-
 ```shell
 pkg install mangal
 ```
@@ -92,8 +90,6 @@ pkg install mangal
 ### Nix 
 
 Install using [Nix](https://nixos.org/download.html#download-nix). Thanks to [@bertof](https://github.com/bertof) for adding it to the [nixpkgs](https://github.com/NixOS/nixpkgs)
-
-> `mangal update` command may not work properly
 
 ```shell
 # NixOS

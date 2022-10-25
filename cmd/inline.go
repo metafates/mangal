@@ -44,19 +44,19 @@ var inlineCmd = &cobra.Command{
 Manga selectors:
   first - first manga in the list
   last - last manga in the list
-  [number] - select manga by index
+  [number] - select manga by index (starting from 0)
 
 Chapter selectors:
   first - first chapter in the list
   last - last chapter in the list
   all - all chapters in the list
-  [number] - select chapter by index
+  [number] - select chapter by index (starting from 0)
   [from]-[to] - select chapters by range
   @[substring]@ - select chapters by name substring
 
 When using the json flag manga selector could be omitted. That way, it will select all mangas`,
 
-	Example: "mangal inline --source Manganelo --query \"death note\" --manga first --chapters \"@Vol.1 @\" -d",
+	Example: "https://github.com/metafates/mangal/wiki/Inline-mode",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		json, _ := cmd.Flags().GetBool("json")
 
@@ -146,6 +146,11 @@ func init() {
 var inlineAnilistSearchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "Search anilist manga by name",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if !cmd.Flags().Changed("name") && !cmd.Flags().Changed("id") {
+			handleErr(errors.New("name or id flag is required"))
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		mangaName := lo.Must(cmd.Flags().GetString("name"))
 		mangaId := lo.Must(cmd.Flags().GetInt("id"))
@@ -169,7 +174,8 @@ var inlineAnilistSearchCmd = &cobra.Command{
 func init() {
 	inlineAnilistCmd.AddCommand(inlineAnilistGetCmd)
 
-	inlineAnilistGetCmd.Flags().StringP("name", "n", "", "manga name to get bind for")
+	inlineAnilistGetCmd.Flags().StringP("name", "n", "", "manga name to get the bind for")
+	lo.Must0(inlineAnilistGetCmd.MarkFlagRequired("name"))
 }
 
 var inlineAnilistGetCmd = &cobra.Command{
@@ -194,6 +200,9 @@ func init() {
 
 	inlineAnilistBindCmd.Flags().StringP("name", "n", "", "manga name")
 	inlineAnilistBindCmd.Flags().IntP("id", "i", 0, "anilist manga id")
+
+	lo.Must0(inlineAnilistBindCmd.MarkFlagRequired("name"))
+	lo.Must0(inlineAnilistBindCmd.MarkFlagRequired("id"))
 
 	inlineAnilistBindCmd.MarkFlagsRequiredTogether("name", "id")
 }

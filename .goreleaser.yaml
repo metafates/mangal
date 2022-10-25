@@ -139,24 +139,10 @@ release:
 
   name_template: "{{.ProjectName}} v{{.Version}}"
   header: |
-    To update:
-    ```
-    mangal update 
-    ```
-
     To install:
     ```sh
     curl -sSL mangal.metafates.one/install | sh
     ```
-
-    <details>
-      <summary>If you have any problems updating</summary>
-      Run the install script (you can run it multiple times):
-
-      ```sh
-      curl -sSL mangal.metafates.one/install | sh
-      ```
-    </details>
 
     ## What's new?
 
