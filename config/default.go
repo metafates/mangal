@@ -134,7 +134,7 @@ It will also cache the results to not spam the API`,
 		},
 		{
 			constant.MetadataSeriesJSON,
-			false,
+			true,
 			`Generate series.json file for each manga`,
 		},
 		{
