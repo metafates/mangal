@@ -78,8 +78,7 @@ var versionCmd = &cobra.Command{
 {{ if not (eq .NewVersion "") }}
 {{ green "▇▇▇" }} New version available {{ bold .NewVersion }}
 {{ faint (concat "https://github.com/metafates/mangal/releases/tag/v" .NewVersion) }}
-{{ end }}
-`)
+{{ end }}`)
 		handleErr(err)
 		handleErr(t.Execute(cmd.OutOrStdout(), versionInfo))
 	},

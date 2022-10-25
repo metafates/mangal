@@ -49,7 +49,7 @@ func getCachedVersion() (version string, err error) {
 		return
 	}
 
-	if time.Since(cache.Updated) > 24*time.Hour {
+	if time.Since(cache.Updated) > time.Hour {
 		return
 	}
 
