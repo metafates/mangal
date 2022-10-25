@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 ## 3.14.1
 
 - Mark flags as required for `inline anilist` commands
+- Remove `update` command [Why?](https://github.com/metafates/mangal/discussions/112)
+- `mangal version` will notify if new version is available
 
 ## 3.14.0
 
