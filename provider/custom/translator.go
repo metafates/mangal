@@ -6,6 +6,7 @@ import (
 	"github.com/samber/lo"
 	lua "github.com/yuin/gopher-lua"
 	"net/url"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -133,14 +134,6 @@ func pageFromTable(table *lua.LTable, chapter *source.Chapter) (page *source.Pag
 			page.Index = uint16(num)
 			return nil
 		}},
-		"extension": {A: lua.LTString, B: false, C: func(v string) error {
-			if !strings.HasPrefix(v, ".") {
-				v = "." + v
-			}
-
-			page.Extension = v
-			return nil
-		}, D: ".jpg"},
 	}
 
 	err = translate(table, mappings)
@@ -148,6 +141,7 @@ func pageFromTable(table *lua.LTable, chapter *source.Chapter) (page *source.Pag
 		return
 	}
 
+	page.Extension = filepath.Ext(page.URL)
 	chapter.Pages = append(chapter.Pages, page)
 	return
 }
