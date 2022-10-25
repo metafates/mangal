@@ -44,19 +44,19 @@ var inlineCmd = &cobra.Command{
 Manga selectors:
   first - first manga in the list
   last - last manga in the list
-  [number] - select manga by index
+  [number] - select manga by index (starting from 0)
 
 Chapter selectors:
   first - first chapter in the list
   last - last chapter in the list
   all - all chapters in the list
-  [number] - select chapter by index
+  [number] - select chapter by index (starting from 0)
   [from]-[to] - select chapters by range
   @[substring]@ - select chapters by name substring
 
 When using the json flag manga selector could be omitted. That way, it will select all mangas`,
 
-	Example: "mangal inline --source Manganelo --query \"death note\" --manga first --chapters \"@Vol.1 @\" -d",
+	Example: "https://github.com/metafates/mangal/wiki/Inline-mode",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		json, _ := cmd.Flags().GetBool("json")
 
