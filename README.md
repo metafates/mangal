@@ -131,10 +131,16 @@ make install # if you want to compile and install mangal to path
 make build # if you want to just build the binary
 ```
 
-If you don't have GNU Make use this
+<details>
+<summary>If you don't have GNU Make use this</summary>
+</details>
+
 ```shell
-go install # to install
-go build # to build
+# To build
+go build -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)' -X 'github.com/metafates/mangal/constant.BuiltBy=$(whoami)' -X 'github.com/metafates/mangal/constant.Revision=$(git rev-parse --short HEAD)' -s -w"
+
+# To install
+go install -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)' -X 'github.com/metafates/mangal/constant.BuiltBy=$(whoami)' -X 'github.com/metafates/mangal/constant.Revision=$(git rev-parse --short HEAD)' -s -w"
 ```
 
 If you want to build mangal for other architecture, say ARM, you'll have to set env variables `GOOS` and `GOARCH`
