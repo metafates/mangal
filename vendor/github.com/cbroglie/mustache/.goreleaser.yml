@@ -1,0 +1,13 @@
+env:
+  - GO111MODULE=on
+  - CGO_ENABLED=0
+builds:
+  - main: ./cmd/mustache
+    binary: mustache
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
