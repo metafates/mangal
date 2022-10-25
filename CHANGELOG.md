@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Mark flags as required for `inline anilist` commands
 - Remove `update` command [Why?](https://github.com/metafates/mangal/discussions/112)
 - `mangal version` will notify if new version is available
+- Use correct page image extension for custom sources #110
 
 ## 3.14.0
 
