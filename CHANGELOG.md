@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - 2x faster json decoder/encoder 🚀🚀
 - Include different cover sizes and color for json output #116
 - Add option to omit dates for ComicInfo.xml #117
+- Overwrite old `series.json` file each time a chapter is downloaded
 
 ## 3.14.2
 

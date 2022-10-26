@@ -71,16 +71,10 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 			log.Warn(err)
 		} else {
 			path = filepath.Join(path, "series.json")
-			exists, err := filesystem.Api().Exists(path)
+			progress("Generating series.json")
+			err = filesystem.Api().WriteFile(path, chapter.Manga.SeriesJSON().Bytes(), os.ModePerm)
 			if err != nil {
 				log.Warn(err)
-			} else if !exists {
-				progress("Generating series.json")
-				data := chapter.Manga.SeriesJSON()
-				err = filesystem.Api().WriteFile(path, data.Bytes(), os.ModePerm)
-				if err != nil {
-					log.Warn(err)
-				}
 			}
 		}
 	}
