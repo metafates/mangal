@@ -40,17 +40,20 @@ type Manga struct {
 	Chapters []*Chapter
 	Source   Source `json:"-"`
 	Metadata struct {
-		Genres     []string
-		Summary    string
-		Author     string
-		Cover      string
-		Tags       []string
-		Characters []string
-		Status     string
-		StartDate  date
-		EndDate    date
-		Synonyms   []string
-		URLs       []string
+		Genres      []string
+		Summary     string
+		Author      string
+		Cover       string
+		CoverMedium string
+		CoverSmall  string
+		CoverColor  string
+		Tags        []string
+		Characters  []string
+		Status      string
+		StartDate   date
+		EndDate     date
+		Synonyms    []string
+		URLs        []string
 	}
 	cachedTempPath  string
 	populated       bool
@@ -189,6 +192,10 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	m.Metadata.Tags = tags
 
 	m.Metadata.Cover = manga.CoverImage.ExtraLarge
+	m.Metadata.CoverMedium = manga.CoverImage.Medium
+	m.Metadata.CoverSmall = manga.CoverImage.Large
+	m.Metadata.CoverColor = manga.CoverImage.Color
+
 	m.Metadata.StartDate = date(manga.StartDate)
 	m.Metadata.EndDate = date(manga.EndDate)
 

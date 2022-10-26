@@ -17,6 +17,9 @@ type Manga struct {
 	Description string `json:"description"`
 	CoverImage  struct {
 		ExtraLarge string `json:"extraLarge"`
+		Large      string `json:"large"`
+		Medium     string `json:"medium"`
+		Color      string `json:"color"`
 	} `json:"coverImage"`
 	Tags []struct {
 		Name string `json:"name"`

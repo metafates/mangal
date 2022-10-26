@@ -17,6 +17,9 @@ tags {
 genres
 coverImage {
 	extraLarge
+	large
+	medium
+	color
 }
 characters (page: 1, perPage: 10, role: MAIN) {
 	nodes {
