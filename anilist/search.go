@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/network"
+	"github.com/samber/lo"
 	"net/http"
 	"strconv"
 )
@@ -82,8 +83,11 @@ func GetByID(id int) (*Manga, error) {
 }
 
 func SearchByName(name string) ([]*Manga, error) {
-	if mangas, ok := searchCacher.Get(name); ok {
-		return mangas, nil
+	if ids, ok := searchCacher.Get(name); ok {
+		return lo.FilterMap(ids, func(item, _ int) (*Manga, bool) {
+			manga, ok := idCacher.Get(item)
+			return manga, ok
+		}), nil
 	}
 
 	// prepare body
@@ -134,6 +138,11 @@ func SearchByName(name string) ([]*Manga, error) {
 
 	mangas := response.Data.Page.Media
 	log.Infof("Got response from Anilist, found %d results", strconv.Itoa(len(mangas)))
-	_ = searchCacher.Set(name, mangas)
+	ids := make([]int, len(mangas))
+	for i, manga := range mangas {
+		ids[i] = manga.ID
+		_ = idCacher.Set(manga.ID, manga)
+	}
+	_ = searchCacher.Set(name, ids)
 	return mangas, nil
 }

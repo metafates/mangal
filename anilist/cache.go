@@ -30,19 +30,21 @@ var relationCacher = &cacher[string, int]{
 	internal: cache.New(
 		"anilist_relation_cache",
 		&cache.Options[*cacheData[string, int]]{
-			Initial:     &cacheData[string, int]{Mangas: make(map[string]int, 0)},
+			Initial: &cacheData[string, int]{Mangas: make(map[string]int, 0)},
+			// never expire
 			ExpireEvery: constant.Forever,
 		},
 	),
 	keyWrapper: normalizedName,
 }
 
-var searchCacher = &cacher[string, []*Manga]{
+var searchCacher = &cacher[string, []int]{
 	internal: cache.New(
 		"anilist_search_cache",
-		&cache.Options[*cacheData[string, []*Manga]]{
-			Initial:     &cacheData[string, []*Manga]{Mangas: make(map[string][]*Manga, 0)},
-			ExpireEvery: time.Hour * 24,
+		&cache.Options[*cacheData[string, []int]]{
+			Initial: &cacheData[string, []int]{Mangas: make(map[string][]int, 0)},
+			// update ids every 10 days, since new manga are not added that often
+			ExpireEvery: time.Hour * 24 * 10,
 		},
 	),
 	keyWrapper: normalizedName,
@@ -52,7 +54,8 @@ var idCacher = &cacher[int, *Manga]{
 	internal: cache.New(
 		"anilist_id_cache",
 		&cache.Options[*cacheData[int, *Manga]]{
-			Initial:     &cacheData[int, *Manga]{Mangas: make(map[int]*Manga, 0)},
+			Initial: &cacheData[int, *Manga]{Mangas: make(map[int]*Manga, 0)},
+			// update manga data every day since it can change often
 			ExpireEvery: time.Hour * 24,
 		},
 	),
