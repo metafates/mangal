@@ -1,8 +1,8 @@
 package updater
 
 import (
-	"encoding/json"
 	"errors"
+	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 ## Unreleased
 
 - Include different cover sizes and color for json output #116
+- 2x faster json decoder/encoder 🚀🚀
 
 ## 3.14.2
 

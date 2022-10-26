@@ -2,8 +2,8 @@ package anilistintegration
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"

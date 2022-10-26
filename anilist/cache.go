@@ -1,7 +1,7 @@
 package anilist
 
 import (
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"

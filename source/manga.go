@@ -2,8 +2,8 @@ package source
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"

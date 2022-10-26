@@ -1,8 +1,8 @@
 package history
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/integration"

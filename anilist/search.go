@@ -2,8 +2,8 @@ package anilist
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/network"
 	"net/http"

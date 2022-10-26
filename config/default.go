@@ -1,8 +1,8 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
 	"github.com/samber/lo"

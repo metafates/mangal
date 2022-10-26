@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
