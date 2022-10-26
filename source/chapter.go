@@ -160,9 +160,11 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
 	<Count>{{ len .Manga.Chapters }}</Count>
 	<Writer>{{ escape .Manga.Metadata.Author }}</Writer>
 	<Characters>{{ join .Manga.Metadata.Characters "," }}</Characters>
+	{{ if addDate }}
 	{{ if geq .Manga.Metadata.StartDate.Year 1 }}<Year>{{ .Manga.Metadata.StartDate.Year }}</Year>{{ end }}
 	{{ if geq .Manga.Metadata.StartDate.Month 1 }}<Month>{{ .Manga.Metadata.StartDate.Month }}</Month>{{ end }}
 	{{ if geq .Manga.Metadata.StartDate.Day 1 }}<Day>{{ .Manga.Metadata.StartDate.Day }}</Day>{{ end }}
+	{{end}}
 	<Tags>{{ join .Manga.Metadata.Tags "," }}</Tags>
 	<Notes>Downloaded with Mangal. https://github.com/metafates/mangal</Notes>
   	<Manga>YesAndRightToLeft</Manga>
@@ -172,6 +174,9 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
 		"join":   strings.Join,
 		"escape": html.EscapeString,
 		"geq":    func(a, b int) bool { return a >= b },
+		"addDate": func() bool {
+			return viper.GetBool(constant.MetadataComicInfoXMLAddDate)
+		},
 	}
 
 	parsed := lo.Must(template.New("ComicInfo").Funcs(funcs).Parse(t))

@@ -133,6 +133,11 @@ It will also cache the results to not spam the API`,
 			`Generate ComicInfo.xml file for each chapter`,
 		},
 		{
+			constant.MetadataComicInfoXMLAddDate,
+			true,
+			`Add series release date to each chapter in ComicInfo.xml file`,
+		},
+		{
 			constant.MetadataSeriesJSON,
 			true,
 			`Generate series.json file for each manga`,

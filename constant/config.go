@@ -18,9 +18,10 @@ const (
 )
 
 const (
-	MetadataFetchAnilist = "metadata.fetch_anilist"
-	MetadataComicInfoXML = "metadata.comic_info_xml"
-	MetadataSeriesJSON   = "metadata.series_json"
+	MetadataFetchAnilist        = "metadata.fetch_anilist"
+	MetadataComicInfoXML        = "metadata.comic_info_xml"
+	MetadataComicInfoXMLAddDate = "metadata.comic_info_xml_add_date"
+	MetadataSeriesJSON          = "metadata.series_json"
 )
 
 const (
