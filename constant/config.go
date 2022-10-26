@@ -1,5 +1,10 @@
 package constant
 
+// DefinedFieldsCount is the number of fields defined in this package.
+// You have to manually update this number when you add a new field
+// to check later if every field has a defined default value
+const DefinedFieldsCount = 47
+
 const (
 	DownloaderPath                = "downloader.path"
 	DownloaderChapterNameTemplate = "downloader.chapter_name_template"

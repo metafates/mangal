@@ -2,8 +2,8 @@ package anilist
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/network"
 	"net/http"
@@ -24,9 +24,11 @@ type searchByIDResponse struct {
 	} `json:"data"`
 }
 
-var searchCache = make(map[string][]*Manga)
-
 func GetByID(id int) (*Manga, error) {
+	if manga, ok := idCacher.Get(id); ok {
+		return manga, nil
+	}
+
 	// prepare body
 	log.Infof("Searching anilist for manga with id: %d", id)
 	body := map[string]interface{}{
@@ -75,11 +77,12 @@ func GetByID(id int) (*Manga, error) {
 
 	manga := response.Data.Media
 	log.Infof("Got response from Anilist, found manga with id %d", manga.ID)
+	_ = idCacher.Set(id, manga)
 	return manga, nil
 }
 
 func SearchByName(name string) ([]*Manga, error) {
-	if mangas, ok := searchCache[name]; ok {
+	if mangas, ok := searchCacher.Get(name); ok {
 		return mangas, nil
 	}
 
@@ -130,7 +133,7 @@ func SearchByName(name string) ([]*Manga, error) {
 	}
 
 	mangas := response.Data.Page.Media
-	log.Info("Got response from Anilist, found " + strconv.Itoa(len(mangas)) + " results")
-	searchCache[name] = mangas
+	log.Infof("Got response from Anilist, found %d results", strconv.Itoa(len(mangas)))
+	_ = searchCacher.Set(name, mangas)
 	return mangas, nil
 }

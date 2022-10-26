@@ -1,94 +1,60 @@
 package anilist
 
 import (
-	"github.com/goccy/go-json"
-	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/log"
-	"github.com/metafates/mangal/util"
-	"github.com/metafates/mangal/where"
-	"io"
-	"os"
-	"path/filepath"
+	"github.com/metafates/mangal/cache"
+	"github.com/metafates/mangal/constant"
+	"time"
 )
 
-var cache = anilistCache{
-	data: &anilistCacheData{Mangas: make(map[string]*Manga)},
+type cacheData[K comparable, T any] struct {
+	Mangas map[K]T `json:"mangas"`
 }
 
-type anilistCacheData struct {
-	Mangas map[string]*Manga `json:"mangas"`
+type cacher[K comparable, T any] struct {
+	internal   *cache.Cache[*cacheData[K, T]]
+	keyWrapper func(K) K
 }
 
-type anilistCache struct {
-	data        *anilistCacheData
-	path        string
-	initialized bool
-}
-
-func (a *anilistCache) Init() error {
-	if a.initialized {
-		return nil
-	}
-
-	log.Debug("Initializing anilist cacher")
-
-	path := filepath.Join(where.Cache(), "anilist_cache.json")
-	a.path = path
-	log.Debugf("Opening anilist cache file at %s", path)
-	file, err := filesystem.Api().OpenFile(path, os.O_RDONLY|os.O_CREATE, os.ModePerm)
-
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
-
-	defer util.Ignore(file.Close)
-
-	contents, err := io.ReadAll(file)
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
-
-	if len(contents) == 0 {
-		log.Debug("Anilist cache file is empty, skipping unmarshal")
-		return nil
-	}
-
-	err = json.Unmarshal(contents, a.data)
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
-
-	log.Debugf("Anilist cache file unmarshalled successfully, len is %d", len(a.data.Mangas))
-	return nil
-}
-
-func (a *anilistCache) Get(name string) (*Manga, bool) {
-	_ = a.Init()
-
-	mangas, ok := a.data.Mangas[normalizeName(name)]
+func (c *cacher[K, T]) Get(key K) (T, bool) {
+	mangas, ok := c.internal.Get().Mangas[c.keyWrapper(key)]
 	return mangas, ok
 }
 
-func (a *anilistCache) Set(name string, manga *Manga) error {
-	_ = a.Init()
+func (c *cacher[K, T]) Set(key K, t T) error {
+	data := c.internal.Get()
+	data.Mangas[c.keyWrapper(key)] = t
+	return c.internal.Set(data)
+}
 
-	log.Debug("Setting anilist cacher entry")
-	a.data.Mangas[normalizeName(name)] = manga
-	marshalled, err := json.Marshal(a.data)
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
+var relationCacher = &cacher[string, int]{
+	internal: cache.New(
+		"anilist_relation_cache",
+		&cache.Options[*cacheData[string, int]]{
+			Initial:     &cacheData[string, int]{Mangas: make(map[string]int, 0)},
+			ExpireEvery: constant.Forever,
+		},
+	),
+	keyWrapper: normalizedName,
+}
 
-	file, err := filesystem.Api().OpenFile(a.path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+var searchCacher = &cacher[string, []*Manga]{
+	internal: cache.New(
+		"anilist_search_cache",
+		&cache.Options[*cacheData[string, []*Manga]]{
+			Initial:     &cacheData[string, []*Manga]{Mangas: make(map[string][]*Manga, 0)},
+			ExpireEvery: time.Hour * 24,
+		},
+	),
+	keyWrapper: normalizedName,
+}
 
-	_, err = file.Write(marshalled)
-	if err != nil {
-		log.Warn(err)
-	}
-
-	return err
+var idCacher = &cacher[int, *Manga]{
+	internal: cache.New(
+		"anilist_id_cache",
+		&cache.Options[*cacheData[int, *Manga]]{
+			Initial:     &cacheData[int, *Manga]{Mangas: make(map[int]*Manga, 0)},
+			ExpireEvery: time.Hour * 24,
+		},
+	),
+	keyWrapper: func(id int) int { return id },
 }

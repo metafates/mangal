@@ -2,8 +2,8 @@ package installer
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"github.com/goccy/go-json"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/where"
 	"io"

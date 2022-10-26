@@ -11,19 +11,34 @@ import (
 
 var (
 	retries uint8
-	limit   uint8 = 3
+	limit   uint8 = 4
 )
 
-func normalizeName(name string) string {
+func normalizedName(name string) string {
 	return strings.ToLower(strings.TrimSpace(name))
 }
 
 func SetRelation(name string, to *Manga) error {
-	return cache.Set(name, to)
+	err := relationCacher.Set(name, to.ID)
+	if err != nil {
+		return err
+	}
+
+	if _, ok := idCacher.Get(to.ID); !ok {
+		return idCacher.Set(to.ID, to)
+	}
+
+	return nil
 }
 
 func GetRelation(name string) (*Manga, bool) {
-	return cache.Get(name)
+	id, ok := relationCacher.Get(name)
+	if !ok {
+		return nil, false
+	}
+
+	manga, ok := idCacher.Get(id)
+	return manga, ok
 }
 
 func FindClosest(name string) (*Manga, error) {
@@ -34,10 +49,12 @@ func FindClosest(name string) (*Manga, error) {
 		return nil, err
 	}
 
-	name = normalizeName(name)
+	name = normalizedName(name)
 
-	if manga, ok := cache.Get(name); ok {
-		return manga, nil
+	if id, ok := relationCacher.Get(name); ok {
+		if manga, ok := idCacher.Get(id); ok {
+			return manga, nil
+		}
 	}
 
 	// search for manga on anilist
@@ -67,15 +84,19 @@ func FindClosest(name string) (*Manga, error) {
 	closest := lo.MinBy(mangas, func(a, b *Manga) bool {
 		return levenshtein.Distance(
 			name,
-			normalizeName(a.Name()),
+			normalizedName(a.Name()),
 		) < levenshtein.Distance(
 			name,
-			normalizeName(b.Name()),
+			normalizedName(b.Name()),
 		)
 	})
 
 	log.Info("Found closest match: " + closest.Name())
 	retries = 0
-	_ = cache.Set(name, closest)
+
+	if _, ok := relationCacher.Get(name); !ok {
+		_ = relationCacher.Set(name, closest.ID)
+	}
+	_ = idCacher.Set(closest.ID, closest)
 	return closest, nil
 }
