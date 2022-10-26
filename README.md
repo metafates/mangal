@@ -203,7 +203,7 @@ Example of usage:
 
 > This will download all chapters of the "Death Note" from Manganelo.
 
-Type `mangal help inline` for more information
+See [Wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for more information
 
 <img width="1249" alt="INLINE" src="https://user-images.githubusercontent.com/62389790/191431913-863fc67e-b30f-4656-b9b3-e2645915f86c.png">
 
