@@ -8,8 +8,13 @@ import (
 )
 
 func (s *luaSource) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
-	if cached, ok := s.cachedChapters[manga.URL]; ok {
-		return cached, nil
+	if chapters := s.cache.chapters.Get(manga.URL); chapters.IsPresent() {
+		c := chapters.MustGet()
+		for _, chapter := range c {
+			chapter.Manga = manga
+		}
+
+		return c, nil
 	}
 
 	_, err := s.call(constant.MangaChaptersFn, lua.LTTable, lua.LString(manga.URL))
@@ -19,8 +24,7 @@ func (s *luaSource) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	}
 
 	table := s.state.CheckTable(-1)
-	chapters := make([]*source.Chapter, table.Len())
-	var i uint16
+	chapters := make([]*source.Chapter, 0)
 
 	table.ForEach(func(k lua.LValue, v lua.LValue) {
 		if k.Type() != lua.LTNumber {
@@ -42,10 +46,9 @@ func (s *luaSource) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 			s.state.RaiseError(err.Error())
 		}
 
-		chapters[i] = chapter
-		i++
+		chapters = append(chapters, chapter)
 	})
 
-	s.cachedChapters[manga.URL] = chapters
+	_ = s.cache.chapters.Set(manga.URL, chapters)
 	return chapters, nil
 }

@@ -8,8 +8,13 @@ import (
 )
 
 func (s *luaSource) Search(query string) ([]*source.Manga, error) {
-	if cached, ok := s.cachedMangas[query]; ok {
-		return cached, nil
+	if mangas := s.cache.mangas.Get(query); mangas.IsPresent() {
+		m := mangas.MustGet()
+		for _, manga := range m {
+			manga.Source = s
+		}
+
+		return m, nil
 	}
 
 	_, err := s.call(constant.SearchMangaFn, lua.LTTable, lua.LString(query))
@@ -45,6 +50,6 @@ func (s *luaSource) Search(query string) ([]*source.Manga, error) {
 		mangas = append(mangas, manga)
 	})
 
-	s.cachedMangas[query] = mangas
+	_ = s.cache.mangas.Set(query, mangas)
 	return mangas, nil
 }

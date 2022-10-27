@@ -10,15 +10,14 @@ import (
 	"time"
 )
 
-var versionCacher = cache.New[string]("version", &cache.Options[string]{
+var versionCacher = cache.New[string]("version", &cache.Options{
 	ExpireEvery: mo.Some(time.Hour),
 })
 
 // LatestVersion returns the latest version of mangal.
 // It will fetch the latest version from the GitHub API.
 func LatestVersion() (version string, err error) {
-	ver := versionCacher.Get()
-	if ver.IsPresent() {
+	if ver := versionCacher.Get(); ver.IsPresent() {
 		return ver.MustGet(), nil
 	}
 

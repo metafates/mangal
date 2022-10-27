@@ -26,18 +26,18 @@ type Cache[T any] struct {
 	initialized bool
 }
 
-type Options[T any] struct {
+type Options struct {
 	ExpireEvery mo.Option[time.Duration]
 }
 
-func New[T any](name string, options *Options[T]) *Cache[T] {
+func New[T any](name string, options *Options) *Cache[T] {
 	return &Cache[T]{
 		name: name,
 		data: &internalData[T]{
 			Internal: mo.None[T](),
 		},
 		expireEvery: options.ExpireEvery,
-		path:        filepath.Join(where.Cache(), util.SanitizeFilename(name+".json")),
+		path:        filepath.Join(where.Cache(), util.SanitizeFilename(name)+".json"),
 		initialized: false,
 	}
 }
@@ -83,15 +83,19 @@ func (c *Cache[T]) Init() error {
 
 	if unmarshalled.Time.IsPresent() {
 		c.data.Time = unmarshalled.Time
-	} else if c.expireEvery.IsPresent() {
+	}
+
+	if c.data.Time.IsAbsent() && c.expireEvery.IsPresent() {
 		c.data.Time = mo.Some(time.Now())
 	}
 
 	if c.expireEvery.IsPresent() &&
 		c.data.Time.IsPresent() &&
-		time.Since(c.data.Time.MustGet()) > c.expireEvery.MustGet() {
+		time.Since(c.data.Time.MustGet()) >= c.expireEvery.MustGet() {
 		log.Debugf("%s cache is expired, reseting cache", c.name)
-		_ = filesystem.Api().WriteFile(c.path, []byte{}, os.ModePerm)
+		c.data.Time = mo.Some(time.Now())
+		var t T
+		_ = c.Set(t)
 		return nil
 	}
 
