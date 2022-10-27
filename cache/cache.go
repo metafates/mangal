@@ -81,26 +81,15 @@ func (c *Cache[T]) Init() error {
 		return err
 	}
 
-	if unmarshalled.Time.IsPresent() {
-		c.data.Time = unmarshalled.Time
-	}
-
-	if c.data.Time.IsAbsent() && c.expireEvery.IsPresent() {
-		c.data.Time = mo.Some(time.Now())
-	}
+	c.data = &unmarshalled
 
 	if c.expireEvery.IsPresent() &&
 		c.data.Time.IsPresent() &&
 		time.Since(c.data.Time.MustGet()) >= c.expireEvery.MustGet() {
 		log.Debugf("%s cache is expired, reseting cache", c.name)
 		c.data.Time = mo.Some(time.Now())
-		var t T
-		_ = c.Set(t)
-		return nil
-	}
-
-	if unmarshalled.Internal.IsPresent() {
-		c.data.Internal = unmarshalled.Internal
+		c.data.Internal = mo.None[T]()
+		return filesystem.Api().WriteFile(c.path, []byte{}, os.ModePerm)
 	}
 
 	log.Debugf("%s cache file unmarshalled successfully", c.name)
