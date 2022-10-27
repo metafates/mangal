@@ -271,7 +271,7 @@ github.com/spf13/afero/mem
 # github.com/spf13/cast v1.5.0
 ## explicit; go 1.18
 github.com/spf13/cast
-# github.com/spf13/cobra v1.6.0
+# github.com/spf13/cobra v1.6.1
 ## explicit; go 1.15
 github.com/spf13/cobra
 # github.com/spf13/jwalterweatherman v1.1.0
@@ -317,7 +317,7 @@ github.com/yuin/gopher-lua
 github.com/yuin/gopher-lua/ast
 github.com/yuin/gopher-lua/parse
 github.com/yuin/gopher-lua/pm
-# golang.org/x/exp v0.0.0-20221019170559-20944726eadf
+# golang.org/x/exp v0.0.0-20221026153819-32f3d567a233
 ## explicit; go 1.18
 golang.org/x/exp/constraints
 golang.org/x/exp/slices
