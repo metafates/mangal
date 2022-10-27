@@ -68,7 +68,7 @@ var icons = map[Icon]*iconDef{
 	Downloaded: {
 		emoji:   "📦",
 		nerd:    style.Cyan("\uF0C5 "),
-		plain:   style.Cyan("Downloaded"),
+		plain:   style.Cyan("⬇"),
 		kaomoji: style.Cyan("⊂(◉‿◉)つ"),
 		squares: style.Cyan("◬"),
 	},
