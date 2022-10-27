@@ -149,7 +149,7 @@ func SearchByName(name string) ([]*Manga, error) {
 	}
 
 	mangas := response.Data.Page.Media
-	log.Infof("Got response from Anilist, found %d results", strconv.Itoa(len(mangas)))
+	log.Infof("Got response from Anilist, found %d results", len(mangas))
 	ids := make([]int, len(mangas))
 	for i, manga := range mangas {
 		ids[i] = manga.ID
