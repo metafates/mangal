@@ -16,6 +16,7 @@ import (
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/samber/mo"
@@ -237,10 +238,7 @@ func newBubble() *statefulBubble {
 
 	bubble.scrapersInstallC = makeList("Install Scrapers", true, &listOptions{
 		TitleStyle: mo.Some(
-			lipgloss.NewStyle().
-				Background(lipgloss.Color("#ced4da")).
-				Foreground(lipgloss.Color("#212529")).
-				Padding(0, 1),
+			style.NewColored("#212529", "#ced4da").Padding(0, 1),
 		),
 	})
 	bubble.scrapersInstallC.SetStatusBarItemName("scraper", "scrapers")
@@ -250,10 +248,7 @@ func newBubble() *statefulBubble {
 
 	bubble.sourcesC = makeList("Select Source", true, &listOptions{
 		TitleStyle: mo.Some(
-			lipgloss.NewStyle().
-				Background(lipgloss.Color("#bc6c25")).
-				Foreground(lipgloss.Color("#fefae0")).
-				Padding(0, 1),
+			style.NewColored("#fefae0", "#bc6c25").Padding(0, 1),
 		),
 	})
 	bubble.sourcesC.SetStatusBarItemName("source", "sources")
@@ -261,30 +256,21 @@ func newBubble() *statefulBubble {
 	showURLs := viper.GetBool(constant.TUIShowURLs)
 	bubble.mangasC = makeList("Mangas", showURLs, &listOptions{
 		TitleStyle: mo.Some(
-			lipgloss.NewStyle().
-				Background(lipgloss.Color("#386641")).
-				Foreground(lipgloss.Color("#f2e8cf")).
-				Padding(0, 1),
+			style.NewColored("#f2e8cf", "#386641").Padding(0, 1),
 		),
 	})
 	bubble.mangasC.SetStatusBarItemName("manga", "mangas")
 
 	bubble.chaptersC = makeList("Chapters", showURLs, &listOptions{
 		TitleStyle: mo.Some(
-			lipgloss.NewStyle().
-				Background(lipgloss.Color("#ffb703")).
-				Foreground(lipgloss.Color("#000814")).
-				Padding(0, 1),
+			style.NewColored("#000814", "#ffb703").Padding(0, 1),
 		),
 	})
 	bubble.chaptersC.SetStatusBarItemName("chapter", "chapters")
 
 	bubble.anilistC = makeList("Anilist Mangas", showURLs, &listOptions{
 		TitleStyle: mo.Some(
-			lipgloss.NewStyle().
-				Background(lipgloss.Color("#2b2d42")).
-				Foreground(lipgloss.Color("#bcbedc")).
-				Padding(0, 1),
+			style.NewColored("#bcbedc", "#2b2d42").Padding(0, 1),
 		),
 	})
 	bubble.anilistC.SetStatusBarItemName("manga", "mangas")

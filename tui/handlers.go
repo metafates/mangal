@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/anilist"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/installer"
@@ -303,7 +304,7 @@ func (b *statefulBubble) waitForAnilistFetchAndSet() tea.Cmd {
 func (b *statefulBubble) fetchAnilist(manga *source.Manga) tea.Cmd {
 	return func() tea.Msg {
 		log.Info("fetching anilist for " + manga.Name)
-		b.progressStatus = fmt.Sprintf("Fetching anilist for %s", style.Magenta(manga.Name))
+		b.progressStatus = fmt.Sprintf("Fetching anilist for %s", style.Fg(color.Purple)(manga.Name))
 		mangas, err := anilist.SearchByName(manga.Name)
 		if err != nil {
 			log.Error(err)

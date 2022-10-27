@@ -2,6 +2,7 @@ package updater
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
@@ -24,7 +25,7 @@ func Notify() {
 %s
 
 `,
-		style.Green("▇▇▇"),
+		style.Fg(color.Green)("▇▇▇"),
 		style.Bold(version),
 		style.Faint(fmt.Sprintf("(You're on %s)", constant.Version)),
 		style.Faint("https://github.com/metafates/mangal/releases/tag/v"+version),

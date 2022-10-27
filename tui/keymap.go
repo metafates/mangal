@@ -3,6 +3,7 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/style"
 )
 
@@ -73,7 +74,7 @@ func newStatefulKeymap() *statefulKeymap {
 		),
 		read: k(
 			keys("r"),
-			help(style.Yellow("r"), style.Yellow("read")),
+			help(style.Fg(color.Yellow)("r"), style.Fg(color.Yellow)("read")),
 		),
 		redownloadFailed: k(
 			keys("r"),

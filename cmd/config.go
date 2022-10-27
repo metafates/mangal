@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -25,8 +26,8 @@ func errUnknownKey(key string) error {
 	})
 	msg := fmt.Sprintf(
 		"unknown key %s, did you mean %s?",
-		style.Red(key),
-		style.Yellow(closest),
+		style.Fg(color.Red)(key),
+		style.Fg(color.Yellow)(closest),
 	)
 
 	return errors.New(msg)
@@ -147,9 +148,9 @@ var configSetCmd = &cobra.Command{
 
 		fmt.Printf(
 			"%s set %s to %s\n",
-			style.Green(icon.Get(icon.Success)),
-			style.Magenta(key),
-			style.Yellow(fmt.Sprintf("%v", v)),
+			style.Fg(color.Green)(icon.Get(icon.Success)),
+			style.Fg(color.Purple)(key),
+			style.Fg(color.Yellow)(fmt.Sprintf("%v", v)),
 		)
 	},
 }
@@ -205,7 +206,7 @@ var configWriteCmd = &cobra.Command{
 		handleErr(viper.SafeWriteConfig())
 		fmt.Printf(
 			"%s wrote config to %s\n",
-			style.Green(icon.Get(icon.Success)),
+			style.Fg(color.Green)(icon.Get(icon.Success)),
 			configFilePath,
 		)
 	},
@@ -232,7 +233,7 @@ var configDeleteCmd = &cobra.Command{
 		handleErr(err)
 		fmt.Printf(
 			"%s deleted config\n",
-			style.Green(icon.Get(icon.Success)),
+			style.Fg(color.Green)(icon.Get(icon.Success)),
 		)
 	},
 }

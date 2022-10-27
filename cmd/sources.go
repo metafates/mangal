@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/tui"
 	"github.com/metafates/mangal/util"
@@ -37,7 +38,7 @@ var sourcesCmd = &cobra.Command{
 	Example: "mangal sources",
 	Run: func(cmd *cobra.Command, args []string) {
 		printHeader := !lo.Must(cmd.Flags().GetBool("raw"))
-		headerStyle := style.Combined(style.Bold, style.HiBlue)
+		headerStyle := style.New().Foreground(color.HiBlue).Bold(true).Render
 		h := func(s string) {
 			if printHeader {
 				cmd.Println(headerStyle(s))
@@ -88,7 +89,7 @@ var sourcesRemoveCmd = &cobra.Command{
 		for _, name := range args {
 			path := filepath.Join(where.Sources(), name+provider.CustomProviderExtension)
 			handleErr(filesystem.Api().Remove(path))
-			fmt.Printf("%s successfully removed %s\n", icon.Get(icon.Success), style.Yellow(name))
+			fmt.Printf("%s successfully removed %s\n", icon.Get(icon.Success), style.Fg(color.Yellow)(name))
 		}
 	},
 }

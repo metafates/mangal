@@ -2,31 +2,29 @@ package style
 
 import "github.com/charmbracelet/lipgloss"
 
-type Style func(string) string
-
-// Combined combines multiple styles into one.
-func Combined(styles ...func(string) string) func(string) string {
-	return func(s string) string {
-		for _, style := range styles {
-			s = style(s)
-		}
-		return s
-	}
+func New() lipgloss.Style {
+	return lipgloss.NewStyle()
 }
 
-func Padding(padding ...int) Style {
-	return func(s string) string {
-		return lipgloss.NewStyle().Padding(padding...).Render(s)
-	}
+func NewColored(foreground, background lipgloss.Color) lipgloss.Style {
+	return New().Foreground(foreground).Background(background)
 }
 
-func Truncate(max int) Style {
-	return func(s string) string {
-		if len(s) <= max {
-			return s
-		}
-
-		// Minus one for the ellipsis
-		return s[:max-1] + "…"
-	}
+func Fg(color lipgloss.Color) func(string) string {
+	return NewColored(color, "").Render
 }
+
+func Bg(color lipgloss.Color) func(string) string {
+	return NewColored("", color).Render
+}
+
+func Truncate(max int) func(string) string {
+	return New().Width(max).Render
+}
+
+var (
+	Faint     = New().Faint(true).Render
+	Bold      = New().Bold(true).Render
+	Italic    = New().Italic(true).Render
+	Underline = New().Underline(true).Render
+)

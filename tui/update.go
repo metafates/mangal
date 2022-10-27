@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/anilist"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/installer"
@@ -460,7 +461,7 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case *anilist.Manga:
-		cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked to %s %s`, style.Blue(msg.Name()), style.Faint(msg.SiteURL)))
+		cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked to %s %s`, style.Fg(color.Blue)(msg.Name()), style.Faint(msg.SiteURL)))
 		return b, cmd
 	case tea.KeyMsg:
 		switch {
@@ -595,7 +596,7 @@ func (b *statefulBubble) updateAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			b.previousState()
-			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Magenta(b.selectedManga.Name), style.Blue(manga.Name()), style.Faint(manga.SiteURL)))
+			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Fg(color.Purple)(b.selectedManga.Name), style.Fg(color.Blue)(manga.Name()), style.Faint(manga.SiteURL)))
 			return b, cmd
 		}
 	}

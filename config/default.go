@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
 	"github.com/samber/lo"
@@ -51,9 +52,9 @@ func (f *Field) Pretty() string {
 %s: %s = %s
 `,
 		style.Faint(f.Description),
-		style.Magenta(f.Key),
-		style.Yellow(f.typeName()),
-		style.Cyan(fmt.Sprintf("%v", viper.Get(f.Key))),
+		style.Fg(color.Purple)(f.Key),
+		style.Fg(color.Yellow)(f.typeName()),
+		style.Fg(color.Cyan)(fmt.Sprintf("%v", viper.Get(f.Key))),
 	)
 }
 

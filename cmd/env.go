@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
@@ -35,13 +36,13 @@ var envCmd = &cobra.Command{
 				continue
 			}
 
-			cmd.Print(style.Combined(style.Bold, style.Magenta)(env))
+			cmd.Print(style.New().Bold(true).Foreground(color.Purple).Render(env))
 			cmd.Print("=")
 
 			if present {
-				cmd.Println(style.Green(value))
+				cmd.Println(style.Fg(color.Green)(value))
 			} else {
-				cmd.Println(style.Red("unset"))
+				cmd.Println(style.Fg(color.Red)("unset"))
 			}
 		}
 	},

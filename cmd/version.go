@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/updater"
 	"os"
@@ -45,8 +46,8 @@ var versionCmd = &cobra.Command{
 		t, err := template.New("version").Funcs(map[string]any{
 			"faint":   style.Faint,
 			"bold":    style.Bold,
-			"magenta": style.Magenta,
-			"green":   style.Green,
+			"magenta": style.Fg(color.Purple),
+			"green":   style.Fg(color.Green),
 			"repeat":  strings.Repeat,
 			"concat": func(a, b string) string {
 				return a + b

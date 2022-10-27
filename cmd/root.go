@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	cc "github.com/ivanpirog/coloredcobra"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/icon"
@@ -68,7 +69,7 @@ var rootCmd = &cobra.Command{
 	Version: constant.Version,
 	Short:   "The ultimate manga downloader",
 	Long: constant.AsciiArtLogo + "\n" +
-		style.Combined(style.HiRed, style.Italic)("    - The ultimate cli manga downloader"),
+		style.New().Italic(true).Foreground(color.HiRed).Render("    - The ultimate cli manga downloader"),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {
 			handleErr(err)

@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
@@ -113,7 +114,7 @@ func (b *statefulBubble) viewRead() string {
 		[]string{
 			style.Title("Reading"),
 			"",
-			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
+			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Fg(color.Purple)(chapterName))),
 			"",
 			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
 		},
@@ -133,7 +134,7 @@ func (b *statefulBubble) viewDownload() string {
 		[]string{
 			style.Title("Downloading"),
 			"",
-			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
+			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Fg(color.Purple)(chapterName))),
 			"",
 			b.progressC.View(),
 			"",
@@ -150,9 +151,9 @@ func (b *statefulBubble) viewDownloadDone() string {
 
 	{
 		temp := strings.Split(util.Quantify(succeded, "chapter", "chapters"), " ")
-		temp[0] = style.Green(temp[0])
+		temp[0] = style.Fg(color.Green)(temp[0])
 		s := strings.Join(temp, " ") + " downloaded"
-		f := fmt.Sprintf("%s failed", style.Red(strconv.Itoa(failed)))
+		f := fmt.Sprintf("%s failed", style.Fg(color.Red)(strconv.Itoa(failed)))
 
 		msg = fmt.Sprintf("%s, %s", s, f)
 	}
@@ -178,7 +179,7 @@ func (b *statefulBubble) viewDownloadDone() string {
 }
 
 func (b *statefulBubble) viewError() string {
-	errorMsg := wrap.String(style.Combined(style.Italic, style.Red)(b.lastError.Error()), b.width)
+	errorMsg := wrap.String(style.New().Italic(true).Foreground(color.Red).Render(b.lastError.Error()), b.width)
 	return b.renderLines(
 		true,
 		append([]string{

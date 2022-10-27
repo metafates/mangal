@@ -2,6 +2,7 @@ package mini
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/style"
 	"github.com/samber/lo"
 	"os"
@@ -10,7 +11,7 @@ import (
 )
 
 func progress(msg string) (eraser func()) {
-	msg = style.Combined(style.Truncate(truncateAt), style.Blue)(msg)
+	msg = style.Truncate(truncateAt)(style.Fg(color.Blue)(msg))
 	fmt.Printf("\r%s", msg)
 
 	return func() {
@@ -19,18 +20,18 @@ func progress(msg string) (eraser func()) {
 }
 
 func title(t string) {
-	fmt.Println(style.Combined(style.Truncate(truncateAt), style.Magenta, style.Bold)(t))
+	fmt.Println(style.Truncate(truncateAt)(style.New().Bold(true).Foreground(color.Purple).Render(t)))
 }
 
 func fail(t string) {
-	fmt.Println(style.Combined(style.Truncate(truncateAt), style.Red, style.Bold)(t))
+	fmt.Println(style.Truncate(truncateAt)(style.New().Bold(true).Foreground(color.Red).Render(t)))
 }
 
 func menu[T fmt.Stringer](items []T, options ...*bind) (*bind, T, error) {
 	styles := map[int]func(string) string{
-		0: style.Combined(style.Truncate(truncateAt), style.Yellow),
-		1: style.Combined(style.Truncate(truncateAt), style.Cyan),
-		2: style.Combined(style.Truncate(truncateAt), style.Bold, style.Red),
+		0: style.New().Width(truncateAt).Foreground(color.Yellow).Render,
+		1: style.New().Width(truncateAt).Foreground(color.Cyan).Render,
+		2: style.New().Width(truncateAt).Foreground(color.Red).Render,
 	}
 
 	for i, item := range items {

@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/filesystem"
@@ -87,7 +88,7 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	progress(fmt.Sprintf(
 		"Converting %d pages to %s %s",
 		len(pages),
-		style.Yellow(viper.GetString(constant.FormatsUse)),
+		style.Fg(color.Yellow)(viper.GetString(constant.FormatsUse)),
 		style.Faint(chapter.SizeHuman())),
 	)
 	conv, err := converter.Get(viper.GetString(constant.FormatsUse))

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/metafates/mangal/color"
 	"os"
 
 	"github.com/metafates/mangal/constant"
@@ -36,7 +37,7 @@ var whereCmd = &cobra.Command{
 	Use:   "where",
 	Short: "Show the paths for a files related to the " + constant.Mangal,
 	Run: func(cmd *cobra.Command, args []string) {
-		headerStyle := style.Combined(style.Bold, style.HiMagenta)
+		headerStyle := style.New().Bold(true).Foreground(color.HiPurple).Render
 
 		for _, n := range wherePaths {
 			if lo.Must(cmd.Flags().GetBool(n.A)) {
@@ -46,7 +47,7 @@ var whereCmd = &cobra.Command{
 		}
 
 		for i, n := range wherePaths {
-			cmd.Printf("%s %s\n", headerStyle(util.Capitalize(n.A)+"?"), style.Yellow("--"+n.A))
+			cmd.Printf("%s %s\n", headerStyle(util.Capitalize(n.A)+"?"), style.Fg(color.Yellow)("--"+n.A))
 			cmd.Println(n.B())
 
 			if i < len(wherePaths)-1 {
