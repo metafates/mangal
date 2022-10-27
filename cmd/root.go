@@ -10,6 +10,7 @@ import (
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/tui"
+	"github.com/metafates/mangal/updater"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -50,6 +51,12 @@ func init() {
 	lo.Must0(viper.BindPFlag(constant.DownloaderDefaultSource, rootCmd.PersistentFlags().Lookup("source")))
 
 	rootCmd.Flags().BoolP("continue", "c", false, "continue reading")
+
+	helpFunc := rootCmd.HelpFunc()
+	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		helpFunc(cmd, args)
+		updater.Notify()
+	})
 
 	// Clear temporary files on startup
 	go clearTemp()

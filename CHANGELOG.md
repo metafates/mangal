@@ -21,6 +21,7 @@ This includes Anilist, Custom (lua) sources and built-in sources.
   See `mangal config info -k downloader.read_downloaded`
 - In TUI mode mangal will show if chapter is downloaded
 - Overwrite old `series.json` file each time a chapter is downloaded
+- Notify about new version in `help` command
 - Internal improvements
 
 ## 3.14.2

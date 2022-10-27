@@ -11,7 +11,7 @@ import (
 )
 
 var versionCacher = cache.New[string]("version", &cache.Options{
-	ExpireEvery: mo.Some(time.Hour),
+	ExpireEvery: mo.Some(time.Hour * 24),
 })
 
 // LatestVersion returns the latest version of mangal.
