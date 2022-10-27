@@ -88,7 +88,8 @@ func (c *Cache[T]) Init() error {
 	}
 
 	if c.expireEvery.IsPresent() &&
-		time.Since(unmarshalled.Time.MustGet()) > c.expireEvery.MustGet() {
+		c.data.Time.IsPresent() &&
+		time.Since(c.data.Time.MustGet()) > c.expireEvery.MustGet() {
 		log.Debugf("%s cache is expired, reseting cache", c.name)
 		_ = filesystem.Api().WriteFile(c.path, []byte{}, os.ModePerm)
 		return nil
