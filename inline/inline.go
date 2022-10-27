@@ -19,7 +19,7 @@ func Run(options *Options) error {
 		return err
 	}
 
-	if options.MangaPicker.IsNone() && options.ChaptersFilter.IsNone() {
+	if options.MangaPicker.IsAbsent() && options.ChaptersFilter.IsAbsent() {
 		if viper.GetBool(constant.MetadataFetchAnilist) {
 			for _, manga := range mangas {
 				_ = manga.PopulateMetadata(func(string) {})
@@ -36,7 +36,7 @@ func Run(options *Options) error {
 	}
 
 	// manga picker can only be none if json is set
-	if options.MangaPicker.IsNone() {
+	if options.MangaPicker.IsAbsent() {
 		// preload all chapters
 		for _, manga := range mangas {
 			if err = jsonUpdateChapters(manga, options); err != nil {
@@ -58,15 +58,15 @@ func Run(options *Options) error {
 	if len(mangas) == 0 {
 		chapters = []*source.Chapter{}
 	} else {
-		manga := options.MangaPicker.Unwrap()(mangas)
+		manga := options.MangaPicker.MustGet()(mangas)
 
 		chapters, err = options.Source.ChaptersOf(manga)
 		if err != nil {
 			return err
 		}
 
-		if options.ChaptersFilter.IsSome() {
-			chapters, err = options.ChaptersFilter.Unwrap()(chapters)
+		if options.ChaptersFilter.IsPresent() {
+			chapters, err = options.ChaptersFilter.MustGet()(chapters)
 			if err != nil {
 				return err
 			}

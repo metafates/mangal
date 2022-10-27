@@ -173,9 +173,9 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.previousState()
 		}
 	case []*anilist.Manga:
-		manga, ok := anilist.GetRelation(b.selectedManga.Name)
+		manga, err := anilist.FindClosest(b.selectedManga.Name)
 		id := -1
-		if ok {
+		if err == nil {
 			id = manga.ID
 		}
 

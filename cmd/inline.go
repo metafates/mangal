@@ -10,8 +10,8 @@ import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/inline"
 	"github.com/metafates/mangal/provider"
-	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io"
@@ -95,19 +95,19 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		}
 
 		mangaFlag := lo.Must(cmd.Flags().GetString("manga"))
-		mangaPicker := util.None[inline.MangaPicker]()
+		mangaPicker := mo.None[inline.MangaPicker]()
 		if mangaFlag != "" {
 			fn, err := inline.ParseMangaPicker(lo.Must(cmd.Flags().GetString("manga")))
 			handleErr(err)
-			mangaPicker = util.Some(fn)
+			mangaPicker = mo.Some(fn)
 		}
 
 		chapterFlag := lo.Must(cmd.Flags().GetString("chapters"))
-		chapterFilter := util.None[inline.ChaptersFilter]()
+		chapterFilter := mo.None[inline.ChaptersFilter]()
 		if chapterFlag != "" {
 			fn, err := inline.ParseChaptersFilter(chapterFlag)
 			handleErr(err)
-			chapterFilter = util.Some(fn)
+			chapterFilter = mo.Some(fn)
 		}
 
 		options := &inline.Options{
@@ -182,16 +182,20 @@ var inlineAnilistGetCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get anilist manga that is bind to manga name",
 	Run: func(cmd *cobra.Command, args []string) {
-		name := lo.Must(cmd.Flags().GetString("name"))
-		anilistManga, ok := anilist.GetRelation(name)
+		var (
+			m   *anilist.Manga
+			err error
+		)
 
-		if !ok {
-			var err error
-			anilistManga, err = anilist.FindClosest(name)
+		name := lo.Must(cmd.Flags().GetString("name"))
+		m, err = anilist.FindClosest(name)
+
+		if err != nil {
+			m, err = anilist.FindClosest(name)
 			handleErr(err)
 		}
 
-		handleErr(json.NewEncoder(os.Stdout).Encode(anilistManga))
+		handleErr(json.NewEncoder(os.Stdout).Encode(m))
 	},
 }
 

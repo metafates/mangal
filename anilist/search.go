@@ -26,8 +26,8 @@ type searchByIDResponse struct {
 }
 
 func GetByID(id int) (*Manga, error) {
-	if manga, ok := idCacher.Get(id); ok {
-		return manga, nil
+	if manga := idCacher.Get(id); manga.IsPresent() {
+		return manga.MustGet(), nil
 	}
 
 	// prepare body
@@ -83,11 +83,23 @@ func GetByID(id int) (*Manga, error) {
 }
 
 func SearchByName(name string) ([]*Manga, error) {
-	if ids, ok := searchCacher.Get(name); ok {
-		return lo.FilterMap(ids, func(item, _ int) (*Manga, bool) {
-			manga, ok := idCacher.Get(item)
-			return manga, ok
-		}), nil
+	name = normalizedName(name)
+
+	if ids := searchCacher.Get(name); ids.IsPresent() {
+		mangas := lo.FilterMap(ids.MustGet(), func(item, _ int) (*Manga, bool) {
+			manga := idCacher.Get(item)
+			if manga.IsPresent() {
+				return manga.MustGet(), true
+			}
+			return nil, false
+		})
+
+		if len(mangas) == 0 {
+			_ = searchCacher.Delete(name)
+			return SearchByName(name)
+		}
+
+		return mangas, nil
 	}
 
 	// prepare body

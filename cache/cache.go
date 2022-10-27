@@ -27,7 +27,6 @@ type Cache[T any] struct {
 }
 
 type Options[T any] struct {
-	Initial     T
 	ExpireEvery time.Duration
 }
 
@@ -35,10 +34,11 @@ func New[T any](name string, options *Options[T]) *Cache[T] {
 	return &Cache[T]{
 		name: name,
 		data: &internalData[T]{
-			Internal: mo.Some(options.Initial),
+			Internal: mo.None[T](),
 		},
 		expireEvery: options.ExpireEvery,
 		path:        filepath.Join(where.Cache(), util.SanitizeFilename(name+".json")),
+		initialized: false,
 	}
 }
 
@@ -47,6 +47,7 @@ func (c *Cache[T]) Init() error {
 		return nil
 	}
 
+	c.initialized = true
 	log.Debugf("Initializing %s cacher", c.name)
 
 	log.Debugf("Opening cache file at %s", c.path)
@@ -93,14 +94,13 @@ func (c *Cache[T]) Init() error {
 	}
 
 	log.Debugf("%s cache file unmarshalled successfully", c.name)
-	c.initialized = true
 	return nil
 }
 
-func (c *Cache[T]) Get() T {
+func (c *Cache[T]) Get() mo.Option[T] {
 	_ = c.Init()
 
-	return c.data.Internal.MustGet()
+	return c.data.Internal
 }
 
 func (c *Cache[T]) Set(data T) error {

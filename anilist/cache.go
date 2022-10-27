@@ -3,6 +3,7 @@ package anilist
 import (
 	"github.com/metafates/mangal/cache"
 	"github.com/metafates/mangal/constant"
+	"github.com/samber/mo"
 	"time"
 )
 
@@ -15,22 +16,46 @@ type cacher[K comparable, T any] struct {
 	keyWrapper func(K) K
 }
 
-func (c *cacher[K, T]) Get(key K) (T, bool) {
-	mangas, ok := c.internal.Get().Mangas[c.keyWrapper(key)]
-	return mangas, ok
+func (c *cacher[K, T]) Get(key K) mo.Option[T] {
+	data := c.internal.Get()
+	if data.IsPresent() {
+		mangas, ok := data.MustGet().Mangas[c.keyWrapper(key)]
+		if ok {
+			return mo.Some(mangas)
+		}
+	}
+
+	return mo.None[T]()
 }
 
 func (c *cacher[K, T]) Set(key K, t T) error {
 	data := c.internal.Get()
-	data.Mangas[c.keyWrapper(key)] = t
-	return c.internal.Set(data)
+	if data.IsPresent() {
+		internal := data.MustGet()
+		internal.Mangas[c.keyWrapper(key)] = t
+		return c.internal.Set(internal)
+	} else {
+		internal := &cacheData[K, T]{Mangas: make(map[K]T)}
+		internal.Mangas[c.keyWrapper(key)] = t
+		return c.internal.Set(internal)
+	}
+}
+
+func (c *cacher[K, T]) Delete(key K) error {
+	data := c.internal.Get()
+	if data.IsPresent() {
+		internal := data.MustGet()
+		delete(internal.Mangas, c.keyWrapper(key))
+		return c.internal.Set(internal)
+	}
+
+	return nil
 }
 
 var relationCacher = &cacher[string, int]{
 	internal: cache.New(
 		"anilist_relation_cache",
 		&cache.Options[*cacheData[string, int]]{
-			Initial: &cacheData[string, int]{Mangas: make(map[string]int, 0)},
 			// never expire
 			ExpireEvery: constant.Forever,
 		},
@@ -42,7 +67,6 @@ var searchCacher = &cacher[string, []int]{
 	internal: cache.New(
 		"anilist_search_cache",
 		&cache.Options[*cacheData[string, []int]]{
-			Initial: &cacheData[string, []int]{Mangas: make(map[string][]int, 0)},
 			// update ids every 10 days, since new manga are not added that often
 			ExpireEvery: time.Hour * 24 * 10,
 		},
@@ -54,7 +78,6 @@ var idCacher = &cacher[int, *Manga]{
 	internal: cache.New(
 		"anilist_id_cache",
 		&cache.Options[*cacheData[int, *Manga]]{
-			Initial: &cacheData[int, *Manga]{Mangas: make(map[int]*Manga, 0)},
 			// update manga data every day since it can change often
 			ExpireEvery: time.Hour * 24,
 		},

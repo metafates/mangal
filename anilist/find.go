@@ -24,21 +24,11 @@ func SetRelation(name string, to *Manga) error {
 		return err
 	}
 
-	if _, ok := idCacher.Get(to.ID); !ok {
+	if id := idCacher.Get(to.ID); id.IsAbsent() {
 		return idCacher.Set(to.ID, to)
 	}
 
 	return nil
-}
-
-func GetRelation(name string) (*Manga, bool) {
-	id, ok := relationCacher.Get(name)
-	if !ok {
-		return nil, false
-	}
-
-	manga, ok := idCacher.Get(id)
-	return manga, ok
 }
 
 func FindClosest(name string) (*Manga, error) {
@@ -50,10 +40,10 @@ func FindClosest(name string) (*Manga, error) {
 	}
 
 	name = normalizedName(name)
-
-	if id, ok := relationCacher.Get(name); ok {
-		if manga, ok := idCacher.Get(id); ok {
-			return manga, nil
+	id := relationCacher.Get(name)
+	if id.IsPresent() {
+		if manga := idCacher.Get(id.MustGet()); manga.IsPresent() {
+			return manga.MustGet(), nil
 		}
 	}
 
@@ -62,6 +52,22 @@ func FindClosest(name string) (*Manga, error) {
 	if err != nil {
 		log.Error(err)
 		return nil, err
+	}
+
+	if id.IsPresent() {
+		found, ok := lo.Find(mangas, func(item *Manga) bool {
+			return item.ID == id.MustGet()
+		})
+
+		if ok {
+			return found, nil
+		}
+
+		// there should be a manga with the id in the cache, but it wasn't found
+		// this means that the manga was deleted from anilist
+		// remove the id from the cache
+		_ = relationCacher.Delete(name)
+		log.Infof("Manga with id %d was deleted from Anilist", id.MustGet())
 	}
 
 	if len(mangas) == 0 {
@@ -94,7 +100,7 @@ func FindClosest(name string) (*Manga, error) {
 	log.Info("Found closest match: " + closest.Name())
 	retries = 0
 
-	if _, ok := relationCacher.Get(name); !ok {
+	if id := relationCacher.Get(name); id.IsAbsent() {
 		_ = relationCacher.Set(name, closest.ID)
 	}
 	_ = idCacher.Set(closest.ID, closest)
