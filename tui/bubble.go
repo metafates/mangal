@@ -294,10 +294,18 @@ func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
 		return nil, err
 	}
 
+	chapters := lo.Values(saved)
+	slices.SortFunc(chapters, func(a, b *history.SavedChapter) bool {
+		if a.MangaName == b.MangaName {
+			return a.Name < b.Name
+		}
+		return a.MangaName < b.MangaName
+	})
+
 	var items []list.Item
-	for _, s := range saved {
+	for _, c := range chapters {
 		items = append(items, &listItem{
-			internal: s,
+			internal: c,
 		})
 	}
 

@@ -11,6 +11,7 @@ const (
 	Success
 	Question
 	Mark
+	Downloaded
 	Progress
 )
 
@@ -63,5 +64,12 @@ var icons = map[Icon]*iconDef{
 		plain:   style.Blue("@"),
 		kaomoji: style.Blue("┌( >_<)┘"),
 		squares: style.Blue("◫"),
+	},
+	Downloaded: {
+		emoji:   "📦",
+		nerd:    style.Cyan("\uF0C5 "),
+		plain:   style.Cyan("Downloaded"),
+		kaomoji: style.Cyan("⊂(◉‿◉)つ"),
+		squares: style.Cyan("◬"),
 	},
 }

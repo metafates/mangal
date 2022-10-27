@@ -64,8 +64,18 @@ func (m *Manga) String() string {
 	return m.Name
 }
 
-func (m *Manga) Filename() string {
+func (m *Manga) Dirname() string {
 	return util.SanitizeFilename(m.Name)
+}
+
+func (m *Manga) peekPath() string {
+	path := where.Downloads()
+
+	if viper.GetBool(constant.DownloaderCreateMangaDir) {
+		path = filepath.Join(path, m.Dirname())
+	}
+
+	return path
 }
 
 func (m *Manga) Path(temp bool) (path string, err error) {
@@ -79,12 +89,7 @@ func (m *Manga) Path(temp bool) (path string, err error) {
 		return
 	}
 
-	path = where.Downloads()
-
-	if viper.GetBool(constant.DownloaderCreateMangaDir) {
-		path = filepath.Join(path, m.Filename())
-	}
-
+	path = m.peekPath()
 	_ = filesystem.Api().MkdirAll(path, os.ModePerm)
 	return
 }

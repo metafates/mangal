@@ -52,7 +52,7 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	}
 	log.Info("found " + fmt.Sprintf("%d", len(pages)) + " pages")
 
-	err = chapter.DownloadPages(progress)
+	err = chapter.DownloadPages(false, progress)
 	if err != nil {
 		log.Error(err)
 		return "", err

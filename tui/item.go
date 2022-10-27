@@ -24,10 +24,20 @@ func (t *listItem) toggleMark() {
 func (t *listItem) Title() (title string) {
 	switch e := t.internal.(type) {
 	case *source.Chapter:
-		title = e.Name
+		var sb = strings.Builder{}
+
+		sb.WriteString(e.Name)
 		if e.Volume != "" {
-			title += " " + style.Faint(e.Volume)
+			sb.WriteString(" ")
+			sb.WriteString(style.Faint(e.Volume))
 		}
+
+		if e.IsDownloaded() {
+			sb.WriteString(" ")
+			sb.WriteString(icon.Get(icon.Downloaded))
+		}
+
+		title = sb.String()
 	case *source.Manga:
 		title = e.Name
 	case *history.SavedChapter:

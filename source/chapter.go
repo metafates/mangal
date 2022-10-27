@@ -9,6 +9,7 @@ import (
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"github.com/spf13/viper"
 	"html"
 	"os"
@@ -35,7 +36,8 @@ type Chapter struct {
 	// Pages of the chapter.
 	Pages []*Page
 
-	size uint64
+	isDownloaded mo.Option[bool]
+	size         uint64
 }
 
 func (c *Chapter) String() string {
@@ -44,7 +46,7 @@ func (c *Chapter) String() string {
 
 // DownloadPages downloads the Pages contents of the Chapter.
 // Pages needs to be set before calling this function.
-func (c *Chapter) DownloadPages(progress func(string)) (err error) {
+func (c *Chapter) DownloadPages(temp bool, progress func(string)) (err error) {
 	c.size = 0
 	status := func() string {
 		return fmt.Sprintf(
@@ -80,6 +82,7 @@ func (c *Chapter) DownloadPages(progress func(string)) (err error) {
 	}
 
 	wg.Wait()
+	c.isDownloaded = mo.Some(!temp && err == nil)
 	return
 }
 
@@ -124,13 +127,19 @@ func (c *Chapter) Filename() (filename string) {
 	return
 }
 
-func (c *Chapter) Path(temp bool) (path string, err error) {
-	path, err = c.Manga.Path(temp)
-	if err != nil {
-		return
+func (c *Chapter) IsDownloaded() bool {
+	if c.isDownloaded.IsPresent() {
+		return c.isDownloaded.MustGet()
 	}
 
-	if c.Volume != "" && viper.GetBool(constant.DownloaderCreateVolumeDir) {
+	path, _ := c.path(c.Manga.peekPath(), false)
+	exists, _ := filesystem.Api().Exists(path)
+	c.isDownloaded = mo.Some(exists)
+	return exists
+}
+
+func (c *Chapter) path(relativeTo string, createVolumeDir bool) (path string, err error) {
+	if createVolumeDir {
 		path = filepath.Join(path, util.SanitizeFilename(c.Volume))
 		err = filesystem.Api().MkdirAll(path, os.ModePerm)
 		if err != nil {
@@ -138,8 +147,18 @@ func (c *Chapter) Path(temp bool) (path string, err error) {
 		}
 	}
 
-	path = filepath.Join(path, c.Filename())
+	path = filepath.Join(relativeTo, c.Filename())
 	return
+}
+
+func (c *Chapter) Path(temp bool) (path string, err error) {
+	var manga string
+	manga, err = c.Manga.Path(temp)
+	if err != nil {
+		return
+	}
+
+	return c.path(manga, c.Volume != "" && viper.GetBool(constant.DownloaderCreateVolumeDir))
 }
 
 func (c *Chapter) Source() Source {

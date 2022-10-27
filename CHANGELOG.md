@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Anilist caching significantly improved. Now, it will cache all search results for 2 days
 - Add caching for custom (lua) sources
 - Add option to omit dates for ComicInfo.xml #117
+- By default, when reading a chapter will look for its downloaded copy locally, instead of downloading it again.
+  See `mangal config info -k downloader.read_downloaded`
+- In TUI mode mangal will show if chapter is downloaded
 - Overwrite old `series.json` file each time a chapter is downloaded
 - Internal improvements
 

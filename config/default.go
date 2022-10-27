@@ -97,6 +97,11 @@ Do no turn it off unless you have some issues`,
 		`Create a subdirectory for each volume`,
 	},
 	{
+		constant.DownloaderReadDownloaded,
+		true,
+		"If chapter is already downloaded, read it instead of downloading it to temp",
+	},
+	{
 		constant.DownloaderRedownloadExisting,
 		false,
 		`Redownload chapters that already exist`,
