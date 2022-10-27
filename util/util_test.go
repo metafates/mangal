@@ -60,24 +60,27 @@ func TestFileStem(t *testing.T) {
 }
 
 func TestQuantity(t *testing.T) {
-	plural := "Apples"
-	Convey("Given a string "+plural, t, func() {
-		Convey("When the quantity is 1", func() {
-			result := Quantity(1, plural)
-			Convey("Then the result should be '1 Apple'", func() {
-				So(result, ShouldEqual, "1 Apple")
+	var (
+		singular = "singular"
+		plural   = "plural"
+	)
+
+	Convey("Given a quantity of 1", t, func() {
+		quantity := 1
+		Convey("When the quantity is converted to a string", func() {
+			result := Quantify(quantity, singular, plural)
+			Convey("Then the result should be '1 singular'", func() {
+				So(result, ShouldEqual, "1 "+singular)
 			})
 		})
-		Convey("When the quantity is 2", func() {
-			result := Quantity(2, plural)
-			Convey("Then the result should be '2 Apples'", func() {
-				So(result, ShouldEqual, "2 Apples")
-			})
-			Convey("When the quantity is 0", func() {
-				result := Quantity(0, plural)
-				Convey("Then the result should be '0 Apples'", func() {
-					So(result, ShouldEqual, "0 Apples")
-				})
+	})
+
+	Convey("Given a quantity of 2", t, func() {
+		quantity := 2
+		Convey("When the quantity is converted to a string", func() {
+			result := Quantify(quantity, singular, plural)
+			Convey("Then the result should be '2 plural'", func() {
+				So(result, ShouldEqual, "2 "+plural)
 			})
 		})
 	})

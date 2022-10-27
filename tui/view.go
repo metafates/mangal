@@ -95,7 +95,7 @@ func (b *statefulBubble) viewConfirm() string {
 		[]string{
 			style.Title("Confirm"),
 			"",
-			fmt.Sprintf("%s Download %s?", icon.Get(icon.Question), util.Quantity(len(b.selectedChapters), "chapter")),
+			fmt.Sprintf("%s Download %s?", icon.Get(icon.Question), util.Quantify(len(b.selectedChapters), "chapter", "chapters")),
 		},
 	)
 }
@@ -149,7 +149,7 @@ func (b *statefulBubble) viewDownloadDone() string {
 	var msg string
 
 	{
-		temp := strings.Split(util.Quantity(succeded, "chapter"), " ")
+		temp := strings.Split(util.Quantify(succeded, "chapter", "chapters"), " ")
 		temp[0] = style.Green(temp[0])
 		s := strings.Join(temp, " ") + " downloaded"
 		f := fmt.Sprintf("%s failed", style.Red(strconv.Itoa(failed)))

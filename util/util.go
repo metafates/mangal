@@ -35,18 +35,13 @@ func SanitizeFilename(filename string) string {
 	return filename
 }
 
-// Quantity returns formatted quantity.
-// Example:
-//
-//	Quantity(1, "manga") -> "1 manga"
-//	Quantity(2, "manga") -> "2 mangas"
-func Quantity(count int, thing string) string {
-	thing = strings.TrimSuffix(thing, "s")
+// Quantify returns a string with the given number and unit.
+func Quantify(count int, singular, plural string) string {
 	if count == 1 {
-		return fmt.Sprintf("%d %s", count, thing)
+		return fmt.Sprintf("%d %s", count, singular)
 	}
 
-	return fmt.Sprintf("%d %ss", count, thing)
+	return fmt.Sprintf("%d %s", count, plural)
 }
 
 // TerminalSize returns the dimensions of the given terminal.

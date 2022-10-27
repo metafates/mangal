@@ -18,6 +18,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"strings"
@@ -186,7 +187,11 @@ func newBubble() *statefulBubble {
 		succededChapters: make([]*source.Chapter, 0),
 	}
 
-	makeList := func(title string, description bool) list.Model {
+	type listOptions struct {
+		TitleStyle mo.Option[lipgloss.Style]
+	}
+
+	makeList := func(title string, description bool, options *listOptions) list.Model {
 		delegate := list.NewDefaultDelegate()
 		delegate.SetSpacing(viper.GetInt(constant.TUIItemSpacing))
 		delegate.ShowDescription = description
@@ -207,6 +212,10 @@ func newBubble() *statefulBubble {
 		}
 		listC.Title = title
 		listC.Styles.NoItems = paddingStyle
+		if titleStyle, ok := options.TitleStyle.Get(); ok {
+			listC.Styles.Title = titleStyle
+		}
+
 		//listC.StatusMessageLifetime = time.Second * 5
 		listC.StatusMessageLifetime = time.Hour * 999 // forever
 
@@ -226,23 +235,58 @@ func newBubble() *statefulBubble {
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 
-	bubble.scrapersInstallC = makeList("Install Scrapers", true)
+	bubble.scrapersInstallC = makeList("Install Scrapers", true, &listOptions{
+		TitleStyle: mo.Some(
+			lipgloss.NewStyle().
+				Background(lipgloss.Color("#ced4da")).
+				Foreground(lipgloss.Color("#212529")).
+				Padding(0, 1),
+		),
+	})
 	bubble.scrapersInstallC.SetStatusBarItemName("scraper", "scrapers")
 
-	bubble.historyC = makeList("History", true)
+	bubble.historyC = makeList("History", true, &listOptions{})
 	bubble.sourcesC.SetStatusBarItemName("chapter", "chapters")
 
-	bubble.sourcesC = makeList("Select Source", true)
+	bubble.sourcesC = makeList("Select Source", true, &listOptions{
+		TitleStyle: mo.Some(
+			lipgloss.NewStyle().
+				Background(lipgloss.Color("#bc6c25")).
+				Foreground(lipgloss.Color("#fefae0")).
+				Padding(0, 1),
+		),
+	})
 	bubble.sourcesC.SetStatusBarItemName("source", "sources")
 
 	showURLs := viper.GetBool(constant.TUIShowURLs)
-	bubble.mangasC = makeList("Mangas", showURLs)
+	bubble.mangasC = makeList("Mangas", showURLs, &listOptions{
+		TitleStyle: mo.Some(
+			lipgloss.NewStyle().
+				Background(lipgloss.Color("#386641")).
+				Foreground(lipgloss.Color("#f2e8cf")).
+				Padding(0, 1),
+		),
+	})
 	bubble.mangasC.SetStatusBarItemName("manga", "mangas")
 
-	bubble.chaptersC = makeList("Chapters", showURLs)
+	bubble.chaptersC = makeList("Chapters", showURLs, &listOptions{
+		TitleStyle: mo.Some(
+			lipgloss.NewStyle().
+				Background(lipgloss.Color("#ffb703")).
+				Foreground(lipgloss.Color("#000814")).
+				Padding(0, 1),
+		),
+	})
 	bubble.chaptersC.SetStatusBarItemName("chapter", "chapters")
 
-	bubble.anilistC = makeList("Anilist Mangas", showURLs)
+	bubble.anilistC = makeList("Anilist Mangas", showURLs, &listOptions{
+		TitleStyle: mo.Some(
+			lipgloss.NewStyle().
+				Background(lipgloss.Color("#2b2d42")).
+				Foreground(lipgloss.Color("#bcbedc")).
+				Padding(0, 1),
+		),
+	})
 	bubble.anilistC.SetStatusBarItemName("manga", "mangas")
 
 	if w, h, err := util.TerminalSize(); err == nil {

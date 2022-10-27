@@ -26,7 +26,7 @@ func (t *listItem) Title() (title string) {
 	case *source.Chapter:
 		var sb = strings.Builder{}
 
-		sb.WriteString(e.Name)
+		sb.WriteString(t.FilterValue())
 		if e.Volume != "" {
 			sb.WriteString(" ")
 			sb.WriteString(style.Faint(e.Volume))
@@ -38,14 +38,8 @@ func (t *listItem) Title() (title string) {
 		}
 
 		title = sb.String()
-	case *source.Manga:
-		title = e.Name
-	case *history.SavedChapter:
-		title = e.MangaName
-	case *anilist.Manga:
-		title = e.Name()
 	default:
-		title = t.title
+		title = t.FilterValue()
 	}
 
 	if title != "" && t.marked {
@@ -73,5 +67,16 @@ func (t *listItem) Description() (description string) {
 }
 
 func (t *listItem) FilterValue() string {
-	return strings.Split(t.Title(), "\033")[0]
+	switch e := t.internal.(type) {
+	case *source.Chapter:
+		return e.Name
+	case *source.Manga:
+		return e.Name
+	case *history.SavedChapter:
+		return e.MangaName
+	case *anilist.Manga:
+		return e.Name()
+	default:
+		return t.title
+	}
 }

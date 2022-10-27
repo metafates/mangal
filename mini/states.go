@@ -339,7 +339,7 @@ func (m *mini) handleChaptersDownloadState() error {
 	}
 
 	util.ClearScreen()
-	title(fmt.Sprintf("%s downloaded.", util.Quantity(len(m.selectedChapters), "chapter")))
+	title(fmt.Sprintf("%s downloaded.", util.Quantify(len(m.selectedChapters), "chapter", "chapters")))
 	b, _, err := menu([]fmt.Stringer{}, back, search)
 	if err != nil {
 		return err

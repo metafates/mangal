@@ -51,7 +51,7 @@ func (c *Chapter) DownloadPages(temp bool, progress func(string)) (err error) {
 	status := func() string {
 		return fmt.Sprintf(
 			"Downloading %s %s",
-			util.Quantity(len(c.Pages), "page"),
+			util.Quantify(len(c.Pages), "page", "pages"),
 			style.Faint(c.SizeHuman()),
 		)
 	}
