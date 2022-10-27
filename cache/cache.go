@@ -22,12 +22,12 @@ type Cache[T any] struct {
 	data        *internalData[T]
 	name        string
 	path        string
-	expireEvery time.Duration
+	expireEvery mo.Option[time.Duration]
 	initialized bool
 }
 
 type Options[T any] struct {
-	ExpireEvery time.Duration
+	ExpireEvery mo.Option[time.Duration]
 }
 
 func New[T any](name string, options *Options[T]) *Cache[T] {
@@ -68,6 +68,9 @@ func (c *Cache[T]) Init() error {
 
 	if len(contents) == 0 {
 		log.Debugf("%s cache file is empty, skipping unmarshal", c.name)
+		if c.expireEvery.IsPresent() {
+			c.data.Time = mo.Some(time.Now())
+		}
 		return nil
 	}
 
@@ -79,14 +82,16 @@ func (c *Cache[T]) Init() error {
 	}
 
 	if unmarshalled.Time.IsPresent() {
-		// check if timeout
-		if time.Since(unmarshalled.Time.MustGet()) > c.expireEvery {
-			log.Debugf("%s cache is expired, reseting cache", c.name)
-			_ = filesystem.Api().WriteFile(c.path, []byte{}, os.ModePerm)
-			return nil
-		}
-	} else {
-		c.data.Time = mo.Some[time.Time](time.Now())
+		c.data.Time = unmarshalled.Time
+	} else if c.expireEvery.IsPresent() {
+		c.data.Time = mo.Some(time.Now())
+	}
+
+	if c.expireEvery.IsPresent() &&
+		time.Since(unmarshalled.Time.MustGet()) > c.expireEvery.MustGet() {
+		log.Debugf("%s cache is expired, reseting cache", c.name)
+		_ = filesystem.Api().WriteFile(c.path, []byte{}, os.ModePerm)
+		return nil
 	}
 
 	if unmarshalled.Internal.IsPresent() {

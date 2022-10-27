@@ -2,7 +2,6 @@ package anilist
 
 import (
 	"github.com/metafates/mangal/cache"
-	"github.com/metafates/mangal/constant"
 	"github.com/samber/mo"
 	"time"
 )
@@ -57,7 +56,7 @@ var relationCacher = &cacher[string, int]{
 		"anilist_relation_cache",
 		&cache.Options[*cacheData[string, int]]{
 			// never expire
-			ExpireEvery: constant.Forever,
+			ExpireEvery: mo.None[time.Duration](),
 		},
 	),
 	keyWrapper: normalizedName,
@@ -68,7 +67,7 @@ var searchCacher = &cacher[string, []int]{
 		"anilist_search_cache",
 		&cache.Options[*cacheData[string, []int]]{
 			// update ids every 10 days, since new manga are not added that often
-			ExpireEvery: time.Hour * 24 * 10,
+			ExpireEvery: mo.Some(time.Hour * 24 * 10),
 		},
 	),
 	keyWrapper: normalizedName,
@@ -78,8 +77,8 @@ var idCacher = &cacher[int, *Manga]{
 	internal: cache.New(
 		"anilist_id_cache",
 		&cache.Options[*cacheData[int, *Manga]]{
-			// update manga data every day since it can change often
-			ExpireEvery: time.Hour * 24,
+			// update manga data every 2 days since it can change often
+			ExpireEvery: mo.Some(time.Hour * 24 * 2),
 		},
 	),
 	keyWrapper: func(id int) int { return id },

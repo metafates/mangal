@@ -5,12 +5,13 @@ import (
 	"errors"
 	"github.com/metafates/mangal/cache"
 	"github.com/metafates/mangal/util"
+	"github.com/samber/mo"
 	"net/http"
 	"time"
 )
 
 var versionCacher = cache.New[string]("version", &cache.Options[string]{
-	ExpireEvery: time.Hour,
+	ExpireEvery: mo.Some(time.Hour),
 })
 
 // LatestVersion returns the latest version of mangal.

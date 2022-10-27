@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 ## Unreleased
 
 - Include different cover sizes and color for json output #116
-- Anilist caching significantly improved
+- Anilist caching significantly improved. Now, it will cache all search results for 2 days
 - Add option to omit dates for ComicInfo.xml #117
 - Overwrite old `series.json` file each time a chapter is downloaded
 - Internal improvements
