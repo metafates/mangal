@@ -180,7 +180,12 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		items := make([]list.Item, len(msg))
+		var marked int
 		for i, manga := range msg {
+			if manga.ID == id {
+				marked = i
+			}
+
 			items[i] = &listItem{
 				internal: manga,
 				marked:   manga.ID == id,
@@ -189,6 +194,7 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		cmd = b.anilistC.SetItems(items)
 		b.newState(anilistSelectState)
+		b.anilistC.Select(marked)
 		return b, tea.Batch(cmd, b.stopLoading())
 	case []*installer.Scraper:
 		b.newState(scrapersInstallState)
