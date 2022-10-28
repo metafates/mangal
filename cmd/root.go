@@ -20,6 +20,8 @@ import (
 )
 
 func init() {
+	rootCmd.Flags().BoolP("version", "v", false, "Print version")
+
 	rootCmd.PersistentFlags().StringP("format", "F", "", "output format")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return converter.Available(), cobra.ShellCompDirectiveDefault
@@ -65,9 +67,8 @@ func init() {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     constant.Mangal,
-	Version: constant.Version,
-	Short:   "The ultimate manga downloader",
+	Use:   constant.Mangal,
+	Short: "The ultimate manga downloader",
 	Long: constant.AsciiArtLogo + "\n" +
 		style.New().Italic(true).Foreground(color.HiRed).Render("    - The ultimate cli manga downloader"),
 	PreRun: func(cmd *cobra.Command, args []string) {
@@ -76,6 +77,11 @@ var rootCmd = &cobra.Command{
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if cmd.Flags().Changed("version") {
+			versionCmd.Run(versionCmd, args)
+			return
+		}
+
 		options := tui.Options{
 			Continue: lo.Must(cmd.Flags().GetBool("continue")),
 		}

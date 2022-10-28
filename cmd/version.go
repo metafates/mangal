@@ -4,6 +4,7 @@ import (
 	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/updater"
+	"github.com/samber/lo"
 	"os"
 	"runtime"
 	"strings"
@@ -16,6 +17,7 @@ import (
 func init() {
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.SetOut(os.Stdout)
+	versionCmd.Flags().BoolP("short", "s", false, "print short version")
 }
 
 var versionCmd = &cobra.Command{
@@ -23,6 +25,11 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of mangal",
 	Long:  `All software has versions. This is mangal's`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if lo.Must(cmd.Flags().GetBool("short")) {
+			cmd.Println(constant.Version)
+			return
+		}
+
 		defer updater.Notify()
 
 		versionInfo := struct {
