@@ -19,13 +19,12 @@ This includes Anilist, Custom (lua) sources and built-in sources.
 - Add option to omit dates for ComicInfo.xml #117
 - By default, when reading a chapter, mangal will look for its downloaded copy, instead of downloading it again.
   See `mangal config info -k downloader.read_downloaded`
-- In TUI mode mangal will show if chapter is downloaded
 - Overwrite old `series.json` file each time a chapter is downloaded
 - Detect sources that use headless chrome and show that in the item description when selecting sources
 - Option to use alternative ComicInfo.xml date.
   See `mangal config info -k metadata.comic_info_xml_alternative_date` for more info
 - Notify about new version in `help` command
-- Slightly improved TUI experience
+- Improved TUI experience
 - Internal improvements
 
 ## 3.14.2

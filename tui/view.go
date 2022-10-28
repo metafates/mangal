@@ -129,6 +129,16 @@ func (b *statefulBubble) viewDownload() string {
 		chapterName = chapter.Name
 	}
 
+	metainfo := strings.Builder{}
+
+	if b.currentDownloadingChapter != nil {
+		metainfo.WriteString("From ")
+		metainfo.WriteString(style.Fg(color.Orange)(b.currentDownloadingChapter.Source().Name()))
+		metainfo.WriteString(" as ")
+	}
+
+	metainfo.WriteString(style.Fg(color.Purple)(viper.GetString(constant.FormatsUse)))
+
 	return b.renderLines(
 		true,
 		[]string{
@@ -139,6 +149,8 @@ func (b *statefulBubble) viewDownload() string {
 			b.progressC.View(),
 			"",
 			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
+			"",
+			style.Truncate(b.width)(metainfo.String()),
 		},
 	)
 }
