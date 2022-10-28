@@ -11,7 +11,7 @@ import (
 )
 
 func progress(msg string) (eraser func()) {
-	msg = style.Truncate(truncateAt)(style.Fg(color.Blue)(msg))
+	msg = style.New().Foreground(color.Blue).Render(msg)
 	fmt.Printf("\r%s", msg)
 
 	return func() {
@@ -20,11 +20,11 @@ func progress(msg string) (eraser func()) {
 }
 
 func title(t string) {
-	fmt.Println(style.Truncate(truncateAt)(style.New().Bold(true).Foreground(color.Purple).Render(t)))
+	fmt.Println(style.New().Bold(true).Width(truncateAt).Foreground(color.Purple).Render(t))
 }
 
 func fail(t string) {
-	fmt.Println(style.Truncate(truncateAt)(style.New().Bold(true).Foreground(color.Red).Render(t)))
+	fmt.Println(style.New().Bold(true).Width(truncateAt).Foreground(color.Red).Render(t))
 }
 
 func menu[T fmt.Stringer](items []T, options ...*bind) (*bind, T, error) {
