@@ -16,6 +16,8 @@ const (
 	Mark
 	Downloaded
 	Progress
+	Search
+	Link
 )
 
 var icons = map[Icon]*iconDef{
@@ -70,9 +72,23 @@ var icons = map[Icon]*iconDef{
 	},
 	Downloaded: {
 		emoji:   "📦",
-		nerd:    style.Fg(color.Cyan)("\uF0C5 "),
-		plain:   style.Fg(color.Cyan)("⬇"),
-		kaomoji: style.Fg(color.Cyan)("⊂(◉‿◉)つ"),
-		squares: style.Fg(color.Cyan)("◬"),
+		nerd:    style.Bold("\uF0C5 "),
+		plain:   style.New().Bold(true).Faint(true).Render("D"),
+		kaomoji: style.Bold("⊂(◉‿◉)つ"),
+		squares: style.Bold("◬"),
+	},
+	Search: {
+		emoji:   "🔍",
+		nerd:    style.Fg(color.Blue)("\uF002"),
+		plain:   style.Fg(color.Blue)("S"),
+		kaomoji: style.Fg(color.Blue)("⌐■-■"),
+		squares: style.Fg(color.Blue)("◪"),
+	},
+	Link: {
+		emoji:   "🔗",
+		nerd:    style.Fg(color.Blue)("\uF0C1"),
+		plain:   style.Fg(color.Blue)("L"),
+		kaomoji: style.Fg(color.Blue)("⌐■-■"),
+		squares: style.Fg(color.Blue)("◪"),
 	},
 }

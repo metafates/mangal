@@ -5,6 +5,7 @@ import (
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
 	"strings"
@@ -19,6 +20,19 @@ type listItem struct {
 
 func (t *listItem) toggleMark() {
 	t.marked = !t.marked
+}
+
+func (t *listItem) getMark() string {
+	switch t.internal.(type) {
+	case *source.Chapter:
+		return icon.Get(icon.Mark)
+	case *anilist.Manga:
+		return icon.Get(icon.Link)
+	case *provider.Provider:
+		return icon.Get(icon.Search)
+	default:
+		return ""
+	}
 }
 
 func (t *listItem) Title() (title string) {
@@ -43,7 +57,8 @@ func (t *listItem) Title() (title string) {
 	}
 
 	if title != "" && t.marked {
-		title = fmt.Sprintf("%s %s", title, icon.Get(icon.Mark))
+		//title = fmt.Sprintf("%s %s", title, icon.Get(icon.Mark))
+		title = fmt.Sprintf("%s %s", title, t.getMark())
 	}
 
 	return
