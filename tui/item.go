@@ -25,7 +25,7 @@ func (t *listItem) toggleMark() {
 func (t *listItem) getMark() string {
 	switch t.internal.(type) {
 	case *source.Chapter:
-		return icon.Get(icon.Mark)
+		return style.Bold(icon.Get(icon.Mark))
 	case *anilist.Manga:
 		return icon.Get(icon.Link)
 	case *provider.Provider:
