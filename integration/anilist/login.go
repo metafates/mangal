@@ -1,4 +1,4 @@
-package anilistintegration
+package anilist
 
 import (
 	"bytes"
