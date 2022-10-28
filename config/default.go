@@ -10,12 +10,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Field represents a single config field
 type Field struct {
-	Key         string
-	Value       any
+	// Key is the key of the field
+	Key string
+	// Value is the default value of the field
+	Value any
+	// Description is the description of the field
 	Description string
 }
 
+// typeName returns the type of the field without reflection
 func (f *Field) typeName() string {
 	switch f.Value.(type) {
 	case string:
@@ -29,6 +34,7 @@ func (f *Field) typeName() string {
 	}
 }
 
+// Json returns the config as json string
 func (f *Field) Json() string {
 	field := struct {
 		Key         string `json:"key"`
@@ -46,6 +52,7 @@ func (f *Field) Json() string {
 	return string(output)
 }
 
+// Pretty format field as string for further cli output
 func (f *Field) Pretty() string {
 	return fmt.Sprintf(
 		`%s
@@ -58,6 +65,8 @@ func (f *Field) Pretty() string {
 	)
 }
 
+// defaults contains all default values for the config.
+// It must contain all fields defined in the constant package.
 var defaults = [constant.DefinedFieldsCount]Field{
 	{
 		constant.DownloaderPath,

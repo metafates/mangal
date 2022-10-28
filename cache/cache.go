@@ -1,23 +1,24 @@
 package cache
 
 import (
-	"encoding/json"
-	"github.com/metafates/mangal/filesystem"
-	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/mo"
-	"io"
-	"os"
 	"path/filepath"
 	"time"
 )
 
+// internalData is a struct that contains the data that is stored in the cache file with time of last update.
+// Used to expire the cache.
 type internalData[T any] struct {
 	Internal mo.Option[T]         `json:"internal"`
 	Time     mo.Option[time.Time] `json:"time"`
 }
 
+// Cache is a generic cache that can be used to cache any type of data.
+// It is used to cache data that is expensive to fetch, such as API responses.
+// Cached data is stored in a file, and is automatically expired after a certain amount of time
+// (if expiration time is spcified)
 type Cache[T any] struct {
 	data        *internalData[T]
 	name        string
@@ -26,10 +27,9 @@ type Cache[T any] struct {
 	initialized bool
 }
 
-type Options struct {
-	ExpireEvery mo.Option[time.Duration]
-}
-
+// New creates a new cache with the specified name and path.
+// Name will be used to generate file path from it. Like this $cache_path + name + .json
+// Name will be automatically converted to a valid file name.
 func New[T any](name string, options *Options) *Cache[T] {
 	return &Cache[T]{
 		name: name,
@@ -40,83 +40,4 @@ func New[T any](name string, options *Options) *Cache[T] {
 		path:        filepath.Join(where.Cache(), util.SanitizeFilename(name)+".json"),
 		initialized: false,
 	}
-}
-
-func (c *Cache[T]) Init() error {
-	if c.initialized {
-		return nil
-	}
-
-	c.initialized = true
-	log.Debugf("Initializing %s cacher", c.name)
-
-	log.Debugf("Opening cache file at %s", c.path)
-	file, err := filesystem.Api().OpenFile(c.path, os.O_RDONLY|os.O_CREATE, os.ModePerm)
-
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
-
-	defer util.Ignore(file.Close)
-
-	contents, err := io.ReadAll(file)
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
-
-	if len(contents) == 0 {
-		log.Debugf("%s cache file is empty, skipping unmarshal", c.name)
-		if c.expireEvery.IsPresent() {
-			c.data.Time = mo.Some(time.Now())
-		}
-		return nil
-	}
-
-	var unmarshalled internalData[T]
-	err = json.Unmarshal(contents, &unmarshalled)
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
-
-	c.data = &unmarshalled
-
-	if c.expireEvery.IsPresent() &&
-		c.data.Time.IsPresent() &&
-		time.Since(c.data.Time.MustGet()) >= c.expireEvery.MustGet() {
-		log.Debugf("%s cache is expired, reseting cache", c.name)
-		c.data.Time = mo.Some(time.Now())
-		c.data.Internal = mo.None[T]()
-		return filesystem.Api().WriteFile(c.path, []byte{}, os.ModePerm)
-	}
-
-	log.Debugf("%s cache file unmarshalled successfully", c.name)
-	return nil
-}
-
-func (c *Cache[T]) Get() mo.Option[T] {
-	_ = c.Init()
-
-	return c.data.Internal
-}
-
-func (c *Cache[T]) Set(data T) error {
-	_ = c.Init()
-
-	c.data.Internal = mo.Some(data)
-	marshalled, err := json.Marshal(c.data)
-	if err != nil {
-		log.Warn(err)
-		return err
-	}
-
-	log.Debugf("Writing %s cache file to %s", c.name, c.path)
-	err = filesystem.Api().WriteFile(c.path, marshalled, os.ModePerm)
-	if err != nil {
-		log.Warn(err)
-	}
-
-	return err
 }

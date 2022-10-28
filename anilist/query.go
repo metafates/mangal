@@ -2,6 +2,7 @@ package anilist
 
 import "fmt"
 
+// mangaSubquery common manga query used for getting manga by id or searching it by name
 var mangaSubquery = `
 id
 idMal
@@ -51,6 +52,7 @@ externalLinks {
 }
 `
 
+// searchByNameQuery query used for searching manga by name
 var searchByNameQuery = fmt.Sprintf(`
 query ($query: String) {
 	Page (page: 1, perPage: 30) {
@@ -61,6 +63,7 @@ query ($query: String) {
 }
 `, mangaSubquery)
 
+// searchByIDQuery query used for searching manga by id
 var searchByIDQuery = fmt.Sprintf(`
 query ($id: Int) {
 	Media (id: $id, type: MANGA) {

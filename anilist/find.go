@@ -14,10 +14,12 @@ var (
 	limit   uint8 = 4
 )
 
+// normalizedName returns a normalized name for comparison
 func normalizedName(name string) string {
 	return strings.ToLower(strings.TrimSpace(name))
 }
 
+// SetRelation sets the relation between a manga name and an anilist id
 func SetRelation(name string, to *Manga) error {
 	err := relationCacher.Set(name, to.ID)
 	if err != nil {
@@ -31,6 +33,8 @@ func SetRelation(name string, to *Manga) error {
 	return nil
 }
 
+// FindClosest returns the closest manga to the given name.
+// It will levenshtein compare the given name with all the manga names in the cache.
 func FindClosest(name string) (*Manga, error) {
 	if retries >= limit {
 		retries = 0

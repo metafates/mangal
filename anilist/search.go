@@ -25,6 +25,8 @@ type searchByIDResponse struct {
 	} `json:"data"`
 }
 
+// GetByID returns the manga with the given id.
+// If the manga is not found, it returns nil.
 func GetByID(id int) (*Manga, error) {
 	if manga := idCacher.Get(id); manga.IsPresent() {
 		return manga.MustGet(), nil
@@ -82,6 +84,7 @@ func GetByID(id int) (*Manga, error) {
 	return manga, nil
 }
 
+// SearchByName returns a list of mangas that match the given name.
 func SearchByName(name string) ([]*Manga, error) {
 	name = normalizedName(name)
 

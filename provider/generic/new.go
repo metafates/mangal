@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// New generates a new scraper with given configuration
 func New(conf *Configuration) source.Source {
 	s := Scraper{
 		mangas:   make(map[string][]*source.Manga),
