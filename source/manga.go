@@ -207,10 +207,10 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	m.Metadata.Status = strings.ReplaceAll(manga.Status, "_", " ")
 	m.Metadata.Synonyms = manga.Synonyms
 
-	urls := []string{manga.URL}
-	urls = append(urls, manga.SiteURL)
-	for _, e := range manga.External {
-		urls = append(urls, e.URL)
+	urls := make([]string, 1+len(manga.External))
+	urls[0] = manga.SiteURL
+	for i, e := range manga.External {
+		urls[i+1] = e.URL
 	}
 
 	urls = lo.Filter(urls, func(url string, _ int) bool {

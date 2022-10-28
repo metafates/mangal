@@ -7,7 +7,6 @@ type date struct {
 }
 
 type Manga struct {
-	URL   string `json:"url"`
 	Title struct {
 		Romaji  string `json:"romaji"`
 		English string `json:"english"`
@@ -22,13 +21,16 @@ type Manga struct {
 		Color      string `json:"color"`
 	} `json:"coverImage"`
 	Tags []struct {
-		Name string `json:"name"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Rank        int    `json:"rank"`
 	} `json:"tags"`
 	Genres     []string `json:"genres"`
 	Characters struct {
 		Nodes []struct {
 			Name struct {
-				Full string `json:"full"`
+				Full   string `json:"full"`
+				Native string `json:"native"`
 			} `json:"name"`
 		} `json:"nodes"`
 	} `json:"characters"`

@@ -13,6 +13,8 @@ title {
 description(asHtml: false)
 tags {
 	name
+	description
+	rank
 }
 genres
 coverImage {
@@ -23,8 +25,10 @@ coverImage {
 }
 characters (page: 1, perPage: 10, role: MAIN) {
 	nodes {
+		id
 		name {
 			full
+			native
 		}
 	}
 }
