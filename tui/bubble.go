@@ -13,7 +13,6 @@ import (
 	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
@@ -292,9 +291,7 @@ func (b *statefulBubble) loadProviders() tea.Cmd {
 	var items []list.Item
 	for _, p := range providers {
 		items = append(items, &listItem{
-			title:       p.Name,
-			description: "Built-in provider " + icon.Get(icon.Go),
-			internal:    p,
+			internal: p,
 		})
 	}
 	slices.SortFunc(items, func(a, b list.Item) bool {
@@ -306,9 +303,7 @@ func (b *statefulBubble) loadProviders() tea.Cmd {
 	var customItems []list.Item
 	for _, p := range customProviders {
 		customItems = append(customItems, &listItem{
-			title:       p.Name,
-			description: "Custom provider " + icon.Get(icon.Lua),
-			internal:    p,
+			internal: p,
 		})
 	}
 	slices.SortFunc(customItems, func(a, b list.Item) bool {

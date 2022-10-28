@@ -5,6 +5,7 @@ import (
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
@@ -12,10 +13,8 @@ import (
 )
 
 type listItem struct {
-	title       string
-	description string
-	internal    interface{}
-	marked      bool
+	internal interface{}
+	marked   bool
 }
 
 func (t *listItem) toggleMark() {
@@ -70,12 +69,25 @@ func (t *listItem) Description() (description string) {
 		description = e.URL
 	case *source.Manga:
 		description = e.URL
+	case *installer.Scraper:
+		description = e.GithubURL()
 	case *history.SavedChapter:
 		description = fmt.Sprintf("%s : %d / %d", e.Name, e.Index, e.MangaChaptersTotal)
+	case *provider.Provider:
+		sb := strings.Builder{}
+		if e.IsCustom {
+			sb.WriteString("Custom")
+		} else {
+			sb.WriteString("Builtin")
+		}
+
+		if e.UsesHeadless {
+			sb.WriteString(", uses headless chrome")
+		}
+
+		description = sb.String()
 	case *anilist.Manga:
 		description = e.SiteURL
-	default:
-		description = t.description
 	}
 
 	return
@@ -91,7 +103,11 @@ func (t *listItem) FilterValue() string {
 		return e.MangaName
 	case *anilist.Manga:
 		return e.Name()
+	case *provider.Provider:
+		return e.Name
+	case *installer.Scraper:
+		return e.Name
 	default:
-		return t.title
+		return ""
 	}
 }

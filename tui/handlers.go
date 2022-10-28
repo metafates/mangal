@@ -38,9 +38,7 @@ func (b *statefulBubble) loadScrapers() tea.Cmd {
 		var items = make([]list.Item, len(scrapers))
 		for i, s := range scrapers {
 			items[i] = &listItem{
-				title:       s.Name,
-				description: s.GithubURL(),
-				internal:    s,
+				internal: s,
 			}
 		}
 
