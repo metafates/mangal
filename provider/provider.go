@@ -43,8 +43,10 @@ func Customs() []*Provider {
 	providers := make([]*Provider, len(paths))
 
 	for i, path := range paths {
-		// check if source containts line require("headless")
-		// if so, set UsesHeadless to true
+		// Check if source contains line `require("headless")`
+		// if so, set UsesHeadless to true.
+		// This approach is not ideal, but it's the only way to do it without
+		// actually loading the source.
 		usesHeadless, _ := filesystem.Api().FileContainsAnyBytes(path, [][]byte{
 			[]byte("require(\"headless\")"),
 			[]byte("require('headless')"),

@@ -596,7 +596,7 @@ func (b *statefulBubble) updateAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			b.previousState()
-			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Fg(color.Purple)(b.selectedManga.Name), style.Fg(color.Blue)(manga.Name()), style.Faint(manga.SiteURL)))
+			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked to %s %s`, style.Fg(color.Orange)(manga.Name()), style.Faint(manga.SiteURL)))
 			return b, cmd
 		}
 	}
