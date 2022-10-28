@@ -74,7 +74,7 @@ func newStatefulKeymap() *statefulKeymap {
 		),
 		read: k(
 			keys("r"),
-			help(style.Fg(color.Yellow)("r"), style.Fg(color.Yellow)("read")),
+			help(style.Fg(color.Orange)("r"), style.Fg(color.Orange)("read")),
 		),
 		redownloadFailed: k(
 			keys("r"),

@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/metafates/mangal/anilist"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/icon"
@@ -263,7 +264,7 @@ func newBubble() *statefulBubble {
 
 	bubble.chaptersC = makeList("Chapters", showURLs, &listOptions{
 		TitleStyle: mo.Some(
-			style.NewColored("#000814", "#ffb703").Padding(0, 1),
+			style.NewColored("#000814", color.Orange).Padding(0, 1),
 		),
 	})
 	bubble.chaptersC.SetStatusBarItemName("chapter", "chapters")
