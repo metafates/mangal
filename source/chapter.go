@@ -17,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"time"
 )
 
 // Chapter is a struct that represents a chapter of a manga.
@@ -179,11 +180,7 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
 	<Count>{{ len .Manga.Chapters }}</Count>
 	<Writer>{{ escape .Manga.Metadata.Author }}</Writer>
 	<Characters>{{ join .Manga.Metadata.Characters "," }}</Characters>
-	{{ if addDate }}
-	{{ if geq .Manga.Metadata.StartDate.Year 1 }}<Year>{{ .Manga.Metadata.StartDate.Year }}</Year>{{ end }}
-	{{ if geq .Manga.Metadata.StartDate.Month 1 }}<Month>{{ .Manga.Metadata.StartDate.Month }}</Month>{{ end }}
-	{{ if geq .Manga.Metadata.StartDate.Day 1 }}<Day>{{ .Manga.Metadata.StartDate.Day }}</Day>{{ end }}
-	{{end}}
+	{{ makeDate }}
 	<Tags>{{ join .Manga.Metadata.Tags "," }}</Tags>
 	<Notes>Downloaded with Mangal. https://github.com/metafates/mangal</Notes>
   	<Manga>YesAndRightToLeft</Manga>
@@ -193,8 +190,39 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
 		"join":   strings.Join,
 		"escape": html.EscapeString,
 		"geq":    func(a, b int) bool { return a >= b },
-		"addDate": func() bool {
-			return viper.GetBool(constant.MetadataComicInfoXMLAddDate)
+		"makeDate": func() string {
+			if !viper.GetBool(constant.MetadataComicInfoXMLAddDate) {
+				return ""
+			}
+
+			var (
+				year  = lo.Tuple2[int, string]{0, "Year"}
+				month = lo.Tuple2[int, string]{0, "Month"}
+				day   = lo.Tuple2[int, string]{0, "Day"}
+			)
+
+			if viper.GetBool(constant.MetadataComicInfoXMLAlternativeDate) {
+				// use current date (download date)
+				now := time.Now()
+				year.A = now.Year()
+				month.A = int(now.Month())
+				day.A = now.Day()
+			} else {
+				year.A = c.Manga.Metadata.StartDate.Year
+				month.A = c.Manga.Metadata.StartDate.Month
+				day.A = c.Manga.Metadata.StartDate.Day
+			}
+
+			sb := strings.Builder{}
+			for _, t := range []lo.Tuple2[int, string]{year, month, day} {
+				if t.A <= 0 {
+					continue
+				}
+
+				sb.WriteString(fmt.Sprintf("<%[1]s>%d</%[1]s>\n", t.B, t.A))
+			}
+
+			return sb.String()
 		},
 	}
 

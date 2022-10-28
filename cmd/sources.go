@@ -66,7 +66,9 @@ var sourcesCmd = &cobra.Command{
 			printCustom()
 		default:
 			printBuiltin()
-			cmd.Println()
+			if printHeader {
+				cmd.Println()
+			}
 			printCustom()
 		}
 	},
