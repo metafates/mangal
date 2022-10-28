@@ -12,7 +12,11 @@ import (
 )
 
 func (m *Mangadex) Search(query string) ([]*source.Manga, error) {
-	if cached, ok := m.cachedMangas[query]; ok {
+	if cached, ok := m.cache.mangas.Get(query).Get(); ok {
+		for _, manga := range cached {
+			manga.Source = m
+		}
+
 		return cached, nil
 	}
 
@@ -53,6 +57,6 @@ func (m *Mangadex) Search(query string) ([]*source.Manga, error) {
 		mangas = append(mangas, &m)
 	}
 
-	m.cachedMangas[query] = mangas
+	_ = m.cache.mangas.Set(query, mangas)
 	return mangas, nil
 }
