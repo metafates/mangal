@@ -220,9 +220,11 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	}
 	m.Metadata.Characters = characters
 
-	var tags = make([]string, len(manga.Tags))
-	for i, tag := range manga.Tags {
-		tags[i] = tag.Name
+	var tags = make([]string, 0)
+	for _, tag := range manga.Tags {
+		if tag.Rank >= viper.GetInt(constant.MetadataComicInfoXMLTagRelevanceThreshold) {
+			tags = append(tags, tag.Name)
+		}
 	}
 	m.Metadata.Tags = tags
 

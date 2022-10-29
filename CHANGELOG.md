@@ -58,6 +58,7 @@ See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for
 - `version` command now has `--short` to just print the version without extra information
 - **Breaking!** Your old reading history (via `mangal --continue`) will be reset
 - Improved `clear` command
+- Option to set threshold for tag relevance to be included in ComicInfo.xml #121
 - Internal improvements
 
 Enjoy!

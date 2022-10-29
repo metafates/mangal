@@ -169,6 +169,11 @@ It will also cache the results to not spam the API`,
 		"Use download date instead of series release date in ComicInfo.xml file",
 	},
 	{
+		constant.MetadataComicInfoXMLTagRelevanceThreshold,
+		60,
+		"Minimum relevance of a tag to be added to ComicInfo.xml file. From 0 to 100",
+	},
+	{
 		constant.MetadataSeriesJSON,
 		true,
 		`Generate series.json file for each manga`,
