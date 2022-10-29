@@ -101,6 +101,22 @@ func (b *statefulBubble) viewConfirm() string {
 	)
 }
 
+func (b *statefulBubble) downloadingChapterMetainfo() string {
+	metainfo := strings.Builder{}
+
+	// Even though when this function is called chapter isn't supposed to be nil,
+	// it can be one for a brief moment.
+	// I assume that it's because View() is called before Update()
+	if b.currentDownloadingChapter != nil {
+		metainfo.WriteString("From ")
+		metainfo.WriteString(style.Fg(color.Orange)(b.currentDownloadingChapter.Source().Name()))
+		metainfo.WriteString(" as ")
+	}
+
+	metainfo.WriteString(style.Fg(color.Purple)(viper.GetString(constant.FormatsUse)))
+	return metainfo.String()
+}
+
 func (b *statefulBubble) viewRead() string {
 	var chapterName string
 
@@ -117,6 +133,8 @@ func (b *statefulBubble) viewRead() string {
 			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Fg(color.Purple)(chapterName))),
 			"",
 			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
+			"",
+			style.Truncate(b.width)(b.downloadingChapterMetainfo()),
 		},
 	)
 }
@@ -129,16 +147,6 @@ func (b *statefulBubble) viewDownload() string {
 		chapterName = chapter.Name
 	}
 
-	metainfo := strings.Builder{}
-
-	if b.currentDownloadingChapter != nil {
-		metainfo.WriteString("From ")
-		metainfo.WriteString(style.Fg(color.Orange)(b.currentDownloadingChapter.Source().Name()))
-		metainfo.WriteString(" as ")
-	}
-
-	metainfo.WriteString(style.Fg(color.Purple)(viper.GetString(constant.FormatsUse)))
-
 	return b.renderLines(
 		true,
 		[]string{
@@ -150,7 +158,7 @@ func (b *statefulBubble) viewDownload() string {
 			"",
 			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
 			"",
-			style.Truncate(b.width)(metainfo.String()),
+			style.Truncate(b.width)(b.downloadingChapterMetainfo()),
 		},
 	)
 }
