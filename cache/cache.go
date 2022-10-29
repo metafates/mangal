@@ -15,7 +15,7 @@ type internalData[T any] struct {
 	Time     mo.Option[time.Time] `json:"time"`
 }
 
-// Cache is a generic cache that can be used to cache any type of data.
+// Cache is a generic thread-safe cache that can be used to cache any type of data.
 // It is used to cache data that is expensive to fetch, such as API responses.
 // Cached data is stored in a file, and is automatically expired after a certain amount of time
 // (if expiration time is spcified)
