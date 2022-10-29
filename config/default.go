@@ -229,11 +229,15 @@ Available options are: emoji, kaomoji, plain, squares, nerd (nerd-font required)
 		true,
 		"Save history on chapter read",
 	},
-
 	{
 		constant.HistorySaveOnDownload,
 		false,
 		"Save history on chapter download",
+	},
+	{
+		constant.SearchShowQuerySuggestions,
+		true,
+		"Show query suggestions in when searching",
 	},
 	{
 		constant.MangadexLanguage,

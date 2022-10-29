@@ -3,7 +3,7 @@ package constant
 // DefinedFieldsCount is the number of fields defined in this package.
 // You have to manually update this number when you add a new field
 // to check later if every field has a defined default value
-const DefinedFieldsCount = 50
+const DefinedFieldsCount = 51
 
 const (
 	DownloaderPath                = "downloader.path"
@@ -45,6 +45,10 @@ const (
 const (
 	HistorySaveOnRead     = "history.save_on_read"
 	HistorySaveOnDownload = "history.save_on_download"
+)
+
+const (
+	SearchShowQuerySuggestions = "search.show_query_suggestions"
 )
 
 const (

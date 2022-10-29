@@ -407,7 +407,11 @@ func (b *statefulBubble) updateSearch(msg tea.Msg) (tea.Model, tea.Cmd) {
 	b.inputC, cmd = b.inputC.Update(msg)
 
 	if b.inputC.Value() != "" {
-		b.searchSuggestion = query.Suggest(b.inputC.Value())
+		if suggestion, ok := query.Suggest(b.inputC.Value()).Get(); ok && suggestion != b.inputC.Value() {
+			b.searchSuggestion = mo.Some(suggestion)
+		} else {
+			b.searchSuggestion = mo.None[string]()
+		}
 	} else if b.searchSuggestion.IsPresent() {
 		b.searchSuggestion = mo.None[string]()
 	}

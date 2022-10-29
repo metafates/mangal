@@ -2,8 +2,10 @@ package query
 
 import (
 	"github.com/lithammer/fuzzysearch/fuzzy"
+	"github.com/metafates/mangal/constant"
 	"github.com/samber/lo"
 	"github.com/samber/mo"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 )
 
@@ -12,6 +14,10 @@ var (
 )
 
 func SuggestMany(query string) []string {
+	if !viper.GetBool(constant.SearchShowQuerySuggestions) {
+		return []string{}
+	}
+
 	query = sanitize(query)
 
 	var records []*queryRecord
