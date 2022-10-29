@@ -45,6 +45,7 @@ See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for
 </details>
 
 - Improved TUI experience
+- Search completions in TUI
 - Anilist caching significantly improved. Now, it will cache all search results (for 2 days)
 - Add caching for custom (lua) sources
 - Include different cover sizes and color for json output #116
