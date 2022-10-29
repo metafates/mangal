@@ -13,9 +13,10 @@ which makes Mangal extremely fast and responsive.
 Now, mangal makes almost no requests to the servers.
 This includes Anilist, Custom (lua) sources and built-in sources.
 
-- Include different cover sizes and color for json output #116
-- Anilist caching significantly improved. Now, it will cache all search results for 2 days
+- Improved TUI experience
+- Anilist caching significantly improved. Now, it will cache all search results (for 2 days)
 - Add caching for custom (lua) sources
+- Include different cover sizes and color for json output #116
 - Add option to omit dates for ComicInfo.xml #117
 - By default, when reading a chapter, mangal will look for its downloaded copy, instead of downloading it again.
   See `mangal config info -k downloader.read_downloaded`
@@ -26,7 +27,7 @@ This includes Anilist, Custom (lua) sources and built-in sources.
 - Notify about new version in `help` command
 - Include staff in ComicInfo.xml #119
 - Add `--set-only` and `--unset-only` flags for `env` command. Old `--filter` flag was removed
-- Improved TUI experience
+- `version` command now has `--short` to just print the version without extra information
 - Internal improvements
 
 ## 3.14.2
