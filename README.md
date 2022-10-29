@@ -38,7 +38,7 @@ curl -sSL mangal.metafates.one/run | sh
 
 - __Lua Scrapers!!!__ You can add any source you want by creating your own _(or using someone's else)_ scraper with
   __Lua 5.1__. See [mangal-scrapers repository](https://github.com/metafates/mangal-scrapers)
-- __4 Built-in sources__ - [Mangadex](https://mangadex.org), [Manganelo](https://m.manganelo.com/wwww), [Mangakakalot](https://mangakakalot.com) & [Mangapill](https://mangapill.com)
+- __4 Built-in sources__ - [Mangadex](https://mangadex.org), [Manganelo](https://m.manganelo.com/wwww), [Manganato](https://manganato.com) & [Mangapill](https://mangapill.com)
 - __Download & Read Manga__ - I mean, it would be strange if you couldn't, right?
 - __Caching__ - Mangal will cache as much data as possible, so you don't have to wait for it to download the same data over and over again. 
 - __4 Different export formats__ - PDF, CBZ, ZIP and plain images
