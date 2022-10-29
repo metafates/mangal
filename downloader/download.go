@@ -19,16 +19,8 @@ import (
 func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	log.Info("downloading " + chapter.Name)
 
-	log.Info("checking if chapter is already downloaded")
 	path, err := chapter.Path(false)
 	if err != nil {
-		log.Error(err)
-		return "", err
-	}
-
-	exists, err := filesystem.Api().Exists(path)
-	if err != nil {
-		log.Error(err)
 		return "", err
 	}
 
@@ -39,7 +31,8 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 			log.Warn(err)
 		}
 	} else {
-		if exists {
+		log.Info("checking if chapter is already downloaded")
+		if chapter.IsDownloaded() {
 			log.Info("chapter already downloaded, skipping")
 			return path, nil
 		}
