@@ -1,4 +1,6 @@
-<h1 align="center">Mangal 4 🪐</h1>
+<h1 align="center">
+<strong>Mangal 4 ☄️</strong>
+</h1>
 
 <p align="center">
     <img alt="Linux" src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black">
@@ -11,7 +13,7 @@
     The most advanced CLI manga downloader in the entire universe!
 </h3>
 
-https://user-images.githubusercontent.com/62389790/191430795-cb9859cc-5252-4155-b34b-ecf727003407.mp4
+https://user-images.githubusercontent.com/62389790/198830175-a9423789-4942-4ae9-9837-cc2e623bbd3e.mp4
 
 ## Try it!
 
@@ -131,7 +133,7 @@ make build # if you want to just build the binary
 
 <details>
 <summary>If you don't have GNU Make use this</summary>
-</details>
+
 
 ```shell
 # To build
@@ -142,6 +144,7 @@ go install -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)
 ```
 
 If you want to build mangal for other architecture, say ARM, you'll have to set env variables `GOOS` and `GOARCH`
+</details>
 
 ```shell
 GOOS=linux GOARCH=arm64 make build
@@ -185,7 +188,11 @@ Just run `mangal` and you're ready to go.
 
 </details>
 
-<img width="1280" alt="TUI" src="https://user-images.githubusercontent.com/62389790/191431456-462ef83d-52be-4fbe-8176-f5e5ecf5954e.png">
+![TUI](https://user-images.githubusercontent.com/62389790/198830334-fd85c74f-cf3b-4e56-9262-5d62f7f829f4.png)
+
+> If you wonder what those icons mean - `D` stands for "downloaded", `*` shows that chapter is marked to be downloaded.
+> You can choose different icons, e.g. nerd font ones - just run mangal with `--icons nerd`.
+> Available options are `nerd`, `emoji`, `kaomoji` and `squares`
 
 ### Mini
 
@@ -193,7 +200,7 @@ Mini mode tries to mimic [ani-cli](https://github.com/pystardust/ani-cli)
 
 To run: `mangal mini`
 
-<img width="613" alt="MINI" src="https://user-images.githubusercontent.com/62389790/191431713-a753743c-a4b2-4787-a054-4da322d70304.png">
+![mini](https://user-images.githubusercontent.com/62389790/198830544-f2005ec4-c206-4fe0-bd08-862ffd08320e.png)
 
 ### Inline
 
@@ -207,7 +214,7 @@ Example of usage:
 
 Type `mangal help inline` for more information
 
-<img width="1249" alt="INLINE" src="https://user-images.githubusercontent.com/62389790/191431913-863fc67e-b30f-4656-b9b3-e2645915f86c.png">
+![inline](https://user-images.githubusercontent.com/62389790/198830728-4126f4bc-1d85-4d9e-96a5-59da541289b1.png)
 
 ### Other
 
@@ -263,11 +270,10 @@ It should automatically appear in the list of available scrapers.
 
 Mangal also supports integration with anilist.
 
-It will mark chapters as read on Anilsit when you read them inside mangal.
+Besides fetching metadata for each manga when downloading,
+mangal can also mark chapters as read on your Anilsit profile when you read them inside mangal.
 
 For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist-Integration)
-
-> Maybe I'll add more sites in the future, like [myanimelist](https://myanimelist.net/). Open for suggestions!
 
 ## Honorable mentions
 
