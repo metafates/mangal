@@ -16,9 +16,12 @@ Now, mangal makes almost no requests to the servers.
 This includes Anilist, Scrapers, Update checker and so on!
 
 <details>
-<summary><strong>⚠️ BREAKING!!!</strong> Please read if you're using inline mode</summary>
+<summary><strong>⚠️ BREAKING!!!⚠️ </strong> Please, read!</summary>
 
-Inline mode now produces slightly different output.
+1. `mangal sources` will no longer list available sources, use `mangal sources list` instead.
+2. `mangal gen` and `mangal install` were removed. Use `mangal sources gen` and `mangal sources install` instead.
+3. `mangal sources remove` command improved.
+2. Inline mode now produces slightly different output.
 
 JSON fields now follow the [camelCase](https://en.wikipedia.org/wiki/Camel_case) style instead of `PascalCase`
 (actually, using PascalCase was never a goal, I just forgot to properly configure it).
