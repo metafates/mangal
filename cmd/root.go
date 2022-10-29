@@ -12,6 +12,8 @@ import (
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/tui"
 	"github.com/metafates/mangal/updater"
+	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -62,7 +64,9 @@ func init() {
 	})
 
 	// Clear temporary files on startup
-	go clearTemp()
+	go func() {
+		_ = util.Delete(where.Temp())
+	}()
 }
 
 // rootCmd represents the base command when called without any subcommands

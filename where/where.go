@@ -38,6 +38,10 @@ func Sources() string {
 	return mkdir(filepath.Join(Config(), "sources"))
 }
 
+func AnilistBinds() string {
+	return filepath.Join(Config(), "anilist.json")
+}
+
 // Logs path
 // Will create the directory if it doesn't exist
 func Logs() string {
@@ -47,19 +51,7 @@ func Logs() string {
 // History path to the file
 // Will create the directory if it doesn't exist
 func History() string {
-	genericCacheDir, err := os.UserCacheDir()
-	if err != nil {
-		genericCacheDir = "."
-	}
-
-	path := filepath.Join(genericCacheDir, constant.CachePrefix+"history.json")
-
-	exists := lo.Must(filesystem.Api().Exists(path))
-	if !exists {
-		lo.Must0(filesystem.Api().WriteFile(path, []byte("{}"), os.ModePerm))
-	}
-
-	return path
+	return filepath.Join(Config(), "history.json")
 }
 
 // Downloads path
@@ -80,18 +72,18 @@ func Downloads() string {
 // Cache path
 // Will create the directory if it doesn't exist
 func Cache() string {
-	genericCacheDir, err := os.UserCacheDir()
+	cacheDir, err := os.UserCacheDir()
 	if err != nil {
-		genericCacheDir = "."
+		cacheDir = filepath.Join(".", "cache")
 	}
 
-	cacheDir := filepath.Join(genericCacheDir, constant.CachePrefix)
+	cacheDir = filepath.Join(cacheDir, constant.Mangal)
 	return mkdir(cacheDir)
 }
 
 // Temp path
 // Will create the directory if it doesn't exist
 func Temp() string {
-	tempDir := filepath.Join(os.TempDir(), constant.TempPrefix)
+	tempDir := filepath.Join(os.TempDir(), constant.Mangal)
 	return mkdir(tempDir)
 }

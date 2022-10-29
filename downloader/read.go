@@ -26,12 +26,12 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 	if viper.GetBool(constant.DownloaderReadDownloaded) && chapter.IsDownloaded() {
 		path, err := chapter.Path(false)
 		if err == nil {
-			return openRead(path, progress)
+			return openRead(path, chapter, progress)
 		}
 	}
 
-	log.Info(fmt.Sprintf("downloading %s for reading. Provider is %s", chapter.Name, chapter.Source().ID()))
-	log.Info("getting pages of " + chapter.Name)
+	log.Infof("downloading %s for reading. Provider is %s", chapter.Name, chapter.Source().ID())
+	log.Infof("getting pages of %s", chapter.Name)
 	progress("Getting pages")
 	pages, err := chapter.Source().PagesOf(chapter)
 	if err != nil {
@@ -65,12 +65,17 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		return err
 	}
 
-	err = openRead(path, progress)
+	err = openRead(path, chapter, progress)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
+	progress("Done")
+	return nil
+}
+
+func openRead(path string, chapter *source.Chapter, progress func(string)) error {
 	if viper.GetBool(constant.HistorySaveOnRead) {
 		go func() {
 			err := history.Save(chapter)
@@ -82,11 +87,6 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		}()
 	}
 
-	progress("Done")
-	return nil
-}
-
-func openRead(path string, progress func(string)) error {
 	var (
 		reader string
 		err    error

@@ -30,6 +30,8 @@ This includes Anilist, Scrapers, Update checker and so on!
 - Include staff in ComicInfo.xml #119
 - Add `--set-only` and `--unset-only` flags for `env` command. Old `--filter` flag was removed
 - `version` command now has `--short` to just print the version without extra information
+- **Breaking!** Your old reading history (via `mangal --continue`) will be reset
+- Improved `clear` command
 - Internal improvements
 
 Enjoy!

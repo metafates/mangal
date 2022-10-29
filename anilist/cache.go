@@ -2,7 +2,9 @@ package anilist
 
 import (
 	"github.com/metafates/mangal/cache"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/mo"
+	"path/filepath"
 	"time"
 )
 
@@ -53,7 +55,7 @@ func (c *cacher[K, T]) Delete(key K) error {
 
 var relationCacher = &cacher[string, int]{
 	internal: cache.New[*cacheData[string, int]](
-		"anilist_relation_cache",
+		where.AnilistBinds(),
 		&cache.Options{
 			// never expire
 			ExpireEvery: mo.None[time.Duration](),
@@ -64,7 +66,7 @@ var relationCacher = &cacher[string, int]{
 
 var searchCacher = &cacher[string, []int]{
 	internal: cache.New[*cacheData[string, []int]](
-		"anilist_search_cache",
+		filepath.Join(where.Cache(), "anilist_search_cache.json"),
 		&cache.Options{
 			// update ids every 10 days, since new manga are not added that often
 			ExpireEvery: mo.Some(time.Hour * 24 * 10),
@@ -75,7 +77,7 @@ var searchCacher = &cacher[string, []int]{
 
 var idCacher = &cacher[int, *Manga]{
 	internal: cache.New[*cacheData[int, *Manga]](
-		"anilist_id_cache",
+		filepath.Join(where.Cache(), "anilist_id_cache.json"),
 		&cache.Options{
 			// update manga data every 2 days since it can change often
 			ExpireEvery: mo.Some(time.Hour * 24 * 2),

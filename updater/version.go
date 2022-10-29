@@ -5,12 +5,14 @@ import (
 	"errors"
 	"github.com/metafates/mangal/cache"
 	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/mo"
 	"net/http"
+	"path/filepath"
 	"time"
 )
 
-var versionCacher = cache.New[string]("version", &cache.Options{
+var versionCacher = cache.New[string](filepath.Join(where.Cache(), "version.json"), &cache.Options{
 	ExpireEvery: mo.Some(time.Hour * 24),
 })
 

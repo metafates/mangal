@@ -2,7 +2,9 @@ package custom
 
 import (
 	"github.com/metafates/mangal/cache"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/mo"
+	"path/filepath"
 	"time"
 )
 
@@ -12,7 +14,7 @@ type cacher[T any] struct {
 
 func newCacher[T any](name string) *cacher[T] {
 	return &cacher[T]{
-		internal: cache.New[map[string]T](name, &cache.Options{
+		internal: cache.New[map[string]T](filepath.Join(where.Cache(), name+".json"), &cache.Options{
 			ExpireEvery: mo.Some(time.Hour * 24),
 		}),
 	}

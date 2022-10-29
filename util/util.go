@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/samber/lo"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/term"
@@ -168,4 +169,19 @@ func CompareVersions(a, b string) (int, error) {
 	}
 
 	return 0, nil
+}
+
+// Delete removes the given path from the filesystem.
+// It can handle both files and directories (recursively).
+func Delete(path string) error {
+	stat, err := filesystem.Api().Stat(path)
+	if err != nil {
+		return err
+	}
+
+	if stat.IsDir() {
+		return filesystem.Api().RemoveAll(path)
+	}
+
+	return filesystem.Api().Remove(path)
 }

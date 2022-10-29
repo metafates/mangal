@@ -2,7 +2,6 @@ package cache
 
 import (
 	"github.com/metafates/mangal/util"
-	"github.com/metafates/mangal/where"
 	"github.com/samber/mo"
 	"path/filepath"
 	"time"
@@ -28,16 +27,16 @@ type Cache[T any] struct {
 }
 
 // New creates a new cache with the specified name and path.
-// Name will be used to generate file path from it. Like this $cache_path + name + .json
 // Name will be automatically converted to a valid file name.
-func New[T any](name string, options *Options) *Cache[T] {
+func New[T any](path string, options *Options) *Cache[T] {
+	name := util.FileStem(filepath.Base(path))
 	return &Cache[T]{
-		name: name,
 		data: &internalData[T]{
 			Internal: mo.None[T](),
 		},
 		expireEvery: options.ExpireEvery,
-		path:        filepath.Join(where.Cache(), util.SanitizeFilename(name)+".json"),
+		name:        name,
+		path:        path,
 		initialized: false,
 	}
 }
