@@ -11,6 +11,9 @@ import (
 // Set sets the cache data.
 // May return error if writing to file failed
 func (c *Cache[T]) Set(data T) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	_ = c.init()
 
 	c.data.Internal = mo.Some(data)

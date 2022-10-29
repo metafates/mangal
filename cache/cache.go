@@ -4,6 +4,7 @@ import (
 	"github.com/metafates/mangal/util"
 	"github.com/samber/mo"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -24,6 +25,7 @@ type Cache[T any] struct {
 	path        string
 	expireEvery mo.Option[time.Duration]
 	initialized bool
+	mutex       *sync.RWMutex
 }
 
 // New creates a new cache with the specified name and path.
@@ -38,5 +40,6 @@ func New[T any](path string, options *Options) *Cache[T] {
 		name:        name,
 		path:        path,
 		initialized: false,
+		mutex:       &sync.RWMutex{},
 	}
 }
