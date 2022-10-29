@@ -105,9 +105,8 @@ func init() {
 }
 
 var sourcesRemoveCmd = &cobra.Command{
-	Use:     "remove",
-	Short:   "Remove a custom source",
-	Example: "mangal sources remove <name>",
+	Use:   "remove",
+	Short: "Remove a custom source",
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, name := range lo.Must(cmd.Flags().GetStringArray("name")) {
 			path := filepath.Join(where.Sources(), name+provider.CustomProviderExtension)

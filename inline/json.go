@@ -48,23 +48,30 @@ func prepareManga(manga *source.Manga, options *Options) error {
 		}
 	}
 
-	chapters, _ := options.Source.ChaptersOf(manga)
 	if options.ChaptersFilter.IsPresent() {
+		chapters, err := options.Source.ChaptersOf(manga)
+		if err != nil {
+			return err
+		}
+
 		chapters, err = options.ChaptersFilter.MustGet()(chapters)
 		if err != nil {
 			return err
 		}
-	}
 
-	manga.Chapters = chapters
+		manga.Chapters = chapters
 
-	if options.PopulatePages {
-		for _, chapter := range chapters {
-			_, err := options.Source.PagesOf(chapter)
-			if err != nil {
-				return err
+		if options.PopulatePages {
+			for _, chapter := range chapters {
+				_, err := options.Source.PagesOf(chapter)
+				if err != nil {
+					return err
+				}
 			}
 		}
+	} else {
+		// clear chapters in case they were loaded from cache or something
+		manga.Chapters = make([]*source.Chapter, 0)
 	}
 
 	if viper.GetBool(constant.MetadataFetchAnilist) {

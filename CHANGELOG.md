@@ -62,6 +62,7 @@ See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for
 - **Breaking!** Your old reading history (via `mangal --continue`) will be reset
 - Improved `clear` command
 - Option to set threshold for tag relevance to be included in ComicInfo.xml #121
+- Improved inline command json output, fixes
 - Internal improvements
 
 Enjoy!
