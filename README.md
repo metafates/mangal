@@ -209,11 +209,11 @@ Inline mode is intended for use with other scripts.
 
 Example of usage:
 
-    mangal inline --source Manganelo --query "death note" --manga first --chapters all  -d
+    mangal inline --source "Manganato" --query "death note" --manga first --chapters first -p --json | jq .
 
-> This will download all chapters of the "Death Note" from Manganelo.
+Type `mangal help inline` for more information.
 
-Type `mangal help inline` for more information
+See [Wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for more examples.
 
 ![inline](https://user-images.githubusercontent.com/62389790/198830728-4126f4bc-1d85-4d9e-96a5-59da541289b1.png)
 
