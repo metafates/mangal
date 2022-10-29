@@ -18,14 +18,15 @@ type (
 )
 
 type Options struct {
-	Out            io.Writer
-	Source         source.Source
-	Download       bool
-	Json           bool
-	PopulatePages  bool
-	Query          string
-	MangaPicker    mo.Option[MangaPicker]
-	ChaptersFilter mo.Option[ChaptersFilter]
+	Out                 io.Writer
+	Source              source.Source
+	IncludeAnilistManga bool
+	Download            bool
+	Json                bool
+	PopulatePages       bool
+	Query               string
+	MangaPicker         mo.Option[MangaPicker]
+	ChaptersFilter      mo.Option[ChaptersFilter]
 }
 
 func ParseMangaPicker(description string) (MangaPicker, error) {

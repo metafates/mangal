@@ -11,6 +11,7 @@ import (
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"github.com/spf13/viper"
 	"io"
 	"net/http"
@@ -21,45 +22,50 @@ import (
 )
 
 type date struct {
-	Year  int
-	Month int
-	Day   int
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Day   int `json:"day"`
 }
 
 // Manga is a manga from a source.
 type Manga struct {
 	// Name of the manga
-	Name string
+	Name string `json:"name"`
 	// URL of the manga
-	URL string
+	URL string `json:"url"`
 	// Index of the manga in the source.
-	Index uint16
+	Index uint16 `json:"index"`
 	// ID of manga in the source.
-	ID string
+	ID string `json:"id"`
 	// Chapters of the manga
-	Chapters []*Chapter
-	Source   Source `json:"-"`
+	Chapters []*Chapter `json:"chapters"`
+	// Source that the manga belongs to.
+	Source Source `json:"-"`
+	// Anilist is the closest anilist match
+	Anilist  mo.Option[*anilist.Manga] `json:"-"`
 	Metadata struct {
-		Genres  []string
-		Summary string
+		Genres  []string `json:"genres"`
+		Summary string   `json:"summary"`
 		Staff   struct {
-			Story       []string
-			Art         []string
-			Translation []string
-			Lettering   []string
-		}
-		Cover       string
-		CoverMedium string
-		CoverSmall  string
-		CoverColor  string
-		Tags        []string
-		Characters  []string
-		Status      string
-		StartDate   date
-		EndDate     date
-		Synonyms    []string
-		URLs        []string
-	}
+			Story       []string `json:"story"`
+			Art         []string `json:"art"`
+			Translation []string `json:"translation"`
+			Lettering   []string `json:"lettering"`
+		} `json:"staff"`
+		Cover struct {
+			ExtraLarge string `json:"extraLarge"`
+			Large      string `json:"large"`
+			Medium     string `json:"medium"`
+			Color      string `json:"color"`
+		} `json:"cover"`
+		Tags       []string `json:"tags"`
+		Characters []string `json:"characters"`
+		Status     string   `json:"status"`
+		StartDate  date     `json:"startDate"`
+		EndDate    date     `json:"endDate"`
+		Synonyms   []string `json:"synonyms"`
+		URLs       []string `json:"urls"`
+	} `json:"metadata"`
 	cachedTempPath  string
 	populated       bool
 	coverDownloaded bool
@@ -108,7 +114,7 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 	log.Info("Downloading cover for ", m.Name)
 	progress("Downloading cover")
 
-	if m.Metadata.Cover == "" {
+	if m.Metadata.Cover.ExtraLarge == "" {
 		log.Warn("No cover to download")
 		return nil
 	}
@@ -120,7 +126,7 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 	}
 
 	var extension string
-	if extension = filepath.Ext(m.Metadata.Cover); extension == "" {
+	if extension = filepath.Ext(m.Metadata.Cover.ExtraLarge); extension == "" {
 		extension = ".jpg"
 	}
 
@@ -137,7 +143,7 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 		return nil
 	}
 
-	resp, err := http.Get(m.Metadata.Cover)
+	resp, err := http.Get(m.Metadata.Cover.ExtraLarge)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -159,6 +165,23 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 	return filesystem.Api().WriteFile(path, data, os.ModePerm)
 }
 
+func (m *Manga) BindWithAnilist() error {
+	if m.Anilist.IsPresent() {
+		return nil
+	}
+
+	log.Infof("binding %s with anilist", m.Name)
+
+	manga, err := anilist.FindClosest(m.Name)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	m.Anilist = mo.Some(manga)
+	return nil
+}
+
 func (m *Manga) PopulateMetadata(progress func(string)) error {
 	if m.populated {
 		return nil
@@ -167,12 +190,14 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 
 	progress("Fetching metadata from anilist")
 	log.Infof("Populating metadata for %s", m.Name)
-
-	manga, err := anilist.FindClosest(m.Name)
-	if err != nil {
-		log.Error(err)
+	if err := m.BindWithAnilist(); err != nil {
 		progress("Failed to fetch metadata")
 		return err
+	}
+
+	manga, ok := m.Anilist.Get()
+	if !ok || manga == nil {
+		return fmt.Errorf("manga '%s' not found on Anilist", m.Name)
 	}
 
 	m.Metadata.Genres = manga.Genres
@@ -201,10 +226,9 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	}
 	m.Metadata.Tags = tags
 
-	m.Metadata.Cover = manga.CoverImage.ExtraLarge
-	m.Metadata.CoverMedium = manga.CoverImage.Medium
-	m.Metadata.CoverSmall = manga.CoverImage.Large
-	m.Metadata.CoverColor = manga.CoverImage.Color
+	m.Metadata.Cover.ExtraLarge = manga.CoverImage.ExtraLarge
+	m.Metadata.Cover.Medium = manga.CoverImage.Medium
+	m.Metadata.Cover.Color = manga.CoverImage.Color
 
 	m.Metadata.StartDate = date(manga.StartDate)
 	m.Metadata.EndDate = date(manga.EndDate)
@@ -288,7 +312,7 @@ func (m *Manga) SeriesJSON() *bytes.Buffer {
 			DescriptionFormatted: m.Metadata.Summary,
 			Status:               status,
 			Year:                 m.Metadata.StartDate.Year,
-			ComicImage:           m.Metadata.Cover,
+			ComicImage:           m.Metadata.Cover.ExtraLarge,
 			Publisher:            publisher,
 			BookType:             "Print",
 			TotalIssues:          len(m.Chapters),

@@ -15,6 +15,32 @@ which makes Mangal extremely fast and responsive.
 Now, mangal makes almost no requests to the servers.
 This includes Anilist, Scrapers, Update checker and so on!
 
+<details>
+<summary><strong>⚠️ BREAKING!!!</strong> Please read if you're using inline mode</summary>
+
+Inline mode now produces slightly different output.
+
+JSON fields now follow the [camelCase](https://en.wikipedia.org/wiki/Camel_case) style instead of `PascalCase`
+(actually, using PascalCase was never a goal, I just forgot to properly configure it).
+But since it's a major release I can finally fix this.
+
+Other changes includes minor fields restructuring. 
+
+Cover image of manga `Metadata.Cover` now moved to `metadata.cover.extraLarge` and it also contains covers of smaller sizes and average color in HEX.
+
+Root result now follows this structure
+```json
+{
+    "source": "source name",
+    "query": "query that was passed",
+    "result": [mangas] // Previously called "Manga"
+}
+```
+
+Please, consider these changes when migrating your applications that use mangal from 3rd version to 4th.
+See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for new output examples.
+</details>
+
 - Improved TUI experience
 - Anilist caching significantly improved. Now, it will cache all search results (for 2 days)
 - Add caching for custom (lua) sources

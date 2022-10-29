@@ -28,12 +28,14 @@ func init() {
 	inlineCmd.Flags().BoolP("json", "j", false, "JSON output")
 	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages")
 	inlineCmd.Flags().BoolP("fetch-metadata", "f", false, "Populate manga metadata")
+	inlineCmd.Flags().BoolP("include-anilist-manga", "a", false, "Include anilist manga in the output")
 	lo.Must0(viper.BindPFlag(constant.MetadataFetchAnilist, inlineCmd.Flags().Lookup("fetch-metadata")))
 
 	inlineCmd.Flags().StringP("output", "o", "", "output file")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	inlineCmd.MarkFlagsMutuallyExclusive("download", "json")
+	inlineCmd.MarkFlagsMutuallyExclusive("include-anilist-manga", "download")
 }
 
 var inlineCmd = &cobra.Command{
@@ -111,14 +113,15 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		}
 
 		options := &inline.Options{
-			Source:         src,
-			Download:       lo.Must(cmd.Flags().GetBool("download")),
-			Json:           lo.Must(cmd.Flags().GetBool("json")),
-			Query:          lo.Must(cmd.Flags().GetString("query")),
-			PopulatePages:  lo.Must(cmd.Flags().GetBool("populate-pages")),
-			MangaPicker:    mangaPicker,
-			ChaptersFilter: chapterFilter,
-			Out:            writer,
+			Source:              src,
+			Download:            lo.Must(cmd.Flags().GetBool("download")),
+			Json:                lo.Must(cmd.Flags().GetBool("json")),
+			Query:               lo.Must(cmd.Flags().GetString("query")),
+			PopulatePages:       lo.Must(cmd.Flags().GetBool("populate-pages")),
+			IncludeAnilistManga: lo.Must(cmd.Flags().GetBool("include-anilist-manga")),
+			MangaPicker:         mangaPicker,
+			ChaptersFilter:      chapterFilter,
+			Out:                 writer,
 		}
 
 		handleErr(inline.Run(options))

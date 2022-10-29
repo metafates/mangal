@@ -26,7 +26,7 @@ func Run(options *Options) error {
 			}
 		}
 
-		marshalled, err := asJson(mangas)
+		marshalled, err := asJson(mangas, options)
 		if err != nil {
 			return err
 		}
@@ -39,12 +39,12 @@ func Run(options *Options) error {
 	if options.MangaPicker.IsAbsent() {
 		// preload all chapters
 		for _, manga := range mangas {
-			if err = jsonUpdateChapters(manga, options); err != nil {
+			if err = prepareManga(manga, options); err != nil {
 				return err
 			}
 		}
 
-		marshalled, err := asJson(mangas)
+		marshalled, err := asJson(mangas, options)
 		if err != nil {
 			return err
 		}
@@ -56,35 +56,34 @@ func Run(options *Options) error {
 	var chapters []*source.Chapter
 
 	if len(mangas) == 0 {
-		chapters = []*source.Chapter{}
-	} else {
-		manga := options.MangaPicker.MustGet()(mangas)
+		return nil
+	}
 
-		chapters, err = options.Source.ChaptersOf(manga)
+	manga := options.MangaPicker.MustGet()(mangas)
+	chapters, err = options.Source.ChaptersOf(manga)
+	if err != nil {
+		return err
+	}
+
+	if options.ChaptersFilter.IsPresent() {
+		chapters, err = options.ChaptersFilter.MustGet()(chapters)
+		if err != nil {
+			return err
+		}
+	}
+
+	if options.Json {
+		if err = prepareManga(manga, options); err != nil {
+			return err
+		}
+
+		marshalled, err := asJson([]*source.Manga{manga}, options)
 		if err != nil {
 			return err
 		}
 
-		if options.ChaptersFilter.IsPresent() {
-			chapters, err = options.ChaptersFilter.MustGet()(chapters)
-			if err != nil {
-				return err
-			}
-		}
-
-		if options.Json {
-			if err = jsonUpdateChapters(manga, options); err != nil {
-				return err
-			}
-
-			marshalled, err := asJson([]*source.Manga{manga})
-			if err != nil {
-				return err
-			}
-
-			_, err = options.Out.Write(marshalled)
-			return err
-		}
+		_, err = options.Out.Write(marshalled)
+		return err
 	}
 
 	for _, chapter := range chapters {

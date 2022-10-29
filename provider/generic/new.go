@@ -55,7 +55,7 @@ func New(conf *Configuration) source.Source {
 				ID:       filepath.Base(url),
 				Source:   &s,
 			}
-			manga.Metadata.Cover = s.config.MangaExtractor.Cover(selection)
+			manga.Metadata.Cover.ExtraLarge = s.config.MangaExtractor.Cover(selection)
 
 			s.mangas[path][i] = &manga
 		})

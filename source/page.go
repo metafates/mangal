@@ -16,11 +16,11 @@ import (
 // Page represents a page in a chapter
 type Page struct {
 	// URL of the page. Used to download the page.
-	URL string
+	URL string `json:"url"`
 	// Index of the page in the chapter.
-	Index uint16
+	Index uint16 `json:"index"`
 	// Extension of the page image.
-	Extension string
+	Extension string `json:"extension"`
 	// Size of the page in bytes
 	Size uint64 `json:"-"`
 	// Contents of the page

@@ -2,21 +2,52 @@ package inline
 
 import (
 	"encoding/json"
+	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
 )
 
-func asJson(manga []*source.Manga) (marshalled []byte, err error) {
+func asJson(manga []*source.Manga, options *Options) (marshalled []byte, err error) {
+	type inlineManga struct {
+		*source.Manga
+		Anilist *anilist.Manga `json:"anilist"`
+	}
+
+	var m = make([]*inlineManga, len(manga))
+	for i, manga := range manga {
+		al := manga.Anilist.OrElse(nil)
+		if !options.IncludeAnilistManga {
+			al = nil
+		}
+
+		m[i] = &inlineManga{
+			Manga:   manga,
+			Anilist: al,
+		}
+	}
+
 	return json.Marshal(&struct {
-		Manga []*source.Manga
+		Source string         `json:"source"`
+		Query  string         `json:"query"`
+		Result []*inlineManga `json:"result"`
 	}{
-		Manga: manga,
+		Result: m,
+		Source: options.Source.Name(),
+		Query:  options.Query,
 	})
 }
 
-func jsonUpdateChapters(manga *source.Manga, options *Options) error {
+func prepareManga(manga *source.Manga, options *Options) error {
 	var err error
+
+	if options.IncludeAnilistManga {
+		err = manga.BindWithAnilist()
+		if err != nil {
+			return err
+		}
+	}
+
 	chapters, _ := options.Source.ChaptersOf(manga)
 	if options.ChaptersFilter.IsPresent() {
 		chapters, err = options.ChaptersFilter.MustGet()(chapters)
