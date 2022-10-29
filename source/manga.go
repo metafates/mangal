@@ -40,9 +40,14 @@ type Manga struct {
 	Chapters []*Chapter
 	Source   Source `json:"-"`
 	Metadata struct {
-		Genres      []string
-		Summary     string
-		Author      string
+		Genres  []string
+		Summary string
+		Staff   struct {
+			Story       []string
+			Art         []string
+			Translation []string
+			Lettering   []string
+		}
 		Cover       string
 		CoverMedium string
 		CoverSmall  string
@@ -114,9 +119,9 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 		return err
 	}
 
-	extension := ".jpg"
-	if ext := filepath.Ext(m.Metadata.Cover); ext != "" {
-		extension = ext
+	var extension string
+	if extension = filepath.Ext(m.Metadata.Cover); extension == "" {
+		extension = ".jpg"
 	}
 
 	path = filepath.Join(path, "cover"+extension)
@@ -207,6 +212,25 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	m.Metadata.Status = strings.ReplaceAll(manga.Status, "_", " ")
 	m.Metadata.Synonyms = manga.Synonyms
 
+	m.Metadata.Staff.Story = make([]string, 0)
+	m.Metadata.Staff.Art = make([]string, 0)
+	m.Metadata.Staff.Translation = make([]string, 0)
+	m.Metadata.Staff.Lettering = make([]string, 0)
+
+	for _, staff := range manga.Staff.Edges {
+		role := strings.ToLower(staff.Role)
+		switch {
+		case strings.Contains(role, "story"):
+			m.Metadata.Staff.Story = append(m.Metadata.Staff.Story, staff.Node.Name.Full)
+		case strings.Contains(role, "art"):
+			m.Metadata.Staff.Art = append(m.Metadata.Staff.Art, staff.Node.Name.Full)
+		case strings.Contains(role, "translator"):
+			m.Metadata.Staff.Translation = append(m.Metadata.Staff.Translation, staff.Node.Name.Full)
+		case strings.Contains(role, "lettering"):
+			m.Metadata.Staff.Lettering = append(m.Metadata.Staff.Lettering, staff.Node.Name.Full)
+		}
+	}
+
 	// Anilist & Myanimelist + external
 	urls := make([]string, 2+len(manga.External))
 	urls[0] = manga.SiteURL
@@ -250,6 +274,11 @@ func (m *Manga) SeriesJSON() *bytes.Buffer {
 		status = "Unknown"
 	}
 
+	var publisher string
+	if len(m.Metadata.Staff.Story) > 0 {
+		publisher = m.Metadata.Staff.Story[0]
+	}
+
 	seriesJSON := struct {
 		Metadata metadata `json:"metadata"`
 	}{
@@ -260,7 +289,7 @@ func (m *Manga) SeriesJSON() *bytes.Buffer {
 			Status:               status,
 			Year:                 m.Metadata.StartDate.Year,
 			ComicImage:           m.Metadata.Cover,
-			Publisher:            m.Metadata.Author,
+			Publisher:            publisher,
 			BookType:             "Print",
 			TotalIssues:          len(m.Chapters),
 			PublicationRun:       fmt.Sprintf("%d %d - %d %d", m.Metadata.StartDate.Month, m.Metadata.StartDate.Year, m.Metadata.EndDate.Month, m.Metadata.EndDate.Year),

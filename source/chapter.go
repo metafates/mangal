@@ -174,22 +174,45 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
   	<Series>{{ escape .Manga.Name }}</Series>
 	<Number>{{ .Index }}</Number>
 	<Web>{{ .URL }}</Web>
-	<Genre>{{ join .Manga.Metadata.Genres "," }}</Genre>
+	<Genre>{{ join .Manga.Metadata.Genres }}</Genre>
 	<PageCount>{{ len .Pages }}</PageCount>
 	<Summary>{{ escape .Manga.Metadata.Summary }}</Summary>
 	<Count>{{ len .Manga.Chapters }}</Count>
-	<Writer>{{ escape .Manga.Metadata.Author }}</Writer>
-	<Characters>{{ join .Manga.Metadata.Characters "," }}</Characters>
+	<Characters>{{ join .Manga.Metadata.Characters }}</Characters>
 	{{ makeDate }}
-	<Tags>{{ join .Manga.Metadata.Tags "," }}</Tags>
+	{{ makeStaff }}
+	<Tags>{{ join .Manga.Metadata.Tags }}</Tags>
 	<Notes>Downloaded with Mangal. https://github.com/metafates/mangal</Notes>
   	<Manga>YesAndRightToLeft</Manga>
 </ComicInfo>`
 
 	funcs := template.FuncMap{
-		"join":   strings.Join,
+		"join": func(s []string) string {
+			return strings.Join(s, ",")
+		},
 		"escape": html.EscapeString,
 		"geq":    func(a, b int) bool { return a >= b },
+		"makeStaff": func() string {
+			sb := strings.Builder{}
+
+			var (
+				Writers     = lo.Tuple2[[]string, string]{c.Manga.Metadata.Staff.Story, "Writer"}
+				Artists     = lo.Tuple2[[]string, string]{c.Manga.Metadata.Staff.Art, "Penciller"}
+				Letterers   = lo.Tuple2[[]string, string]{c.Manga.Metadata.Staff.Lettering, "Letterer"}
+				Translators = lo.Tuple2[[]string, string]{c.Manga.Metadata.Staff.Translation, "Translator"}
+			)
+
+			for _, staff := range []lo.Tuple2[[]string, string]{Writers, Artists, Letterers, Translators} {
+				if len(staff.A) == 0 {
+					continue
+				}
+
+				s := strings.Join(staff.A, ",")
+				sb.WriteString(fmt.Sprintf("<%[1]s>%s</%[1]s>\n", staff.B, s))
+			}
+
+			return sb.String()
+		},
 		"makeDate": func() string {
 			if !viper.GetBool(constant.MetadataComicInfoXMLAddDate) {
 				return ""

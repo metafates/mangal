@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/where"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -123,6 +124,9 @@ func New(conf *Configuration) source.Source {
 		elements.Each(func(i int, selection *goquery.Selection) {
 			link := s.config.PageExtractor.URL(selection)
 			ext := filepath.Ext(link)
+			// remove some query params from the extension
+			ext = strings.Split(ext, "?")[0]
+
 			page := source.Page{
 				URL:       link,
 				Index:     uint16(i),

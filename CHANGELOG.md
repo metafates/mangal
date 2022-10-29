@@ -24,6 +24,7 @@ This includes Anilist, Custom (lua) sources and built-in sources.
 - Option to use alternative ComicInfo.xml date.
   See `mangal config info -k metadata.comic_info_xml_alternative_date` for more info
 - Notify about new version in `help` command
+- Include staff in ComicInfo.xml #119
 - Improved TUI experience
 - Internal improvements
 

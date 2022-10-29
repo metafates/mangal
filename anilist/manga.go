@@ -54,6 +54,16 @@ type Manga struct {
 			} `json:"name"`
 		} `json:"nodes"`
 	} `json:"characters"`
+	Staff struct {
+		Edges []struct {
+			Role string `json:"role"`
+			Node struct {
+				Name struct {
+					Full string `json:"full"`
+				} `json:"name"`
+			} `json:"node"`
+		} `json:"edges"`
+	} `json:"staff"`
 	// StartDate is the date the manga started publishing.
 	StartDate date `json:"startDate"`
 	// EndDate is the date the manga ended publishing.

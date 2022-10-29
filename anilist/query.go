@@ -43,6 +43,16 @@ endDate {
 	month	
 	day
 }
+staff {
+	edges {
+	  role
+	  node {
+		name {
+		  full
+		}
+	  }
+	}
+}
 status
 synonyms
 siteUrl
