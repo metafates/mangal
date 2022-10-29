@@ -28,7 +28,9 @@ var envCmd = &cobra.Command{
 		config.EnvExposed = append(config.EnvExposed, where.EnvConfigPath)
 		slices.Sort(config.EnvExposed)
 		for _, env := range config.EnvExposed {
-			env = strings.ToUpper(constant.Mangal + "_" + config.EnvKeyReplacer.Replace(env))
+			if env != where.EnvConfigPath {
+				env = strings.ToUpper(constant.Mangal + "_" + config.EnvKeyReplacer.Replace(env))
+			}
 			value := os.Getenv(env)
 			present := value != ""
 
