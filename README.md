@@ -143,8 +143,9 @@ go build -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)' 
 go install -ldflags "-X 'github.com/metafates/mangal/constant.BuiltAt=$(date -u)' -X 'github.com/metafates/mangal/constant.BuiltBy=$(whoami)' -X 'github.com/metafates/mangal/constant.Revision=$(git rev-parse --short HEAD)' -s -w"
 ```
 
-If you want to build mangal for other architecture, say ARM, you'll have to set env variables `GOOS` and `GOARCH`
 </details>
+
+If you want to build mangal for other architecture, say ARM, you'll have to set env variables `GOOS` and `GOARCH`
 
 ```shell
 GOOS=linux GOARCH=arm64 make build
