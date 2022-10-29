@@ -14,5 +14,7 @@ var installCmd = &cobra.Command{
 	Deprecated: "use `mangal sources install` instead.",
 	Long: `Browse and install custom scrapers from official GitHub repo.
 https://github.com/metafates/mangal-scrapers`,
-	Run: sourcesInstallCmd.Run,
+	Run: func(cmd *cobra.Command, args []string) {
+		sourcesInstallCmd.Run(sourcesGenCmd, args)
+	},
 }
