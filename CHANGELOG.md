@@ -7,11 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 4.0.0
 
+I've been actively working on this update lately, and I'm finally happy to share the 4th version of Mangal! 🐳
+
 The most important feature this major version brings is significantly improved caching mechanism
 which makes Mangal extremely fast and responsive.
 
 Now, mangal makes almost no requests to the servers.
-This includes Anilist, Custom (lua) sources and built-in sources.
+This includes Anilist, Scrapers, Update checker and so on!
 
 - Improved TUI experience
 - Anilist caching significantly improved. Now, it will cache all search results (for 2 days)
@@ -29,6 +31,8 @@ This includes Anilist, Custom (lua) sources and built-in sources.
 - Add `--set-only` and `--unset-only` flags for `env` command. Old `--filter` flag was removed
 - `version` command now has `--short` to just print the version without extra information
 - Internal improvements
+
+Enjoy!
 
 ## 3.14.2
 
