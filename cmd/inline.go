@@ -10,6 +10,7 @@ import (
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/inline"
 	"github.com/metafates/mangal/provider"
+	"github.com/metafates/mangal/query"
 	"github.com/samber/lo"
 	"github.com/samber/mo"
 	"github.com/spf13/cobra"
@@ -36,6 +37,10 @@ func init() {
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	inlineCmd.MarkFlagsMutuallyExclusive("download", "json")
 	inlineCmd.MarkFlagsMutuallyExclusive("include-anilist-manga", "download")
+
+	inlineCmd.RegisterFlagCompletionFunc("query", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return query.SuggestMany(toComplete), cobra.ShellCompDirectiveNoFileComp
+	})
 }
 
 var inlineCmd = &cobra.Command{
