@@ -25,6 +25,7 @@ This includes Anilist, Custom (lua) sources and built-in sources.
   See `mangal config info -k metadata.comic_info_xml_alternative_date` for more info
 - Notify about new version in `help` command
 - Include staff in ComicInfo.xml #119
+- Add `--set-only` and `--unset-only` flags for `env` command. Old `--filter` flag was removed
 - Improved TUI experience
 - Internal improvements
 

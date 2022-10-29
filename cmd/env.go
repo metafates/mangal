@@ -15,7 +15,10 @@ import (
 
 func init() {
 	rootCmd.AddCommand(envCmd)
-	envCmd.Flags().BoolP("filter", "f", false, "filter out variables that are not set")
+	envCmd.Flags().BoolP("set-only", "s", false, "only show variables that are set")
+	envCmd.Flags().BoolP("unset-only", "u", false, "only show variables that are unset")
+
+	envCmd.MarkFlagsMutuallyExclusive("set-only", "unset-only")
 }
 
 var envCmd = &cobra.Command{
@@ -23,7 +26,8 @@ var envCmd = &cobra.Command{
 	Short: "Show available environment variables",
 	Long:  `Show available environment variables.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		filter := lo.Must(cmd.Flags().GetBool("filter"))
+		setOnly := lo.Must(cmd.Flags().GetBool("set-only"))
+		unsetOnly := lo.Must(cmd.Flags().GetBool("unset-only"))
 
 		config.EnvExposed = append(config.EnvExposed, where.EnvConfigPath)
 		slices.Sort(config.EnvExposed)
@@ -34,8 +38,14 @@ var envCmd = &cobra.Command{
 			value := os.Getenv(env)
 			present := value != ""
 
-			if !present && filter {
-				continue
+			if setOnly || unsetOnly {
+				if !present && setOnly {
+					continue
+				}
+
+				if present && unsetOnly {
+					continue
+				}
 			}
 
 			cmd.Print(style.New().Bold(true).Foreground(color.Purple).Render(env))
