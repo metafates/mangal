@@ -48,6 +48,12 @@ func Logs() string {
 	return mkdir(filepath.Join(Config(), "logs"))
 }
 
+// Queries path
+// Will create the directory if it doesn't exist
+func Queries() string {
+	return filepath.Join(Cache(), "queries.json")
+}
+
 // History path to the file
 // Will create the directory if it doesn't exist
 func History() string {

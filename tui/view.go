@@ -68,13 +68,25 @@ func (b *statefulBubble) viewSources() string {
 }
 
 func (b *statefulBubble) viewSearch() string {
+	lines := []string{
+		style.Title("Search Manga"),
+		"",
+		b.inputC.View(),
+	}
+
+	if b.searchSuggestion.IsPresent() {
+		lines = append(
+			lines,
+			"",
+			fmt.Sprintf("Search %s ?", style.Fg(color.Orange)(b.searchSuggestion.MustGet())),
+			"",
+			fmt.Sprintf("Press %s to accept", style.Bold(style.Faint(b.keymap.acceptSearchSuggestion.Help().Key))),
+		)
+	}
+
 	return b.renderLines(
 		true,
-		[]string{
-			style.Title("Search Manga"),
-			"",
-			b.inputC.View(),
-		},
+		lines,
 	)
 }
 

@@ -73,6 +73,8 @@ type statefulBubble struct {
 
 	failedChapters   []*source.Chapter
 	succededChapters []*source.Chapter
+
+	searchSuggestion mo.Option[string]
 }
 
 func (b *statefulBubble) raiseError(err error) {

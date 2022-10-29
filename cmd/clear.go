@@ -22,6 +22,7 @@ var clearTargets = []clearTarget{
 	{"cache directory", "cache", mo.Some("c"), where.Cache},
 	{"history file", "history", mo.Some("s"), where.History},
 	{"anilist binds", "anilist", mo.Some("a"), where.AnilistBinds},
+	{"queries history", "queries", mo.Some("q"), where.Queries},
 }
 
 func init() {

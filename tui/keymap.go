@@ -12,6 +12,7 @@ type statefulKeymap struct {
 
 	quit, forceQuit,
 	selectOne, selectAll, selectVolume, clearSelection,
+	acceptSearchSuggestion,
 	anilistSelect,
 	remove,
 	redownloadFailed,
@@ -75,6 +76,10 @@ func newStatefulKeymap() *statefulKeymap {
 		read: k(
 			keys("r"),
 			help(style.Fg(color.Orange)("r"), style.Fg(color.Orange)("read")),
+		),
+		acceptSearchSuggestion: k(
+			keys("tab"),
+			help("tab", "accept search suggestion"),
 		),
 		redownloadFailed: k(
 			keys("r"),
@@ -151,7 +156,7 @@ func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 		search := withDescription(k.confirm, "search with selected")
 		return h(k.selectOne, k.selectAll, search), h(k.selectOne, k.selectAll, k.clearSelection, search)
 	case searchState:
-		return to2(h(k.confirm, k.forceQuit))
+		return to2(h(k.confirm, k.acceptSearchSuggestion, k.forceQuit))
 	case mangasState:
 		return to2(h(k.confirm, k.back, k.openURL))
 	case chaptersState:

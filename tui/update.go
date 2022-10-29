@@ -13,10 +13,12 @@ import (
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/open"
 	"github.com/metafates/mangal/provider"
+	"github.com/metafates/mangal/query"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"time"
@@ -392,12 +394,24 @@ func (b *statefulBubble) updateSearch(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.confirm) && b.inputC.Value() != "":
 			b.startLoading()
 			b.newState(loadingState)
+			go query.Remember(b.inputC.Value(), 1)
 			return b, tea.Batch(b.searchManga(b.inputC.Value()), b.waitForMangas(), b.spinnerC.Tick)
+		case key.Matches(msg, b.keymap.acceptSearchSuggestion) && b.searchSuggestion.IsPresent():
+			b.inputC.SetValue(b.searchSuggestion.MustGet())
+			b.searchSuggestion = mo.None[string]()
+			b.inputC.SetCursor(len(b.inputC.Value()))
+			return b, nil
 		}
-
 	}
 
 	b.inputC, cmd = b.inputC.Update(msg)
+
+	if b.inputC.Value() != "" {
+		b.searchSuggestion = query.Suggest(b.inputC.Value())
+	} else if b.searchSuggestion.IsPresent() {
+		b.searchSuggestion = mo.None[string]()
+	}
+
 	return b, cmd
 }
 
@@ -416,6 +430,7 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m, _ := b.mangasC.SelectedItem().(*listItem).internal.(*source.Manga)
 			b.selectedManga = m
+			go query.Remember(m.Name, 2)
 			return b, tea.Batch(b.getChapters(m), b.waitForChapters(), b.startLoading())
 		case key.Matches(msg, b.keymap.openURL):
 			if b.mangasC.SelectedItem() == nil {
