@@ -32,13 +32,18 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	return SaveTo(chapter, path)
+	err = SaveTo(chapter, path)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
 }
 
-func SaveTo(chapter *source.Chapter, to string) (path string, err error) {
+func SaveTo(chapter *source.Chapter, to string) error {
 	cbzFile, err := filesystem.Api().Create(to)
 	if err != nil {
-		return
+		return err
 	}
 
 	defer util.Ignore(cbzFile.Close)
@@ -48,7 +53,7 @@ func SaveTo(chapter *source.Chapter, to string) (path string, err error) {
 
 	for _, page := range chapter.Pages {
 		if err = addToZip(zipWriter, page.Contents, page.Filename()); err != nil {
-			return
+			return err
 		}
 	}
 
@@ -61,7 +66,7 @@ func SaveTo(chapter *source.Chapter, to string) (path string, err error) {
 		}
 	}
 
-	return
+	return err
 }
 
 func addToZip(writer *zip.Writer, file io.Reader, name string) error {

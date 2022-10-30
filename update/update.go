@@ -155,7 +155,7 @@ func Metadata(mangaPath string) error {
 		}
 
 		log.Debugf("saving to %s", path)
-		_, err = cbz.SaveTo(chapter, path)
+		err = cbz.SaveTo(chapter, path)
 		if err != nil {
 			log.Error(err)
 			return err
