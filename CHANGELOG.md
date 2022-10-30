@@ -16,20 +16,19 @@ Now, mangal makes almost no requests to the servers.
 This includes Anilist, Scrapers, Update checker and so on!
 
 <details>
-<summary><strong>⚠️ BREAKING!!!⚠️ </strong> Please, read!</summary>
+<summary><strong>⚠️  BREAKING!!! ⚠️ </strong> Please, read!</summary>
 
 1. `mangal sources` will no longer list available sources, use `mangal sources list` instead.
 2. `mangal gen` and `mangal install` were removed. Use `mangal sources gen` and `mangal sources install` instead.
 3. `mangal sources remove` command improved and accepts flags instead of args.
-4. Inline mode now produces slightly different output.
 
-JSON fields now follow the [camelCase](https://en.wikipedia.org/wiki/Camel_case) style instead of `PascalCase`
-(actually, using PascalCase was never a goal, I just forgot to properly configure it).
-But since it's a major release I can finally fix this.
+Inline JSON output is different now.
 
-Other changes includes minor fields restructuring. 
-
-Cover image of manga `Metadata.Cover` now moved to `metadata.cover.extraLarge` and it also contains covers of smaller sizes and average color in HEX.
+- JSON fields now follow the [camelCase](https://en.wikipedia.org/wiki/Camel_case) style instead of `PascalCase`
+  (actually, using PascalCase was never a goal, I just forgot to properly configure it).
+  But since it's a major release I can finally fix this.
+- Structure was changed
+- Additional fields were added
 
 See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for new output examples.
 
