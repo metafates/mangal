@@ -85,3 +85,14 @@ var idCacher = &cacher[int, *Manga]{
 	),
 	keyWrapper: func(id int) int { return id },
 }
+
+var failCacher = &cacher[string, bool]{
+	internal: cache.New[*cacheData[string, bool]](
+		filepath.Join(where.Cache(), "anilist_fail_cache.json"),
+		&cache.Options{
+			// expire every minute
+			ExpireEvery: mo.Some(time.Minute),
+		},
+	),
+	keyWrapper: normalizedName,
+}
