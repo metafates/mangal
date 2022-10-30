@@ -32,6 +32,8 @@ type Manga struct {
 		// Color is the average color of the cover image.
 		Color string `json:"color"`
 	} `json:"coverImage"`
+	// BannerImage of the media
+	BannerImage string `json:"bannerImage"`
 	// Tags are the tags of the manga.
 	Tags []struct {
 		// Name of the tag.
@@ -71,7 +73,7 @@ type Manga struct {
 	// Synonyms are the synonyms of the manga (Alternative titles).
 	Synonyms []string `json:"synonyms"`
 	// Status is the status of the manga. (FINISHED, RELEASING, NOT_YET_RELEASED, CANCELLED)
-	Status string `json:"status"`
+	Status string `json:"status" jsonschema:"enum=FINISHED,enum=RELEASING,enum=NOT_YET_RELEASED,enum=CANCELLED,enum=HIATUS"`
 	// IDMal is the id of the manga on MyAnimeList.
 	IDMal int `json:"idMal"`
 	// Chapters is the amount of chapters the manga has when complete.

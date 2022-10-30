@@ -24,6 +24,7 @@ coverImage {
 	medium
 	color
 }
+bannerImage
 characters (page: 1, perPage: 10, role: MAIN) {
 	nodes {
 		id

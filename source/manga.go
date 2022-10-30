@@ -42,28 +42,50 @@ type Manga struct {
 	// Anilist is the closest anilist match
 	Anilist  mo.Option[*anilist.Manga] `json:"-"`
 	Metadata struct {
-		Genres  []string `json:"genres"`
-		Summary string   `json:"summary"`
-		Staff   struct {
-			Story       []string `json:"story"`
-			Art         []string `json:"art"`
+		// Genres of the manga
+		Genres []string `json:"genres"`
+		// Summary in the plain text with newlines
+		Summary string `json:"summary"`
+		// Staff that worked on the manga
+		Staff struct {
+			// Story author
+			Story []string `json:"story"`
+			// Art author
+			Art []string `json:"art"`
+			// Translation group
 			Translation []string `json:"translation"`
-			Lettering   []string `json:"lettering"`
+			// Lettering group
+			Lettering []string `json:"lettering"`
 		} `json:"staff"`
+		// Cover images of the manga
 		Cover struct {
+			// ExtraLarge is the largest cover image. If not available, Large will be used.
 			ExtraLarge string `json:"extraLarge"`
-			Large      string `json:"large"`
-			Medium     string `json:"medium"`
-			Color      string `json:"color"`
+			// Large is the second-largest cover image.
+			Large string `json:"large"`
+			// Medium cover image. The smallest one.
+			Medium string `json:"medium"`
+			// Color average color of the cover image.
+			Color string `json:"color"`
 		} `json:"cover"`
-		Tags       []string `json:"tags"`
+		// BannerImage is the banner image of the manga.
+		BannerImage string `json:"bannerImage"`
+		// Tags of the manga
+		Tags []string `json:"tags"`
+		// Characters of the manga
 		Characters []string `json:"characters"`
-		Status     string   `json:"status"`
-		StartDate  date     `json:"startDate"`
-		EndDate    date     `json:"endDate"`
-		Synonyms   []string `json:"synonyms"`
-		Chapters   int      `json:"chapters"`
-		URLs       []string `json:"urls"`
+		// Status of the manga
+		Status string `json:"status" jsonschema:"enum=FINISHED,enum=RELEASING,enum=NOT_YET_RELEASED,enum=CANCELLED,enum=HIATUS"`
+		// StartDate is the date when the manga started.
+		StartDate date `json:"startDate"`
+		// EndDate is the date when the manga ended.
+		EndDate date `json:"endDate"`
+		// Synonyms other names of the manga.
+		Synonyms []string `json:"synonyms"`
+		// Chapters is the amount of chapters the manga will have when completed.
+		Chapters int `json:"chapters"`
+		// URLs external URLs of the manga.
+		URLs []string `json:"urls"`
 	} `json:"metadata"`
 	cachedTempPath  string
 	populated       bool
@@ -251,6 +273,8 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	m.Metadata.Cover.Large = manga.CoverImage.Large
 	m.Metadata.Cover.Medium = manga.CoverImage.Medium
 	m.Metadata.Cover.Color = manga.CoverImage.Color
+
+	m.Metadata.BannerImage = manga.BannerImage
 
 	m.Metadata.StartDate = date(manga.StartDate)
 	m.Metadata.EndDate = date(manga.EndDate)

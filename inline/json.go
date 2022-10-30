@@ -8,31 +8,36 @@ import (
 	"github.com/spf13/viper"
 )
 
-func asJson(manga []*source.Manga, options *Options) (marshalled []byte, err error) {
-	type inlineManga struct {
-		Source string `json:"source"`
-		*source.Manga
-		Anilist *anilist.Manga `json:"anilist"`
-	}
+type Manga struct {
+	// Source that the manga belongs to.
+	Source string `json:"source"`
+	// Mangal variant of the manga
+	Mangal *source.Manga `json:"mangal"`
+	// Anilist is the closest anilist match to mangal manga
+	Anilist *anilist.Manga `json:"anilist"`
+}
 
-	var m = make([]*inlineManga, len(manga))
+type Output struct {
+	Query  string   `json:"query"`
+	Result []*Manga `json:"result"`
+}
+
+func asJson(manga []*source.Manga, options *Options) (marshalled []byte, err error) {
+	var m = make([]*Manga, len(manga))
 	for i, manga := range manga {
 		al := manga.Anilist.OrElse(nil)
 		if !options.IncludeAnilistManga {
 			al = nil
 		}
 
-		m[i] = &inlineManga{
-			Manga:   manga,
+		m[i] = &Manga{
+			Mangal:  manga,
 			Anilist: al,
 			Source:  manga.Source.Name(),
 		}
 	}
 
-	return json.Marshal(&struct {
-		Query  string         `json:"query"`
-		Result []*inlineManga `json:"result"`
-	}{
+	return json.Marshal(&Output{
 		Result: m,
 		Query:  options.Query,
 	})

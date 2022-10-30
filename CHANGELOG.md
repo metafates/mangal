@@ -20,8 +20,8 @@ This includes Anilist, Scrapers, Update checker and so on!
 
 1. `mangal sources` will no longer list available sources, use `mangal sources list` instead.
 2. `mangal gen` and `mangal install` were removed. Use `mangal sources gen` and `mangal sources install` instead.
-3. `mangal sources remove` command improved.
-2. Inline mode now produces slightly different output.
+3. `mangal sources remove` command improved and accepts flags instead of args.
+4. Inline mode now produces slightly different output.
 
 JSON fields now follow the [camelCase](https://en.wikipedia.org/wiki/Camel_case) style instead of `PascalCase`
 (actually, using PascalCase was never a goal, I just forgot to properly configure it).
@@ -31,16 +31,9 @@ Other changes includes minor fields restructuring.
 
 Cover image of manga `Metadata.Cover` now moved to `metadata.cover.extraLarge` and it also contains covers of smaller sizes and average color in HEX.
 
-Root result now follows this structure
-```json
-{
-    "query": "query that was passed",
-    "result": ["manga objects"]
-}
-```
+See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for new output examples.
 
 Please, consider these changes when migrating your applications that use mangal from 3rd version to 4th.
-See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for new output examples.
 </details>
 
 - Improved TUI experience
@@ -48,6 +41,7 @@ See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for
 - Anilist caching significantly improved. Now, it will cache all search results (for 2 days)
 - Update metadata of already downloaded manga (ComicInfo.xml, series.json, cover image) after changing Anilist bind. #124
   See `mangal inline anilist update` for more info
+- New command to generate json schema of inline output. See `mangal help inline schema`
 - **Breaking** `downloader.default_source` was changed to `downloader.default_sources` and accepts array of strings.
   See `mangal config info -k downloader.default_sources` for more info
 - New `config reset` command

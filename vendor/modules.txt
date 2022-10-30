@@ -118,9 +118,15 @@ github.com/hhrutter/lzw
 # github.com/hhrutter/tiff v0.0.0-20190829141212-736cae8d0bc7
 ## explicit; go 1.12
 github.com/hhrutter/tiff
+# github.com/iancoleman/orderedmap v0.0.0-20190318233801-ac98e3ecb4b0
+## explicit
+github.com/iancoleman/orderedmap
 # github.com/inconshreveable/mousetrap v1.0.1
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
+# github.com/invopop/jsonschema v0.6.0
+## explicit; go 1.16
+github.com/invopop/jsonschema
 # github.com/ivanpirog/coloredcobra v1.0.1
 ## explicit; go 1.15
 github.com/ivanpirog/coloredcobra

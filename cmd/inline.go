@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/invopop/jsonschema"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
@@ -19,6 +20,9 @@ import (
 	"github.com/spf13/viper"
 	"io"
 	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
 )
 
 func init() {
@@ -256,5 +260,59 @@ var inlineAnilistUpdateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		path := lo.Must(cmd.Flags().GetString("path"))
 		handleErr(update.Metadata(path))
+	},
+}
+
+func init() {
+	inlineCmd.AddCommand(inlineSchemaCmd)
+
+	inlineSchemaCmd.Flags().BoolP("anilist", "a", false, "generate anilist search output schema")
+	inlineSchemaCmd.Flags().BoolP("inline", "i", false, "generate inline output schema")
+
+	inlineSchemaCmd.MarkFlagsMutuallyExclusive("anilist", "inline")
+}
+
+var inlineSchemaCmd = &cobra.Command{
+	Use:   "schema",
+	Short: "Schemas for the inline json outputs",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		// check if any flag is set
+		if !cmd.Flags().Changed("anilist") && !cmd.Flags().Changed("inline") {
+			handleErr(errors.New("anilist or inline flag is required"))
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		reflector := new(jsonschema.Reflector)
+		reflector.Anonymous = true
+		reflector.Namer = func(t reflect.Type) string {
+			switch name := strings.ToLower(t.Name()); name {
+			case "manga", "chapter", "page", "date", "output":
+				return filepath.Base(t.PkgPath()) + "." + name
+			}
+
+			return t.Name()
+		}
+
+		var schema *jsonschema.Schema
+
+		switch {
+		case lo.Must(cmd.Flags().GetBool("anilist")):
+			err := reflector.AddGoComments("github.com/metafates/mangal", fmt.Sprintf(".%canilist", os.PathSeparator))
+			handleErr(err)
+			schema = reflector.Reflect([]*anilist.Manga{})
+		case lo.Must(cmd.Flags().GetBool("inline")):
+			err := reflector.AddGoComments("github.com/metafates/mangal", fmt.Sprintf(".%cinline", os.PathSeparator))
+			handleErr(err)
+			err = reflector.AddGoComments("github.com/metafates/mangal", fmt.Sprintf(".%csource", os.PathSeparator))
+			handleErr(err)
+
+			schema = reflector.Reflect(&inline.Output{
+				Result: []*inline.Manga{
+					{Mangal: &source.Manga{}},
+				},
+			})
+		}
+
+		handleErr(json.NewEncoder(os.Stdout).Encode(schema))
 	},
 }
