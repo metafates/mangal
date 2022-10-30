@@ -83,6 +83,18 @@ func Metadata(mangaPath string) error {
 	}
 
 	log.Info("downloading new cover")
+	// remove old cover(s).
+	// even though DownloadCover() will overwrite previous one
+	// there may be a sitation when new cover has a different extension
+	// which would result having duplicates
+	files, err := filesystem.Api().ReadDir(mangaPath)
+	if err == nil {
+		for _, file := range files {
+			if util.FileStem(file.Name()) == "cover" {
+				_ = filesystem.Api().Remove(filepath.Join(mangaPath, file.Name()))
+			}
+		}
+	}
 	err = manga.DownloadCover(true, mangaPath, func(string) {})
 	if err != nil {
 		log.Error(err)
