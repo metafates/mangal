@@ -297,20 +297,9 @@ var inlineSchemaCmd = &cobra.Command{
 
 		switch {
 		case lo.Must(cmd.Flags().GetBool("anilist")):
-			err := reflector.AddGoComments("github.com/metafates/mangal", fmt.Sprintf(".%canilist", os.PathSeparator))
-			handleErr(err)
 			schema = reflector.Reflect([]*anilist.Manga{})
 		case lo.Must(cmd.Flags().GetBool("inline")):
-			err := reflector.AddGoComments("github.com/metafates/mangal", fmt.Sprintf(".%cinline", os.PathSeparator))
-			handleErr(err)
-			err = reflector.AddGoComments("github.com/metafates/mangal", fmt.Sprintf(".%csource", os.PathSeparator))
-			handleErr(err)
-
-			schema = reflector.Reflect(&inline.Output{
-				Result: []*inline.Manga{
-					{Mangal: &source.Manga{}},
-				},
-			})
+			schema = reflector.Reflect(&inline.Output{})
 		}
 
 		handleErr(json.NewEncoder(os.Stdout).Encode(schema))
