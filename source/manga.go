@@ -248,6 +248,7 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	m.Metadata.Tags = tags
 
 	m.Metadata.Cover.ExtraLarge = manga.CoverImage.ExtraLarge
+	m.Metadata.Cover.Large = manga.CoverImage.Large
 	m.Metadata.Cover.Medium = manga.CoverImage.Medium
 	m.Metadata.Cover.Color = manga.CoverImage.Color
 
