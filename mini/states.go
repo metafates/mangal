@@ -32,7 +32,7 @@ const (
 func (m *mini) handleSourceSelectState() error {
 	var err error
 
-	if name := viper.GetString(constant.DownloaderDefaultSource); name != "" {
+	if name := viper.GetString(constant.DownloaderDefaultSources); name != "" {
 		p, ok := provider.Get(name)
 		if !ok {
 			return fmt.Errorf("unknown source \"%s\"", name)

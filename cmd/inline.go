@@ -11,6 +11,7 @@ import (
 	"github.com/metafates/mangal/inline"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/query"
+	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/update"
 	"github.com/samber/lo"
 	"github.com/samber/mo"
@@ -81,17 +82,26 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		sourceName := viper.GetString(constant.DownloaderDefaultSource)
-		if sourceName == "" {
-			handleErr(errors.New("source not set"))
-		}
-		p, ok := provider.Get(sourceName)
-		if !ok {
-			handleErr(fmt.Errorf("source not found: %s", sourceName))
-		}
+		var (
+			sources []source.Source
+			err     error
+		)
 
-		src, err := p.CreateSource()
-		handleErr(err)
+		for _, name := range viper.GetStringSlice(constant.DownloaderDefaultSources) {
+			if name == "" {
+				handleErr(errors.New("source not set"))
+			}
+
+			p, ok := provider.Get(name)
+			if !ok {
+				handleErr(fmt.Errorf("source not found: %s", name))
+			}
+
+			src, err := p.CreateSource()
+			handleErr(err)
+
+			sources = append(sources, src)
+		}
 
 		output := lo.Must(cmd.Flags().GetString("output"))
 		var writer io.Writer
@@ -119,7 +129,7 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		}
 
 		options := &inline.Options{
-			Source:              src,
+			Sources:             sources,
 			Download:            lo.Must(cmd.Flags().GetBool("download")),
 			Json:                lo.Must(cmd.Flags().GetBool("json")),
 			Query:               lo.Must(cmd.Flags().GetString("query")),

@@ -34,9 +34,8 @@ Cover image of manga `Metadata.Cover` now moved to `metadata.cover.extraLarge` a
 Root result now follows this structure
 ```json
 {
-    "source": "source name",
     "query": "query that was passed",
-    "result": [mangas] // Previously called "Manga"
+    "result": ["manga objects"]
 }
 ```
 
@@ -48,7 +47,10 @@ See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for
 - Search completions in TUI. `mangal config info -k search.show_query_suggestions`
 - Anilist caching significantly improved. Now, it will cache all search results (for 2 days)
 - Update metadata of already downloaded manga (ComicInfo.xml, series.json, cover image) after changing Anilist bind. #124
-  See `mangal inline anilist update`
+  See `mangal inline anilist update` for more info
+- **Breaking** `downloader.default_source` was changed to `downloader.default_sources` and accepts array of strings.
+  See `mangal config info -k downloader.default_sources` for more info
+- New `config reset` command
 - Add caching for custom (lua) sources
 - Include different cover sizes and color for json output #116
 - Add option to omit dates for ComicInfo.xml #117

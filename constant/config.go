@@ -11,7 +11,7 @@ const (
 	DownloaderAsync               = "downloader.async"
 	DownloaderCreateMangaDir      = "downloader.create_manga_dir"
 	DownloaderCreateVolumeDir     = "downloader.create_volume_dir"
-	DownloaderDefaultSource       = "downloader.default_source"
+	DownloaderDefaultSources      = "downloader.default_sources"
 	DownloaderStopOnError         = "downloader.stop_on_error"
 	DownloaderDownloadCover       = "downloader.download_cover"
 	DownloaderRedownloadExisting  = "downloader.redownload_existing"

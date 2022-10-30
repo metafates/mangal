@@ -29,6 +29,10 @@ func (f *Field) typeName() string {
 		return "int"
 	case bool:
 		return "bool"
+	case []string:
+		return "[]string"
+	case []int:
+		return "[]int"
 	default:
 		return "unknown"
 	}
@@ -117,11 +121,11 @@ Do no turn it off unless you have some issues`,
 		`Redownload chapters that already exist`,
 	},
 	{
-		constant.DownloaderDefaultSource,
-		"",
-		`Default source to use.
+		constant.DownloaderDefaultSources,
+		[]string{},
+		`Default sources to use.
 Will prompt if not set.
-Type "mangal sources" to show available sources`,
+Type "mangal sources list" to show available sources`,
 	},
 	{
 		constant.DownloaderStopOnError,

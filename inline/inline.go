@@ -9,14 +9,19 @@ import (
 	"os"
 )
 
-func Run(options *Options) error {
+func Run(options *Options) (err error) {
 	if options.Out == nil {
 		options.Out = os.Stdout
 	}
 
-	mangas, err := options.Source.Search(options.Query)
-	if err != nil {
-		return err
+	var mangas []*source.Manga
+	for _, src := range options.Sources {
+		m, err := src.Search(options.Query)
+		if err != nil {
+			return err
+		}
+
+		mangas = append(mangas, m...)
 	}
 
 	if options.MangaPicker.IsAbsent() && options.ChaptersFilter.IsAbsent() {
@@ -60,7 +65,7 @@ func Run(options *Options) error {
 	}
 
 	manga := options.MangaPicker.MustGet()(mangas)
-	chapters, err = options.Source.ChaptersOf(manga)
+	chapters, err = manga.Source.ChaptersOf(manga)
 	if err != nil {
 		return err
 	}

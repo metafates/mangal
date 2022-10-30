@@ -10,6 +10,7 @@ import (
 
 func asJson(manga []*source.Manga, options *Options) (marshalled []byte, err error) {
 	type inlineManga struct {
+		Source string `json:"source"`
 		*source.Manga
 		Anilist *anilist.Manga `json:"anilist"`
 	}
@@ -24,16 +25,15 @@ func asJson(manga []*source.Manga, options *Options) (marshalled []byte, err err
 		m[i] = &inlineManga{
 			Manga:   manga,
 			Anilist: al,
+			Source:  manga.Source.Name(),
 		}
 	}
 
 	return json.Marshal(&struct {
-		Source string         `json:"source"`
 		Query  string         `json:"query"`
 		Result []*inlineManga `json:"result"`
 	}{
 		Result: m,
-		Source: options.Source.Name(),
 		Query:  options.Query,
 	})
 }
@@ -49,7 +49,7 @@ func prepareManga(manga *source.Manga, options *Options) error {
 	}
 
 	if options.ChaptersFilter.IsPresent() {
-		chapters, err := options.Source.ChaptersOf(manga)
+		chapters, err := manga.Source.ChaptersOf(manga)
 		if err != nil {
 			return err
 		}
@@ -63,7 +63,7 @@ func prepareManga(manga *source.Manga, options *Options) error {
 
 		if options.PopulatePages {
 			for _, chapter := range chapters {
-				_, err := options.Source.PagesOf(chapter)
+				_, err := chapter.Source().PagesOf(chapter)
 				if err != nil {
 					return err
 				}

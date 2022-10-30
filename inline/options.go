@@ -19,7 +19,7 @@ type (
 
 type Options struct {
 	Out                 io.Writer
-	Source              source.Source
+	Sources             []source.Source
 	IncludeAnilistManga bool
 	Download            bool
 	Json                bool
