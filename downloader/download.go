@@ -81,7 +81,10 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	}
 
 	if viper.GetBool(constant.DownloaderDownloadCover) {
-		_ = chapter.Manga.DownloadCover(progress)
+		coverDir, err := chapter.Manga.Path(false)
+		if err == nil {
+			_ = chapter.Manga.DownloadCover(false, coverDir, progress)
+		}
 	}
 
 	log.Info("getting " + viper.GetString(constant.FormatsUse) + " converter")

@@ -103,7 +103,23 @@ func (m *Manga) Path(temp bool) (path string, err error) {
 	return
 }
 
-func (m *Manga) DownloadCover(progress func(string)) error {
+func (m *Manga) GetCover() (string, error) {
+	var covers = []string{
+		m.Metadata.Cover.ExtraLarge,
+		m.Metadata.Cover.Large,
+		m.Metadata.Cover.Medium,
+	}
+
+	for _, cover := range covers {
+		if cover != "" {
+			return cover, nil
+		}
+	}
+
+	return "", fmt.Errorf("no cover found")
+}
+
+func (m *Manga) DownloadCover(overwrite bool, path string, progress func(string)) error {
 	if m.coverDownloaded {
 		return nil
 	}
@@ -112,36 +128,33 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 	log.Info("Downloading cover for ", m.Name)
 	progress("Downloading cover")
 
-	if m.Metadata.Cover.ExtraLarge == "" {
-		log.Warn("No cover to download")
+	cover, err := m.GetCover()
+	if err != nil {
+		log.Warn(err)
 		return nil
 	}
 
-	path, err := m.Path(false)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
 	var extension string
-	if extension = filepath.Ext(m.Metadata.Cover.ExtraLarge); extension == "" {
+	if extension = filepath.Ext(cover); extension == "" {
 		extension = ".jpg"
 	}
 
 	path = filepath.Join(path, "cover"+extension)
 
-	exists, err := filesystem.Api().Exists(path)
-	if err != nil {
-		log.Error(err)
-		return err
+	if !overwrite {
+		exists, err := filesystem.Api().Exists(path)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+
+		if exists {
+			log.Warn("Cover already exists")
+			return nil
+		}
 	}
 
-	if exists {
-		log.Warn("Cover already exists")
-		return nil
-	}
-
-	resp, err := http.Get(m.Metadata.Cover.ExtraLarge)
+	resp, err := http.Get(cover)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -160,7 +173,14 @@ func (m *Manga) DownloadCover(progress func(string)) error {
 		return err
 	}
 
-	return filesystem.Api().WriteFile(path, data, os.ModePerm)
+	err = filesystem.Api().WriteFile(path, data, os.ModePerm)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	log.Info("Cover downloaded")
+	return nil
 }
 
 func (m *Manga) BindWithAnilist() error {

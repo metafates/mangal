@@ -245,8 +245,6 @@ var inlineAnilistUpdateCmd = &cobra.Command{
 	Short: "Update old manga metadata according to the current anilist bind",
 	Run: func(cmd *cobra.Command, args []string) {
 		path := lo.Must(cmd.Flags().GetString("path"))
-		name, err := update.GetName(path)
-		handleErr(err)
-		fmt.Println(name)
+		handleErr(update.Metadata(path))
 	},
 }

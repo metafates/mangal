@@ -32,7 +32,11 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	cbzFile, err := filesystem.Api().Create(path)
+	return SaveTo(chapter, path)
+}
+
+func SaveTo(chapter *source.Chapter, to string) (path string, err error) {
+	cbzFile, err := filesystem.Api().Create(to)
 	if err != nil {
 		return
 	}
