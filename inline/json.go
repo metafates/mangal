@@ -10,16 +10,16 @@ import (
 
 type Manga struct {
 	// Source that the manga belongs to.
-	Source string `json:"source"`
+	Source string `json:"source" jsonschema:"description=Source that the manga belongs to."`
 	// Mangal variant of the manga
-	Mangal *source.Manga `json:"mangal"`
+	Mangal *source.Manga `json:"mangal" jsonschema:"description=Mangal variant of the manga"`
 	// Anilist is the closest anilist match to mangal manga
-	Anilist *anilist.Manga `json:"anilist"`
+	Anilist *anilist.Manga `json:"anilist" jsonschema:"description=Anilist is the closest anilist match to mangal manga"`
 }
 
 type Output struct {
-	Query  string   `json:"query"`
-	Result []*Manga `json:"result"`
+	Query  string   `json:"query" jsonschema:"description=Query that was used to search for the manga."`
+	Result []*Manga `json:"result" jsonschema:"description=Result of the search."`
 }
 
 func asJson(manga []*source.Manga, options *Options) (marshalled []byte, err error) {

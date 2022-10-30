@@ -28,64 +28,64 @@ type date struct {
 // Manga is a manga from a source.
 type Manga struct {
 	// Name of the manga
-	Name string `json:"name"`
+	Name string `json:"name" jsonschema:"description=Name of the manga"`
 	// URL of the manga
-	URL string `json:"url"`
+	URL string `json:"url" jsonschema:"description=URL of the manga"`
 	// Index of the manga in the source.
-	Index uint16 `json:"index"`
+	Index uint16 `json:"index" jsonschema:"description=Index of the manga in the source"`
 	// ID of manga in the source.
-	ID string `json:"id"`
+	ID string `json:"id" jsonschema:"description=ID of manga in the source"`
 	// Chapters of the manga
-	Chapters []*Chapter `json:"chapters"`
+	Chapters []*Chapter `json:"chapters" jsonschema:"description=Chapters of the manga"`
 	// Source that the manga belongs to.
 	Source Source `json:"-"`
 	// Anilist is the closest anilist match
 	Anilist  mo.Option[*anilist.Manga] `json:"-"`
 	Metadata struct {
 		// Genres of the manga
-		Genres []string `json:"genres"`
+		Genres []string `json:"genres" jsonschema:"description=Genres of the manga"`
 		// Summary in the plain text with newlines
-		Summary string `json:"summary"`
+		Summary string `json:"summary" jsonschema:"description=Summary in the plain text with newlines"`
 		// Staff that worked on the manga
 		Staff struct {
-			// Story author
-			Story []string `json:"story"`
-			// Art author
-			Art []string `json:"art"`
+			// Story authors
+			Story []string `json:"story" jsonschema:"description=Story authors"`
+			// Art authors
+			Art []string `json:"art" jsonschema:"description=Art authors"`
 			// Translation group
-			Translation []string `json:"translation"`
+			Translation []string `json:"translation" jsonschema:"description=Translation group"`
 			// Lettering group
-			Lettering []string `json:"lettering"`
-		} `json:"staff"`
+			Lettering []string `json:"lettering" jsonschema:"description=Lettering group"`
+		} `json:"staff" jsonschema:"description=Staff that worked on the manga"`
 		// Cover images of the manga
 		Cover struct {
 			// ExtraLarge is the largest cover image. If not available, Large will be used.
-			ExtraLarge string `json:"extraLarge"`
+			ExtraLarge string `json:"extraLarge" jsonschema:"description=ExtraLarge is the largest cover image. If not available, Large will be used."`
 			// Large is the second-largest cover image.
-			Large string `json:"large"`
+			Large string `json:"large" jsonschema:"description=Large is the second-largest cover image."`
 			// Medium cover image. The smallest one.
-			Medium string `json:"medium"`
+			Medium string `json:"medium" jsonschema:"description=Medium cover image. The smallest one."`
 			// Color average color of the cover image.
-			Color string `json:"color"`
-		} `json:"cover"`
+			Color string `json:"color" jsonschema:"description=Color average color of the cover image."`
+		} `json:"cover" jsonschema:"description=Cover images of the manga"`
 		// BannerImage is the banner image of the manga.
-		BannerImage string `json:"bannerImage"`
+		BannerImage string `json:"bannerImage" jsonschema:"description=BannerImage is the banner image of the manga."`
 		// Tags of the manga
-		Tags []string `json:"tags"`
+		Tags []string `json:"tags" jsonschema:"description=Tags of the manga"`
 		// Characters of the manga
-		Characters []string `json:"characters"`
+		Characters []string `json:"characters" jsonschema:"description=Characters of the manga"`
 		// Status of the manga
 		Status string `json:"status" jsonschema:"enum=FINISHED,enum=RELEASING,enum=NOT_YET_RELEASED,enum=CANCELLED,enum=HIATUS"`
 		// StartDate is the date when the manga started.
-		StartDate date `json:"startDate"`
+		StartDate date `json:"startDate" jsonschema:"description=StartDate is the date when the manga started."`
 		// EndDate is the date when the manga ended.
-		EndDate date `json:"endDate"`
+		EndDate date `json:"endDate" jsonschema:"description=EndDate is the date when the manga ended."`
 		// Synonyms other names of the manga.
-		Synonyms []string `json:"synonyms"`
+		Synonyms []string `json:"synonyms" jsonschema:"description=Synonyms other names of the manga."`
 		// Chapters is the amount of chapters the manga will have when completed.
-		Chapters int `json:"chapters"`
+		Chapters int `json:"chapters" jsonschema:"description=The amount of chapters the manga will have when completed."`
 		// URLs external URLs of the manga.
-		URLs []string `json:"urls"`
+		URLs []string `json:"urls" jsonschema:"description=External URLs of the manga."`
 	} `json:"metadata"`
 	cachedTempPath  string
 	populated       bool

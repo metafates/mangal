@@ -18,19 +18,19 @@ import (
 // Chapter is a struct that represents a chapter of a manga.
 type Chapter struct {
 	// Name of the chapter
-	Name string `json:"name"`
+	Name string `json:"name" jsonschema:"description=Name of the chapter"`
 	// URL of the chapter
-	URL string `json:"url"`
+	URL string `json:"url" jsonschema:"description=URL of the chapter"`
 	// Index of the chapter in the manga.
-	Index uint16 `json:"index"`
+	Index uint16 `json:"index" jsonschema:"description=Index of the chapter in the manga"`
 	// ID of the chapter in the source.
-	ID string `json:"id"`
+	ID string `json:"id" jsonschema:"description=ID of the chapter in the source"`
 	// Volume which the chapter belongs to.
-	Volume string `json:"volume"`
+	Volume string `json:"volume" jsonschema:"description=Volume which the chapter belongs to"`
 	// Manga that the chapter belongs to.
 	Manga *Manga `json:"-"`
 	// Pages of the chapter.
-	Pages []*Page `json:"pages"`
+	Pages []*Page `json:"pages" jsonschema:"description=Pages of the chapter"`
 
 	isDownloaded mo.Option[bool]
 	size         uint64
