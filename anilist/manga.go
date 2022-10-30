@@ -74,6 +74,8 @@ type Manga struct {
 	Status string `json:"status"`
 	// IDMal is the id of the manga on MyAnimeList.
 	IDMal int `json:"idMal"`
+	// Chapters is the amount of chapters the manga has when complete.
+	Chapters int `json:"chapters"`
 	// SiteURL is the url of the manga on Anilist.
 	SiteURL string `json:"siteUrl"`
 	// Country of origin of the manga.

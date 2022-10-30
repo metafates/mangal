@@ -173,7 +173,7 @@ func (c *Chapter) ComicInfo() *ComicInfo {
 		Genre:      strings.Join(c.Manga.Metadata.Tags, ","),
 		PageCount:  len(c.Pages),
 		Summary:    c.Manga.Metadata.Summary,
-		Count:      len(c.Manga.Chapters),
+		Count:      c.Manga.Metadata.Chapters,
 		Characters: strings.Join(c.Manga.Metadata.Characters, ","),
 		Year:       c.Manga.Metadata.StartDate.Year,
 		Month:      c.Manga.Metadata.StartDate.Month,

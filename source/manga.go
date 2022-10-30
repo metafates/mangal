@@ -62,6 +62,7 @@ type Manga struct {
 		StartDate  date     `json:"startDate"`
 		EndDate    date     `json:"endDate"`
 		Synonyms   []string `json:"synonyms"`
+		Chapters   int      `json:"chapters"`
 		URLs       []string `json:"urls"`
 	} `json:"metadata"`
 	cachedTempPath  string
@@ -261,6 +262,8 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	m.Metadata.Staff.Translation = make([]string, 0)
 	m.Metadata.Staff.Lettering = make([]string, 0)
 
+	m.Metadata.Chapters = manga.Chapters
+
 	for _, staff := range manga.Staff.Edges {
 		role := strings.ToLower(staff.Role)
 		switch {
@@ -317,7 +320,7 @@ func (m *Manga) SeriesJSON() *SeriesJSON {
 	seriesJSON.Metadata.ComicImage = m.Metadata.Cover.ExtraLarge
 	seriesJSON.Metadata.Publisher = publisher
 	seriesJSON.Metadata.BookType = "Print"
-	seriesJSON.Metadata.TotalIssues = len(m.Chapters)
+	seriesJSON.Metadata.TotalIssues = m.Metadata.Chapters
 	seriesJSON.Metadata.PublicationRun = fmt.Sprintf("%d %d - %d %d", m.Metadata.StartDate.Month, m.Metadata.StartDate.Year, m.Metadata.EndDate.Month, m.Metadata.EndDate.Year)
 
 	return seriesJSON

@@ -56,6 +56,7 @@ staff {
 status
 synonyms
 siteUrl
+chapters
 countryOfOrigin
 externalLinks {
 	url
