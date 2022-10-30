@@ -103,9 +103,9 @@ func SearchByName(name string) ([]*Manga, error) {
 
 	// prepare body
 	log.Info("Searching anilist for manga: " + name)
-	body := map[string]interface{}{
+	body := map[string]any{
 		"query": searchByNameQuery,
-		"variables": map[string]interface{}{
+		"variables": map[string]any{
 			"query": name,
 		},
 	}
