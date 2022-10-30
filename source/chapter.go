@@ -2,6 +2,7 @@ package source
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
@@ -11,13 +12,10 @@ import (
 	"github.com/samber/lo"
 	"github.com/samber/mo"
 	"github.com/spf13/viper"
-	"html"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
-	"text/template"
-	"time"
 )
 
 // Chapter is a struct that represents a chapter of a manga.
@@ -167,91 +165,31 @@ func (c *Chapter) Source() Source {
 }
 
 func (c *Chapter) ComicInfoXML() *bytes.Buffer {
-	// language=gotemplate
-	t := `
-<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Title>{{ escape .Name }}</Title>
-  	<Series>{{ escape .Manga.Name }}</Series>
-	<Number>{{ .Index }}</Number>
-	<Web>{{ .URL }}</Web>
-	<Genre>{{ join .Manga.Metadata.Genres }}</Genre>
-	<PageCount>{{ len .Pages }}</PageCount>
-	<Summary>{{ escape .Manga.Metadata.Summary }}</Summary>
-	<Count>{{ len .Manga.Chapters }}</Count>
-	<Characters>{{ join .Manga.Metadata.Characters }}</Characters>
-	{{ makeDate }}
-	{{ makeStaff }}
-	<Tags>{{ join .Manga.Metadata.Tags }}</Tags>
-	<Notes>Downloaded with Mangal. https://github.com/metafates/mangal</Notes>
-  	<Manga>YesAndRightToLeft</Manga>
-</ComicInfo>`
+	comicInfo := &ComicInfo{
+		XmlnsXsd: "http://www.w3.org/2001/XMLSchema",
+		XmlnsXsi: "http://www.w3.org/2001/XMLSchema-instance",
 
-	funcs := template.FuncMap{
-		"join": func(s []string) string {
-			return strings.Join(s, ",")
-		},
-		"escape": html.EscapeString,
-		"geq":    func(a, b int) bool { return a >= b },
-		"makeStaff": func() string {
-			sb := strings.Builder{}
-
-			var (
-				Writers     = lo.Tuple2[[]string, string]{c.Manga.Metadata.Staff.Story, "Writer"}
-				Artists     = lo.Tuple2[[]string, string]{c.Manga.Metadata.Staff.Art, "Penciller"}
-				Letterers   = lo.Tuple2[[]string, string]{c.Manga.Metadata.Staff.Lettering, "Letterer"}
-				Translators = lo.Tuple2[[]string, string]{c.Manga.Metadata.Staff.Translation, "Translator"}
-			)
-
-			for _, staff := range []lo.Tuple2[[]string, string]{Writers, Artists, Letterers, Translators} {
-				if len(staff.A) == 0 {
-					continue
-				}
-
-				s := strings.Join(staff.A, ",")
-				sb.WriteString(fmt.Sprintf("<%[1]s>%s</%[1]s>\n", staff.B, s))
-			}
-
-			return sb.String()
-		},
-		"makeDate": func() string {
-			if !viper.GetBool(constant.MetadataComicInfoXMLAddDate) {
-				return ""
-			}
-
-			var (
-				year  = lo.Tuple2[int, string]{0, "Year"}
-				month = lo.Tuple2[int, string]{0, "Month"}
-				day   = lo.Tuple2[int, string]{0, "Day"}
-			)
-
-			if viper.GetBool(constant.MetadataComicInfoXMLAlternativeDate) {
-				// use current date (download date)
-				now := time.Now()
-				year.A = now.Year()
-				month.A = int(now.Month())
-				day.A = now.Day()
-			} else {
-				year.A = c.Manga.Metadata.StartDate.Year
-				month.A = c.Manga.Metadata.StartDate.Month
-				day.A = c.Manga.Metadata.StartDate.Day
-			}
-
-			sb := strings.Builder{}
-			for _, t := range []lo.Tuple2[int, string]{year, month, day} {
-				if t.A <= 0 {
-					continue
-				}
-
-				sb.WriteString(fmt.Sprintf("<%[1]s>%d</%[1]s>\n", t.B, t.A))
-			}
-
-			return sb.String()
-		},
+		Title:      c.Manga.Name,
+		Series:     c.Manga.Name,
+		Number:     int(c.Index),
+		Web:        c.URL,
+		Genre:      strings.Join(c.Manga.Metadata.Tags, ","),
+		PageCount:  len(c.Pages),
+		Summary:    c.Manga.Metadata.Summary,
+		Count:      len(c.Manga.Chapters),
+		Characters: strings.Join(c.Manga.Metadata.Characters, ","),
+		Year:       c.Manga.Metadata.StartDate.Year,
+		Month:      c.Manga.Metadata.StartDate.Month,
+		Day:        c.Manga.Metadata.StartDate.Day,
+		Writer:     strings.Join(c.Manga.Metadata.Staff.Story, ","),
+		Penciller:  strings.Join(c.Manga.Metadata.Staff.Art, ","),
+		Letterer:   strings.Join(c.Manga.Metadata.Staff.Lettering, ","),
+		Translator: strings.Join(c.Manga.Metadata.Staff.Translation, ","),
+		Tags:       strings.Join(c.Manga.Metadata.Tags, ","),
+		Notes:      "Downloaded with Mangal. https://github.com/metafates/mangal",
+		Manga:      "YesAndRightToLeft",
 	}
 
-	parsed := lo.Must(template.New("ComicInfo").Funcs(funcs).Parse(t))
-	buf := bytes.NewBufferString("")
-	lo.Must0(parsed.Execute(buf, c))
-
-	return buf
+	marshalled := lo.Must(xml.MarshalIndent(comicInfo, "", "  "))
+	return bytes.NewBuffer(marshalled)
 }

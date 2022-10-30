@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/style"
-	"github.com/metafates/mangal/updater"
+	"github.com/metafates/mangal/version"
 	"github.com/samber/lo"
 	"os"
 	"runtime"
@@ -30,7 +30,7 @@ var versionCmd = &cobra.Command{
 			return
 		}
 
-		defer updater.Notify()
+		defer version.Notify()
 
 		versionInfo := struct {
 			Version  string

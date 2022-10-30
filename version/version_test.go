@@ -1,4 +1,4 @@
-package updater
+package version
 
 import (
 	"github.com/metafates/mangal/constant"
@@ -15,7 +15,7 @@ func TestLatestVersion(t *testing.T) {
 	}
 
 	Convey("When getting the latest version", t, func() {
-		version, err := LatestVersion()
+		version, err := Latest()
 		Convey("It should not return an error", func() {
 			So(err, ShouldBeNil)
 

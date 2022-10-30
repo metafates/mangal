@@ -275,21 +275,6 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 }
 
 func (m *Manga) SeriesJSON() *bytes.Buffer {
-	type metadata struct {
-		Type                 string `json:"type"`
-		Name                 string `json:"name"`
-		DescriptionFormatted string `json:"description_formatted"`
-		DescriptionText      string `json:"description_text"`
-		Status               string `json:"status"`
-		Year                 int    `json:"year"`
-		ComicImage           string `json:"ComicImage"`
-		Publisher            string `json:"publisher"`
-		ComicID              int    `json:"comicId"`
-		BookType             string `json:"booktype"`
-		TotalIssues          int    `json:"total_issues"`
-		PublicationRun       string `json:"publication_run"`
-	}
-
 	var status string
 	switch m.Metadata.Status {
 	case "FINISHED":
@@ -305,22 +290,17 @@ func (m *Manga) SeriesJSON() *bytes.Buffer {
 		publisher = m.Metadata.Staff.Story[0]
 	}
 
-	seriesJSON := struct {
-		Metadata metadata `json:"metadata"`
-	}{
-		Metadata: metadata{
-			Type:                 "comicSeries",
-			Name:                 m.Name,
-			DescriptionFormatted: m.Metadata.Summary,
-			Status:               status,
-			Year:                 m.Metadata.StartDate.Year,
-			ComicImage:           m.Metadata.Cover.ExtraLarge,
-			Publisher:            publisher,
-			BookType:             "Print",
-			TotalIssues:          len(m.Chapters),
-			PublicationRun:       fmt.Sprintf("%d %d - %d %d", m.Metadata.StartDate.Month, m.Metadata.StartDate.Year, m.Metadata.EndDate.Month, m.Metadata.EndDate.Year),
-		},
-	}
+	seriesJSON := &SeriesJSON{}
+	seriesJSON.Metadata.Type = "comicSeries"
+	seriesJSON.Metadata.Name = m.Name
+	seriesJSON.Metadata.DescriptionFormatted = m.Metadata.Summary
+	seriesJSON.Metadata.Status = status
+	seriesJSON.Metadata.Year = m.Metadata.StartDate.Year
+	seriesJSON.Metadata.ComicImage = m.Metadata.Cover.ExtraLarge
+	seriesJSON.Metadata.Publisher = publisher
+	seriesJSON.Metadata.BookType = "Print"
+	seriesJSON.Metadata.TotalIssues = len(m.Chapters)
+	seriesJSON.Metadata.PublicationRun = fmt.Sprintf("%d %d - %d %d", m.Metadata.StartDate.Month, m.Metadata.StartDate.Year, m.Metadata.EndDate.Month, m.Metadata.EndDate.Year)
 
 	var buf bytes.Buffer
 	lo.Must0(json.NewEncoder(&buf).Encode(seriesJSON))

@@ -1,4 +1,4 @@
-package updater
+package version
 
 import (
 	"fmt"
@@ -11,10 +11,10 @@ import (
 
 func Notify() {
 	erase := util.PrintErasable(fmt.Sprintf("%s Checking if new version is available...", icon.Get(icon.Progress)))
-	version, err := LatestVersion()
+	version, err := Latest()
 	erase()
 	if err == nil {
-		comp, err := util.CompareVersions(version, constant.Version)
+		comp, err := Compare(version, constant.Version)
 		if err == nil && comp == -1 {
 			return
 		}

@@ -11,8 +11,8 @@ import (
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/tui"
-	"github.com/metafates/mangal/updater"
 	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/version"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
@@ -60,7 +60,7 @@ func init() {
 	helpFunc := rootCmd.HelpFunc()
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		helpFunc(cmd, args)
-		updater.Notify()
+		version.Notify()
 	})
 
 	// Clear temporary files on startup

@@ -1,4 +1,4 @@
-package updater
+package version
 
 import (
 	"encoding/json"
@@ -16,9 +16,9 @@ var versionCacher = cache.New[string](filepath.Join(where.Cache(), "version.json
 	ExpireEvery: mo.Some(time.Hour * 24),
 })
 
-// LatestVersion returns the latest version of mangal.
+// Latest returns the latest version of mangal.
 // It will fetch the latest version from the GitHub API.
-func LatestVersion() (version string, err error) {
+func Latest() (version string, err error) {
 	if ver := versionCacher.Get(); ver.IsPresent() {
 		return ver.MustGet(), nil
 	}
