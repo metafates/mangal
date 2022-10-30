@@ -2,6 +2,8 @@ package cbz
 
 import (
 	"archive/zip"
+	"bytes"
+	"encoding/xml"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
@@ -47,7 +49,12 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 	}
 
 	if viper.GetBool(constant.MetadataComicInfoXML) {
-		err = addToZip(zipWriter, chapter.ComicInfoXML(), "ComicInfo.xml")
+		comicInfo := chapter.ComicInfo()
+		marshalled, err := xml.MarshalIndent(comicInfo, "", "  ")
+		if err == nil {
+			buf := bytes.NewBuffer(marshalled)
+			err = addToZip(zipWriter, buf, "ComicInfo.xml")
+		}
 	}
 
 	return

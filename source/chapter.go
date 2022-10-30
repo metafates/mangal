@@ -1,15 +1,12 @@
 package source
 
 import (
-	"bytes"
-	"encoding/xml"
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
-	"github.com/samber/lo"
 	"github.com/samber/mo"
 	"github.com/spf13/viper"
 	"os"
@@ -164,8 +161,8 @@ func (c *Chapter) Source() Source {
 	return c.Manga.Source
 }
 
-func (c *Chapter) ComicInfoXML() *bytes.Buffer {
-	comicInfo := &ComicInfo{
+func (c *Chapter) ComicInfo() *ComicInfo {
+	return &ComicInfo{
 		XmlnsXsd: "http://www.w3.org/2001/XMLSchema",
 		XmlnsXsi: "http://www.w3.org/2001/XMLSchema-instance",
 
@@ -190,6 +187,4 @@ func (c *Chapter) ComicInfoXML() *bytes.Buffer {
 		Manga:      "YesAndRightToLeft",
 	}
 
-	marshalled := lo.Must(xml.MarshalIndent(comicInfo, "", "  "))
-	return bytes.NewBuffer(marshalled)
 }

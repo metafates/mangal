@@ -1,8 +1,6 @@
 package source
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
@@ -274,7 +272,7 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 	return nil
 }
 
-func (m *Manga) SeriesJSON() *bytes.Buffer {
+func (m *Manga) SeriesJSON() *SeriesJSON {
 	var status string
 	switch m.Metadata.Status {
 	case "FINISHED":
@@ -302,7 +300,5 @@ func (m *Manga) SeriesJSON() *bytes.Buffer {
 	seriesJSON.Metadata.TotalIssues = len(m.Chapters)
 	seriesJSON.Metadata.PublicationRun = fmt.Sprintf("%d %d - %d %d", m.Metadata.StartDate.Month, m.Metadata.StartDate.Year, m.Metadata.EndDate.Month, m.Metadata.EndDate.Year)
 
-	var buf bytes.Buffer
-	lo.Must0(json.NewEncoder(&buf).Encode(seriesJSON))
-	return &buf
+	return seriesJSON
 }

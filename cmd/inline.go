@@ -11,6 +11,7 @@ import (
 	"github.com/metafates/mangal/inline"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/query"
+	"github.com/metafates/mangal/update"
 	"github.com/samber/lo"
 	"github.com/samber/mo"
 	"github.com/spf13/cobra"
@@ -229,5 +230,23 @@ var inlineAnilistBindCmd = &cobra.Command{
 		mangaName := lo.Must(cmd.Flags().GetString("name"))
 
 		handleErr(anilist.SetRelation(mangaName, anilistManga))
+	},
+}
+
+func init() {
+	inlineAnilistCmd.AddCommand(inlineAnilistUpdateCmd)
+
+	inlineAnilistUpdateCmd.Flags().StringP("path", "p", "", "path to the manga")
+	lo.Must0(inlineAnilistUpdateCmd.MarkFlagRequired("path"))
+}
+
+var inlineAnilistUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update old manga metadata according to the current anilist bind",
+	Run: func(cmd *cobra.Command, args []string) {
+		path := lo.Must(cmd.Flags().GetString("path"))
+		name, err := update.GetName(path)
+		handleErr(err)
+		fmt.Println(name)
 	},
 }

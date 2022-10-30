@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
@@ -66,9 +67,15 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 		} else {
 			path = filepath.Join(path, "series.json")
 			progress("Generating series.json")
-			err = filesystem.Api().WriteFile(path, chapter.Manga.SeriesJSON().Bytes(), os.ModePerm)
+			seriesJSON := chapter.Manga.SeriesJSON()
+			buf, err := json.Marshal(seriesJSON)
 			if err != nil {
 				log.Warn(err)
+			} else {
+				err = filesystem.Api().WriteFile(path, buf, os.ModePerm)
+				if err != nil {
+					log.Warn(err)
+				}
 			}
 		}
 	}
