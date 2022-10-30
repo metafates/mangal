@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-var (
-	retries uint8
-	limit   uint8 = 4
-)
-
 // normalizedName returns a normalized name for comparison
 func normalizedName(name string) string {
 	return strings.ToLower(strings.TrimSpace(name))
@@ -36,18 +31,32 @@ func SetRelation(name string, to *Manga) error {
 // FindClosest returns the closest manga to the given name.
 // It will levenshtein compare the given name with all the manga names in the cache.
 func FindClosest(name string) (*Manga, error) {
-	if retries >= limit {
-		retries = 0
+	return findClosest(name, name, 0, 4)
+}
+
+// findClosest returns the closest manga to the given name.
+// It will levenshtein compare the given name with all the manga names in the cache.
+func findClosest(name, originalName string, try, limit int) (*Manga, error) {
+	if try >= limit {
 		err := fmt.Errorf("no results found on Anilist for manga %s", name)
 		log.Error(err)
+		_ = relationCacher.Set(originalName, -1)
 		return nil, err
 	}
 
 	name = normalizedName(name)
 	id := relationCacher.Get(name)
 	if id.IsPresent() {
-		if manga := idCacher.Get(id.MustGet()); manga.IsPresent() {
-			return manga.MustGet(), nil
+		if id.MustGet() == -1 {
+			return nil, fmt.Errorf("no results found on Anilist for manga %s", name)
+		}
+
+		if manga, ok := idCacher.Get(id.MustGet()).Get(); ok {
+			if try != 0 {
+				_ = relationCacher.Set(originalName, id.MustGet())
+			}
+
+			return manga, nil
 		}
 	}
 
@@ -76,18 +85,17 @@ func FindClosest(name string) (*Manga, error) {
 
 	if len(mangas) == 0 {
 		// try again with a different name
-		retries++
 		words := strings.Split(name, " ")
 		if len(words) == 1 {
 			// trigger limit
-			retries = limit
-			return FindClosest("")
+			try = limit
+			return findClosest(name, originalName, try, limit)
 		}
 
 		// one word less
 		alternateName := strings.Join(words[:util.Max(len(words)-1, 1)], " ")
 		log.Infof(`No results found on Anilist for manga "%s", trying "%s"`, name, alternateName)
-		return FindClosest(alternateName)
+		return findClosest(alternateName, originalName, try+1, limit)
 	}
 
 	// find the closest match
@@ -102,11 +110,19 @@ func FindClosest(name string) (*Manga, error) {
 	})
 
 	log.Info("Found closest match: " + closest.Name())
-	retries = 0
 
-	if id := relationCacher.Get(name); id.IsAbsent() {
-		_ = relationCacher.Set(name, closest.ID)
+	save := func(n string) {
+		if id := relationCacher.Get(n); id.IsAbsent() {
+			fmt.Println("Saving", n)
+			_ = relationCacher.Set(n, closest.ID)
+		} else {
+			fmt.Println("Already saved", n)
+		}
 	}
+
+	save(name)
+	save(originalName)
+
 	_ = idCacher.Set(closest.ID, closest)
 	return closest, nil
 }

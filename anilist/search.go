@@ -88,13 +88,9 @@ func GetByID(id int) (*Manga, error) {
 func SearchByName(name string) ([]*Manga, error) {
 	name = normalizedName(name)
 
-	if ids := searchCacher.Get(name); ids.IsPresent() {
-		mangas := lo.FilterMap(ids.MustGet(), func(item, _ int) (*Manga, bool) {
-			manga := idCacher.Get(item)
-			if manga.IsPresent() {
-				return manga.MustGet(), true
-			}
-			return nil, false
+	if ids, ok := searchCacher.Get(name).Get(); ok {
+		mangas := lo.FilterMap(ids, func(item, _ int) (*Manga, bool) {
+			return idCacher.Get(item).Get()
 		})
 
 		if len(mangas) == 0 {
