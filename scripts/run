@@ -104,7 +104,9 @@ run() {
     )
 
     tar -xf "$TAR_FILE" -C "$TMPDIR"
-    "${TMPDIR}/${FILE_BASENAME}" "$@"
+    T="$TMPDIR"
+    TMPDIR="" # unset TMPDIR so mangal won't crash because of occupied TMPDIR
+    "${T}/${FILE_BASENAME}" "$@"
 }
 
 run "$@"
