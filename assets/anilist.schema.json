@@ -1,27 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$defs": {
-    "anilist.date": {
-      "properties": {
-        "year": {
-          "type": "integer"
-        },
-        "month": {
-          "type": "integer"
-        },
-        "day": {
-          "type": "integer"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "year",
-        "month",
-        "day"
-      ]
-    },
-    "anilist.manga": {
+    "anilist.Manga": {
       "properties": {
         "title": {
           "properties": {
@@ -288,10 +268,30 @@
         "countryOfOrigin",
         "externalLinks"
       ]
+    },
+    "anilist.date": {
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "month": {
+          "type": "integer"
+        },
+        "day": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "year",
+        "month",
+        "day"
+      ]
     }
   },
   "items": {
-    "$ref": "#/$defs/anilist.manga"
+    "$ref": "#/$defs/anilist.Manga"
   },
   "type": "array"
 }

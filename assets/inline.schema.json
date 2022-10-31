@@ -1,28 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$ref": "#/$defs/inline.output",
+  "$ref": "#/$defs/inline.Output",
   "$defs": {
-    "anilist.date": {
-      "properties": {
-        "year": {
-          "type": "integer"
-        },
-        "month": {
-          "type": "integer"
-        },
-        "day": {
-          "type": "integer"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "year",
-        "month",
-        "day"
-      ]
-    },
-    "anilist.manga": {
+    "anilist.Manga": {
       "properties": {
         "title": {
           "properties": {
@@ -290,18 +270,38 @@
         "externalLinks"
       ]
     },
-    "inline.manga": {
+    "anilist.date": {
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "month": {
+          "type": "integer"
+        },
+        "day": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "year",
+        "month",
+        "day"
+      ]
+    },
+    "inline.Manga": {
       "properties": {
         "source": {
           "type": "string",
           "description": "Source that the manga belongs to."
         },
         "mangal": {
-          "$ref": "#/$defs/source.manga",
+          "$ref": "#/$defs/source.Manga",
           "description": "Mangal variant of the manga"
         },
         "anilist": {
-          "$ref": "#/$defs/anilist.manga",
+          "$ref": "#/$defs/anilist.Manga",
           "description": "Anilist is the closest anilist match to mangal manga"
         }
       },
@@ -313,7 +313,7 @@
         "anilist"
       ]
     },
-    "inline.output": {
+    "inline.Output": {
       "properties": {
         "query": {
           "type": "string",
@@ -321,7 +321,7 @@
         },
         "result": {
           "items": {
-            "$ref": "#/$defs/inline.manga"
+            "$ref": "#/$defs/inline.Manga"
           },
           "type": "array",
           "description": "Result of the search."
@@ -334,7 +334,7 @@
         "result"
       ]
     },
-    "source.chapter": {
+    "source.Chapter": {
       "properties": {
         "name": {
           "type": "string",
@@ -358,7 +358,7 @@
         },
         "pages": {
           "items": {
-            "$ref": "#/$defs/source.page"
+            "$ref": "#/$defs/source.Page"
           },
           "type": "array",
           "description": "Pages of the chapter"
@@ -375,27 +375,7 @@
         "pages"
       ]
     },
-    "source.date": {
-      "properties": {
-        "year": {
-          "type": "integer"
-        },
-        "month": {
-          "type": "integer"
-        },
-        "day": {
-          "type": "integer"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "year",
-        "month",
-        "day"
-      ]
-    },
-    "source.manga": {
+    "source.Manga": {
       "properties": {
         "name": {
           "type": "string",
@@ -415,7 +395,7 @@
         },
         "chapters": {
           "items": {
-            "$ref": "#/$defs/source.chapter"
+            "$ref": "#/$defs/source.Chapter"
           },
           "type": "array",
           "description": "Chapters of the manga"
@@ -588,7 +568,7 @@
         "metadata"
       ]
     },
-    "source.page": {
+    "source.Page": {
       "properties": {
         "url": {
           "type": "string",
@@ -609,6 +589,26 @@
         "url",
         "index",
         "extension"
+      ]
+    },
+    "source.date": {
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "month": {
+          "type": "integer"
+        },
+        "day": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "year",
+        "month",
+        "day"
       ]
     }
   }
