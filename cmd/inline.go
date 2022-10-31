@@ -267,30 +267,22 @@ func init() {
 	inlineCmd.AddCommand(inlineSchemaCmd)
 
 	inlineSchemaCmd.Flags().BoolP("anilist", "a", false, "generate anilist search output schema")
-	inlineSchemaCmd.Flags().BoolP("inline", "i", false, "generate inline output schema")
-
-	inlineSchemaCmd.MarkFlagsMutuallyExclusive("anilist", "inline")
 }
 
 var inlineSchemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "Schemas for the inline json outputs",
-	PreRun: func(cmd *cobra.Command, args []string) {
-		// check if any flag is set
-		if !cmd.Flags().Changed("anilist") && !cmd.Flags().Changed("inline") {
-			handleErr(errors.New("anilist or inline flag is required"))
-		}
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		reflector := new(jsonschema.Reflector)
 		reflector.Anonymous = true
 		reflector.Namer = func(t reflect.Type) string {
-			switch name := strings.ToLower(t.Name()); name {
+			name := t.Name()
+			switch strings.ToLower(name) {
 			case "manga", "chapter", "page", "date", "output":
 				return filepath.Base(t.PkgPath()) + "." + name
 			}
 
-			return t.Name()
+			return name
 		}
 
 		var schema *jsonschema.Schema
@@ -298,7 +290,7 @@ var inlineSchemaCmd = &cobra.Command{
 		switch {
 		case lo.Must(cmd.Flags().GetBool("anilist")):
 			schema = reflector.Reflect([]*anilist.Manga{})
-		case lo.Must(cmd.Flags().GetBool("inline")):
+		default:
 			schema = reflector.Reflect(&inline.Output{})
 		}
 

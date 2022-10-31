@@ -13,7 +13,10 @@
     The most advanced CLI manga downloader in the entire universe!
 </h3>
 
-https://user-images.githubusercontent.com/62389790/198830175-a9423789-4942-4ae9-9837-cc2e623bbd3e.mp4
+<p align="center">
+    <img alt="Mangal 4 TUI" src="assets/tui.gif">
+</p>
+
 
 ## Try it!
 
@@ -215,7 +218,9 @@ Type `mangal help inline` for more information.
 
 See [Wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for more examples.
 
-![inline](https://user-images.githubusercontent.com/62389790/198830728-4126f4bc-1d85-4d9e-96a5-59da541289b1.png)
+<p align="center">
+    <img alt="Mangal 4 Inline" src="assets/inline.gif">
+</p>
 
 ### Other
 

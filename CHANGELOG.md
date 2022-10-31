@@ -30,7 +30,7 @@ Inline JSON output is different now.
 - Structure was changed
 - Additional fields were added
 
-See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for new output examples.
+See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for new output schemas.
 
 Please, consider these changes when migrating your applications that use mangal from 3rd version to 4th.
 </details>

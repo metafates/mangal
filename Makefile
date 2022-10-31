@@ -18,6 +18,7 @@ help:
 	@echo "  install      Install the mangal binary"
 	@echo "  uninstall    Uninstall the mangal binary"
 	@echo "  test         Run the tests"
+	@echo "  gif          Generate usage gifs"
 	@echo "  help         Show this help message"
 	@echo ""
 
@@ -33,3 +34,7 @@ test:
 
 uninstall:
 	@rm -f $(shell which mangal)
+
+gif:
+	@vhs assets/tui.tape
+	@vhs assets/inline.tape
