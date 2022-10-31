@@ -210,10 +210,6 @@ To run: `mangal mini`
 
 Inline mode is intended for use with other scripts.
 
-Example of usage:
-
-    mangal inline --source "Manganato" --query "death note" --manga first --chapters first -p --json | jq .
-
 Type `mangal help inline` for more information.
 
 See [Wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for more examples.
