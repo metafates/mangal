@@ -304,11 +304,11 @@ For more information see [wiki](https://github.com/metafates/mangal/wiki/Anilist
 
 ### Contributors
 
-And of course, thanks to all the contributors! You are awesome!
+And of course, thanks to all contributors! You are awesome!
 
 <p align="center">
 <a href="https://github.com/metafates/mangal/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=metafates/mangal" />
+  <img alt="Contributors" src="https://contrib.rocks/image?repo=metafates/mangal" />
 </a>
 </p>
 
@@ -321,6 +321,6 @@ please consider starring it, that would mean a lot to me ⭐
 
 <p align="center">
 <a href="https://star-history.com/#metafates/mangal&Date">
-<img src="https://api.star-history.com/svg?repos=metafates/mangal&type=Date"/>
+<img alt="Star History" src="https://api.star-history.com/svg?repos=metafates/mangal&type=Date"/>
 </a>
 </p>
