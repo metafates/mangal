@@ -17,9 +17,9 @@ import (
 
 const (
 	// default http User Agent
-	DefaultUserAgent = `gopher-lua`
+	DefaultUserAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36`
 	// default http timeout
-	DefaultTimeout = 20 * time.Second
+	DefaultTimeout = 2 * time.Minute
 	// default don't ignore ssl
 	insecureSkipVerify = false
 )
