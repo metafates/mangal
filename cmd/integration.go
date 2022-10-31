@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/metafates/mangal/constant"
-	"github.com/metafates/mangal/integration/anilistintegration"
+	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/integration/anilist"
 	"github.com/metafates/mangal/log"
+	"github.com/metafates/mangal/open"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -102,13 +104,30 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 		}
 
 		if viper.GetString(constant.AnilistCode) == "" {
-			fmt.Println(anilistintegration.New().AuthURL())
+			authURL := anilist.New().AuthURL()
+			confirmOpenInBrowser := survey.Confirm{
+				Message: "Open browser to authenticate with Anilist?",
+				Default: false,
+			}
+
+			var openInBrowser bool
+			err := survey.AskOne(&confirmOpenInBrowser, &openInBrowser)
+			if err == nil && openInBrowser {
+				err = open.Start(authURL)
+			}
+
+			if err != nil || !openInBrowser {
+				fmt.Println("Please open the following URL in your browser:")
+				fmt.Println(authURL)
+			}
+
 			input := survey.Input{
-				Message: "Anilsit code is not set. Please copy it from the link above and paste in here:",
+				Message: "Anilsit code is not set. Please copy it from the link and paste in here:",
 				Help:    "",
 			}
+
 			var response string
-			err := survey.AskOne(&input, &response)
+			err = survey.AskOne(&input, &response)
 			handleErr(err)
 
 			if response == "" {
@@ -119,5 +138,7 @@ See https://github.com/metafates/mangal/wiki/Anilist-Integration for more inform
 			err = viper.WriteConfig()
 			handleErr(err)
 		}
+
+		fmt.Printf("%s Anilist integration was set up\n", icon.Get(icon.Success))
 	},
 }

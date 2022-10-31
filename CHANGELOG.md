@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 4.0.0
+
+I've been actively working on this update lately, and I'm finally happy to share the 4th version of Mangal! 🐳
+
+The most important feature this major version brings is significantly improved caching mechanism
+which makes Mangal extremely fast and responsive.
+
+Now, mangal makes almost no requests to the servers.
+This includes Anilist, Scrapers, Update checker and so on!
+
+<details>
+<summary><strong>⚠️  BREAKING!!! ⚠️ </strong> Please, read!</summary>
+
+1. `mangal sources` will no longer list available sources, use `mangal sources list` instead.
+2. `mangal gen` and `mangal install` were removed. Use `mangal sources gen` and `mangal sources install` instead.
+3. `mangal sources remove` command improved and accepts flags instead of args.
+
+Inline JSON output is different now.
+
+- JSON fields now follow the [camelCase](https://en.wikipedia.org/wiki/Camel_case) style instead of `PascalCase`
+  (actually, using PascalCase was never a goal, I just forgot to properly configure it).
+  But since it's a major release I can finally fix this.
+- Structure was changed
+- Additional fields were added
+
+See [Inline mode wiki](https://github.com/metafates/mangal/wiki/Inline-mode) for new output schemas.
+
+Please, consider these changes when migrating your applications that use mangal from 3rd version to 4th.
+</details>
+
+- Improved TUI experience
+- Search completions in TUI. `mangal config info -k search.show_query_suggestions`
+- Anilist caching significantly improved. Now, it will cache all search results (for 2 days)
+- Update metadata of already downloaded manga (ComicInfo.xml, series.json, cover image) after changing Anilist bind. #124
+  See `mangal inline anilist update` for more info
+- New command to generate json schema of inline output. See `mangal help inline schema`
+- **Breaking** `downloader.default_source` was changed to `downloader.default_sources` and accepts array of strings.
+  See `mangal config info -k downloader.default_sources` for more info
+- New `config reset` command
+- Add caching for custom (lua) sources
+- Include different cover sizes and color for json output #116
+- Add option to omit dates for ComicInfo.xml #117
+- By default, when reading a chapter, mangal will look for its downloaded copy, instead of downloading it again.
+  See `mangal config info -k downloader.read_downloaded`
+- Overwrite old `series.json` file each time a chapter is downloaded
+- Detect sources that use headless chrome and show that in the item description when selecting sources
+- Option to use alternative ComicInfo.xml date.
+  See `mangal config info -k metadata.comic_info_xml_alternative_date` for more info
+- Notify about new version in `help` command
+- Include staff in ComicInfo.xml #119
+- Add `--set-only` and `--unset-only` flags for `env` command. Old `--filter` flag was removed
+- `version` command now has `--short` to just print the version without extra information
+- **Breaking!** Your old reading history (via `mangal --continue`) will be reset
+- Improved `clear` command
+- Option to set threshold for tag relevance to be included in ComicInfo.xml #121
+- Improved inline command json output, fixes
+- Internal improvements
+
+Enjoy!
+
 ## 3.14.2
 
 - Do not put an invalid value for dates #114

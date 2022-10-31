@@ -49,7 +49,7 @@ func TestManga_Filename(t *testing.T) {
 	Convey("Given a manga", t, func() {
 		Convey("When Filename is called", func() {
 			Convey("It should return a sanitized filename", func() {
-				So(testManga.Filename(), ShouldEqual, util.SanitizeFilename(testManga.Name))
+				So(testManga.Dirname(), ShouldEqual, util.SanitizeFilename(testManga.Name))
 			})
 		})
 	})

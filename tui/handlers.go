@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/anilist"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/installer"
@@ -37,9 +38,7 @@ func (b *statefulBubble) loadScrapers() tea.Cmd {
 		var items = make([]list.Item, len(scrapers))
 		for i, s := range scrapers {
 			items[i] = &listItem{
-				title:       s.Name,
-				description: s.GithubURL(),
-				internal:    s,
+				internal: s,
 			}
 		}
 
@@ -145,7 +144,7 @@ func (b *statefulBubble) waitForSourcesLoaded() tea.Cmd {
 func (b *statefulBubble) searchManga(query string) tea.Cmd {
 	return func() tea.Msg {
 		log.Info("searching for " + query)
-		b.progressStatus = fmt.Sprintf("Searching among %s", util.Quantity(len(b.selectedSources), "source"))
+		b.progressStatus = fmt.Sprintf("Searching among %s", util.Quantify(len(b.selectedSources), "source", "sources"))
 
 		var mangas = make([]*source.Manga, 0)
 
@@ -161,7 +160,7 @@ func (b *statefulBubble) searchManga(query string) tea.Cmd {
 					b.errorChannel <- err
 				}
 
-				log.Infof("found %s from source %s", util.Quantity(len(sourceMangas), "manga"), s.Name())
+				log.Infof("found %s from source %s", util.Quantify(len(sourceMangas), "manga", "mangas"), s.Name())
 				mangas = append(mangas, sourceMangas...)
 			}(s)
 		}
@@ -196,7 +195,7 @@ func (b *statefulBubble) getChapters(manga *source.Manga) tea.Cmd {
 			log.Error(err)
 			b.errorChannel <- err
 		} else {
-			log.Infof("found %s", util.Quantity(len(chapters), "chapter"))
+			log.Infof("found %s", util.Quantify(len(chapters), "chapter", "chapters"))
 			b.foundChaptersChannel <- chapters
 		}
 
@@ -303,13 +302,13 @@ func (b *statefulBubble) waitForAnilistFetchAndSet() tea.Cmd {
 func (b *statefulBubble) fetchAnilist(manga *source.Manga) tea.Cmd {
 	return func() tea.Msg {
 		log.Info("fetching anilist for " + manga.Name)
-		b.progressStatus = fmt.Sprintf("Fetching anilist for %s", style.Magenta(manga.Name))
+		b.progressStatus = fmt.Sprintf("Fetching anilist for %s", style.Fg(color.Purple)(manga.Name))
 		mangas, err := anilist.SearchByName(manga.Name)
 		if err != nil {
 			log.Error(err)
 			b.errorChannel <- err
 		} else {
-			log.Infof("found %s", util.Quantity(len(mangas), "manga"))
+			log.Infof("found %s", util.Quantify(len(mangas), "manga", "mangas"))
 			b.fetchedAnilistMangasChannel <- mangas
 		}
 

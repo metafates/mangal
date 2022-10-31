@@ -1,7 +1,9 @@
 package downloader
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/filesystem"
@@ -18,16 +20,8 @@ import (
 func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	log.Info("downloading " + chapter.Name)
 
-	log.Info("checking if chapter is already downloaded")
 	path, err := chapter.Path(false)
 	if err != nil {
-		log.Error(err)
-		return "", err
-	}
-
-	exists, err := filesystem.Api().Exists(path)
-	if err != nil {
-		log.Error(err)
 		return "", err
 	}
 
@@ -38,7 +32,8 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 			log.Warn(err)
 		}
 	} else {
-		if exists {
+		log.Info("checking if chapter is already downloaded")
+		if chapter.IsDownloaded() {
 			log.Info("chapter already downloaded, skipping")
 			return path, nil
 		}
@@ -52,7 +47,7 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	}
 	log.Info("found " + fmt.Sprintf("%d", len(pages)) + " pages")
 
-	err = chapter.DownloadPages(progress)
+	err = chapter.DownloadPages(false, progress)
 	if err != nil {
 		log.Error(err)
 		return "", err
@@ -71,13 +66,13 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 			log.Warn(err)
 		} else {
 			path = filepath.Join(path, "series.json")
-			exists, err := filesystem.Api().Exists(path)
+			progress("Generating series.json")
+			seriesJSON := chapter.Manga.SeriesJSON()
+			buf, err := json.Marshal(seriesJSON)
 			if err != nil {
 				log.Warn(err)
-			} else if !exists {
-				progress("Generating series.json")
-				data := chapter.Manga.SeriesJSON()
-				err = filesystem.Api().WriteFile(path, data.Bytes(), os.ModePerm)
+			} else {
+				err = filesystem.Api().WriteFile(path, buf, os.ModePerm)
 				if err != nil {
 					log.Warn(err)
 				}
@@ -86,14 +81,17 @@ func Download(chapter *source.Chapter, progress func(string)) (string, error) {
 	}
 
 	if viper.GetBool(constant.DownloaderDownloadCover) {
-		_ = chapter.Manga.DownloadCover(progress)
+		coverDir, err := chapter.Manga.Path(false)
+		if err == nil {
+			_ = chapter.Manga.DownloadCover(false, coverDir, progress)
+		}
 	}
 
 	log.Info("getting " + viper.GetString(constant.FormatsUse) + " converter")
 	progress(fmt.Sprintf(
 		"Converting %d pages to %s %s",
 		len(pages),
-		style.Yellow(viper.GetString(constant.FormatsUse)),
+		style.Fg(color.Yellow)(viper.GetString(constant.FormatsUse)),
 		style.Faint(chapter.SizeHuman())),
 	)
 	conv, err := converter.Get(viper.GetString(constant.FormatsUse))

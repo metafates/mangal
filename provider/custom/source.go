@@ -1,16 +1,18 @@
 package custom
 
 import (
+	"fmt"
 	"github.com/metafates/mangal/source"
 	lua "github.com/yuin/gopher-lua"
 )
 
 type luaSource struct {
-	name           string
-	state          *lua.LState
-	cachedMangas   map[string][]*source.Manga
-	cachedChapters map[string][]*source.Chapter
-	cachedPages    map[string][]*source.Page
+	name  string
+	state *lua.LState
+	cache struct {
+		mangas   *cacher[[]*source.Manga]
+		chapters *cacher[[]*source.Chapter]
+	}
 }
 
 func (s *luaSource) Name() string {
@@ -18,13 +20,19 @@ func (s *luaSource) Name() string {
 }
 
 func newLuaSource(name string, state *lua.LState) (*luaSource, error) {
-	return &luaSource{
-		name:           name,
-		state:          state,
-		cachedMangas:   make(map[string][]*source.Manga),
-		cachedChapters: make(map[string][]*source.Chapter),
-		cachedPages:    make(map[string][]*source.Page),
-	}, nil
+	s := &luaSource{
+		name:  name,
+		state: state,
+	}
+
+	cacheName := func(cacheFor string) string {
+		return fmt.Sprintf("%s_%s", s.ID(), cacheFor)
+	}
+
+	s.cache.mangas = newCacher[[]*source.Manga](cacheName("mangas"))
+	s.cache.chapters = newCacher[[]*source.Chapter](cacheName("chapters"))
+
+	return s, nil
 }
 
 func (s *luaSource) call(fn string, ret lua.LValueType, args ...lua.LValue) (lua.LValue, error) {

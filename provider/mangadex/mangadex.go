@@ -11,9 +11,11 @@ const (
 )
 
 type Mangadex struct {
-	client         *mangodex.DexClient
-	cachedMangas   map[string][]*source.Manga
-	cachedChapters map[string][]*source.Chapter
+	client *mangodex.DexClient
+	cache  struct {
+		mangas   *cacher[[]*source.Manga]
+		chapters *cacher[[]*source.Chapter]
+	}
 }
 
 func (*Mangadex) Name() string {
@@ -25,9 +27,12 @@ func (*Mangadex) ID() string {
 }
 
 func New() *Mangadex {
-	return &Mangadex{
-		client:         mangodex.NewDexClient(),
-		cachedMangas:   make(map[string][]*source.Manga),
-		cachedChapters: make(map[string][]*source.Chapter),
+	dex := &Mangadex{
+		client: mangodex.NewDexClient(),
 	}
+
+	dex.cache.mangas = newCacher[[]*source.Manga](ID + "_mangas")
+	dex.cache.chapters = newCacher[[]*source.Chapter](ID + "_chapters")
+
+	return dex
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"io"
 	"regexp"
 	"strconv"
@@ -17,14 +18,15 @@ type (
 )
 
 type Options struct {
-	Out            io.Writer
-	Source         source.Source
-	Download       bool
-	Json           bool
-	PopulatePages  bool
-	Query          string
-	MangaPicker    util.Option[MangaPicker]
-	ChaptersFilter util.Option[ChaptersFilter]
+	Out                 io.Writer
+	Sources             []source.Source
+	IncludeAnilistManga bool
+	Download            bool
+	Json                bool
+	PopulatePages       bool
+	Query               string
+	MangaPicker         mo.Option[MangaPicker]
+	ChaptersFilter      mo.Option[ChaptersFilter]
 }
 
 func ParseMangaPicker(description string) (MangaPicker, error) {

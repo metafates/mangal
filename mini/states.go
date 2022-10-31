@@ -32,7 +32,7 @@ const (
 func (m *mini) handleSourceSelectState() error {
 	var err error
 
-	if name := viper.GetString(constant.DownloaderDefaultSource); name != "" {
+	if name := viper.GetString(constant.DownloaderDefaultSources); name != "" {
 		p, ok := provider.Get(name)
 		if !ok {
 			return fmt.Errorf("unknown source \"%s\"", name)
@@ -339,7 +339,7 @@ func (m *mini) handleChaptersDownloadState() error {
 	}
 
 	util.ClearScreen()
-	title(fmt.Sprintf("%s downloaded.", util.Quantity(len(m.selectedChapters), "chapter")))
+	title(fmt.Sprintf("%s downloaded.", util.Quantify(len(m.selectedChapters), "chapter", "chapters")))
 	b, _, err := menu([]fmt.Stringer{}, back, search)
 	if err != nil {
 		return err

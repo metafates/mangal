@@ -10,15 +10,21 @@ import (
 )
 
 func (b *statefulBubble) Init() tea.Cmd {
-	if name := viper.GetString(constant.DownloaderDefaultSource); name != "" {
-		p, ok := provider.Get(name)
-		if !ok {
-			b.raiseError(fmt.Errorf("provider %s not found", name))
-			return nil
+	if names := viper.GetStringSlice(constant.DownloaderDefaultSources); len(names) != 0 {
+		var providers []*provider.Provider
+
+		for _, name := range names {
+			p, ok := provider.Get(name)
+			if !ok {
+				b.raiseError(fmt.Errorf("provider %s not found", name))
+				return nil
+			}
+
+			providers = append(providers, p)
 		}
 
 		b.setState(loadingState)
-		return tea.Batch(b.startLoading(), b.loadSources([]*provider.Provider{p}), b.waitForSourcesLoaded())
+		return tea.Batch(b.startLoading(), b.loadSources(providers), b.waitForSourcesLoaded())
 	}
 
 	return tea.Batch(textinput.Blink, b.loadProviders())

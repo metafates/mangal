@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	cc "github.com/ivanpirog/coloredcobra"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/icon"
@@ -10,6 +11,9 @@ import (
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/tui"
+	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/version"
+	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,6 +22,8 @@ import (
 )
 
 func init() {
+	rootCmd.Flags().BoolP("version", "v", false, "Print version")
+
 	rootCmd.PersistentFlags().StringP("format", "F", "", "output format")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return converter.Available(), cobra.ShellCompDirectiveDefault
@@ -33,7 +39,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolP("write-history", "H", true, "write history of the read chapters")
 	lo.Must0(viper.BindPFlag(constant.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("write-history")))
 
-	rootCmd.PersistentFlags().StringP("source", "S", "", "default source to use")
+	rootCmd.PersistentFlags().StringArrayP("source", "S", []string{}, "default source to use")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("source", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		var sources []string
 
@@ -47,27 +53,39 @@ func init() {
 
 		return sources, cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(constant.DownloaderDefaultSource, rootCmd.PersistentFlags().Lookup("source")))
+	lo.Must0(viper.BindPFlag(constant.DownloaderDefaultSources, rootCmd.PersistentFlags().Lookup("source")))
 
 	rootCmd.Flags().BoolP("continue", "c", false, "continue reading")
 
+	helpFunc := rootCmd.HelpFunc()
+	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		helpFunc(cmd, args)
+		version.Notify()
+	})
+
 	// Clear temporary files on startup
-	go clearTemp()
+	go func() {
+		_ = util.Delete(where.Temp())
+	}()
 }
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     constant.Mangal,
-	Version: constant.Version,
-	Short:   "The ultimate manga downloader",
+	Use:   constant.Mangal,
+	Short: "The ultimate manga downloader",
 	Long: constant.AsciiArtLogo + "\n" +
-		style.Combined(style.HiRed, style.Italic)("    - The ultimate cli manga downloader"),
+		style.New().Italic(true).Foreground(color.HiRed).Render("    - The ultimate cli manga downloader"),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {
 			handleErr(err)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if cmd.Flags().Changed("version") {
+			versionCmd.Run(versionCmd, args)
+			return
+		}
+
 		options := tui.Options{
 			Continue: lo.Must(cmd.Flags().GetBool("continue")),
 		}

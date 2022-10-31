@@ -9,24 +9,29 @@ import (
 	"os"
 )
 
-func Run(options *Options) error {
+func Run(options *Options) (err error) {
 	if options.Out == nil {
 		options.Out = os.Stdout
 	}
 
-	mangas, err := options.Source.Search(options.Query)
-	if err != nil {
-		return err
+	var mangas []*source.Manga
+	for _, src := range options.Sources {
+		m, err := src.Search(options.Query)
+		if err != nil {
+			return err
+		}
+
+		mangas = append(mangas, m...)
 	}
 
-	if options.MangaPicker.IsNone() && options.ChaptersFilter.IsNone() {
+	if options.MangaPicker.IsAbsent() && options.ChaptersFilter.IsAbsent() {
 		if viper.GetBool(constant.MetadataFetchAnilist) {
 			for _, manga := range mangas {
 				_ = manga.PopulateMetadata(func(string) {})
 			}
 		}
 
-		marshalled, err := asJson(mangas)
+		marshalled, err := asJson(mangas, options)
 		if err != nil {
 			return err
 		}
@@ -36,15 +41,15 @@ func Run(options *Options) error {
 	}
 
 	// manga picker can only be none if json is set
-	if options.MangaPicker.IsNone() {
+	if options.MangaPicker.IsAbsent() {
 		// preload all chapters
 		for _, manga := range mangas {
-			if err = jsonUpdateChapters(manga, options); err != nil {
+			if err = prepareManga(manga, options); err != nil {
 				return err
 			}
 		}
 
-		marshalled, err := asJson(mangas)
+		marshalled, err := asJson(mangas, options)
 		if err != nil {
 			return err
 		}
@@ -56,35 +61,34 @@ func Run(options *Options) error {
 	var chapters []*source.Chapter
 
 	if len(mangas) == 0 {
-		chapters = []*source.Chapter{}
-	} else {
-		manga := options.MangaPicker.Unwrap()(mangas)
+		return nil
+	}
 
-		chapters, err = options.Source.ChaptersOf(manga)
+	manga := options.MangaPicker.MustGet()(mangas)
+	chapters, err = manga.Source.ChaptersOf(manga)
+	if err != nil {
+		return err
+	}
+
+	if options.ChaptersFilter.IsPresent() {
+		chapters, err = options.ChaptersFilter.MustGet()(chapters)
+		if err != nil {
+			return err
+		}
+	}
+
+	if options.Json {
+		if err = prepareManga(manga, options); err != nil {
+			return err
+		}
+
+		marshalled, err := asJson([]*source.Manga{manga}, options)
 		if err != nil {
 			return err
 		}
 
-		if options.ChaptersFilter.IsSome() {
-			chapters, err = options.ChaptersFilter.Unwrap()(chapters)
-			if err != nil {
-				return err
-			}
-		}
-
-		if options.Json {
-			if err = jsonUpdateChapters(manga, options); err != nil {
-				return err
-			}
-
-			marshalled, err := asJson([]*source.Manga{manga})
-			if err != nil {
-				return err
-			}
-
-			_, err = options.Out.Write(marshalled)
-			return err
-		}
+		_, err = options.Out.Write(marshalled)
+		return err
 	}
 
 	for _, chapter := range chapters {

@@ -4,6 +4,7 @@ import (
 	"github.com/metafates/mangal/source"
 )
 
+// Search for mangas by given title
 func (s *Scraper) Search(query string) ([]*source.Manga, error) {
 	address := s.config.GenerateSearchURL(query)
 

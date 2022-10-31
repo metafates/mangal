@@ -162,6 +162,23 @@ func Delete[S ~[]E, E any](s S, i, j int) S {
 	return append(s[:i], s[j:]...)
 }
 
+// Replace replaces the elements s[i:j] by the given v, and returns the
+// modified slice. Replace panics if s[i:j] is not a valid slice of s.
+func Replace[S ~[]E, E any](s S, i, j int, v ...E) S {
+	tot := len(s[:i]) + len(v) + len(s[j:])
+	if tot <= cap(s) {
+		s2 := s[:tot]
+		copy(s2[i+len(v):], s[j:])
+		copy(s2[i:], v)
+		return s2
+	}
+	s2 := make(S, tot)
+	copy(s2, s[:i])
+	copy(s2[i:], v)
+	copy(s2[i+len(v):], s[j:])
+	return s2
+}
+
 // Clone returns a copy of the slice.
 // The elements are copied using assignment, so this is a shallow clone.
 func Clone[S ~[]E, E any](s S) S {

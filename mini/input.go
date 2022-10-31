@@ -3,6 +3,7 @@ package mini
 import (
 	"bufio"
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/style"
 	"os"
 	"strconv"
@@ -20,7 +21,7 @@ func (o input) asInt() (n int64, ok bool) {
 }
 
 func getInput(validator func(string) bool) (*input, error) {
-	fmt.Print(style.Magenta("> "))
+	fmt.Print(style.Fg(color.Purple)("> "))
 	reader := bufio.NewReader(os.Stdin)
 	in, err := reader.ReadString('\n')
 	if err != nil {
@@ -34,7 +35,7 @@ func getInput(validator func(string) bool) (*input, error) {
 	}
 
 	if !validator(in) {
-		fmt.Println(style.Red("Invalid choice entered"))
+		fmt.Println(style.Fg(color.Red)("Invalid choice entered"))
 		return getInput(validator)
 	}
 

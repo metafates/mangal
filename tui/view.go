@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/style"
@@ -67,13 +68,25 @@ func (b *statefulBubble) viewSources() string {
 }
 
 func (b *statefulBubble) viewSearch() string {
+	lines := []string{
+		style.Title("Search Manga"),
+		"",
+		b.inputC.View(),
+	}
+
+	if b.searchSuggestion.IsPresent() {
+		lines = append(
+			lines,
+			"",
+			fmt.Sprintf("Search %s ?", style.Fg(color.Orange)(b.searchSuggestion.MustGet())),
+			"",
+			fmt.Sprintf("Press %s to accept", style.Bold(style.Faint(b.keymap.acceptSearchSuggestion.Help().Key))),
+		)
+	}
+
 	return b.renderLines(
 		true,
-		[]string{
-			style.Title("Search Manga"),
-			"",
-			b.inputC.View(),
-		},
+		lines,
 	)
 }
 
@@ -95,9 +108,25 @@ func (b *statefulBubble) viewConfirm() string {
 		[]string{
 			style.Title("Confirm"),
 			"",
-			fmt.Sprintf("%s Download %s?", icon.Get(icon.Question), util.Quantity(len(b.selectedChapters), "chapter")),
+			fmt.Sprintf("%s Download %s?", icon.Get(icon.Question), util.Quantify(len(b.selectedChapters), "chapter", "chapters")),
 		},
 	)
+}
+
+func (b *statefulBubble) downloadingChapterMetainfo() string {
+	metainfo := strings.Builder{}
+
+	// Even though when this function is called chapter isn't supposed to be nil,
+	// it can be one for a brief moment.
+	// I assume that it's because View() is called before Update()
+	if b.currentDownloadingChapter != nil {
+		metainfo.WriteString("From ")
+		metainfo.WriteString(style.Fg(color.Orange)(b.currentDownloadingChapter.Source().Name()))
+		metainfo.WriteString(" as ")
+	}
+
+	metainfo.WriteString(style.Fg(color.Purple)(viper.GetString(constant.FormatsUse)))
+	return metainfo.String()
 }
 
 func (b *statefulBubble) viewRead() string {
@@ -113,9 +142,11 @@ func (b *statefulBubble) viewRead() string {
 		[]string{
 			style.Title("Reading"),
 			"",
-			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
+			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Fg(color.Purple)(chapterName))),
 			"",
 			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
+			"",
+			style.Truncate(b.width)(b.downloadingChapterMetainfo()),
 		},
 	)
 }
@@ -133,11 +164,13 @@ func (b *statefulBubble) viewDownload() string {
 		[]string{
 			style.Title("Downloading"),
 			"",
-			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Magenta(chapterName))),
+			style.Truncate(b.width)(fmt.Sprintf(icon.Get(icon.Progress)+" Downloading %s", style.Fg(color.Purple)(chapterName))),
 			"",
 			b.progressC.View(),
 			"",
 			style.Truncate(b.width)(b.spinnerC.View() + b.progressStatus),
+			"",
+			style.Truncate(b.width)(b.downloadingChapterMetainfo()),
 		},
 	)
 }
@@ -149,10 +182,10 @@ func (b *statefulBubble) viewDownloadDone() string {
 	var msg string
 
 	{
-		temp := strings.Split(util.Quantity(succeded, "chapter"), " ")
-		temp[0] = style.Green(temp[0])
+		temp := strings.Split(util.Quantify(succeded, "chapter", "chapters"), " ")
+		temp[0] = style.Fg(color.Green)(temp[0])
 		s := strings.Join(temp, " ") + " downloaded"
-		f := fmt.Sprintf("%s failed", style.Red(strconv.Itoa(failed)))
+		f := fmt.Sprintf("%s failed", style.Fg(color.Red)(strconv.Itoa(failed)))
 
 		msg = fmt.Sprintf("%s, %s", s, f)
 	}
@@ -178,7 +211,7 @@ func (b *statefulBubble) viewDownloadDone() string {
 }
 
 func (b *statefulBubble) viewError() string {
-	errorMsg := wrap.String(style.Combined(style.Italic, style.Red)(b.lastError.Error()), b.width)
+	errorMsg := wrap.String(style.New().Italic(true).Foreground(color.Red).Render(b.lastError.Error()), b.width)
 	return b.renderLines(
 		true,
 		append([]string{

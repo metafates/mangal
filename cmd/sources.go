@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/tui"
 	"github.com/metafates/mangal/util"
@@ -23,21 +24,30 @@ import (
 
 func init() {
 	rootCmd.AddCommand(sourcesCmd)
-	sourcesCmd.Flags().BoolP("raw", "r", false, "do not print headers")
-	sourcesCmd.Flags().BoolP("custom", "c", false, "show only custom sources")
-	sourcesCmd.Flags().BoolP("builtin", "b", false, "show only builtin sources")
-
-	sourcesCmd.MarkFlagsMutuallyExclusive("custom", "builtin")
-	sourcesCmd.SetOut(os.Stdout)
 }
 
 var sourcesCmd = &cobra.Command{
-	Use:     "sources",
-	Short:   "List an available sources",
-	Example: "mangal sources",
+	Use:   "sources",
+	Short: "Manage sources",
+}
+
+func init() {
+	sourcesCmd.AddCommand(sourcesListCmd)
+
+	sourcesListCmd.Flags().BoolP("raw", "r", false, "do not print headers")
+	sourcesListCmd.Flags().BoolP("custom", "c", false, "show only custom sources")
+	sourcesListCmd.Flags().BoolP("builtin", "b", false, "show only builtin sources")
+
+	sourcesListCmd.MarkFlagsMutuallyExclusive("custom", "builtin")
+	sourcesListCmd.SetOut(os.Stdout)
+}
+
+var sourcesListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List an available sources",
 	Run: func(cmd *cobra.Command, args []string) {
 		printHeader := !lo.Must(cmd.Flags().GetBool("raw"))
-		headerStyle := style.Combined(style.Bold, style.HiBlue)
+		headerStyle := style.New().Foreground(color.HiBlue).Bold(true).Render
 		h := func(s string) {
 			if printHeader {
 				cmd.Println(headerStyle(s))
@@ -65,7 +75,9 @@ var sourcesCmd = &cobra.Command{
 			printCustom()
 		default:
 			printBuiltin()
-			cmd.Println()
+			if printHeader {
+				cmd.Println()
+			}
 			printCustom()
 		}
 	},
@@ -73,22 +85,33 @@ var sourcesCmd = &cobra.Command{
 
 func init() {
 	sourcesCmd.AddCommand(sourcesRemoveCmd)
+
+	sourcesRemoveCmd.Flags().StringArrayP("name", "n", []string{}, "name of the source to remove")
+	lo.Must0(sourcesRemoveCmd.RegisterFlagCompletionFunc("name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		sources, err := filesystem.Api().ReadDir(where.Sources())
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		return lo.FilterMap(sources, func(item os.FileInfo, _ int) (string, bool) {
+			name := item.Name()
+			if !strings.HasSuffix(name, provider.CustomProviderExtension) {
+				return "", false
+			}
+
+			return util.FileStem(filepath.Base(name)), true
+		}), cobra.ShellCompDirectiveNoFileComp
+	}))
 }
 
 var sourcesRemoveCmd = &cobra.Command{
-	Use:     "remove",
-	Short:   "Remove a custom source",
-	Example: "mangal sources remove <name>",
+	Use:   "remove",
+	Short: "Remove a custom source",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			handleErr(cmd.Help())
-			return
-		}
-
-		for _, name := range args {
+		for _, name := range lo.Must(cmd.Flags().GetStringArray("name")) {
 			path := filepath.Join(where.Sources(), name+provider.CustomProviderExtension)
 			handleErr(filesystem.Api().Remove(path))
-			fmt.Printf("%s successfully removed %s\n", icon.Get(icon.Success), style.Yellow(name))
+			fmt.Printf("%s successfully removed %s\n", icon.Get(icon.Success), style.Fg(color.Yellow)(name))
 		}
 	},
 }

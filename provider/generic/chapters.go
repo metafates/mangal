@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// ChaptersOf given source.Manga
 func (s *Scraper) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	if chapters, ok := s.chapters[manga.URL]; ok {
 		return chapters, nil

@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// PagesOf given source.Chapter
 func (s *Scraper) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 	if pages, ok := s.pages[chapter.URL]; ok {
 		return pages, nil

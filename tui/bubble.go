@@ -10,14 +10,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/metafates/mangal/anilist"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
-	"github.com/metafates/mangal/icon"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"strings"
@@ -71,6 +73,8 @@ type statefulBubble struct {
 
 	failedChapters   []*source.Chapter
 	succededChapters []*source.Chapter
+
+	searchSuggestion mo.Option[string]
 }
 
 func (b *statefulBubble) raiseError(err error) {
@@ -186,7 +190,11 @@ func newBubble() *statefulBubble {
 		succededChapters: make([]*source.Chapter, 0),
 	}
 
-	makeList := func(title string, description bool) list.Model {
+	type listOptions struct {
+		TitleStyle mo.Option[lipgloss.Style]
+	}
+
+	makeList := func(title string, description bool, options *listOptions) list.Model {
 		delegate := list.NewDefaultDelegate()
 		delegate.SetSpacing(viper.GetInt(constant.TUIItemSpacing))
 		delegate.ShowDescription = description
@@ -207,6 +215,10 @@ func newBubble() *statefulBubble {
 		}
 		listC.Title = title
 		listC.Styles.NoItems = paddingStyle
+		if titleStyle, ok := options.TitleStyle.Get(); ok {
+			listC.Styles.Title = titleStyle
+		}
+
 		//listC.StatusMessageLifetime = time.Second * 5
 		listC.StatusMessageLifetime = time.Hour * 999 // forever
 
@@ -226,23 +238,43 @@ func newBubble() *statefulBubble {
 
 	bubble.progressC = progress.New(progress.WithDefaultGradient())
 
-	bubble.scrapersInstallC = makeList("Install Scrapers", true)
+	bubble.scrapersInstallC = makeList("Install Scrapers", true, &listOptions{
+		TitleStyle: mo.Some(
+			style.NewColored("#212529", "#ced4da").Padding(0, 1),
+		),
+	})
 	bubble.scrapersInstallC.SetStatusBarItemName("scraper", "scrapers")
 
-	bubble.historyC = makeList("History", true)
+	bubble.historyC = makeList("History", true, &listOptions{})
 	bubble.sourcesC.SetStatusBarItemName("chapter", "chapters")
 
-	bubble.sourcesC = makeList("Select Source", true)
+	bubble.sourcesC = makeList("Select Source", true, &listOptions{
+		TitleStyle: mo.Some(
+			style.NewColored("#fefae0", "#bc6c25").Padding(0, 1),
+		),
+	})
 	bubble.sourcesC.SetStatusBarItemName("source", "sources")
 
 	showURLs := viper.GetBool(constant.TUIShowURLs)
-	bubble.mangasC = makeList("Mangas", showURLs)
+	bubble.mangasC = makeList("Mangas", showURLs, &listOptions{
+		TitleStyle: mo.Some(
+			style.NewColored("#f2e8cf", "#386641").Padding(0, 1),
+		),
+	})
 	bubble.mangasC.SetStatusBarItemName("manga", "mangas")
 
-	bubble.chaptersC = makeList("Chapters", showURLs)
+	bubble.chaptersC = makeList("Chapters", showURLs, &listOptions{
+		TitleStyle: mo.Some(
+			style.NewColored("#000814", color.Orange).Padding(0, 1),
+		),
+	})
 	bubble.chaptersC.SetStatusBarItemName("chapter", "chapters")
 
-	bubble.anilistC = makeList("Anilist Mangas", showURLs)
+	bubble.anilistC = makeList("Anilist Mangas", showURLs, &listOptions{
+		TitleStyle: mo.Some(
+			style.NewColored("#bcbedc", "#2b2d42").Padding(0, 1),
+		),
+	})
 	bubble.anilistC.SetStatusBarItemName("manga", "mangas")
 
 	if w, h, err := util.TerminalSize(); err == nil {
@@ -261,9 +293,7 @@ func (b *statefulBubble) loadProviders() tea.Cmd {
 	var items []list.Item
 	for _, p := range providers {
 		items = append(items, &listItem{
-			title:       p.Name,
-			description: "Built-in provider " + icon.Get(icon.Go),
-			internal:    p,
+			internal: p,
 		})
 	}
 	slices.SortFunc(items, func(a, b list.Item) bool {
@@ -275,9 +305,7 @@ func (b *statefulBubble) loadProviders() tea.Cmd {
 	var customItems []list.Item
 	for _, p := range customProviders {
 		customItems = append(customItems, &listItem{
-			title:       p.Name,
-			description: "Custom provider " + icon.Get(icon.Lua),
-			internal:    p,
+			internal: p,
 		})
 	}
 	slices.SortFunc(customItems, func(a, b list.Item) bool {
@@ -294,10 +322,18 @@ func (b *statefulBubble) loadHistory() (tea.Cmd, error) {
 		return nil, err
 	}
 
+	chapters := lo.Values(saved)
+	slices.SortFunc(chapters, func(a, b *history.SavedChapter) bool {
+		if a.MangaName == b.MangaName {
+			return a.Name < b.Name
+		}
+		return a.MangaName < b.MangaName
+	})
+
 	var items []list.Item
-	for _, s := range saved {
+	for _, c := range chapters {
 		items = append(items, &listItem{
-			internal: s,
+			internal: c,
 		})
 	}
 

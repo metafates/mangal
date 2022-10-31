@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -25,8 +26,8 @@ func errUnknownKey(key string) error {
 	})
 	msg := fmt.Sprintf(
 		"unknown key %s, did you mean %s?",
-		style.Red(key),
-		style.Yellow(closest),
+		style.Fg(color.Red)(key),
+		style.Fg(color.Yellow)(closest),
 	)
 
 	return errors.New(msg)
@@ -96,7 +97,7 @@ func init() {
 	lo.Must0(configSetCmd.MarkFlagRequired("key"))
 	_ = configSetCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
 
-	configSetCmd.Flags().StringP("value", "v", "", "The value to set")
+	configSetCmd.Flags().StringSliceP("value", "v", []string{}, "The value to set")
 	lo.Must0(configSetCmd.MarkFlagRequired("value"))
 
 	// deprecated flags for backwards compatibility
@@ -110,7 +111,7 @@ var configSetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			key   = lo.Must(cmd.Flags().GetString("key"))
-			value = lo.Must(cmd.Flags().GetString("value"))
+			value = lo.Must(cmd.Flags().GetStringSlice("value"))
 		)
 
 		if _, ok := config.Default[key]; !ok {
@@ -122,19 +123,21 @@ var configSetCmd = &cobra.Command{
 		case string:
 			v = value
 		case int:
-			parsedInt, err := strconv.ParseInt(value, 10, 64)
+			parsedInt, err := strconv.ParseInt(value[0], 10, 64)
 			if err != nil {
 				handleErr(fmt.Errorf("invalid integer value: %s", value))
 			}
 
 			v = int(parsedInt)
 		case bool:
-			parsedBool, err := strconv.ParseBool(value)
+			parsedBool, err := strconv.ParseBool(value[0])
 			if err != nil {
 				handleErr(fmt.Errorf("invalid boolean value: %s", value))
 			}
 
 			v = parsedBool
+		case []string:
+			v = value
 		}
 
 		viper.Set(key, v)
@@ -147,9 +150,9 @@ var configSetCmd = &cobra.Command{
 
 		fmt.Printf(
 			"%s set %s to %s\n",
-			style.Green(icon.Get(icon.Success)),
-			style.Magenta(key),
-			style.Yellow(fmt.Sprintf("%v", v)),
+			style.Fg(color.Green)(icon.Get(icon.Success)),
+			style.Fg(color.Purple)(key),
+			style.Fg(color.Yellow)(fmt.Sprintf("%v", v)),
 		)
 	},
 }
@@ -205,7 +208,7 @@ var configWriteCmd = &cobra.Command{
 		handleErr(viper.SafeWriteConfig())
 		fmt.Printf(
 			"%s wrote config to %s\n",
-			style.Green(icon.Get(icon.Success)),
+			style.Fg(color.Green)(icon.Get(icon.Success)),
 			configFilePath,
 		)
 	},
@@ -232,7 +235,43 @@ var configDeleteCmd = &cobra.Command{
 		handleErr(err)
 		fmt.Printf(
 			"%s deleted config\n",
-			style.Green(icon.Get(icon.Success)),
+			style.Fg(color.Green)(icon.Get(icon.Success)),
+		)
+	},
+}
+
+func init() {
+	configCmd.AddCommand(configResetCmd)
+
+	configResetCmd.Flags().StringP("key", "k", "", "The key to reset the value for")
+	_ = configResetCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
+}
+
+var configResetCmd = &cobra.Command{
+	Use:   "reset",
+	Short: "Reset the config key to default",
+	Run: func(cmd *cobra.Command, args []string) {
+		var (
+			key = lo.Must(cmd.Flags().GetString("key"))
+		)
+
+		if _, ok := config.Default[key]; !ok {
+			handleErr(errUnknownKey(key))
+		}
+
+		viper.Set(key, config.Default[key].Value)
+		switch err := viper.WriteConfig(); err.(type) {
+		case viper.ConfigFileNotFoundError:
+			handleErr(viper.SafeWriteConfig())
+		default:
+			handleErr(err)
+		}
+
+		fmt.Printf(
+			"%s reset %s to default value %s\n",
+			style.Fg(color.Green)(icon.Get(icon.Success)),
+			style.Fg(color.Purple)(key),
+			style.Fg(color.Yellow)(fmt.Sprintf("%v", config.Default[key].Value)),
 		)
 	},
 }

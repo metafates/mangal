@@ -7,9 +7,11 @@ import (
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/where"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
+// New generates a new scraper with given configuration
 func New(conf *Configuration) source.Source {
 	s := Scraper{
 		mangas:   make(map[string][]*source.Manga),
@@ -53,7 +55,7 @@ func New(conf *Configuration) source.Source {
 				ID:       filepath.Base(url),
 				Source:   &s,
 			}
-			manga.Metadata.Cover = s.config.MangaExtractor.Cover(selection)
+			manga.Metadata.Cover.ExtraLarge = s.config.MangaExtractor.Cover(selection)
 
 			s.mangas[path][i] = &manga
 		})
@@ -122,6 +124,9 @@ func New(conf *Configuration) source.Source {
 		elements.Each(func(i int, selection *goquery.Selection) {
 			link := s.config.PageExtractor.URL(selection)
 			ext := filepath.Ext(link)
+			// remove some query params from the extension
+			ext = strings.Split(ext, "?")[0]
+
 			page := source.Page{
 				URL:       link,
 				Index:     uint16(i),

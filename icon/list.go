@@ -1,6 +1,9 @@
 package icon
 
-import "github.com/metafates/mangal/style"
+import (
+	"github.com/metafates/mangal/color"
+	"github.com/metafates/mangal/style"
+)
 
 type Icon int
 
@@ -11,57 +14,81 @@ const (
 	Success
 	Question
 	Mark
+	Downloaded
 	Progress
+	Search
+	Link
 )
 
 var icons = map[Icon]*iconDef{
 	Lua: {
 		emoji:   "🌙",
-		nerd:    style.Blue("\uE620"),
-		plain:   style.Blue("Lua"),
-		kaomoji: style.Blue("(=^･ω･^=)"),
-		squares: style.Blue("◧"),
+		nerd:    style.Fg(color.Blue)("\uE620"),
+		plain:   style.Fg(color.Blue)("Lua"),
+		kaomoji: style.Fg(color.Blue)("(=^･ω･^=)"),
+		squares: style.Fg(color.Blue)("◧"),
 	},
 	Go: {
 		emoji:   "🐹",
-		nerd:    style.Cyan("\uE627"),
-		plain:   style.Cyan("Go"),
-		kaomoji: style.Cyan("ʕ •ᴥ• ʔ"),
-		squares: style.Cyan("◨"),
+		nerd:    style.Fg(color.Cyan)("\uE627"),
+		plain:   style.Fg(color.Cyan)("Go"),
+		kaomoji: style.Fg(color.Cyan)("ʕ •ᴥ• ʔ"),
+		squares: style.Fg(color.Cyan)("◨"),
 	},
 	Fail: {
 		emoji:   "💀",
-		nerd:    style.Red("ﮊ"),
-		plain:   style.Red("X"),
-		kaomoji: style.Red("┐('～`;)┌"),
-		squares: style.Red("▨"),
+		nerd:    style.Fg(color.Red)("ﮊ"),
+		plain:   style.Fg(color.Red)("X"),
+		kaomoji: style.Fg(color.Red)("┐('～`;)┌"),
+		squares: style.Fg(color.Red)("▨"),
 	},
 	Success: {
 		emoji:   "🎉",
-		nerd:    style.Green("\uF65F "),
-		plain:   style.Green("✓"),
-		kaomoji: style.Green("(ᵔ◡ᵔ)"),
-		squares: style.Green("▣"),
+		nerd:    style.Fg(color.Green)("\uF65F "),
+		plain:   style.Fg(color.Green)("✓"),
+		kaomoji: style.Fg(color.Green)("(ᵔ◡ᵔ)"),
+		squares: style.Fg(color.Green)("▣"),
 	},
 	Mark: {
 		emoji:   "🦐",
-		nerd:    style.Green("\uF6D9"),
-		plain:   style.Combined(style.Green, style.Bold)("*"),
-		kaomoji: style.Combined(style.Red, style.Bold)("炎"),
-		squares: style.Combined(style.Green, style.Bold)("■"),
+		nerd:    style.Fg(color.Green)("\uF6D9"),
+		plain:   style.New().Bold(true).Foreground(color.Orange).Render("*"),
+		kaomoji: style.New().Bold(true).Foreground(color.Red).Render("炎"),
+		squares: style.New().Bold(true).Foreground(color.Orange).Render("■"),
 	},
 	Question: {
 		emoji:   "🤨",
-		nerd:    style.Yellow("\uF128"),
-		plain:   style.Yellow("?"),
-		kaomoji: style.Yellow("(￢ ￢)"),
-		squares: style.Yellow("◲"),
+		nerd:    style.Fg(color.Yellow)("\uF128"),
+		plain:   style.Fg(color.Yellow)("?"),
+		kaomoji: style.Fg(color.Yellow)("(￢ ￢)"),
+		squares: style.Fg(color.Yellow)("◲"),
 	},
 	Progress: {
 		emoji:   "👾",
-		nerd:    style.Blue("\uF0ED "),
-		plain:   style.Blue("@"),
-		kaomoji: style.Blue("┌( >_<)┘"),
-		squares: style.Blue("◫"),
+		nerd:    style.Fg(color.Blue)("\uF0ED "),
+		plain:   style.Fg(color.Blue)("@"),
+		kaomoji: style.Fg(color.Blue)("┌( >_<)┘"),
+		squares: style.Fg(color.Blue)("◫"),
+	},
+	Downloaded: {
+		emoji:   "📦",
+		nerd:    style.Bold("\uF0C5 "),
+		plain:   style.New().Bold(true).Faint(true).Render("D"),
+		kaomoji: style.Bold("⊂(◉‿◉)つ"),
+		squares: style.Bold("◬"),
+	},
+	Search: {
+		emoji:   "🔍",
+		nerd:    style.Fg(color.Blue)("\uF002"),
+		plain:   style.Fg(color.Blue)("S"),
+		kaomoji: style.Fg(color.Blue)("⌐■-■"),
+		squares: style.Fg(color.Blue)("◪"),
+	},
+	Link: {
+		emoji:   "🔗",
+		nerd:    style.Fg(color.Blue)("\uF0C1"),
+		plain:   style.Fg(color.Blue)("L"),
+		kaomoji: style.Fg(color.Blue)("⌐■-■"),
+		squares: style.Fg(color.Blue)("◪"),
 	},
 }

@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/samber/lo"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/term"
@@ -35,18 +36,13 @@ func SanitizeFilename(filename string) string {
 	return filename
 }
 
-// Quantity returns formatted quantity.
-// Example:
-//
-//	Quantity(1, "manga") -> "1 manga"
-//	Quantity(2, "manga") -> "2 mangas"
-func Quantity(count int, thing string) string {
-	thing = strings.TrimSuffix(thing, "s")
+// Quantify returns a string with the given number and unit.
+func Quantify(count int, singular, plural string) string {
 	if count == 1 {
-		return fmt.Sprintf("%d %s", count, thing)
+		return fmt.Sprintf("%d %s", count, singular)
 	}
 
-	return fmt.Sprintf("%d %ss", count, thing)
+	return fmt.Sprintf("%d %s", count, plural)
 }
 
 // TerminalSize returns the dimensions of the given terminal.
@@ -134,43 +130,24 @@ func PrintErasable(msg string) (eraser func()) {
 
 // Capitalize returns a string with the first letter capitalized.
 func Capitalize(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-func CompareVersions(a, b string) (int, error) {
-	type version struct {
-		major, minor, patch int
-	}
-
-	parse := func(s string) (version, error) {
-		var v version
-		_, err := fmt.Sscanf(strings.TrimPrefix(s, "v"), "%d.%d.%d", &v.major, &v.minor, &v.patch)
-		return v, err
-	}
-
-	av, err := parse(a)
+// Delete removes the given path from the filesystem.
+// It can handle both files and directories (recursively).
+func Delete(path string) error {
+	stat, err := filesystem.Api().Stat(path)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	bv, err := parse(b)
-	if err != nil {
-		return 0, err
+	if stat.IsDir() {
+		return filesystem.Api().RemoveAll(path)
 	}
 
-	for _, pair := range []lo.Tuple2[int, int]{
-		{av.major, bv.major},
-		{av.minor, bv.minor},
-		{av.patch, bv.patch},
-	} {
-		if pair.A > pair.B {
-			return 1, nil
-		}
-
-		if pair.A < pair.B {
-			return -1, nil
-		}
-	}
-
-	return 0, nil
+	return filesystem.Api().Remove(path)
 }

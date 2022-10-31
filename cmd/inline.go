@@ -4,18 +4,25 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/invopop/jsonschema"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/inline"
 	"github.com/metafates/mangal/provider"
-	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/query"
+	"github.com/metafates/mangal/source"
+	"github.com/metafates/mangal/update"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io"
 	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
 )
 
 func init() {
@@ -28,12 +35,18 @@ func init() {
 	inlineCmd.Flags().BoolP("json", "j", false, "JSON output")
 	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages")
 	inlineCmd.Flags().BoolP("fetch-metadata", "f", false, "Populate manga metadata")
+	inlineCmd.Flags().BoolP("include-anilist-manga", "a", false, "Include anilist manga in the output")
 	lo.Must0(viper.BindPFlag(constant.MetadataFetchAnilist, inlineCmd.Flags().Lookup("fetch-metadata")))
 
 	inlineCmd.Flags().StringP("output", "o", "", "output file")
 
 	lo.Must0(inlineCmd.MarkFlagRequired("query"))
 	inlineCmd.MarkFlagsMutuallyExclusive("download", "json")
+	inlineCmd.MarkFlagsMutuallyExclusive("include-anilist-manga", "download")
+
+	inlineCmd.RegisterFlagCompletionFunc("query", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return query.SuggestMany(toComplete), cobra.ShellCompDirectiveNoFileComp
+	})
 }
 
 var inlineCmd = &cobra.Command{
@@ -73,17 +86,26 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		sourceName := viper.GetString(constant.DownloaderDefaultSource)
-		if sourceName == "" {
-			handleErr(errors.New("source not set"))
-		}
-		p, ok := provider.Get(sourceName)
-		if !ok {
-			handleErr(fmt.Errorf("source not found: %s", sourceName))
-		}
+		var (
+			sources []source.Source
+			err     error
+		)
 
-		src, err := p.CreateSource()
-		handleErr(err)
+		for _, name := range viper.GetStringSlice(constant.DownloaderDefaultSources) {
+			if name == "" {
+				handleErr(errors.New("source not set"))
+			}
+
+			p, ok := provider.Get(name)
+			if !ok {
+				handleErr(fmt.Errorf("source not found: %s", name))
+			}
+
+			src, err := p.CreateSource()
+			handleErr(err)
+
+			sources = append(sources, src)
+		}
 
 		output := lo.Must(cmd.Flags().GetString("output"))
 		var writer io.Writer
@@ -95,30 +117,31 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		}
 
 		mangaFlag := lo.Must(cmd.Flags().GetString("manga"))
-		mangaPicker := util.None[inline.MangaPicker]()
+		mangaPicker := mo.None[inline.MangaPicker]()
 		if mangaFlag != "" {
 			fn, err := inline.ParseMangaPicker(lo.Must(cmd.Flags().GetString("manga")))
 			handleErr(err)
-			mangaPicker = util.Some(fn)
+			mangaPicker = mo.Some(fn)
 		}
 
 		chapterFlag := lo.Must(cmd.Flags().GetString("chapters"))
-		chapterFilter := util.None[inline.ChaptersFilter]()
+		chapterFilter := mo.None[inline.ChaptersFilter]()
 		if chapterFlag != "" {
 			fn, err := inline.ParseChaptersFilter(chapterFlag)
 			handleErr(err)
-			chapterFilter = util.Some(fn)
+			chapterFilter = mo.Some(fn)
 		}
 
 		options := &inline.Options{
-			Source:         src,
-			Download:       lo.Must(cmd.Flags().GetBool("download")),
-			Json:           lo.Must(cmd.Flags().GetBool("json")),
-			Query:          lo.Must(cmd.Flags().GetString("query")),
-			PopulatePages:  lo.Must(cmd.Flags().GetBool("populate-pages")),
-			MangaPicker:    mangaPicker,
-			ChaptersFilter: chapterFilter,
-			Out:            writer,
+			Sources:             sources,
+			Download:            lo.Must(cmd.Flags().GetBool("download")),
+			Json:                lo.Must(cmd.Flags().GetBool("json")),
+			Query:               lo.Must(cmd.Flags().GetString("query")),
+			PopulatePages:       lo.Must(cmd.Flags().GetBool("populate-pages")),
+			IncludeAnilistManga: lo.Must(cmd.Flags().GetBool("include-anilist-manga")),
+			MangaPicker:         mangaPicker,
+			ChaptersFilter:      chapterFilter,
+			Out:                 writer,
 		}
 
 		handleErr(inline.Run(options))
@@ -182,16 +205,20 @@ var inlineAnilistGetCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get anilist manga that is bind to manga name",
 	Run: func(cmd *cobra.Command, args []string) {
-		name := lo.Must(cmd.Flags().GetString("name"))
-		anilistManga, ok := anilist.GetRelation(name)
+		var (
+			m   *anilist.Manga
+			err error
+		)
 
-		if !ok {
-			var err error
-			anilistManga, err = anilist.FindClosest(name)
+		name := lo.Must(cmd.Flags().GetString("name"))
+		m, err = anilist.FindClosest(name)
+
+		if err != nil {
+			m, err = anilist.FindClosest(name)
 			handleErr(err)
 		}
 
-		handleErr(json.NewEncoder(os.Stdout).Encode(anilistManga))
+		handleErr(json.NewEncoder(os.Stdout).Encode(m))
 	},
 }
 
@@ -217,5 +244,56 @@ var inlineAnilistBindCmd = &cobra.Command{
 		mangaName := lo.Must(cmd.Flags().GetString("name"))
 
 		handleErr(anilist.SetRelation(mangaName, anilistManga))
+	},
+}
+
+func init() {
+	inlineAnilistCmd.AddCommand(inlineAnilistUpdateCmd)
+
+	inlineAnilistUpdateCmd.Flags().StringP("path", "p", "", "path to the manga")
+	lo.Must0(inlineAnilistUpdateCmd.MarkFlagRequired("path"))
+}
+
+var inlineAnilistUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update old manga metadata according to the current anilist bind",
+	Run: func(cmd *cobra.Command, args []string) {
+		path := lo.Must(cmd.Flags().GetString("path"))
+		handleErr(update.Metadata(path))
+	},
+}
+
+func init() {
+	inlineCmd.AddCommand(inlineSchemaCmd)
+
+	inlineSchemaCmd.Flags().BoolP("anilist", "a", false, "generate anilist search output schema")
+}
+
+var inlineSchemaCmd = &cobra.Command{
+	Use:   "schema",
+	Short: "Schemas for the inline json outputs",
+	Run: func(cmd *cobra.Command, args []string) {
+		reflector := new(jsonschema.Reflector)
+		reflector.Anonymous = true
+		reflector.Namer = func(t reflect.Type) string {
+			name := t.Name()
+			switch strings.ToLower(name) {
+			case "manga", "chapter", "page", "date", "output":
+				return filepath.Base(t.PkgPath()) + "." + name
+			}
+
+			return name
+		}
+
+		var schema *jsonschema.Schema
+
+		switch {
+		case lo.Must(cmd.Flags().GetBool("anilist")):
+			schema = reflector.Reflect([]*anilist.Manga{})
+		default:
+			schema = reflector.Reflect(&inline.Output{})
+		}
+
+		handleErr(json.NewEncoder(os.Stdout).Encode(schema))
 	},
 }

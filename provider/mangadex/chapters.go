@@ -12,7 +12,11 @@ import (
 )
 
 func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
-	if cached, ok := m.cachedChapters[manga.URL]; ok {
+	if cached, ok := m.cache.chapters.Get(manga.URL).Get(); ok {
+		for _, chapter := range cached {
+			chapter.Manga = manga
+		}
+
 		return cached, nil
 	}
 
@@ -99,6 +103,6 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 	})
 
 	manga.Chapters = chapters
-	m.cachedChapters[manga.URL] = chapters
+	_ = m.cache.chapters.Set(manga.URL, chapters)
 	return chapters, nil
 }

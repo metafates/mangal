@@ -7,15 +7,18 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/anilist"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/installer"
 	"github.com/metafates/mangal/open"
 	"github.com/metafates/mangal/provider"
+	"github.com/metafates/mangal/query"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
+	"github.com/samber/mo"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 	"time"
@@ -173,14 +176,19 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.previousState()
 		}
 	case []*anilist.Manga:
-		manga, ok := anilist.GetRelation(b.selectedManga.Name)
+		manga, err := anilist.FindClosest(b.selectedManga.Name)
 		id := -1
-		if ok {
+		if err == nil {
 			id = manga.ID
 		}
 
 		items := make([]list.Item, len(msg))
+		var marked int
 		for i, manga := range msg {
+			if manga.ID == id {
+				marked = i
+			}
+
 			items[i] = &listItem{
 				internal: manga,
 				marked:   manga.ID == id,
@@ -189,6 +197,7 @@ func (b *statefulBubble) updateLoading(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		cmd = b.anilistC.SetItems(items)
 		b.newState(anilistSelectState)
+		b.anilistC.Select(marked)
 		return b, tea.Batch(cmd, b.stopLoading())
 	case []*installer.Scraper:
 		b.newState(scrapersInstallState)
@@ -385,12 +394,28 @@ func (b *statefulBubble) updateSearch(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.confirm) && b.inputC.Value() != "":
 			b.startLoading()
 			b.newState(loadingState)
+			go query.Remember(b.inputC.Value(), 1)
 			return b, tea.Batch(b.searchManga(b.inputC.Value()), b.waitForMangas(), b.spinnerC.Tick)
+		case key.Matches(msg, b.keymap.acceptSearchSuggestion) && b.searchSuggestion.IsPresent():
+			b.inputC.SetValue(b.searchSuggestion.MustGet())
+			b.searchSuggestion = mo.None[string]()
+			b.inputC.SetCursor(len(b.inputC.Value()))
+			return b, nil
 		}
-
 	}
 
 	b.inputC, cmd = b.inputC.Update(msg)
+
+	if b.inputC.Value() != "" {
+		if suggestion, ok := query.Suggest(b.inputC.Value()).Get(); ok && suggestion != b.inputC.Value() {
+			b.searchSuggestion = mo.Some(suggestion)
+		} else {
+			b.searchSuggestion = mo.None[string]()
+		}
+	} else if b.searchSuggestion.IsPresent() {
+		b.searchSuggestion = mo.None[string]()
+	}
+
 	return b, cmd
 }
 
@@ -409,6 +434,7 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m, _ := b.mangasC.SelectedItem().(*listItem).internal.(*source.Manga)
 			b.selectedManga = m
+			go query.Remember(m.Name, 2)
 			return b, tea.Batch(b.getChapters(m), b.waitForChapters(), b.startLoading())
 		case key.Matches(msg, b.keymap.openURL):
 			if b.mangasC.SelectedItem() == nil {
@@ -454,7 +480,7 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case *anilist.Manga:
-		cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked to %s %s`, style.Blue(msg.Name()), style.Faint(msg.SiteURL)))
+		cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked to %s %s`, style.Fg(color.Orange)(msg.Name()), style.Faint(msg.SiteURL)))
 		return b, cmd
 	case tea.KeyMsg:
 		switch {
@@ -576,7 +602,7 @@ func (b *statefulBubble) updateAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				b.raiseError(err)
 			}
-		case key.Matches(msg, b.keymap.confirm):
+		case key.Matches(msg, b.keymap.confirm, b.keymap.selectOne):
 			if b.anilistC.SelectedItem() == nil {
 				break
 			}
@@ -589,7 +615,7 @@ func (b *statefulBubble) updateAnilistSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			b.previousState()
-			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked %s to %s %s`, style.Magenta(b.selectedManga.Name), style.Blue(manga.Name()), style.Faint(manga.SiteURL)))
+			cmd = b.chaptersC.NewStatusMessage(fmt.Sprintf(`Linked to %s %s`, style.Fg(color.Orange)(manga.Name()), style.Faint(manga.SiteURL)))
 			return b, cmd
 		}
 	}

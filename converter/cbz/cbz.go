@@ -2,6 +2,8 @@ package cbz
 
 import (
 	"archive/zip"
+	"bytes"
+	"encoding/xml"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/source"
@@ -30,9 +32,18 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 		return
 	}
 
-	cbzFile, err := filesystem.Api().Create(path)
+	err = SaveTo(chapter, path)
 	if err != nil {
-		return
+		return "", err
+	}
+
+	return path, nil
+}
+
+func SaveTo(chapter *source.Chapter, to string) error {
+	cbzFile, err := filesystem.Api().Create(to)
+	if err != nil {
+		return err
 	}
 
 	defer util.Ignore(cbzFile.Close)
@@ -42,15 +53,20 @@ func save(chapter *source.Chapter, temp bool) (path string, err error) {
 
 	for _, page := range chapter.Pages {
 		if err = addToZip(zipWriter, page.Contents, page.Filename()); err != nil {
-			return
+			return err
 		}
 	}
 
 	if viper.GetBool(constant.MetadataComicInfoXML) {
-		err = addToZip(zipWriter, chapter.ComicInfoXML(), "ComicInfo.xml")
+		comicInfo := chapter.ComicInfo()
+		marshalled, err := xml.MarshalIndent(comicInfo, "", "  ")
+		if err == nil {
+			buf := bytes.NewBuffer(marshalled)
+			err = addToZip(zipWriter, buf, "ComicInfo.xml")
+		}
 	}
 
-	return
+	return err
 }
 
 func addToZip(writer *zip.Writer, file io.Reader, name string) error {

@@ -1,161 +1,65 @@
 package history
 
 import (
-	"encoding/json"
-	"fmt"
+	"github.com/metafates/mangal/cache"
 	"github.com/metafates/mangal/constant"
-	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/integration"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/where"
+	"github.com/samber/mo"
 	"github.com/spf13/viper"
-	"os"
+	"time"
 )
 
-type SavedChapter struct {
-	SourceID           string `json:"source_id"`
-	MangaName          string `json:"manga_name"`
-	MangaURL           string `json:"manga_url"`
-	MangaChaptersTotal int    `json:"manga_chapters_total"`
-	Name               string `json:"name"`
-	URL                string `json:"url"`
-	ID                 string `json:"id"`
-	Index              int    `json:"index"`
-	MangaID            string `json:"manga_id"`
-}
-
-func (c *SavedChapter) String() string {
-	return fmt.Sprintf("%s : %d / %d", c.MangaName, c.Index, c.MangaChaptersTotal)
-}
+var cacher = cache.New[map[string]*SavedChapter](
+	where.History(),
+	&cache.Options{
+		ExpireEvery: mo.None[time.Duration](),
+	},
+)
 
 // Get returns all chapters from the history file
 func Get() (chapters map[string]*SavedChapter, err error) {
-	log.Info("Getting history location")
-	historyFile := where.History()
-
-	// decode json into slice of structs
-	log.Info("Reading history file")
-	contents, err := filesystem.Api().ReadFile(historyFile)
-	if err != nil {
-		log.Error(err)
-		return
+	cached, ok := cacher.Get().Get()
+	if !ok {
+		return make(map[string]*SavedChapter), nil
 	}
 
-	log.Info("Decoding history from json")
-	err = json.Unmarshal(contents, &chapters)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
-	return
+	return cached, nil
 }
 
 // Save saves the chapter to the history file
 func Save(chapter *source.Chapter) error {
 	if viper.GetBool(constant.AnilistEnable) {
-		defer func() {
+		go func() {
 			log.Info("Saving chapter to anilist")
 			err := integration.Anilist.MarkRead(chapter)
 			if err != nil {
-				log.Error("Saving chapter to anilist failed: " + err.Error())
+				log.Warn("Saving chapter to anilist failed: " + err.Error())
 			}
 		}()
 	}
 
-	log.Info("Saving chapter to history")
-
-	historyFile := where.History()
-
-	// decode json into slice of structs
-	var chapters map[string]*SavedChapter
-	log.Info("Reading history file")
-	contents, err := filesystem.Api().ReadFile(historyFile)
+	saved, err := Get()
 	if err != nil {
-		log.Error(err)
 		return err
 	}
 
-	log.Info("Decoding history from json")
-	err = json.Unmarshal(contents, &chapters)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+	savedChapter := newSavedChapter(chapter)
+	saved[savedChapter.encode()] = savedChapter
 
-	jsonChapter := SavedChapter{
-		SourceID:           chapter.Manga.Source.ID(),
-		MangaName:          chapter.Manga.Name,
-		MangaURL:           chapter.Manga.URL,
-		Name:               chapter.Name,
-		URL:                chapter.URL,
-		ID:                 chapter.ID,
-		MangaID:            chapter.Manga.ID,
-		MangaChaptersTotal: len(chapter.Manga.Chapters),
-		Index:              int(chapter.Index),
-	}
-
-	chapters[fmt.Sprintf("%s (%s)", jsonChapter.MangaName, jsonChapter.SourceID)] = &jsonChapter
-
-	// encode json
-	log.Info("Encoding history to json")
-	encoded, err := json.Marshal(chapters)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	// write to file
-	log.Info("Writing history to file")
-	err = filesystem.Api().WriteFile(historyFile, encoded, os.ModePerm)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	return nil
+	return cacher.Set(saved)
 }
 
 // Remove removes the chapter from the history file
 func Remove(chapter *SavedChapter) error {
-	log.Info("Removing chapter from history")
-
-	historyFile := where.History()
-
-	// decode json into slice of structs
-	var chapters map[string]*SavedChapter
-	log.Info("Reading history file")
-	contents, err := filesystem.Api().ReadFile(historyFile)
+	saved, err := Get()
 	if err != nil {
-		log.Error(err)
 		return err
 	}
 
-	log.Info("Decoding history from json")
-	err = json.Unmarshal(contents, &chapters)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
+	delete(saved, chapter.encode())
 
-	delete(chapters, fmt.Sprintf("%s (%s)", chapter.MangaName, chapter.SourceID))
-
-	// encode json
-	log.Info("Encoding history to json")
-	encoded, err := json.Marshal(chapters)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	// write to file
-	log.Info("Writing history to file")
-	err = filesystem.Api().WriteFile(historyFile, encoded, os.ModePerm)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-
-	return nil
+	return cacher.Set(saved)
 }

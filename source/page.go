@@ -16,11 +16,11 @@ import (
 // Page represents a page in a chapter
 type Page struct {
 	// URL of the page. Used to download the page.
-	URL string
+	URL string `json:"url" jsonschema:"description=URL of the page. Used to download the image."`
 	// Index of the page in the chapter.
-	Index uint16
+	Index uint16 `json:"index" jsonschema:"description=Index of the page in the chapter."`
 	// Extension of the page image.
-	Extension string
+	Extension string `json:"extension" jsonschema:"description=Extension of the page image."`
 	// Size of the page in bytes
 	Size uint64 `json:"-"`
 	// Contents of the page
@@ -29,16 +29,16 @@ type Page struct {
 	Chapter *Chapter `json:"-"`
 }
 
-func (p *Page) request() (req *http.Request, err error) {
-	req, err = http.NewRequest(http.MethodGet, p.URL, nil)
+func (p *Page) request() (*http.Request, error) {
+	req, err := http.NewRequest(http.MethodGet, p.URL, nil)
 	if err != nil {
 		log.Error(err)
-		return
+		return nil, err
 	}
 
 	req.Header.Set("Referer", p.Chapter.URL)
 	req.Header.Set("User-Agent", constant.UserAgent)
-	return
+	return req, nil
 }
 
 // Download Page contents.
@@ -108,7 +108,7 @@ func (p *Page) Close() error {
 
 // Read reads from the page contents.
 func (p *Page) Read(b []byte) (int, error) {
-	log.Debugf("Reading page contents #%d", p.Index)
+	log.Tracef("Reading page contents #%d", p.Index)
 	if p.Contents == nil {
 		err := errors.New("page not downloaded")
 		log.Error(err)

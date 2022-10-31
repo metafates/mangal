@@ -66,7 +66,7 @@ func mangaFromTable(table *lua.LTable, index uint16) (manga *source.Manga, err e
 				return err
 			}
 
-			manga.Metadata.Cover = v
+			manga.Metadata.Cover.ExtraLarge = v
 			return nil
 		}},
 		"genres": {A: lua.LTString, B: false, C: func(v string) error {
@@ -108,7 +108,7 @@ func chapterFromTable(table *lua.LTable, manga *source.Manga, index uint16) (cha
 				return err
 			}
 
-			manga.Metadata.Cover = v
+			manga.Metadata.Cover.ExtraLarge = v
 			return nil
 		}},
 	}

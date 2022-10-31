@@ -5,6 +5,7 @@ import (
 	"github.com/metafates/mangal/source"
 )
 
+// Scraper is a generic scraper downloads html pages and parses them
 type Scraper struct {
 	mangasCollector   *colly.Collector
 	chaptersCollector *colly.Collector
@@ -17,10 +18,12 @@ type Scraper struct {
 	config *Configuration
 }
 
+// Name of the scraper
 func (s *Scraper) Name() string {
 	return s.config.Name
 }
 
+// ID of the scraper
 func (s *Scraper) ID() string {
 	return s.config.ID()
 }

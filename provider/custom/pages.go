@@ -7,10 +7,6 @@ import (
 )
 
 func (s *luaSource) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
-	if cached, ok := s.cachedPages[chapter.URL]; ok {
-		return cached, nil
-	}
-
 	_, err := s.call(constant.ChapterPagesFn, lua.LTTable, lua.LString(chapter.URL))
 
 	if err != nil {
@@ -18,8 +14,7 @@ func (s *luaSource) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 	}
 
 	table := s.state.CheckTable(-1)
-	pages := make([]*source.Page, table.Len())
-	var i uint16
+	pages := make([]*source.Page, 0)
 
 	table.ForEach(func(k lua.LValue, v lua.LValue) {
 		if k.Type() != lua.LTNumber {
@@ -36,10 +31,8 @@ func (s *luaSource) PagesOf(chapter *source.Chapter) ([]*source.Page, error) {
 			s.state.RaiseError(err.Error())
 		}
 
-		pages[i] = page
-		i++
+		pages = append(pages, page)
 	})
 
-	s.cachedPages[chapter.URL] = pages
 	return pages, nil
 }

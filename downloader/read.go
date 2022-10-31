@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"fmt"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
@@ -22,8 +23,15 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		)
 	}
 
-	log.Info(fmt.Sprintf("downloading %s for reading. Provider is %s", chapter.Name, chapter.Source().ID()))
-	log.Info("getting pages of " + chapter.Name)
+	if viper.GetBool(constant.DownloaderReadDownloaded) && chapter.IsDownloaded() {
+		path, err := chapter.Path(false)
+		if err == nil {
+			return openRead(path, chapter, progress)
+		}
+	}
+
+	log.Infof("downloading %s for reading. Provider is %s", chapter.Name, chapter.Source().ID())
+	log.Infof("getting pages of %s", chapter.Name)
 	progress("Getting pages")
 	pages, err := chapter.Source().PagesOf(chapter)
 	if err != nil {
@@ -31,7 +39,7 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		return err
 	}
 
-	err = chapter.DownloadPages(progress)
+	err = chapter.DownloadPages(true, progress)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -48,7 +56,7 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 	progress(fmt.Sprintf(
 		"Converting %d pages to %s %s",
 		len(pages),
-		style.Yellow(viper.GetString(constant.FormatsUse)),
+		style.Fg(color.Yellow)(viper.GetString(constant.FormatsUse)),
 		style.Faint(chapter.SizeHuman())),
 	)
 	path, err := conv.SaveTemp(chapter)
@@ -57,12 +65,17 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		return err
 	}
 
-	err = openRead(path, progress)
+	err = openRead(path, chapter, progress)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
+	progress("Done")
+	return nil
+}
+
+func openRead(path string, chapter *source.Chapter, progress func(string)) error {
 	if viper.GetBool(constant.HistorySaveOnRead) {
 		go func() {
 			err := history.Save(chapter)
@@ -74,11 +87,6 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		}()
 	}
 
-	progress("Done")
-	return nil
-}
-
-func openRead(path string, progress func(string)) error {
 	var (
 		reader string
 		err    error

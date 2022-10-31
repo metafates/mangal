@@ -1,0 +1,615 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/inline.Output",
+  "$defs": {
+    "anilist.Manga": {
+      "properties": {
+        "title": {
+          "properties": {
+            "romaji": {
+              "type": "string",
+              "description": "Romanized title of the manga."
+            },
+            "english": {
+              "type": "string",
+              "description": "English title of the manga."
+            },
+            "native": {
+              "type": "string",
+              "description": "Native title of the manga. Usually in kanji."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "romaji",
+            "english",
+            "native"
+          ]
+        },
+        "id": {
+          "type": "integer",
+          "description": "ID of the manga on Anilist."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the manga in html format."
+        },
+        "coverImage": {
+          "properties": {
+            "extraLarge": {
+              "type": "string",
+              "description": "URL of the extra large cover image. If the image is not available"
+            },
+            "large": {
+              "type": "string",
+              "description": "URL of the large cover image."
+            },
+            "medium": {
+              "type": "string",
+              "description": "URL of the medium cover image."
+            },
+            "color": {
+              "type": "string",
+              "description": "Average color of the cover image."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "extraLarge",
+            "large",
+            "medium",
+            "color"
+          ],
+          "description": "Cover image of the manga."
+        },
+        "bannerImage": {
+          "type": "string",
+          "description": "Banner image of the manga."
+        },
+        "tags": {
+          "items": {
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the tag."
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the tag."
+              },
+              "rank": {
+                "type": "integer",
+                "description": "Rank of the tag. How relevant it is to the manga from 1 to 100."
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "name",
+              "description",
+              "rank"
+            ]
+          },
+          "type": "array"
+        },
+        "genres": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Genres of the manga."
+        },
+        "characters": {
+          "properties": {
+            "nodes": {
+              "items": {
+                "properties": {
+                  "name": {
+                    "properties": {
+                      "full": {
+                        "type": "string",
+                        "description": "Full name of the character."
+                      },
+                      "native": {
+                        "type": "string",
+                        "description": "Native name of the character. Usually in kanji."
+                      }
+                    },
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                      "full",
+                      "native"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "name"
+                ]
+              },
+              "type": "array"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "nodes"
+          ]
+        },
+        "staff": {
+          "properties": {
+            "edges": {
+              "items": {
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "description": "Role of the staff member."
+                  },
+                  "node": {
+                    "properties": {
+                      "name": {
+                        "properties": {
+                          "full": {
+                            "type": "string",
+                            "description": "Full name of the staff member."
+                          }
+                        },
+                        "additionalProperties": false,
+                        "type": "object",
+                        "required": [
+                          "full"
+                        ]
+                      }
+                    },
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                      "name"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "role",
+                  "node"
+                ]
+              },
+              "type": "array"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "edges"
+          ]
+        },
+        "startDate": {
+          "$ref": "#/$defs/anilist.date",
+          "description": "Date the manga started publishing."
+        },
+        "endDate": {
+          "$ref": "#/$defs/anilist.date",
+          "description": "Date the manga ended publishing."
+        },
+        "synonyms": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Synonyms of the manga (Alternative titles)."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "FINISHED",
+            "RELEASING",
+            "NOT_YET_RELEASED",
+            "CANCELLED",
+            "HIATUS"
+          ]
+        },
+        "idMal": {
+          "type": "integer",
+          "description": "ID of the manga on MyAnimeList."
+        },
+        "chapters": {
+          "type": "integer",
+          "description": "Amount of chapters the manga has when complete."
+        },
+        "siteUrl": {
+          "type": "string",
+          "description": "URL of the manga on Anilist."
+        },
+        "countryOfOrigin": {
+          "type": "string",
+          "description": "Country of origin of the manga."
+        },
+        "externalLinks": {
+          "items": {
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL of the external link."
+              }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "url"
+            ]
+          },
+          "type": "array",
+          "description": "External links related to the manga."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "title",
+        "id",
+        "description",
+        "coverImage",
+        "bannerImage",
+        "tags",
+        "genres",
+        "characters",
+        "staff",
+        "startDate",
+        "endDate",
+        "synonyms",
+        "status",
+        "idMal",
+        "chapters",
+        "siteUrl",
+        "countryOfOrigin",
+        "externalLinks"
+      ]
+    },
+    "anilist.date": {
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "month": {
+          "type": "integer"
+        },
+        "day": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "year",
+        "month",
+        "day"
+      ]
+    },
+    "inline.Manga": {
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source that the manga belongs to."
+        },
+        "mangal": {
+          "$ref": "#/$defs/source.Manga",
+          "description": "Mangal variant of the manga"
+        },
+        "anilist": {
+          "$ref": "#/$defs/anilist.Manga",
+          "description": "Anilist is the closest anilist match to mangal manga"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "source",
+        "mangal",
+        "anilist"
+      ]
+    },
+    "inline.Output": {
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Query that was used to search for the manga."
+        },
+        "result": {
+          "items": {
+            "$ref": "#/$defs/inline.Manga"
+          },
+          "type": "array",
+          "description": "Result of the search."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "query",
+        "result"
+      ]
+    },
+    "source.Chapter": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the chapter"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the chapter"
+        },
+        "index": {
+          "type": "integer",
+          "description": "Index of the chapter in the manga"
+        },
+        "id": {
+          "type": "string",
+          "description": "ID of the chapter in the source"
+        },
+        "volume": {
+          "type": "string",
+          "description": "Volume which the chapter belongs to"
+        },
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/source.Page"
+          },
+          "type": "array",
+          "description": "Pages of the chapter"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "url",
+        "index",
+        "id",
+        "volume",
+        "pages"
+      ]
+    },
+    "source.Manga": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the manga"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the manga"
+        },
+        "index": {
+          "type": "integer",
+          "description": "Index of the manga in the source"
+        },
+        "id": {
+          "type": "string",
+          "description": "ID of manga in the source"
+        },
+        "chapters": {
+          "items": {
+            "$ref": "#/$defs/source.Chapter"
+          },
+          "type": "array",
+          "description": "Chapters of the manga"
+        },
+        "metadata": {
+          "properties": {
+            "genres": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "description": "Genres of the manga"
+            },
+            "summary": {
+              "type": "string",
+              "description": "Summary in the plain text with newlines"
+            },
+            "staff": {
+              "properties": {
+                "story": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "description": "Story authors"
+                },
+                "art": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "description": "Art authors"
+                },
+                "translation": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "description": "Translation group"
+                },
+                "lettering": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "description": "Lettering group"
+                }
+              },
+              "additionalProperties": false,
+              "type": "object",
+              "required": [
+                "story",
+                "art",
+                "translation",
+                "lettering"
+              ],
+              "description": "Staff that worked on the manga"
+            },
+            "cover": {
+              "properties": {
+                "extraLarge": {
+                  "type": "string",
+                  "description": "ExtraLarge is the largest cover image. If not available"
+                },
+                "large": {
+                  "type": "string",
+                  "description": "Large is the second-largest cover image."
+                },
+                "medium": {
+                  "type": "string",
+                  "description": "Medium cover image. The smallest one."
+                },
+                "color": {
+                  "type": "string",
+                  "description": "Color average color of the cover image."
+                }
+              },
+              "additionalProperties": false,
+              "type": "object",
+              "required": [
+                "extraLarge",
+                "large",
+                "medium",
+                "color"
+              ],
+              "description": "Cover images of the manga"
+            },
+            "bannerImage": {
+              "type": "string",
+              "description": "BannerImage is the banner image of the manga."
+            },
+            "tags": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "description": "Tags of the manga"
+            },
+            "characters": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "description": "Characters of the manga"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "FINISHED",
+                "RELEASING",
+                "NOT_YET_RELEASED",
+                "CANCELLED",
+                "HIATUS"
+              ]
+            },
+            "startDate": {
+              "$ref": "#/$defs/source.date",
+              "description": "StartDate is the date when the manga started."
+            },
+            "endDate": {
+              "$ref": "#/$defs/source.date",
+              "description": "EndDate is the date when the manga ended."
+            },
+            "synonyms": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "description": "Synonyms other names of the manga."
+            },
+            "chapters": {
+              "type": "integer",
+              "description": "The amount of chapters the manga will have when completed."
+            },
+            "urls": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "description": "External URLs of the manga."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "genres",
+            "summary",
+            "staff",
+            "cover",
+            "bannerImage",
+            "tags",
+            "characters",
+            "status",
+            "startDate",
+            "endDate",
+            "synonyms",
+            "chapters",
+            "urls"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "url",
+        "index",
+        "id",
+        "chapters",
+        "metadata"
+      ]
+    },
+    "source.Page": {
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "URL of the page. Used to download the image."
+        },
+        "index": {
+          "type": "integer",
+          "description": "Index of the page in the chapter."
+        },
+        "extension": {
+          "type": "string",
+          "description": "Extension of the page image."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "url",
+        "index",
+        "extension"
+      ]
+    },
+    "source.date": {
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "month": {
+          "type": "integer"
+        },
+        "day": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "year",
+        "month",
+        "day"
+      ]
+    }
+  }
+}

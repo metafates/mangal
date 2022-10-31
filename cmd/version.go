@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/style"
-	"github.com/metafates/mangal/updater"
-	"github.com/metafates/mangal/util"
+	"github.com/metafates/mangal/version"
+	"github.com/samber/lo"
 	"os"
 	"runtime"
 	"strings"
@@ -18,6 +17,7 @@ import (
 func init() {
 	rootCmd.AddCommand(versionCmd)
 	versionCmd.SetOut(os.Stdout)
+	versionCmd.Flags().BoolP("short", "s", false, "print short version")
 }
 
 var versionCmd = &cobra.Command{
@@ -25,44 +25,36 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of mangal",
 	Long:  `All software has versions. This is mangal's`,
 	Run: func(cmd *cobra.Command, args []string) {
-		erase := util.PrintErasable(fmt.Sprintf("%s Checking if new version is available...", icon.Get(icon.Progress)))
-		var newVersion string
-
-		version, err := updater.LatestVersion()
-		if err == nil {
-			comp, err := util.CompareVersions(constant.Version, version)
-			if err == nil && comp == -1 {
-				newVersion = version
-			}
+		if lo.Must(cmd.Flags().GetBool("short")) {
+			cmd.Println(constant.Version)
+			return
 		}
 
-		erase()
+		defer version.Notify()
 
 		versionInfo := struct {
-			Version    string
-			OS         string
-			Arch       string
-			BuiltAt    string
-			BuiltBy    string
-			Revision   string
-			App        string
-			NewVersion string
+			Version  string
+			OS       string
+			Arch     string
+			BuiltAt  string
+			BuiltBy  string
+			Revision string
+			App      string
 		}{
-			Version:    constant.Version,
-			App:        constant.Mangal,
-			OS:         runtime.GOOS,
-			Arch:       runtime.GOARCH,
-			BuiltAt:    strings.TrimSpace(constant.BuiltAt),
-			BuiltBy:    constant.BuiltBy,
-			Revision:   constant.Revision,
-			NewVersion: newVersion,
+			Version:  constant.Version,
+			App:      constant.Mangal,
+			OS:       runtime.GOOS,
+			Arch:     runtime.GOARCH,
+			BuiltAt:  strings.TrimSpace(constant.BuiltAt),
+			BuiltBy:  constant.BuiltBy,
+			Revision: constant.Revision,
 		}
 
 		t, err := template.New("version").Funcs(map[string]any{
 			"faint":   style.Faint,
 			"bold":    style.Bold,
-			"magenta": style.Magenta,
-			"green":   style.Green,
+			"magenta": style.Fg(color.Purple),
+			"green":   style.Fg(color.Green),
 			"repeat":  strings.Repeat,
 			"concat": func(a, b string) string {
 				return a + b
@@ -74,11 +66,7 @@ var versionCmd = &cobra.Command{
   {{ faint "Build Date" }}  	  {{ bold .BuiltAt }}
   {{ faint "Built By" }}        {{ bold .BuiltBy }}
   {{ faint "Platform" }}        {{ bold .OS }}/{{ bold .Arch }}
-
-{{ if not (eq .NewVersion "") }}
-{{ green "▇▇▇" }} New version available {{ bold .NewVersion }}
-{{ faint (concat "https://github.com/metafates/mangal/releases/tag/v" .NewVersion) }}
-{{ end }}`)
+`)
 		handleErr(err)
 		handleErr(t.Execute(cmd.OutOrStdout(), versionInfo))
 	},
