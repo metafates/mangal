@@ -1,28 +1,32 @@
 package history
 
 import (
-	"github.com/metafates/mangal/cache"
+	"github.com/metafates/gache"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/integration"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/where"
-	"github.com/samber/mo"
 	"github.com/spf13/viper"
-	"time"
 )
 
-var cacher = cache.New[map[string]*SavedChapter](
-	where.History(),
-	&cache.Options{
-		ExpireEvery: mo.None[time.Duration](),
+var cacher = gache.New[map[string]*SavedChapter](
+	&gache.Options{
+		Path:       where.History(),
+		FileSystem: &filesystem.GacheFs{},
 	},
 )
 
 // Get returns all chapters from the history file
 func Get() (chapters map[string]*SavedChapter, err error) {
-	cached, ok := cacher.Get().Get()
-	if !ok {
+	cached, expired, err := cacher.Get()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if expired {
 		return make(map[string]*SavedChapter), nil
 	}
 

@@ -1,7 +1,8 @@
 package custom
 
 import (
-	"github.com/metafates/mangal/cache"
+	"github.com/metafates/gache"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/mo"
@@ -10,23 +11,24 @@ import (
 )
 
 type cacher[T any] struct {
-	internal *cache.Cache[map[string]T]
+	internal *gache.Cache[map[string]T]
 }
 
 func newCacher[T any](name string) *cacher[T] {
 	return &cacher[T]{
-		internal: cache.New[map[string]T](filepath.Join(where.Cache(), util.SanitizeFilename(name)+".json"), &cache.Options{
-			ExpireEvery: mo.Some(time.Hour * 24),
+		internal: gache.New[map[string]T](&gache.Options{
+			Lifetime:   time.Hour * 24,
+			Path:       filepath.Join(where.Cache(), util.SanitizeFilename(name)+".json"),
+			FileSystem: &filesystem.GacheFs{},
 		}),
 	}
 }
 
 func (c *cacher[T]) Get(key string) mo.Option[T] {
-	if c.internal.Get().IsAbsent() {
+	data, expired, err := c.internal.Get()
+	if err != nil || expired || data == nil {
 		return mo.None[T]()
 	}
-
-	data := c.internal.Get().MustGet()
 
 	if x, ok := data[key]; ok {
 		return mo.Some(x)
@@ -36,12 +38,14 @@ func (c *cacher[T]) Get(key string) mo.Option[T] {
 }
 
 func (c *cacher[T]) Set(key string, t T) error {
-	var data map[string]T
+	data, expired, err := c.internal.Get()
 
-	if c.internal.Get().IsAbsent() {
+	if err != nil {
+		return err
+	}
+
+	if expired || data == nil {
 		data = make(map[string]T)
-	} else {
-		data = c.internal.Get().MustGet()
 	}
 
 	data[key] = t
