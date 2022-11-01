@@ -15,7 +15,7 @@ func Notify() {
 	erase()
 	if err == nil {
 		comp, err := Compare(version, constant.Version)
-		if err == nil && comp == -1 {
+		if err == nil && comp <= 0 {
 			return
 		}
 	}
