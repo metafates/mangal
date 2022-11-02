@@ -232,12 +232,13 @@ For example, on __Linux__ it would be `~/.config/mangal/mangal.toml`.
 Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
 > See `mangal env` to show all available env variables.
 
-| Command              | Description                                      |
-|----------------------|--------------------------------------------------|
-| `mangal config get`  | Get config value for specific key                |
-| `mangal config set`  | Set config value for specific key                |
-| `mangal config info` | List all config fields with description for each |
-| `mangal config init` | Write current config to a file                   |
+| Command               | Description                                      |
+|-----------------------|--------------------------------------------------|
+| `mangal config get`   | Get config value for specific key                |
+| `mangal config set`   | Set config value for specific key                |
+| `mangal config reset` | Reset config value for specific key              |
+| `mangal config info`  | List all config fields with description for each |
+| `mangal config init`  | Write current config to a file                   |
 
 ## Custom scrapers
 
