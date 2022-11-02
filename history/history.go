@@ -26,7 +26,7 @@ func Get() (chapters map[string]*SavedChapter, err error) {
 		return nil, err
 	}
 
-	if expired {
+	if expired || cached == nil {
 		return make(map[string]*SavedChapter), nil
 	}
 
