@@ -50,7 +50,7 @@ var configCmd = &cobra.Command{
 
 func init() {
 	configCmd.AddCommand(configInfoCmd)
-	configInfoCmd.Flags().StringP("key", "k", "", "The key to get the value for")
+	configInfoCmd.Flags().StringSliceP("key", "k", []string{}, "The keys to get info for")
 	configInfoCmd.Flags().BoolP("json", "j", false, "Output as JSON")
 	_ = configInfoCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
 
@@ -62,16 +62,20 @@ var configInfoCmd = &cobra.Command{
 	Short: "Show the info for each config field with description",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			key    = lo.Must(cmd.Flags().GetString("key"))
+			keys   = lo.Must(cmd.Flags().GetStringSlice("key"))
 			asJson = lo.Must(cmd.Flags().GetBool("json"))
 			fields = lo.Values(config.Default)
 		)
 
-		if key != "" {
-			if field, ok := config.Default[key]; ok {
-				fields = []config.Field{field}
-			} else {
-				handleErr(errUnknownKey(key))
+		if len(keys) > 0 {
+			fields = make([]config.Field, 0, len(keys))
+
+			for _, key := range keys {
+				if _, ok := config.Default[key]; !ok {
+					handleErr(errUnknownKey(key))
+				}
+
+				fields = append(fields, config.Default[key])
 			}
 		}
 
