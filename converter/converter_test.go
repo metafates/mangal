@@ -8,7 +8,7 @@ import (
 
 func TestGet(t *testing.T) {
 	Convey("When trying to get a valid converter", t, func() {
-		_, err := Get(constant.CBZ)
+		_, err := Get(constant.FormatCBZ)
 		Convey("Then no error should be returned", func() {
 			So(err, ShouldBeNil)
 		})

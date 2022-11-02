@@ -1,8 +1,8 @@
 package constant
 
 const (
-	Plain = "plain"
-	CBZ   = "cbz"
-	PDF   = "pdf"
-	ZIP   = "zip"
+	FormatPlain = "plain"
+	FormatCBZ   = "cbz"
+	FormatPDF   = "pdf"
+	FormatZIP   = "zip"
 )

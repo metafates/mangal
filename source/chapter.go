@@ -117,7 +117,7 @@ func (c *Chapter) Filename() (filename string) {
 
 	// plain format assumes that chapter is a directory with images
 	// rather than a single file. So no need to add extension to it
-	if f := viper.GetString(constant.FormatsUse); f != constant.Plain {
+	if f := viper.GetString(constant.FormatsUse); f != constant.FormatPlain {
 		return filename + "." + f
 	}
 

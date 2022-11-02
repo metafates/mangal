@@ -44,8 +44,8 @@ func Metadata(mangaPath string) error {
 	manga.Chapters = make([]*source.Chapter, 0)
 	chaptersPaths := make(map[*source.Chapter]string)
 	for _, chapter := range chapters {
-		// since we are trying to update ComicInfo.xml here, we do not care about any other formats other than CBZ
-		if chapter.format != constant.CBZ {
+		// since we are trying to update ComicInfo.xml here, we do not care about any other formats other than FormatCBZ
+		if chapter.format != constant.FormatCBZ {
 			continue
 		}
 
