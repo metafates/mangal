@@ -6,7 +6,6 @@ import (
 	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/style"
-	"github.com/samber/lo"
 	"github.com/spf13/viper"
 )
 
@@ -38,8 +37,7 @@ func (f *Field) typeName() string {
 	}
 }
 
-// Json returns the config as json string
-func (f *Field) Json() string {
+func (f *Field) MarshalJSON() ([]byte, error) {
 	field := struct {
 		Key         string `json:"key"`
 		Value       any    `json:"value"`
@@ -52,8 +50,7 @@ func (f *Field) Json() string {
 		Type:        f.typeName(),
 	}
 
-	output := lo.Must(json.Marshal(field))
-	return string(output)
+	return json.Marshal(field)
 }
 
 // Pretty format field as string for further cli output

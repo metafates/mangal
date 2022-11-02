@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/metafates/mangal/color"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -51,6 +53,8 @@ func init() {
 	configInfoCmd.Flags().StringP("key", "k", "", "The key to get the value for")
 	configInfoCmd.Flags().BoolP("json", "j", false, "Output as JSON")
 	_ = configInfoCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
+
+	configInfoCmd.SetOut(os.Stdout)
 }
 
 var configInfoCmd = &cobra.Command{
@@ -75,17 +79,17 @@ var configInfoCmd = &cobra.Command{
 			return fields[i].Key < fields[j].Key
 		})
 
-		for i, field := range fields {
-			if asJson {
-				fmt.Println(field.Json())
-			} else {
-				fmt.Print(field.Pretty())
-			}
+		if asJson {
+			encoder := json.NewEncoder(cmd.OutOrStdout())
+			lo.Must0(encoder.Encode(fields))
+			return
+		}
 
-			if !asJson {
-				if i < len(fields)-1 {
-					fmt.Println()
-				}
+		for i, field := range fields {
+			fmt.Print(field.Pretty())
+
+			if i < len(fields)-1 {
+				fmt.Println()
 			}
 		}
 	},

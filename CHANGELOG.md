@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Fix comic_info_xml_add_date and comic_info_xml_alternative_date flags #126
 - Fix notification that new version is available even though it's the same #125
 - Fix config set command doesn't work for string values #127
+- Fix json output for `config info -j` command #129"
 
 ## 4.0.0
 
