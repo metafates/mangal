@@ -41,11 +41,13 @@ func (f *Field) MarshalJSON() ([]byte, error) {
 	field := struct {
 		Key         string `json:"key"`
 		Value       any    `json:"value"`
+		Default     any    `json:"default"`
 		Description string `json:"description"`
 		Type        string `json:"type"`
 	}{
 		Key:         f.Key,
-		Value:       f.Value,
+		Value:       viper.Get(f.Key),
+		Default:     f.Value,
 		Description: f.Description,
 		Type:        f.typeName(),
 	}
