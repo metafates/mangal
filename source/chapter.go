@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Chapter is a struct that represents a chapter of a manga.
@@ -162,6 +163,24 @@ func (c *Chapter) Source() Source {
 }
 
 func (c *Chapter) ComicInfo() *ComicInfo {
+	var (
+		day, month, year int
+	)
+
+	if viper.GetBool(constant.MetadataComicInfoXMLAddDate) {
+		if viper.GetBool(constant.MetadataComicInfoXMLAlternativeDate) {
+			// get current date
+			t := time.Now()
+			day = t.Day()
+			month = int(t.Month())
+			year = t.Year()
+		} else {
+			day = c.Manga.Metadata.StartDate.Day
+			month = c.Manga.Metadata.StartDate.Month
+			year = c.Manga.Metadata.StartDate.Year
+		}
+	} // empty dates will be omitted
+
 	return &ComicInfo{
 		XmlnsXsd: "http://www.w3.org/2001/XMLSchema",
 		XmlnsXsi: "http://www.w3.org/2001/XMLSchema-instance",
@@ -175,9 +194,9 @@ func (c *Chapter) ComicInfo() *ComicInfo {
 		Summary:    c.Manga.Metadata.Summary,
 		Count:      c.Manga.Metadata.Chapters,
 		Characters: strings.Join(c.Manga.Metadata.Characters, ","),
-		Year:       c.Manga.Metadata.StartDate.Year,
-		Month:      c.Manga.Metadata.StartDate.Month,
-		Day:        c.Manga.Metadata.StartDate.Day,
+		Year:       year,
+		Month:      month,
+		Day:        day,
 		Writer:     strings.Join(c.Manga.Metadata.Staff.Story, ","),
 		Penciller:  strings.Join(c.Manga.Metadata.Staff.Art, ","),
 		Letterer:   strings.Join(c.Manga.Metadata.Staff.Lettering, ","),
@@ -186,5 +205,4 @@ func (c *Chapter) ComicInfo() *ComicInfo {
 		Notes:      "Downloaded with Mangal. https://github.com/metafates/mangal",
 		Manga:      "YesAndRightToLeft",
 	}
-
 }
