@@ -185,7 +185,7 @@ func (c *Chapter) ComicInfo() *ComicInfo {
 		XmlnsXsd: "http://www.w3.org/2001/XMLSchema",
 		XmlnsXsi: "http://www.w3.org/2001/XMLSchema-instance",
 
-		Title:      c.Manga.Name,
+		Title:      c.Name,
 		Series:     c.Manga.Name,
 		Number:     int(c.Index),
 		Web:        c.URL,
