@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 4.0.1
+
+This update includes just some bug-fixes and internal improvements. 🥱 
+
+- Better caching by [Gache](https://github.com/metafates/gache) library
+- Fix comic_info_xml_add_date and comic_info_xml_alternative_date flags #126
+- Fix notification that new version is available even though it's the same #125
+- Fix config set command doesn't work for string values #127
+- Fix json output for `config info -j` command #129
+- Fix history and default sources not working well together in TUI
+- `config reset` now accepts `--all` flag to reset all config values
+
 ## 4.0.0
 
 I've been actively working on this update lately, and I'm finally happy to share the 4th version of Mangal! 🐳

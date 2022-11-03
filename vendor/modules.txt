@@ -163,6 +163,9 @@ github.com/mattn/go-localereader
 # github.com/mattn/go-runewidth v0.0.14
 ## explicit; go 1.9
 github.com/mattn/go-runewidth
+# github.com/metafates/gache v0.0.2
+## explicit; go 1.19
+github.com/metafates/gache
 # github.com/metafates/mangal-lua-libs v0.4.2
 ## explicit; go 1.18
 github.com/metafates/mangal-lua-libs
@@ -326,7 +329,7 @@ github.com/yuin/gopher-lua
 github.com/yuin/gopher-lua/ast
 github.com/yuin/gopher-lua/parse
 github.com/yuin/gopher-lua/pm
-# golang.org/x/exp v0.0.0-20221028150844-83b7d23a625f
+# golang.org/x/exp v0.0.0-20221031165847-c99f073a8326
 ## explicit; go 1.18
 golang.org/x/exp/constraints
 golang.org/x/exp/slices

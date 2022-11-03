@@ -18,13 +18,13 @@ import (
 func init() {
 	filesystem.SetMemMapFs()
 	lo.Must0(config.Setup())
-	viper.Set(constant.FormatsUse, constant.ZIP)
+	viper.Set(constant.FormatsUse, constant.FormatZIP)
 }
 
 func TestCBZ(t *testing.T) {
 	z := New()
 
-	Convey("Given a ZIP converter", t, func() {
+	Convey("Given a FormatZIP converter", t, func() {
 		Convey("When saving a chapter", func() {
 			chapter := SampleChapter(t)
 			result, err := z.Save(chapter)

@@ -17,13 +17,13 @@ import (
 func init() {
 	filesystem.SetMemMapFs()
 	lo.Must0(config.Setup())
-	viper.Set(constant.FormatsUse, constant.PDF)
+	viper.Set(constant.FormatsUse, constant.FormatPDF)
 }
 
 func TestPDF(t *testing.T) {
 	pdf := New()
 
-	Convey("Given a PDF converter", t, func() {
+	Convey("Given a FormatPDF converter", t, func() {
 		Convey("When saving a chapter", func() {
 			chapter := SampleChapter(t)
 			result, err := pdf.Save(chapter)

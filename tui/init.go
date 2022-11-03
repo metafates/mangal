@@ -10,7 +10,7 @@ import (
 )
 
 func (b *statefulBubble) Init() tea.Cmd {
-	if names := viper.GetStringSlice(constant.DownloaderDefaultSources); len(names) != 0 {
+	if names := viper.GetStringSlice(constant.DownloaderDefaultSources); b.state != historyState && len(names) != 0 {
 		var providers []*provider.Provider
 
 		for _, name := range names {

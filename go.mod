@@ -15,6 +15,7 @@ require (
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/ka-weihe/fast-levenshtein v0.0.0-20201227151214-4c99ee36a1ba
 	github.com/lithammer/fuzzysearch v1.1.5
+	github.com/metafates/gache v0.0.2
 	github.com/metafates/mangal-lua-libs v0.4.2
 	github.com/muesli/reflow v0.3.0
 	github.com/pdfcpu/pdfcpu v0.3.13
@@ -26,7 +27,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.13.0
 	github.com/yuin/gopher-lua v0.0.0-20220504180219-658193537a64
-	golang.org/x/exp v0.0.0-20221028150844-83b7d23a625f
+	golang.org/x/exp v0.0.0-20221031165847-c99f073a8326
 	golang.org/x/term v0.1.0
 )
 

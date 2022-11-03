@@ -25,12 +25,12 @@ func getChapters(manga string) ([]*downloadedChapter, error) {
 
 		name := info.Name()
 		switch filepath.Ext(name)[1:] {
-		case constant.CBZ:
-			chapters = append(chapters, &downloadedChapter{path: path, format: constant.CBZ})
-		case constant.PDF:
-			chapters = append(chapters, &downloadedChapter{path: path, format: constant.PDF})
-		case constant.ZIP:
-			chapters = append(chapters, &downloadedChapter{path: path, format: constant.ZIP})
+		case constant.FormatCBZ:
+			chapters = append(chapters, &downloadedChapter{path: path, format: constant.FormatCBZ})
+		case constant.FormatPDF:
+			chapters = append(chapters, &downloadedChapter{path: path, format: constant.FormatPDF})
+		case constant.FormatZIP:
+			chapters = append(chapters, &downloadedChapter{path: path, format: constant.FormatZIP})
 		}
 
 		return nil

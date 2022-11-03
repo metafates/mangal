@@ -25,8 +25,8 @@ func SuggestMany(query string) []string {
 	if prev, ok := suggestionCache[query]; ok {
 		records = prev
 	} else {
-		cached, ok := cacher.Get().Get()
-		if !ok {
+		cached, expired, err := cacher.Get()
+		if err != nil || expired || cached == nil {
 			return []string{}
 		}
 

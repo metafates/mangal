@@ -19,10 +19,10 @@ type Converter interface {
 }
 
 var converters = map[string]Converter{
-	constant.Plain: plain.New(),
-	constant.CBZ:   cbz.New(),
-	constant.PDF:   pdf.New(),
-	constant.ZIP:   zip.New(),
+	constant.FormatPlain: plain.New(),
+	constant.FormatCBZ:   cbz.New(),
+	constant.FormatPDF:   pdf.New(),
+	constant.FormatZIP:   zip.New(),
 }
 
 // Available returns a list of available converters.

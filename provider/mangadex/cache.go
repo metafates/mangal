@@ -1,7 +1,8 @@
 package mangadex
 
 import (
-	"github.com/metafates/mangal/cache"
+	"github.com/metafates/gache"
+	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/mo"
 	"path/filepath"
@@ -9,23 +10,24 @@ import (
 )
 
 type cacher[T any] struct {
-	internal *cache.Cache[map[string]T]
+	internal *gache.Cache[map[string]T]
 }
 
 func newCacher[T any](name string) *cacher[T] {
 	return &cacher[T]{
-		internal: cache.New[map[string]T](
-			filepath.Join(where.Cache(), name+".json"),
-			&cache.Options{
-				ExpireEvery: mo.Some(time.Hour * 24),
+		internal: gache.New[map[string]T](
+			&gache.Options{
+				Path:       filepath.Join(where.Cache(), name+".json"),
+				Lifetime:   time.Hour * 24,
+				FileSystem: &filesystem.GacheFs{},
 			},
 		),
 	}
 }
 
 func (c *cacher[T]) Get(key string) mo.Option[T] {
-	cached, ok := c.internal.Get().Get()
-	if !ok {
+	cached, expired, err := c.internal.Get()
+	if err != nil || expired || cached == nil {
 		return mo.None[T]()
 	}
 
@@ -37,8 +39,12 @@ func (c *cacher[T]) Get(key string) mo.Option[T] {
 }
 
 func (c *cacher[T]) Set(key string, value T) error {
-	cached, ok := c.internal.Get().Get()
-	if !ok {
+	cached, expired, err := c.internal.Get()
+	if err != nil {
+		return err
+	}
+
+	if expired || cached == nil {
 		cached = map[string]T{}
 	}
 

@@ -5,9 +5,13 @@ package query
 func Remember(query string, weight int) error {
 	query = sanitize(query)
 
-	cached, ok := cacher.Get().Get()
-	if !ok {
+	cached, expired, err := cacher.Get()
+	if expired || err != nil {
 		cached = map[string]*queryRecord{}
+	}
+
+	if cached == nil {
+		cached = make(map[string]*queryRecord)
 	}
 
 	// if the query is already in the cache

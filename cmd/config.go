@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/metafates/mangal/color"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -48,9 +50,11 @@ var configCmd = &cobra.Command{
 
 func init() {
 	configCmd.AddCommand(configInfoCmd)
-	configInfoCmd.Flags().StringP("key", "k", "", "The key to get the value for")
+	configInfoCmd.Flags().StringSliceP("key", "k", []string{}, "The keys to get info for")
 	configInfoCmd.Flags().BoolP("json", "j", false, "Output as JSON")
 	_ = configInfoCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
+
+	configInfoCmd.SetOut(os.Stdout)
 }
 
 var configInfoCmd = &cobra.Command{
@@ -58,16 +62,20 @@ var configInfoCmd = &cobra.Command{
 	Short: "Show the info for each config field with description",
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			key    = lo.Must(cmd.Flags().GetString("key"))
+			keys   = lo.Must(cmd.Flags().GetStringSlice("key"))
 			asJson = lo.Must(cmd.Flags().GetBool("json"))
 			fields = lo.Values(config.Default)
 		)
 
-		if key != "" {
-			if field, ok := config.Default[key]; ok {
-				fields = []config.Field{field}
-			} else {
-				handleErr(errUnknownKey(key))
+		if len(keys) > 0 {
+			fields = make([]config.Field, 0, len(keys))
+
+			for _, key := range keys {
+				if _, ok := config.Default[key]; !ok {
+					handleErr(errUnknownKey(key))
+				}
+
+				fields = append(fields, config.Default[key])
 			}
 		}
 
@@ -75,17 +83,17 @@ var configInfoCmd = &cobra.Command{
 			return fields[i].Key < fields[j].Key
 		})
 
-		for i, field := range fields {
-			if asJson {
-				fmt.Println(field.Json())
-			} else {
-				fmt.Print(field.Pretty())
-			}
+		if asJson {
+			encoder := json.NewEncoder(cmd.OutOrStdout())
+			lo.Must0(encoder.Encode(fields))
+			return
+		}
 
-			if !asJson {
-				if i < len(fields)-1 {
-					fmt.Println()
-				}
+		for i, field := range fields {
+			fmt.Print(field.Pretty())
+
+			if i < len(fields)-1 {
+				fmt.Println()
 			}
 		}
 	},
@@ -121,7 +129,7 @@ var configSetCmd = &cobra.Command{
 		var v any
 		switch config.Default[key].Value.(type) {
 		case string:
-			v = value
+			v = value[0]
 		case int:
 			parsedInt, err := strconv.ParseInt(value[0], 10, 64)
 			if err != nil {
@@ -244,22 +252,35 @@ func init() {
 	configCmd.AddCommand(configResetCmd)
 
 	configResetCmd.Flags().StringP("key", "k", "", "The key to reset the value for")
+	configResetCmd.Flags().BoolP("all", "a", false, "Reset all config values")
+	configResetCmd.MarkFlagsMutuallyExclusive("key", "all")
 	_ = configResetCmd.RegisterFlagCompletionFunc("key", completionConfigKeys)
 }
 
 var configResetCmd = &cobra.Command{
 	Use:   "reset",
 	Short: "Reset the config key to default",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if !cmd.Flags().Changed("key") && !cmd.Flags().Changed("all") {
+			handleErr(fmt.Errorf("either --key or --all must be set"))
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			key = lo.Must(cmd.Flags().GetString("key"))
+			all = lo.Must(cmd.Flags().GetBool("all"))
 		)
 
-		if _, ok := config.Default[key]; !ok {
+		if all {
+			for key, field := range config.Default {
+				viper.Set(key, field.Value)
+			}
+		} else if _, ok := config.Default[key]; !ok {
 			handleErr(errUnknownKey(key))
+		} else {
+			viper.Set(key, config.Default[key].Value)
 		}
 
-		viper.Set(key, config.Default[key].Value)
 		switch err := viper.WriteConfig(); err.(type) {
 		case viper.ConfigFileNotFoundError:
 			handleErr(viper.SafeWriteConfig())
@@ -267,11 +288,18 @@ var configResetCmd = &cobra.Command{
 			handleErr(err)
 		}
 
-		fmt.Printf(
-			"%s reset %s to default value %s\n",
-			style.Fg(color.Green)(icon.Get(icon.Success)),
-			style.Fg(color.Purple)(key),
-			style.Fg(color.Yellow)(fmt.Sprintf("%v", config.Default[key].Value)),
-		)
+		if all {
+			fmt.Printf(
+				"%s reset all config values\n",
+				style.Fg(color.Green)(icon.Get(icon.Success)),
+			)
+		} else {
+			fmt.Printf(
+				"%s reset %s to default value %s\n",
+				style.Fg(color.Green)(icon.Get(icon.Success)),
+				style.Fg(color.Purple)(key),
+				style.Fg(color.Yellow)(fmt.Sprintf("%v", config.Default[key].Value)),
+			)
+		}
 	},
 }
