@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 4.0.1
 
+This update includes just some bug-fixes and internal improvements. 🥱 
+
 - Better caching by [Gache](https://github.com/metafates/gache) library
 - Fix comic_info_xml_add_date and comic_info_xml_alternative_date flags #126
 - Fix notification that new version is available even though it's the same #125
