@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 4.0.2
+
+- Fix invalid title in ComicInfo for chapters #130
+
 ## 4.0.1
 
 This update includes just some bug-fixes and internal improvements. 🥱 
