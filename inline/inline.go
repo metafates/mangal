@@ -70,7 +70,7 @@ func Run(options *Options) (err error) {
 			_, err = options.Out.Write(marshalled)
 			return err
 		}
-	
+
 		return nil
 	}
 
