@@ -107,6 +107,8 @@ When using the json flag manga selector could be omitted. That way, it will sele
 			sources = append(sources, src)
 		}
 
+		query := lo.Must(cmd.Flags().GetString("query"))
+
 		output := lo.Must(cmd.Flags().GetString("output"))
 		var writer io.Writer
 		if output != "" {
@@ -119,7 +121,7 @@ When using the json flag manga selector could be omitted. That way, it will sele
 		mangaFlag := lo.Must(cmd.Flags().GetString("manga"))
 		mangaPicker := mo.None[inline.MangaPicker]()
 		if mangaFlag != "" {
-			fn, err := inline.ParseMangaPicker(lo.Must(cmd.Flags().GetString("manga")))
+			fn, err := inline.ParseMangaPicker(query, lo.Must(cmd.Flags().GetString("manga")))
 			handleErr(err)
 			mangaPicker = mo.Some(fn)
 		}
@@ -136,7 +138,7 @@ When using the json flag manga selector could be omitted. That way, it will sele
 			Sources:             sources,
 			Download:            lo.Must(cmd.Flags().GetBool("download")),
 			Json:                lo.Must(cmd.Flags().GetBool("json")),
-			Query:               lo.Must(cmd.Flags().GetString("query")),
+			Query:               query,
 			PopulatePages:       lo.Must(cmd.Flags().GetBool("populate-pages")),
 			IncludeAnilistManga: lo.Must(cmd.Flags().GetBool("include-anilist-manga")),
 			MangaPicker:         mangaPicker,

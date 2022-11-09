@@ -29,13 +29,14 @@ type Options struct {
 	ChaptersFilter      mo.Option[ChaptersFilter]
 }
 
-func ParseMangaPicker(description string) (MangaPicker, error) {
-	var (
+func ParseMangaPicker(query, description string) (MangaPicker, error) {
+	const (
 		first = "first"
 		last  = "last"
+		exact = "exact"
 	)
 
-	pattern := fmt.Sprintf(`^(%s|%s|\d+)$`, first, last)
+	pattern := fmt.Sprintf(`^(%s|%s|%s|\d+)$`, first, last, exact)
 	mangaPickerRegex := regexp.MustCompile(pattern)
 
 	if !mangaPickerRegex.MatchString(description) {
@@ -52,6 +53,14 @@ func ParseMangaPicker(description string) (MangaPicker, error) {
 			return mangas[0]
 		case last:
 			return mangas[len(mangas)-1]
+		case exact:
+			for _, manga := range mangas {
+				if manga.Name == query {
+					return manga
+				}
+			}
+
+			return nil
 		default:
 			index := lo.Must(strconv.ParseUint(description, 10, 16))
 			return mangas[util.Min(index, uint64(len(mangas)-1))]
@@ -60,7 +69,7 @@ func ParseMangaPicker(description string) (MangaPicker, error) {
 }
 
 func ParseChaptersFilter(description string) (ChaptersFilter, error) {
-	var (
+	const (
 		first = "first"
 		last  = "last"
 		all   = "all"
