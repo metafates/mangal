@@ -65,6 +65,21 @@ func Run(options *Options) (err error) {
 	}
 
 	manga := options.MangaPicker.MustGet()(mangas)
+
+	if manga == nil {
+		if options.Json {
+			marshalled, err := asJson([]*source.Manga{}, options)
+			if err != nil {
+				return err
+			}
+
+			_, err = options.Out.Write(marshalled)
+			return err
+		}
+
+		return nil
+	}
+
 	chapters, err = manga.Source.ChaptersOf(manga)
 	if err != nil {
 		return err
