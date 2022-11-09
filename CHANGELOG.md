@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 - Add `exact` manga selector for inline mode #131
 - Fix panic when manga not found in inline mode
+- More consistent JSON output for inline mode
 
 ## 4.0.2
 
