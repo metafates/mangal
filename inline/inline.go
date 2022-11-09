@@ -61,6 +61,16 @@ func Run(options *Options) (err error) {
 	var chapters []*source.Chapter
 
 	if len(mangas) == 0 {
+		if options.Json {
+			marshalled, err := asJson([]*source.Manga{}, options)
+			if err != nil {
+				return err
+			}
+
+			_, err = options.Out.Write(marshalled)
+			return err
+		}
+	
 		return nil
 	}
 
