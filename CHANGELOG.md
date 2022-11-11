@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to
 [Semantic Versioning](https://semver.org).
 
+## 4.0.4
+
+- Fix manga tags and genres being the same inside ComicInfo.xml #133
+- Fill `DescriptionText` field for *series.json* 
+
 ## 4.0.3
 
 - Add `exact` manga selector for inline mode #131

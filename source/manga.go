@@ -340,6 +340,7 @@ func (m *Manga) SeriesJSON() *SeriesJSON {
 	seriesJSON.Metadata.Type = "comicSeries"
 	seriesJSON.Metadata.Name = m.Name
 	seriesJSON.Metadata.DescriptionFormatted = m.Metadata.Summary
+	seriesJSON.Metadata.DescriptionText = m.Metadata.Summary
 	seriesJSON.Metadata.Status = status
 	seriesJSON.Metadata.Year = m.Metadata.StartDate.Year
 	seriesJSON.Metadata.ComicImage = m.Metadata.Cover.ExtraLarge
