@@ -235,6 +235,9 @@ title.FirstChild = title_text
 channel.FirstChild = title
 fmt.Println(doc.OutputXML(true))
 // <?xml version="1.0"?><rss><channel><title>W3Schools Home Page</title></channel></rss>
+
+fmt.Println(doc.OutputXMLWithOptions(WithOutputSelf()))
+// <?xml version="1.0"?><rss><channel><title>W3Schools Home Page</title></channel></rss>
 ```
 
 Questions

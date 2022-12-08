@@ -229,7 +229,7 @@ func Flatten[T any](collection [][]T) []T {
 	return result
 }
 
-// Interleave round-robbin alternating input slices and sequentially appending value at index into result
+// Interleave round-robin alternating input slices and sequentially appending value at index into result
 // Play: https://go.dev/play/p/DDhlwrShbwe
 func Interleave[T any](collections ...[]T) []T {
 	if len(collections) == 0 {
@@ -513,9 +513,15 @@ func Slice[T any](collection []T, start int, end int) []T {
 	if start > size {
 		start = size
 	}
+	if start < 0 {
+		start = 0
+	}
 
 	if end > size {
 		end = size
+	}
+	if end < 0 {
+		end = 0
 	}
 
 	return collection[start:end]

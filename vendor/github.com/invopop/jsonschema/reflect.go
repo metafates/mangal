@@ -108,7 +108,14 @@ type customSchemaImpl interface {
 	JSONSchema() *Schema
 }
 
+// Function to be run after the schema has been generated.
+// this will let you modify a schema afterwards
+type extendSchemaImpl interface {
+	JSONSchemaExtend(*Schema)
+}
+
 var customType = reflect.TypeOf((*customSchemaImpl)(nil)).Elem()
+var extendType = reflect.TypeOf((*extendSchemaImpl)(nil)).Elem()
 
 // customSchemaGetFieldDocString
 type customSchemaGetFieldDocString interface {
@@ -395,6 +402,8 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 		panic("unsupported type " + t.String())
 	}
 
+	r.reflectSchemaExtend(definitions, t, st)
+
 	// Always try to reference the definition which may have just been created
 	if def := r.refDefinition(definitions, t); def != nil {
 		return def
@@ -420,6 +429,19 @@ func (r *Reflector) reflectCustomSchema(definitions Definitions, t reflect.Type)
 	}
 
 	return nil
+}
+
+func (r *Reflector) reflectSchemaExtend(definitions Definitions, t reflect.Type, s *Schema) *Schema {
+	if t.Implements(extendType) {
+		v := reflect.New(t)
+		o := v.Interface().(extendSchemaImpl)
+		o.JSONSchemaExtend(s)
+		if ref := r.refDefinition(definitions, t); ref != nil {
+			return ref
+		}
+	}
+
+	return s
 }
 
 func (r *Reflector) reflectSliceOrArray(definitions Definitions, t reflect.Type, st *Schema) {
@@ -683,6 +705,21 @@ func (t *Schema) genericKeywords(tags []string, parent *Schema, propertyName str
 					parent.OneOf = append(parent.OneOf, typeFound)
 				}
 				typeFound.Required = append(typeFound.Required, propertyName)
+			case "anyof_required":
+				var typeFound *Schema
+				for i := range parent.AnyOf {
+					if parent.AnyOf[i].Title == nameValue[1] {
+						typeFound = parent.AnyOf[i]
+					}
+				}
+				if typeFound == nil {
+					typeFound = &Schema{
+						Title:    nameValue[1],
+						Required: []string{},
+					}
+					parent.AnyOf = append(parent.AnyOf, typeFound)
+				}
+				typeFound.Required = append(typeFound.Required, propertyName)
 			case "oneof_type":
 				if t.OneOf == nil {
 					t.OneOf = make([]*Schema, 0, 1)
@@ -691,6 +728,17 @@ func (t *Schema) genericKeywords(tags []string, parent *Schema, propertyName str
 				types := strings.Split(nameValue[1], ";")
 				for _, ty := range types {
 					t.OneOf = append(t.OneOf, &Schema{
+						Type: ty,
+					})
+				}
+			case "anyof_type":
+				if t.AnyOf == nil {
+					t.AnyOf = make([]*Schema, 0, 1)
+				}
+				t.Type = ""
+				types := strings.Split(nameValue[1], ";")
+				for _, ty := range types {
+					t.AnyOf = append(t.AnyOf, &Schema{
 						Type: ty,
 					})
 				}
@@ -855,7 +903,7 @@ func (t *Schema) arrayKeywords(tags []string) {
 
 func (t *Schema) extraKeywords(tags []string) {
 	for _, tag := range tags {
-		nameValue := strings.Split(tag, "=")
+		nameValue := strings.SplitN(tag, "=", 2)
 		if len(nameValue) == 2 {
 			t.setExtra(nameValue[0], nameValue[1])
 		}
@@ -874,13 +922,23 @@ func (t *Schema) setExtra(key, val string) {
 			t.Extras[key] = append(existingVal, val)
 		case int:
 			t.Extras[key], _ = strconv.Atoi(val)
+		case bool:
+			t.Extras[key] = (val == "true" || val == "t")
 		}
 	} else {
 		switch key {
 		case "minimum":
 			t.Extras[key], _ = strconv.Atoi(val)
 		default:
-			t.Extras[key] = val
+			var x interface{}
+			if val == "true" {
+				x = true
+			} else if val == "false" {
+				x = false
+			} else {
+				x = val
+			}
+			t.Extras[key] = x
 		}
 	}
 }
@@ -953,6 +1011,11 @@ func (r *Reflector) reflectFieldName(f reflect.StructField) (string, bool, bool,
 	if f.Anonymous && jsonTags[0] == "" {
 		// As per JSON Marshal rules, anonymous structs are inherited
 		if f.Type.Kind() == reflect.Struct {
+			return "", true, false, false
+		}
+
+		// As per JSON Marshal rules, anonymous pointer to structs are inherited
+		if f.Type.Kind() == reflect.Ptr && f.Type.Elem().Kind() == reflect.Struct {
 			return "", true, false, false
 		}
 	}

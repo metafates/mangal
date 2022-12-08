@@ -119,8 +119,12 @@ func Run(options *Options) (err error) {
 	for _, chapter := range chapters {
 		if options.Download {
 			path, err := downloader.Download(chapter, func(string) {})
-			if err != nil && viper.GetBool(constant.DownloaderStopOnError) {
-				return err
+			if err != nil {
+				if viper.GetBool(constant.DownloaderStopOnError) {
+					return err
+				}
+
+				continue
 			}
 
 			_, err = options.Out.Write([]byte(path + "\n"))
