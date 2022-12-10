@@ -94,6 +94,16 @@ Thanks to [@T-Dynamos](https://github.com/T-Dynamos) for adding it to the [termu
 pkg install mangal
 ```
 
+### Gentoo
+
+Install using third-party overlay [raiagent](https://github.com/leycec/raiagent). Thanks to [@leycec](https://github.com/leycec) for maintaining it.
+
+```shell
+eselect repository enable raiagent
+emerge --sync raiagent
+emerge mangal
+```
+
 ### Nix 
 
 Install using [Nix](https://nixos.org/download.html#download-nix). Thanks to [@bertof](https://github.com/bertof) for adding it to the [nixpkgs](https://github.com/NixOS/nixpkgs)
