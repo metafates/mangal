@@ -4,8 +4,8 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/xml"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
@@ -57,7 +57,7 @@ func SaveTo(chapter *source.Chapter, to string) error {
 		}
 	}
 
-	if viper.GetBool(constant.MetadataComicInfoXML) {
+	if viper.GetBool(key.MetadataComicInfoXML) {
 		comicInfo := chapter.ComicInfo()
 		marshalled, err := xml.MarshalIndent(comicInfo, "", "  ")
 		if err == nil {

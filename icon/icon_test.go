@@ -1,7 +1,7 @@
 package icon
 
 import (
-	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/viper"
 	"testing"
@@ -11,7 +11,7 @@ func TestGet(t *testing.T) {
 	Convey("Given a icon", t, func() {
 		i := Lua
 		Convey("When getting the icon with emoji setting", func() {
-			viper.Set(constant.IconsVariant, emoji)
+			viper.Set(key.IconsVariant, emoji)
 			result := Get(i)
 			Convey("Then the result should be emoji icon", func() {
 				So(result, ShouldEqual, icons[i].emoji)
@@ -19,7 +19,7 @@ func TestGet(t *testing.T) {
 		})
 
 		Convey("When getting the icon with nerd setting", func() {
-			viper.Set(constant.IconsVariant, nerd)
+			viper.Set(key.IconsVariant, nerd)
 			result := Get(i)
 			Convey("Then the result should be nerd icon", func() {
 				So(result, ShouldEqual, icons[i].nerd)
@@ -27,7 +27,7 @@ func TestGet(t *testing.T) {
 		})
 
 		Convey("When getting the icon with plain setting", func() {
-			viper.Set(constant.IconsVariant, plain)
+			viper.Set(key.IconsVariant, plain)
 			result := Get(i)
 			Convey("Then the result should be plain icon", func() {
 				So(result, ShouldEqual, icons[i].plain)
@@ -35,7 +35,7 @@ func TestGet(t *testing.T) {
 		})
 
 		Convey("When getting the icon with kaomoji setting", func() {
-			viper.Set(constant.IconsVariant, kaomoji)
+			viper.Set(key.IconsVariant, kaomoji)
 			result := Get(i)
 			Convey("Then the result should be kaomoji icon", func() {
 				So(result, ShouldEqual, icons[i].kaomoji)
@@ -43,7 +43,7 @@ func TestGet(t *testing.T) {
 		})
 
 		Convey("When getting the icon with no setting", func() {
-			viper.Set(constant.IconsVariant, "")
+			viper.Set(key.IconsVariant, "")
 			result := Get(i)
 			Convey("Then the result should be empty icon", func() {
 				So(result, ShouldBeEmpty)

@@ -1,8 +1,8 @@
 package pdf
 
 import (
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
@@ -74,7 +74,7 @@ func pagesToPDF(w io.Writer, pages []*source.Page) error {
 		indRef, err := pdfcpu.NewPageForImage(ctx.XRefTable, r, pagesIndRef, imp)
 
 		if err != nil {
-			if viper.GetBool(constant.FormatsSkipUnsupportedImages) {
+			if viper.GetBool(key.FormatsSkipUnsupportedImages) {
 				continue
 			}
 

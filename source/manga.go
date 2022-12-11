@@ -3,8 +3,8 @@ package source
 import (
 	"fmt"
 	"github.com/metafates/mangal/anilist"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/util"
 	"github.com/metafates/mangal/where"
@@ -103,7 +103,7 @@ func (m *Manga) Dirname() string {
 func (m *Manga) peekPath() string {
 	path := where.Downloads()
 
-	if viper.GetBool(constant.DownloaderCreateMangaDir) {
+	if viper.GetBool(key.DownloaderCreateMangaDir) {
 		path = filepath.Join(path, m.Dirname())
 	}
 
@@ -263,7 +263,7 @@ func (m *Manga) PopulateMetadata(progress func(string)) error {
 
 	var tags = make([]string, 0)
 	for _, tag := range manga.Tags {
-		if tag.Rank >= viper.GetInt(constant.MetadataComicInfoXMLTagRelevanceThreshold) {
+		if tag.Rank >= viper.GetInt(key.MetadataComicInfoXMLTagRelevanceThreshold) {
 			tags = append(tags, tag.Name)
 		}
 	}

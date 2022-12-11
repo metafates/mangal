@@ -3,7 +3,7 @@ package mangadex
 import (
 	"fmt"
 	"github.com/darylhjd/mangodex"
-	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
@@ -27,7 +27,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		params.Add("contentRating[]", rating)
 	}
 
-	if viper.GetBool(constant.MangadexNSFW) {
+	if viper.GetBool(key.MangadexNSFW) {
 		params.Add("contentRating[]", mangodex.Porn)
 		params.Add("contentRating[]", mangodex.Erotica)
 	}
@@ -41,7 +41,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		currOffset = 0
 	)
 
-	language := viper.GetString(constant.MangadexLanguage)
+	language := viper.GetString(key.MangadexLanguage)
 
 	for {
 		params.Set("offset", strconv.Itoa(currOffset))
@@ -52,7 +52,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 
 		for i, chapter := range list.Data {
 			// Skip external chapters. Their pages cannot be downloaded.
-			if chapter.Attributes.ExternalURL != nil && !viper.GetBool(constant.MangadexShowUnavailableChapters) {
+			if chapter.Attributes.ExternalURL != nil && !viper.GetBool(key.MangadexShowUnavailableChapters) {
 				continue
 			}
 

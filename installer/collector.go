@@ -1,7 +1,7 @@
 package installer
 
 import (
-	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
@@ -36,8 +36,8 @@ func Scrapers() ([]*Scraper, error) {
 
 func setupCollector() {
 	collector = &githubFilesCollector{
-		user:   viper.GetString(constant.InstallerUser),
-		repo:   viper.GetString(constant.InstallerRepo),
-		branch: viper.GetString(constant.InstallerBranch),
+		user:   viper.GetString(key.InstallerUser),
+		repo:   viper.GetString(key.InstallerRepo),
+		branch: viper.GetString(key.InstallerBranch),
 	}
 }

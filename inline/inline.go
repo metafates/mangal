@@ -1,8 +1,8 @@
 package inline
 
 import (
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
@@ -25,7 +25,7 @@ func Run(options *Options) (err error) {
 	}
 
 	if options.MangaPicker.IsAbsent() && options.ChaptersFilter.IsAbsent() {
-		if viper.GetBool(constant.MetadataFetchAnilist) {
+		if viper.GetBool(key.MetadataFetchAnilist) {
 			for _, manga := range mangas {
 				_ = manga.PopulateMetadata(func(string) {})
 			}
@@ -120,7 +120,7 @@ func Run(options *Options) (err error) {
 		if options.Download {
 			path, err := downloader.Download(chapter, func(string) {})
 			if err != nil {
-				if viper.GetBool(constant.DownloaderStopOnError) {
+				if viper.GetBool(key.DownloaderStopOnError) {
 					return err
 				}
 

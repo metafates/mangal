@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/metafates/mangal/color"
-	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/style"
 	"github.com/spf13/viper"
 )
@@ -70,9 +70,9 @@ func (f *Field) Pretty() string {
 
 // defaults contains all default values for the config.
 // It must contain all fields defined in the constant package.
-var defaults = [constant.DefinedFieldsCount]Field{
+var defaults = [key.DefinedFieldsCount]Field{
 	{
-		constant.DownloaderPath,
+		key.DownloaderPath,
 		".",
 		`Where to download manga
 Absolute or relative.
@@ -80,7 +80,7 @@ You can also use tilde (~) to refer to your home directory or use env variables.
 Examples: ~/... or $HOME/... or ${MANGA_PATH}-mangal`,
 	},
 	{
-		constant.DownloaderChapterNameTemplate,
+		key.DownloaderChapterNameTemplate,
 		"[{padded-index}] {chapter}",
 		`Key template of the downloaded chapters
 Path forbidden symbols will be replaced with "_"
@@ -94,258 +94,258 @@ Available variables:
 {source}         - name of the source`,
 	},
 	{
-		constant.DownloaderAsync,
+		key.DownloaderAsync,
 		true,
 		`Use asynchronous downloader (faster)
 Do no turn it off unless you have some issues`,
 	},
 	{
-		constant.DownloaderCreateMangaDir,
+		key.DownloaderCreateMangaDir,
 		true,
 		`Create a subdirectory for each manga`,
 	},
 	{
-		constant.DownloaderCreateVolumeDir,
+		key.DownloaderCreateVolumeDir,
 		false,
 		`Create a subdirectory for each volume`,
 	},
 	{
-		constant.DownloaderReadDownloaded,
+		key.DownloaderReadDownloaded,
 		true,
 		"If chapter is already downloaded, read it instead of downloading it to temp",
 	},
 	{
-		constant.DownloaderRedownloadExisting,
+		key.DownloaderRedownloadExisting,
 		false,
 		`Redownload chapters that already exist`,
 	},
 	{
-		constant.DownloaderDefaultSources,
+		key.DownloaderDefaultSources,
 		[]string{},
 		`Default sources to use.
 Will prompt if not set.
 Type "mangal sources list" to show available sources`,
 	},
 	{
-		constant.DownloaderStopOnError,
+		key.DownloaderStopOnError,
 		false,
 		`Stop downloading other chapters on error`,
 	},
 	{
-		constant.DownloaderDownloadCover,
+		key.DownloaderDownloadCover,
 		true,
 		`Whether to download manga cover or not`,
 	},
 	{
-		constant.FormatsUse,
+		key.FormatsUse,
 		"pdf",
 		`Default format to export chapters
 Available options are: pdf, zip, cbz, plain`,
 	},
 	{
-		constant.FormatsSkipUnsupportedImages,
+		key.FormatsSkipUnsupportedImages,
 		true,
 		`Will skip images that can't be converted to the specified format 
 Example: if you want to export to pdf, but some images are gifs, they will be skipped`,
 	},
 
 	{
-		constant.MetadataFetchAnilist,
+		key.MetadataFetchAnilist,
 		true,
 		`Fetch metadata from Anilist
 It will also cache the results to not spam the API`,
 	},
 
 	{
-		constant.MetadataComicInfoXML,
+		key.MetadataComicInfoXML,
 		true,
 		`Generate ComicInfo.xml file for each chapter`,
 	},
 	{
-		constant.MetadataComicInfoXMLAddDate,
+		key.MetadataComicInfoXMLAddDate,
 		true,
 		`Add series release date to each chapter in ComicInfo.xml file`,
 	},
 	{
-		constant.MetadataComicInfoXMLAlternativeDate,
+		key.MetadataComicInfoXMLAlternativeDate,
 		false,
 		"Use download date instead of series release date in ComicInfo.xml file",
 	},
 	{
-		constant.MetadataComicInfoXMLTagRelevanceThreshold,
+		key.MetadataComicInfoXMLTagRelevanceThreshold,
 		60,
 		"Minimum relevance of a tag to be added to ComicInfo.xml file. From 0 to 100",
 	},
 	{
-		constant.MetadataSeriesJSON,
+		key.MetadataSeriesJSON,
 		true,
 		`Generate series.json file for each manga`,
 	},
 	{
-		constant.MiniSearchLimit,
+		key.MiniSearchLimit,
 		20,
 		`Limit of search results to show`,
 	},
 	{
-		constant.IconsVariant,
+		key.IconsVariant,
 		"plain",
 		`Icons variant.
 Available options are: emoji, kaomoji, plain, squares, nerd (nerd-font required)`,
 	},
 	{
-		constant.ReaderPDF,
+		key.ReaderPDF,
 		"",
 		"What app to use to open pdf files",
 	},
 	{
-		constant.ReaderCBZ,
+		key.ReaderCBZ,
 		"",
 		"What app to use to open cbz files",
 	},
 	{
-		constant.ReaderZIP,
+		key.ReaderZIP,
 		"",
 		"What app to use to open zip files",
 	},
 	{
-		constant.RaderPlain,
+		key.RaderPlain,
 		"",
 		"What app to use to open folders",
 	},
 	{
-		constant.ReaderBrowser,
+		key.ReaderBrowser,
 		"",
 		"What browser to use to open webpages",
 	},
 	{
-		constant.ReaderFolder,
+		key.ReaderFolder,
 		"",
 		"What app to use to open folders",
 	},
 	{
-		constant.ReaderReadInBrowser,
+		key.ReaderReadInBrowser,
 		false,
 		"Open chapter url in browser instead of downloading it",
 	},
 	{
-		constant.HistorySaveOnRead,
+		key.HistorySaveOnRead,
 		true,
 		"Save history on chapter read",
 	},
 	{
-		constant.HistorySaveOnDownload,
+		key.HistorySaveOnDownload,
 		false,
 		"Save history on chapter download",
 	},
 	{
-		constant.SearchShowQuerySuggestions,
+		key.SearchShowQuerySuggestions,
 		true,
 		"Show query suggestions in when searching",
 	},
 	{
-		constant.MangadexLanguage,
+		key.MangadexLanguage,
 		"en",
 		`Preferred language for mangadex
 Use "any" to show all languages`,
 	},
 	{
-		constant.MangadexNSFW,
+		key.MangadexNSFW,
 		false,
 		"Show NSFW content",
 	},
 	{
-		constant.MangadexShowUnavailableChapters,
+		key.MangadexShowUnavailableChapters,
 		false,
 		"Show chapters that cannot be downloaded",
 	},
 	{
-		constant.InstallerUser,
+		key.InstallerUser,
 		"metafates",
 		"Custom scrapers repository owner",
 	},
 	{
-		constant.InstallerRepo,
+		key.InstallerRepo,
 		"mangal-scrapers",
 		"Custom scrapers repository name",
 	},
 	{
-		constant.InstallerBranch,
+		key.InstallerBranch,
 		"main",
 		"Custom scrapers repository branch",
 	},
 	{
-		constant.GenAuthor,
+		key.GenAuthor,
 		"",
 		"Key to use in generated scrapers as author",
 	},
 	{
-		constant.LogsWrite,
+		key.LogsWrite,
 		false,
 		"Write logs",
 	},
 	{
-		constant.LogsLevel,
+		key.LogsLevel,
 		"info",
 		`Available options are: (from less to most verbose)
 panic, fatal, error, warn, info, debug, trace`,
 	},
 	{
-		constant.LogsJson,
+		key.LogsJson,
 		false,
 		"Use json format for logs",
 	},
 	{
-		constant.AnilistEnable,
+		key.AnilistEnable,
 		false,
 		"Enable Anilist integration",
 	},
 	{
-		constant.AnilistCode,
+		key.AnilistCode,
 		"",
 		"Anilist code to use for authentication",
 	},
 	{
-		constant.AnilistID,
+		key.AnilistID,
 		"",
 		"Anilist ID to use for authentication",
 	},
 	{
-		constant.AnilistSecret,
+		key.AnilistSecret,
 		"",
 		"Anilist secret to use for authentication",
 	},
 	{
-		constant.AnilistLinkOnMangaSelect,
+		key.AnilistLinkOnMangaSelect,
 		true,
 		"Show link to Anilist on manga select",
 	},
 	{
-		constant.TUIItemSpacing,
+		key.TUIItemSpacing,
 		1,
 		"Spacing between items in the TUI",
 	},
 	{
-		constant.TUIReadOnEnter,
+		key.TUIReadOnEnter,
 		true,
 		"Read chapter on enter if other chapters aren't selected",
 	},
 	{
-		constant.TUISearchPromptString,
+		key.TUISearchPromptString,
 		"> ",
 		"Search prompt string to use",
 	},
 	{
-		constant.TUIShowURLs,
+		key.TUIShowURLs,
 		true,
 		"Show URLs under list items",
 	},
 	{
-		constant.TUIReverseChapters,
+		key.TUIReverseChapters,
 		false,
 		"Reverse chapters order",
 	},
 	{
-		constant.TUIShowDownloadedPath,
+		key.TUIShowDownloadedPath,
 		true,
 		"Show path where chapters were downloaded",
 	},
@@ -364,9 +364,9 @@ func init() {
 		count++
 	}
 
-	if count != constant.DefinedFieldsCount {
-		panic(fmt.Sprintf("Expected %d default values, got %d", constant.DefinedFieldsCount, count))
+	if count != key.DefinedFieldsCount {
+		panic(fmt.Sprintf("Expected %d default values, got %d", key.DefinedFieldsCount, count))
 	}
 }
 
-var Default = make(map[string]Field, constant.DefinedFieldsCount)
+var Default = make(map[string]Field, key.DefinedFieldsCount)

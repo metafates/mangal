@@ -2,7 +2,7 @@ package query
 
 import (
 	"github.com/lithammer/fuzzysearch/fuzzy"
-	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	"github.com/samber/lo"
 	"github.com/samber/mo"
 	"github.com/spf13/viper"
@@ -14,7 +14,7 @@ var (
 )
 
 func SuggestMany(query string) []string {
-	if !viper.GetBool(constant.SearchShowQuerySuggestions) {
+	if !viper.GetBool(key.SearchShowQuerySuggestions) {
 		return []string{}
 	}
 

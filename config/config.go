@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
@@ -74,7 +75,7 @@ func setDefaults() {
 // resolveAliases resolves the aliases for the paths
 func resolveAliases() {
 	home := lo.Must(os.UserHomeDir())
-	path := viper.GetString(constant.DownloaderPath)
+	path := viper.GetString(key.DownloaderPath)
 
 	if path == "~" {
 		path = home
@@ -84,5 +85,5 @@ func resolveAliases() {
 
 	path = os.ExpandEnv(path)
 
-	viper.Set(constant.DownloaderPath, path)
+	viper.Set(key.DownloaderPath, path)
 }

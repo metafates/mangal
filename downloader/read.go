@@ -6,6 +6,7 @@ import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/history"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/open"
 	"github.com/metafates/mangal/source"
@@ -16,14 +17,14 @@ import (
 // Read the chapter by downloading it with the given source
 // and opening it with the configured reader.
 func Read(chapter *source.Chapter, progress func(string)) error {
-	if viper.GetBool(constant.ReaderReadInBrowser) {
+	if viper.GetBool(key.ReaderReadInBrowser) {
 		return open.StartWith(
 			chapter.URL,
-			viper.GetString(constant.ReaderBrowser),
+			viper.GetString(key.ReaderBrowser),
 		)
 	}
 
-	if viper.GetBool(constant.DownloaderReadDownloaded) && chapter.IsDownloaded() {
+	if viper.GetBool(key.DownloaderReadDownloaded) && chapter.IsDownloaded() {
 		path, err := chapter.Path(false)
 		if err == nil {
 			return openRead(path, chapter, progress)
@@ -45,18 +46,18 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 		return err
 	}
 
-	log.Info("getting " + viper.GetString(constant.FormatsUse) + " converter")
-	conv, err := converter.Get(viper.GetString(constant.FormatsUse))
+	log.Info("getting " + viper.GetString(key.FormatsUse) + " converter")
+	conv, err := converter.Get(viper.GetString(key.FormatsUse))
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	log.Info("converting " + viper.GetString(constant.FormatsUse))
+	log.Info("converting " + viper.GetString(key.FormatsUse))
 	progress(fmt.Sprintf(
 		"Converting %d pages to %s %s",
 		len(pages),
-		style.Fg(color.Yellow)(viper.GetString(constant.FormatsUse)),
+		style.Fg(color.Yellow)(viper.GetString(key.FormatsUse)),
 		style.Faint(chapter.SizeHuman())),
 	)
 	path, err := conv.SaveTemp(chapter)
@@ -76,7 +77,7 @@ func Read(chapter *source.Chapter, progress func(string)) error {
 }
 
 func openRead(path string, chapter *source.Chapter, progress func(string)) error {
-	if viper.GetBool(constant.HistorySaveOnRead) {
+	if viper.GetBool(key.HistorySaveOnRead) {
 		go func() {
 			err := history.Save(chapter)
 			if err != nil {
@@ -92,15 +93,15 @@ func openRead(path string, chapter *source.Chapter, progress func(string)) error
 		err    error
 	)
 
-	switch viper.GetString(constant.FormatsUse) {
+	switch viper.GetString(key.FormatsUse) {
 	case constant.FormatPDF:
-		reader = viper.GetString(constant.ReaderPDF)
+		reader = viper.GetString(key.ReaderPDF)
 	case constant.FormatCBZ:
-		reader = viper.GetString(constant.ReaderCBZ)
+		reader = viper.GetString(key.ReaderCBZ)
 	case constant.FormatZIP:
-		reader = viper.GetString(constant.ReaderZIP)
+		reader = viper.GetString(key.ReaderZIP)
 	case constant.FormatPlain:
-		reader = viper.GetString(constant.RaderPlain)
+		reader = viper.GetString(key.RaderPlain)
 	}
 
 	if reader != "" {

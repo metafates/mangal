@@ -2,9 +2,9 @@ package mini
 
 import (
 	"fmt"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/history"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/util"
@@ -32,7 +32,7 @@ const (
 func (m *mini) handleSourceSelectState() error {
 	var err error
 
-	if name := viper.GetString(constant.DownloaderDefaultSources); name != "" {
+	if name := viper.GetString(key.DownloaderDefaultSources); name != "" {
 		p, ok := provider.Get(name)
 		if !ok {
 			return fmt.Errorf("unknown source \"%s\"", name)
@@ -91,7 +91,7 @@ func (m *mini) handleMangaSearchState() error {
 
 		erase := progress("Searching Query..")
 		m.cachedMangas[query], err = m.selectedSource.Search(query)
-		max := lo.Min([]int{len(m.cachedMangas[query]), viper.GetInt(constant.MiniSearchLimit)})
+		max := lo.Min([]int{len(m.cachedMangas[query]), viper.GetInt(key.MiniSearchLimit)})
 		m.cachedMangas[query] = m.cachedMangas[query][:max]
 		erase()
 
@@ -324,7 +324,7 @@ func (m *mini) handleChaptersDownloadState() error {
 
 		erase()
 
-		if err != nil && viper.GetBool(constant.DownloaderStopOnError) {
+		if err != nil && viper.GetBool(key.DownloaderStopOnError) {
 			return err
 		}
 

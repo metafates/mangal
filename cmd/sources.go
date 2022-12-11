@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/tui"
 	"github.com/metafates/mangal/util"
 	"github.com/spf13/viper"
@@ -147,7 +148,7 @@ var sourcesGenCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.SetOut(os.Stdout)
 
-		author := viper.GetString(constant.GenAuthor)
+		author := viper.GetString(key.GenAuthor)
 		if author == "" {
 			usr, err := user.Current()
 			if err == nil {

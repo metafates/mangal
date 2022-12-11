@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/metafates/mangal/color"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/muesli/reflow/wrap"
@@ -125,7 +125,7 @@ func (b *statefulBubble) downloadingChapterMetainfo() string {
 		metainfo.WriteString(" as ")
 	}
 
-	metainfo.WriteString(style.Fg(color.Purple)(viper.GetString(constant.FormatsUse)))
+	metainfo.WriteString(style.Fg(color.Purple)(viper.GetString(key.FormatsUse)))
 	return metainfo.String()
 }
 
@@ -196,7 +196,7 @@ func (b *statefulBubble) viewDownloadDone() string {
 		msg,
 	}
 
-	if succeded > 0 && viper.GetBool(constant.TUIShowDownloadedPath) {
+	if succeded > 0 && viper.GetBool(key.TUIShowDownloadedPath) {
 		path, err := b.selectedManga.Path(false)
 		if err == nil {
 			lines = append(lines, "")

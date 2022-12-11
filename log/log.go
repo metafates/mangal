@@ -3,8 +3,8 @@ package log
 import (
 	"errors"
 	"fmt"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/where"
 	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
@@ -17,7 +17,7 @@ import (
 var writeLogs bool
 
 func Setup() error {
-	writeLogs = viper.GetBool(constant.LogsWrite)
+	writeLogs = viper.GetBool(key.LogsWrite)
 
 	if !writeLogs {
 		return nil
@@ -41,13 +41,13 @@ func Setup() error {
 
 	log.SetOutput(logFile)
 
-	if viper.GetBool(constant.LogsJson) {
+	if viper.GetBool(key.LogsJson) {
 		log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
 	} else {
 		log.SetFormatter(&log.TextFormatter{})
 	}
 
-	switch viper.GetString(constant.LogsLevel) {
+	switch viper.GetString(key.LogsLevel) {
 	case "panic":
 		log.SetLevel(log.PanicLevel)
 	case "fatal":
