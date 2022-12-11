@@ -349,6 +349,11 @@ panic, fatal, error, warn, info, debug, trace`,
 		true,
 		"Show path where chapters were downloaded",
 	},
+	{
+		key.CliColored,
+		true,
+		"Use colors in CLI help page",
+	},
 }
 
 func init() {
