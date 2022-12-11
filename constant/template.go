@@ -14,6 +14,9 @@ const SourceTemplate = `{{ $divider := repeat "-" (plus (max (len .URL) (len .Na
 {{ $divider }}
 
 
+---@alias manga { name: string, url: string, author: string|nil, genres: string|nil, summary: string|nil }
+---@alias chapter { name: string, url: string, volume: string|nil, manga_summary: string|nil, manga_author: string|nil, manga_genres: string|nil }
+---@alias page { url: string, index: number }
 
 
 ----- IMPORTS -----
@@ -30,46 +33,24 @@ const SourceTemplate = `{{ $divider := repeat "-" (plus (max (len .URL) (len .Na
 ----- MAIN -----
 
 --- Searches for manga with given query.
---[[
-Manga fields:
-	name - string, required
- 	url - string, required
-	author - string, optional
-	genres - string (multiple genres are divided by comma ','), optional
-	summary - string, optional
---]]
--- @param query Query to search for
--- @return Table of mangas
+-- @param query string Query to search for
+-- @return manga[] Table of mangas
 function {{ .SearchMangaFn }}(query)
 	return {}
 end
 
 
 --- Gets the list of all manga chapters.
---[[
-Chapter fields:
-	name - string, required
-	url - string, required
-	volume - string, optional
-	manga_summary - string, optional (in case you can't get it from search page)
-	manga_author - string, optional 
-	manga_genres - string (multiple genres are divided by comma ','), optional
---]]
--- @param mangaURL URL of the manga
--- @return Table of chapters
+-- @param mangaURL string URL of the manga
+-- @return chapter[] Table of chapters
 function {{ .MangaChaptersFn }}(mangaURL)
 	return {}
 end
 
 
 --- Gets the list of all pages of a chapter.
---[[
-Page fields:
-	url - string, required
-	index - uint, required
---]]
--- @param chapterURL URL of the chapter
--- @return Table of pages
+-- @param chapterURL string URL of the chapter
+-- @return page[]
 function {{ .ChapterPagesFn }}(chapterURL)
 	return {}
 end
