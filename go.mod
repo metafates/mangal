@@ -19,15 +19,15 @@ require (
 	github.com/metafates/mangal-lua-libs v0.4.2
 	github.com/muesli/reflow v0.3.0
 	github.com/pdfcpu/pdfcpu v0.3.13
-	github.com/samber/lo v1.36.0
-	github.com/samber/mo v1.5.2
+	github.com/samber/lo v1.37.0
+	github.com/samber/mo v1.7.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/afero v1.9.3
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
-	github.com/yuin/gopher-lua v0.0.0-20220504180219-658193537a64
-	golang.org/x/exp v0.0.0-20221208044002-44028be4359e
+	github.com/yuin/gopher-lua v0.0.0-20221210110428-332342483e3f
+	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
 	golang.org/x/term v0.3.0
 )
 
@@ -58,7 +58,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/magiconair/properties v1.8.6 // indirect
+	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
