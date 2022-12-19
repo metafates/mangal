@@ -60,7 +60,7 @@ func (c *Chapter) DownloadPages(temp bool, progress func(string)) (err error) {
 
 	for _, page := range c.Pages {
 		if page == nil {
-			continue
+			return fmt.Errorf("page #%d is empty, aborting download", page.Index)
 		}
 
 		d := func(page *Page) {
@@ -84,7 +84,13 @@ func (c *Chapter) DownloadPages(temp bool, progress func(string)) (err error) {
 	}
 
 	wg.Wait()
-	c.isDownloaded = mo.Some(!temp && err == nil)
+
+	if err != nil {
+		c.isDownloaded = mo.Some(false)
+		return err
+	}
+
+	c.isDownloaded = mo.Some(!temp)
 	return
 }
 

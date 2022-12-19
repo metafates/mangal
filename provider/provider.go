@@ -51,6 +51,7 @@ func Customs() []*Provider {
 			[]byte("require(\"headless\")"),
 			[]byte("require('headless')"),
 			[]byte("require(headless)"),
+			[]byte("require'headless'"),
 		})
 
 		name := util.FileStem(path)

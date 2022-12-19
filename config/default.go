@@ -4,9 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/metafates/mangal/color"
+	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/style"
+	"github.com/samber/lo"
 	"github.com/spf13/viper"
+	"reflect"
+	"strconv"
+	"strings"
+	"text/template"
 )
 
 // Field represents a single config field
@@ -55,18 +61,67 @@ func (f *Field) MarshalJSON() ([]byte, error) {
 	return json.Marshal(field)
 }
 
-// Pretty format field as string for further cli output
+var prettyTemplate = lo.Must(template.New("pretty").Funcs(template.FuncMap{
+	"faint":  style.Faint,
+	"bold":   style.Bold,
+	"purple": style.Fg(color.Purple),
+	"blue":   style.Fg(color.Blue),
+	"cyan":   style.Fg(color.Cyan),
+	"value":  func(k string) any { return viper.Get(k) },
+	"hl": func(v any) string {
+		switch value := v.(type) {
+		case bool:
+			b := strconv.FormatBool(value)
+			if value {
+				return style.Fg(color.Green)(b)
+			}
+
+			return style.Fg(color.Red)(b)
+		case string:
+			return style.Fg(color.Yellow)(value)
+		default:
+			return fmt.Sprint(value)
+		}
+	},
+	"typename": func(v any) string { return reflect.TypeOf(v).String() },
+}).Parse(`{{ faint .Description }}
+{{ blue "Key:" }}     {{ purple .Key }}
+{{ blue "Env:" }}     {{ .Env }}
+{{ blue "Value:" }}   {{ hl (value .Key) }}
+{{ blue "Default:" }} {{ hl (.Value) }}
+{{ blue "Type:" }}    {{ typename .Value }}`))
+
 func (f *Field) Pretty() string {
-	return fmt.Sprintf(
-		`%s
-%s: %s = %s
-`,
-		style.Faint(f.Description),
-		style.Fg(color.Purple)(f.Key),
-		style.Fg(color.Yellow)(f.typeName()),
-		style.Fg(color.Cyan)(fmt.Sprintf("%v", viper.Get(f.Key))),
-	)
+	var b strings.Builder
+
+	lo.Must0(prettyTemplate.Execute(&b, f))
+
+	return b.String()
 }
+
+func (f *Field) Env() string {
+	env := strings.ToUpper(EnvKeyReplacer.Replace(f.Key))
+	appPrefix := strings.ToUpper(constant.Mangal + "_")
+
+	if strings.HasPrefix(env, appPrefix) {
+		return env
+	}
+
+	return appPrefix + env
+}
+
+// Pretty format field as string for further cli output
+//func (f *Field) Pretty() string {
+//	return fmt.Sprintf(
+//		`%s
+//%s: %s = %s
+//`,
+//		style.Faint(f.Description),
+//		style.Fg(color.Purple)(f.Key),
+//		style.Fg(color.Yellow)(f.typeName()),
+//		style.Fg(color.Cyan)(fmt.Sprintf("%v", viper.Get(f.Key))),
+//	)
+//}
 
 // defaults contains all default values for the config.
 // It must contain all fields defined in the constant package.

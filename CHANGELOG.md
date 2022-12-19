@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 ## 4.0.5
 
 - Fixes runtime crash #135
-- Option to disable colors in cli help `mangal config info -k cli.colored`
+- Option to disable colors in cli help `mangal config info -k cli.colored` (why not? =P)
+- Improved `config info` command output. It now shows default value and env variable name.
 - Internal improvements
 
 ## 4.0.4

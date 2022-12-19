@@ -86,7 +86,6 @@ func GetByID(id int) (*Manga, error) {
 }
 
 // SearchByName returns a list of mangas that match the given name.
-// TODO: keep failed names in cache for a minute
 func SearchByName(name string) ([]*Manga, error) {
 	name = normalizedName(name)
 	_ = query.Remember(name, 1)
