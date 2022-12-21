@@ -1,10 +1,12 @@
 # mo - Monads
 
 [![tag](https://img.shields.io/github/tag/samber/mo.svg)](https://github.com/samber/mo/releases)
+![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.18-%23007d9c)
 [![GoDoc](https://godoc.org/github.com/samber/mo?status.svg)](https://pkg.go.dev/github.com/samber/mo)
 ![Build Status](https://github.com/samber/mo/actions/workflows/go.yml/badge.svg)
 [![Go report](https://goreportcard.com/badge/github.com/samber/mo)](https://goreportcard.com/report/github.com/samber/mo)
-[![codecov](https://codecov.io/gh/samber/mo/branch/master/graph/badge.svg)](https://codecov.io/gh/samber/mo)
+[![Coverage](https://img.shields.io/codecov/c/github/samber/do)](https://codecov.io/gh/samber/mo)
+[![License](https://img.shields.io/github/license/samber/mo)](./LICENSE)
 
 🦄 **`samber/mo` brings monads and popular FP abstractions to Go projects. `samber/mo` uses the recent Go 1.18+ Generics.**
 
@@ -30,7 +32,7 @@ We currently support the following data types:
 - `Option[T]` (Maybe)
 - `Result[T]`
 - `Either[A, B]`
-- `EitherX[T1, ..., TX]` (With X between 3 and 5) 
+- `EitherX[T1, ..., TX]` (With X between 3 and 5)
 - `Future[T]`
 - `IO[T]`
 - `IOEither[T]`
@@ -97,6 +99,18 @@ option3 := option1.Match(
 ```
 
 More examples in [documentation](https://godoc.org/github.com/samber/mo).
+
+### Tips for lazy developers
+
+I cannot recommend it, but in case you are too lazy for repeating `mo.` everywhere, you can import the entire library into the namespace.
+
+```go
+import (
+    . "github.com/samber/mo"
+)
+```
+
+I take no responsibility on this junk. 😁 💩
 
 ## 🤠 Documentation and examples
 
@@ -182,6 +196,7 @@ Methods:
 - `.Right()` [doc](https://pkg.go.dev/github.com/samber/mo#Either.Right)
 - `.MustLeft()` [doc](https://pkg.go.dev/github.com/samber/mo#Either.MustLeft)
 - `.MustRight()` [doc](https://pkg.go.dev/github.com/samber/mo#Either.MustRight)
+- `.Unpack()` [doc](https://pkg.go.dev/github.com/samber/mo#Either.Unpack)
 - `.LeftOrElse()` [doc](https://pkg.go.dev/github.com/samber/mo#Either.LeftOrElse)
 - `.RightOrElse()` [doc](https://pkg.go.dev/github.com/samber/mo#Either.RightOrElse)
 - `.LeftOrEmpty()` [doc](https://pkg.go.dev/github.com/samber/mo#Either.LeftOrEmpty)
@@ -211,6 +226,7 @@ Methods:
 - `.IsArgX()` [doc](https://pkg.go.dev/github.com/samber/mo#Either5.IsArg1)
 - `.ArgX()` [doc](https://pkg.go.dev/github.com/samber/mo#Either5.Arg1)
 - `.MustArgX()` [doc](https://pkg.go.dev/github.com/samber/mo#Either5.MustArg1)
+- `.Unpack()` [doc](https://pkg.go.dev/github.com/samber/mo#Either5.Unpack)
 - `.ArgXOrElse()` [doc](https://pkg.go.dev/github.com/samber/mo#Either5.Arg1OrElse)
 - `.ArgXOrEmpty()` [doc](https://pkg.go.dev/github.com/samber/mo#Either5.Arg1OrEmpty)
 - `.ForEach()` [doc](https://pkg.go.dev/github.com/samber/mo#Either5.ForEach)
@@ -357,9 +373,9 @@ make test
 make watch-test
 ```
 
-## 👤 Authors
+## 👤 Contributors
 
-- Samuel Berthe
+![Contributors](https://contrib.rocks/image?repo=samber/mo)
 
 ## 💫 Show your support
 

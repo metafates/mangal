@@ -3,7 +3,7 @@ package inline
 import (
 	"encoding/json"
 	"github.com/metafates/mangal/anilist"
-	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
 )
@@ -79,7 +79,7 @@ func prepareManga(manga *source.Manga, options *Options) error {
 		manga.Chapters = make([]*source.Chapter, 0)
 	}
 
-	if viper.GetBool(constant.MetadataFetchAnilist) {
+	if viper.GetBool(key.MetadataFetchAnilist) {
 		_ = manga.PopulateMetadata(func(string) {})
 	}
 

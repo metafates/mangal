@@ -1,16 +1,19 @@
 # lo
 
 [![tag](https://img.shields.io/github/tag/samber/lo.svg)](https://github.com/samber/lo/releases)
+![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.18-%23007d9c)
 [![GoDoc](https://godoc.org/github.com/samber/lo?status.svg)](https://pkg.go.dev/github.com/samber/lo)
 ![Build Status](https://github.com/samber/lo/actions/workflows/go.yml/badge.svg)
 [![Go report](https://goreportcard.com/badge/github.com/samber/lo)](https://goreportcard.com/report/github.com/samber/lo)
-[![codecov](https://codecov.io/gh/samber/lo/branch/master/graph/badge.svg)](https://codecov.io/gh/samber/lo)
+[![Coverage](https://img.shields.io/codecov/c/github/samber/lo)](https://codecov.io/gh/samber/lo)
+[![Contributors](https://img.shields.io/github/contributors/samber/lo)](https://github.com/samber/lo/graphs/contributors)
+[![License](https://img.shields.io/github/license/samber/lo)](./LICENSE)
 
 ✨ **`samber/lo` is a Lodash-style Go library based on Go 1.18+ Generics.**
 
 This project started as an experiment with the new generics implementation. It may look like [Lodash](https://github.com/lodash/lodash) in some aspects. I used to code with the fantastic ["go-funk"](https://github.com/thoas/go-funk) package, but "go-funk" uses reflection and therefore is not typesafe.
 
-As expected, benchmarks demonstrate that generics will be much faster than implementations based on the "reflect" package. Benchmarks also show similar performance gains compared to pure `for` loops. [See below](#-benchmark).
+As expected, benchmarks demonstrate that generics are much faster than implementations based on the "reflect" package. Benchmarks also show similar performance gains compared to pure `for` loops. [See below](#-benchmark).
 
 In the future, 5 to 10 helpers will overlap with those coming into the Go standard library (under package names `slices` and `maps`). I feel this library is legitimate and offers many more valuable abstractions.
 
@@ -22,6 +25,8 @@ In the future, 5 to 10 helpers will overlap with those coming into the Go standa
 **Why this name?**
 
 I wanted a **short name**, similar to "Lodash" and no Go package currently uses this name.
+
+![](img/logo-full.png)
 
 ## 🚀 Install
 
@@ -138,6 +143,7 @@ Supported math helpers:
 
 Supported helpers for strings:
 
+- [RandomString](#randomstring)
 - [Substring](#substring)
 - [ChunkString](#chunkstring)
 - [RuneLength](#runelength)
@@ -154,9 +160,10 @@ Supported helpers for channels:
 - [ChannelDispatcher](#channeldispatcher)
 - [SliceToChannel](#slicetochannel)
 - [Generator](#generator)
-- [Batch](#batch)
-- [BatchWithTimeout](#batchwithtimeout)
-- [ChannelMerge](#channelmerge)
+- [Buffer](#buffer)
+- [BufferWithTimeout](#bufferwithtimeout)
+- [FanIn](#fanin)
+- [FanOut](#fanout)
 
 Supported intersection helpers:
 
@@ -219,14 +226,18 @@ Type manipulation helpers:
 Function helpers:
 
 - [Partial](#partial)
+- [Partial2 -> Partial5](#partial2---partial5)
 
 Concurrency helpers:
 
 - [Attempt](#attempt)
+- [AttemptWhile](#attemptwhile)
 - [AttemptWithDelay](#attemptwithdelay)
+- [AttemptWhileWithDelay](#attemptwhilewithdelay)
 - [Debounce](#debounce)
 - [Synchronize](#synchronize)
 - [Async](#async)
+- [Transaction](#transaction)
 
 Error handling:
 
@@ -515,7 +526,7 @@ flat := lo.Flatten[int]([][]int{{0, 1}, {2, 3, 4, 5}})
 
 ### Interleave
 
-Round-robbin alternating input slices and sequentially appending value at index into result.
+Round-robin alternating input slices and sequentially appending value at index into result.
 
 ```go
 interleaved := lo.Interleave[int]([]int{1, 4, 7}, []int{2, 5, 8}, []int{3, 6, 9})
@@ -1201,6 +1212,17 @@ sum := lo.SumBy(strings, func(item string) int {
 
 [[play](https://go.dev/play/p/Dz_a_7jN_ca)]
 
+### RandomString
+
+Returns a random string of the specified length and made of the specified charset.
+
+```go
+str := lo.RandomString(5, lo.LettersCharset)
+// example: "eIGbt"
+```
+
+[[play](https://go.dev/play/p/rRseOQVVum4)]
+
 ### Substring
 
 Return part of a string.
@@ -1432,16 +1454,16 @@ for v := range lo.Generator(2, generator) {
 // prints 1, then 2, then 3
 ```
 
-### Batch
+### Buffer
 
 Creates a slice of n elements from a channel. Returns the slice, the slice length, the read time and the channel status (opened/closed).
 
 ```go
 ch := lo.SliceToChannel(2, []int{1, 2, 3, 4, 5})
 
-items1, length1, duration1, ok1 := lo.Batch(ch, 3)
+items1, length1, duration1, ok1 := lo.Buffer(ch, 3)
 // []int{1, 2, 3}, 3, 0s, true
-items2, length2, duration2, ok2 := lo.Batch(ch, 3)
+items2, length2, duration2, ok2 := lo.Buffer(ch, 3)
 // []int{4, 5}, 2, 0s, false
 ```
 
@@ -1452,7 +1474,7 @@ ch := readFromQueue()
 
 for {
     // read 1k items
-    items, length, _, ok := lo.Batch(ch, 1000)
+    items, length, _, ok := lo.Buffer(ch, 1000)
 
     // do batching stuff
 
@@ -1462,7 +1484,7 @@ for {
 }
 ```
 
-### BatchWithTimeout
+### BufferWithTimeout
 
 Creates a slice of n elements from a channel, with timeout. Returns the slice, the slice length, the read time and the channel status (opened/closed).
 
@@ -1476,11 +1498,11 @@ generator := func(yield func(int)) {
 
 ch := lo.Generator(0, generator)
 
-items1, length1, duration1, ok1 := lo.BatchWithTimeout(ch, 3, 100*time.Millisecond)
+items1, length1, duration1, ok1 := lo.BufferWithTimeout(ch, 3, 100*time.Millisecond)
 // []int{1, 2}, 2, 100ms, true
-items2, length2, duration2, ok2 := lo.BatchWithTimeout(ch, 3, 100*time.Millisecond)
+items2, length2, duration2, ok2 := lo.BufferWithTimeout(ch, 3, 100*time.Millisecond)
 // []int{3, 4, 5}, 3, 75ms, true
-items3, length3, duration2, ok3 := lo.BatchWithTimeout(ch, 3, 100*time.Millisecond)
+items3, length3, duration2, ok3 := lo.BufferWithTimeout(ch, 3, 100*time.Millisecond)
 // []int{}, 0, 10ms, false
 ```
 
@@ -1492,7 +1514,7 @@ ch := readFromQueue()
 for {
     // read 1k items
     // wait up to 1 second
-    items, length, _, ok := lo.BatchWithTimeout(ch, 1000, 1*time.Second)
+    items, length, _, ok := lo.BufferWithTimeout(ch, 1000, 1*time.Second)
 
     // do batching stuff
 
@@ -1515,7 +1537,7 @@ consumer := func(c <-chan int) {
     for {
         // read 1k items
         // wait up to 1 second
-        items, length, _, ok := lo.BatchWithTimeout(ch, 1000, 1*time.Second)
+        items, length, _, ok := lo.BufferWithTimeout(ch, 1000, 1*time.Second)
 
         // do batching stuff
 
@@ -1530,16 +1552,28 @@ for i := range children {
 }
 ```
 
-### ChannelMerge
+### FanIn
 
-Collects messages from multiple input channels into a single buffered channel. Output messages has no priority.
+Merge messages from multiple input channels into a single buffered channel. Output messages has no priority. When all upstream channels reach EOF, downstream channel closes.
 
 ```go
 stream1 := make(chan int, 42)
 stream2 := make(chan int, 42)
 stream3 := make(chan int, 42)
 
-all := lo.ChannelMerge(100, stream1, stream2, stream3)
+all := lo.FanIn(100, stream1, stream2, stream3)
+// <-chan int
+```
+
+### FanOut
+
+Broadcasts all the upstream messages to multiple downstream channels. When upstream channel reach EOF, downstream channels close. If any downstream channels is full, broadcasting is paused.
+
+```go
+stream := make(chan int, 42)
+
+all := lo.FanOut(5, 100, stream)
+// [5]<-chan int
 ```
 
 ### Contains
@@ -1664,10 +1698,10 @@ left, right := lo.Difference[int]([]int{0, 1, 2, 3, 4, 5}, []int{0, 1, 2, 3, 4, 
 
 ### Union
 
-Returns all distinct elements from both collections. Result will not change the order of elements relatively.
+Returns all distinct elements from given collections. Result will not change the order of elements relatively.
 
 ```go
-union := lo.Union[int]([]int{0, 1, 2, 3, 4, 5}, []int{0, 2, 10})
+union := lo.Union[int]([]int{0, 1, 2, 3, 4, 5}, []int{0, 2}, []int{0, 10})
 // []int{0, 1, 2, 3, 4, 5, 10}
 ```
 
@@ -2242,6 +2276,21 @@ f(42)
 // 47
 ```
 
+### Partial2 -> Partial5
+
+Returns new function that, when called, has its first argument set to the provided value.
+
+```go
+add := func(x, y, z int) int { return x + y + z }
+f := lo.Partial2(add, 42)
+
+f(10, 5)
+// 57
+
+f(42, -4)
+// 80
+```
+
 ### Attempt
 
 Invokes a function N times until it returns valid output. Returning either the caught error or nil. When first argument is less than `1`, the function runs until a successful response is returned.
@@ -2304,6 +2353,56 @@ iter, duration, err := lo.AttemptWithDelay(5, 2*time.Second, func(i int, duratio
 For more advanced retry strategies (delay, exponential backoff...), please take a look on [cenkalti/backoff](https://github.com/cenkalti/backoff).
 
 [[play](https://go.dev/play/p/tVs6CygC7m1)]
+
+### AttemptWhile
+
+Invokes a function N times until it returns valid output. Returning either the caught error or nil, and along with a bool value to identifying whether it needs invoke function continuously. It will terminate the invoke immediately if second bool value is returned with falsy value.
+
+When first argument is less than `1`, the function runs until a successful response is returned.
+
+```go
+count1, err1 := lo.AttemptWhile(5, func(i int) (error, bool) {
+    err := doMockedHTTPRequest(i)
+    if err != nil {
+        if errors.Is(err, ErrBadRequest) { // lets assume ErrBadRequest is a critical error that needs to terminate the invoke
+            return err, false // flag the second return value as false to terminate the invoke
+        }
+
+        return err, true
+    }
+
+    return nil, false
+})
+```
+
+For more advanced retry strategies (delay, exponential backoff...), please take a look on [cenkalti/backoff](https://github.com/cenkalti/backoff).
+
+[[play](https://go.dev/play/p/M2wVq24PaZM)]
+
+### AttemptWhileWithDelay
+
+Invokes a function N times until it returns valid output, with a pause between each call. Returning either the caught error or nil, and along with a bool value to identifying whether it needs to invoke function continuously. It will terminate the invoke immediately if second bool value is returned with falsy value.
+
+When first argument is less than `1`, the function runs until a successful response is returned.
+
+```go
+count1, time1, err1 := lo.AttemptWhileWithDelay(5, time.Millisecond, func(i int, d time.Duration) (error, bool) {
+    err := doMockedHTTPRequest(i)
+    if err != nil {
+        if errors.Is(err, ErrBadRequest) { // lets assume ErrBadRequest is a critical error that needs to terminate the invoke
+            return err, false // flag the second return value as false to terminate the invoke
+        }
+
+        return err, true
+    }
+
+    return nil, false
+})
+```
+
+For more advanced retry strategies (delay, exponential backoff...), please take a look on [cenkalti/backoff](https://github.com/cenkalti/backoff).
+
+[[play](https://go.dev/play/p/cfcmhvLO-nv)]
 
 ### Debounce
 
@@ -2382,6 +2481,58 @@ ch := lo.Async2(func() (int, string) {
   return 42, "Hello"
 })
 // chan lo.Tuple2[int, string] ({42, "Hello"})
+```
+
+### Transaction
+
+Implements a Saga pattern.
+
+```go
+transaction := NewTransaction[int]().
+    Then(
+        func(state int) (int, error) {
+            fmt.Println("step 1")
+            return state + 10, nil
+        },
+        func(state int) int {
+            fmt.Println("rollback 1")
+            return state - 10
+        },
+    ).
+    Then(
+        func(state int) (int, error) {
+            fmt.Println("step 2")
+            return state + 15, nil
+        },
+        func(state int) int {
+            fmt.Println("rollback 2")
+            return state - 15
+        },
+    ).
+    Then(
+        func(state int) (int, error) {
+            fmt.Println("step 3")
+
+            if true {
+                return state, fmt.Errorf("error")
+            }
+
+            return state + 42, nil
+        },
+        func(state int) int {
+            fmt.Println("rollback 3")
+            return state - 42
+        },
+    )
+
+_, _ = transaction.Process(-5)
+
+// Output:
+// step 1
+// step 2
+// step 3
+// rollback 2
+// rollback 1
 ```
 
 ### Validate
@@ -2683,9 +2834,9 @@ make test
 make watch-test
 ```
 
-## 👤 Authors
+## 👤 Contributors
 
-- Samuel Berthe
+![Contributors](https://contrib.rocks/image?repo=samber/lo)
 
 ## 💫 Show your support
 

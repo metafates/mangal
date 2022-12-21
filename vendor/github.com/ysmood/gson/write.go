@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-// New JSON from []byte, io.Reader, or raw value.
+// New JSON from []byte, [io.Reader], or raw value.
 func New(v interface{}) JSON {
 	return JSON{&sync.Mutex{}, &v}
 }
@@ -23,7 +23,7 @@ func (j *JSON) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Val of the underlaying json value.
+// Val of the underlying json value.
 // The first time it's called, it will try to parse the underlying data.
 func (j JSON) Val() interface{} {
 	if j.value == nil {

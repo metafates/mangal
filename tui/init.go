@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/provider"
 	"github.com/spf13/viper"
 )
 
 func (b *statefulBubble) Init() tea.Cmd {
-	if names := viper.GetStringSlice(constant.DownloaderDefaultSources); b.state != historyState && len(names) != 0 {
+	if names := viper.GetStringSlice(key.DownloaderDefaultSources); b.state != historyState && len(names) != 0 {
 		var providers []*provider.Provider
 
 		for _, name := range names {

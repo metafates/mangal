@@ -8,9 +8,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/color"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/history"
 	"github.com/metafates/mangal/installer"
+	key2 "github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/open"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/query"
@@ -450,7 +450,7 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case []*source.Chapter:
 		items := make([]list.Item, len(msg))
 
-		if viper.GetBool(constant.TUIReverseChapters) {
+		if viper.GetBool(key2.TUIReverseChapters) {
 			for i, c := range msg {
 				items[len(msg)-i-1] = &listItem{internal: c}
 			}
@@ -464,7 +464,7 @@ func (b *statefulBubble) updateMangas(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.newState(chaptersState)
 		b.stopLoading()
 
-		if viper.GetBool(constant.AnilistLinkOnMangaSelect) {
+		if viper.GetBool(key2.AnilistLinkOnMangaSelect) {
 			return b, tea.Batch(cmd, b.fetchAndSetAnilist(b.selectedManga), b.waitForAnilistFetchAndSet())
 		}
 
@@ -568,7 +568,7 @@ func (b *statefulBubble) updateChapters(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.confirm):
 			if len(b.selectedChapters) != 0 {
 				b.newState(confirmState)
-			} else if viper.GetBool(constant.TUIReadOnEnter) {
+			} else if viper.GetBool(key2.TUIReadOnEnter) {
 				if b.chaptersC.SelectedItem() == nil {
 					break
 				}
@@ -704,7 +704,7 @@ func (b *statefulBubble) updateDownloadDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, b.keymap.openFolder):
 			err := open.StartWith(
 				lo.Must(b.currentDownloadingChapter.Manga.Path(false)),
-				viper.GetString(constant.ReaderFolder),
+				viper.GetString(key2.ReaderFolder),
 			)
 
 			if err != nil {

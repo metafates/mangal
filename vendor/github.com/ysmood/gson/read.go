@@ -1,3 +1,4 @@
+// Package gson A tiny JSON lib to read and alter a JSON value.
 package gson
 
 import (
@@ -22,6 +23,24 @@ func (j JSON) MarshalJSON() ([]byte, error) {
 	return json.Marshal(j.Val())
 }
 
+// Unmarshal is the same as [json.Unmarshal] for the underlying raw value.
+// It should be called before other operations.
+func (j JSON) Unmarshal(v interface{}) error {
+	if j.value == nil {
+		return fmt.Errorf("gson: no value to unmarshal")
+	}
+
+	j.lock.Lock()
+	defer j.lock.Unlock()
+
+	b, ok := (*j.value).([]byte)
+	if !ok {
+		return fmt.Errorf("gson: value has been parsed")
+	}
+
+	return json.Unmarshal(b, v)
+}
+
 // JSON string
 func (j JSON) JSON(prefix, indent string) string {
 	buf := bytes.NewBuffer(nil)
@@ -33,7 +52,7 @@ func (j JSON) JSON(prefix, indent string) string {
 	return s[:len(s)-1]
 }
 
-// Raw underlaying value
+// Raw underlying value
 func (j JSON) Raw() interface{} {
 	if j.value == nil {
 		return nil
@@ -41,7 +60,7 @@ func (j JSON) Raw() interface{} {
 	return *j.value
 }
 
-// String implements fmt.Stringer interface
+// String implements [fmt.Stringer] interface
 func (j JSON) String() string {
 	return fmt.Sprintf("%v", j.Val())
 }

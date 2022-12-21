@@ -6,9 +6,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/metafates/mangal/anilist"
 	"github.com/metafates/mangal/color"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/downloader"
 	"github.com/metafates/mangal/installer"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/source"
@@ -252,7 +252,7 @@ func (b *statefulBubble) downloadChapter(chapter *source.Chapter) tea.Cmd {
 		})
 
 		if err != nil {
-			if viper.GetBool(constant.DownloaderStopOnError) {
+			if viper.GetBool(key.DownloaderStopOnError) {
 				b.errorChannel <- err
 			} else {
 				b.failedChapters = append(b.failedChapters, chapter)

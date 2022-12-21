@@ -1,7 +1,7 @@
 package icon
 
 import (
-	"github.com/metafates/mangal/constant"
+	"github.com/metafates/mangal/key"
 	"github.com/spf13/viper"
 )
 
@@ -26,7 +26,7 @@ type iconDef struct {
 }
 
 func (i *iconDef) Get() string {
-	switch viper.GetString(constant.IconsVariant) {
+	switch viper.GetString(key.IconsVariant) {
 	case emoji:
 		return i.emoji
 	case nerd:

@@ -1,11 +1,47 @@
 package tea
 
-// Convenience commands. Not part of the Bubble Tea core, but potentially
-// handy.
-
 import (
 	"time"
 )
+
+// Batch performs a bunch of commands concurrently with no ordering guarantees
+// about the results. Use a Batch to return several commands.
+//
+// Example:
+//
+//	    func (m model) Init() Cmd {
+//		       return tea.Batch(someCommand, someOtherCommand)
+//	    }
+func Batch(cmds ...Cmd) Cmd {
+	var validCmds []Cmd
+	for _, c := range cmds {
+		if c == nil {
+			continue
+		}
+		validCmds = append(validCmds, c)
+	}
+	if len(validCmds) == 0 {
+		return nil
+	}
+	return func() Msg {
+		return BatchMsg(validCmds)
+	}
+}
+
+// BatchMsg is a message used to perform a bunch of commands concurrently with
+// no ordering guarantees. You can send a BatchMsg with Batch.
+type BatchMsg []Cmd
+
+// Sequence runs the given commands one at a time, in order. Contrast this with
+// Batch, which runs commands concurrently.
+func Sequence(cmds ...Cmd) Cmd {
+	return func() Msg {
+		return sequenceMsg(cmds)
+	}
+}
+
+// sequenceMsg is used internally to run the given commands in order.
+type sequenceMsg []Cmd
 
 // Every is a command that ticks in sync with the system clock. So, if you
 // wanted to tick with the system clock every second, minute or hour you
@@ -63,7 +99,7 @@ func Every(duration time.Duration, fn func(time.Time) Msg) Cmd {
 }
 
 // Tick produces a command at an interval independent of the system clock at
-// the given duration. That is, the timer begins when precisely when invoked,
+// the given duration. That is, the timer begins precisely when invoked,
 // and runs for its entire duration.
 //
 // To produce the command, pass a duration and a function which returns
@@ -119,6 +155,8 @@ func Tick(d time.Duration, fn func(time.Time) Msg) Cmd {
 //	}
 //
 //	cmd := Sequentially(saveStateCmd, Quit)
+//
+// Deprecated: use Sequence instead.
 func Sequentially(cmds ...Cmd) Cmd {
 	return func() Msg {
 		for _, cmd := range cmds {

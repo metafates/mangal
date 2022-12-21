@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/invopop/jsonschema"
 	"github.com/metafates/mangal/anilist"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/inline"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/query"
 	"github.com/metafates/mangal/source"
@@ -36,7 +36,7 @@ func init() {
 	inlineCmd.Flags().BoolP("populate-pages", "p", false, "Populate chapters pages")
 	inlineCmd.Flags().BoolP("fetch-metadata", "f", false, "Populate manga metadata")
 	inlineCmd.Flags().BoolP("include-anilist-manga", "a", false, "Include anilist manga in the output")
-	lo.Must0(viper.BindPFlag(constant.MetadataFetchAnilist, inlineCmd.Flags().Lookup("fetch-metadata")))
+	lo.Must0(viper.BindPFlag(key.MetadataFetchAnilist, inlineCmd.Flags().Lookup("fetch-metadata")))
 
 	inlineCmd.Flags().StringP("output", "o", "", "output file")
 
@@ -81,7 +81,7 @@ When using the json flag manga selector could be omitted. That way, it will sele
 			lo.Must0(cmd.MarkFlagRequired("json"))
 		}
 
-		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {
+		if _, err := converter.Get(viper.GetString(key.FormatsUse)); err != nil {
 			handleErr(err)
 		}
 	},
@@ -91,7 +91,7 @@ When using the json flag manga selector could be omitted. That way, it will sele
 			err     error
 		)
 
-		for _, name := range viper.GetStringSlice(constant.DownloaderDefaultSources) {
+		for _, name := range viper.GetStringSlice(key.DownloaderDefaultSources) {
 			if name == "" {
 				handleErr(errors.New("source not set"))
 			}

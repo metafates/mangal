@@ -94,6 +94,7 @@ var configInfoCmd = &cobra.Command{
 
 			if i < len(fields)-1 {
 				fmt.Println()
+				fmt.Println()
 			}
 		}
 	},

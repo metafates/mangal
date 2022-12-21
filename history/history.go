@@ -2,9 +2,9 @@ package history
 
 import (
 	"github.com/metafates/gache"
-	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
 	"github.com/metafates/mangal/integration"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/source"
 	"github.com/metafates/mangal/where"
@@ -35,7 +35,7 @@ func Get() (chapters map[string]*SavedChapter, err error) {
 
 // Save saves the chapter to the history file
 func Save(chapter *source.Chapter) error {
-	if viper.GetBool(constant.AnilistEnable) {
+	if viper.GetBool(key.AnilistEnable) {
 		go func() {
 			log.Info("Saving chapter to anilist")
 			err := integration.Anilist.MarkRead(chapter)

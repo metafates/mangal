@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/viper"
@@ -12,7 +13,7 @@ import (
 
 func init() {
 	filesystem.SetMemMapFs()
-	viper.Set(constant.FormatsUse, constant.FormatPDF)
+	viper.Set(key.FormatsUse, constant.FormatPDF)
 }
 
 var testChapter = Chapter{
@@ -30,7 +31,7 @@ func TestChapter_Filename(t *testing.T) {
 		Convey("When Filename is called", func() {
 			Convey("It should return a sanitized filename", func() {
 				const template = "&{index}! {chapter}// {volume} 28922@ {manga}"
-				viper.Set(constant.DownloaderChapterNameTemplate, template)
+				viper.Set(key.DownloaderChapterNameTemplate, template)
 				filename := testChapter.Filename()
 
 				Convey("It should match the given template", func() {

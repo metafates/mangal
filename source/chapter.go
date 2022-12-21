@@ -5,6 +5,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
 	"github.com/samber/mo"
@@ -58,6 +59,10 @@ func (c *Chapter) DownloadPages(temp bool, progress func(string)) (err error) {
 	wg.Add(len(c.Pages))
 
 	for _, page := range c.Pages {
+		if page == nil {
+			return fmt.Errorf("page #%d is empty, aborting download", page.Index)
+		}
+
 		d := func(page *Page) {
 			defer wg.Done()
 
@@ -71,7 +76,7 @@ func (c *Chapter) DownloadPages(temp bool, progress func(string)) (err error) {
 			progress(status())
 		}
 
-		if viper.GetBool(constant.DownloaderAsync) {
+		if viper.GetBool(key.DownloaderAsync) {
 			go d(page)
 		} else {
 			d(page)
@@ -79,13 +84,19 @@ func (c *Chapter) DownloadPages(temp bool, progress func(string)) (err error) {
 	}
 
 	wg.Wait()
-	c.isDownloaded = mo.Some(!temp && err == nil)
+
+	if err != nil {
+		c.isDownloaded = mo.Some(false)
+		return err
+	}
+
+	c.isDownloaded = mo.Some(!temp)
 	return
 }
 
 // formattedName of the chapter according to the template in the config.
 func (c *Chapter) formattedName() (name string) {
-	name = viper.GetString(constant.DownloaderChapterNameTemplate)
+	name = viper.GetString(key.DownloaderChapterNameTemplate)
 
 	var sourceName string
 	if c.Source() != nil {
@@ -117,7 +128,7 @@ func (c *Chapter) Filename() (filename string) {
 
 	// plain format assumes that chapter is a directory with images
 	// rather than a single file. So no need to add extension to it
-	if f := viper.GetString(constant.FormatsUse); f != constant.FormatPlain {
+	if f := viper.GetString(key.FormatsUse); f != constant.FormatPlain {
 		return filename + "." + f
 	}
 
@@ -155,7 +166,7 @@ func (c *Chapter) Path(temp bool) (path string, err error) {
 		return
 	}
 
-	return c.path(manga, c.Volume != "" && viper.GetBool(constant.DownloaderCreateVolumeDir))
+	return c.path(manga, c.Volume != "" && viper.GetBool(key.DownloaderCreateVolumeDir))
 }
 
 func (c *Chapter) Source() Source {
@@ -167,8 +178,8 @@ func (c *Chapter) ComicInfo() *ComicInfo {
 		day, month, year int
 	)
 
-	if viper.GetBool(constant.MetadataComicInfoXMLAddDate) {
-		if viper.GetBool(constant.MetadataComicInfoXMLAlternativeDate) {
+	if viper.GetBool(key.MetadataComicInfoXMLAddDate) {
+		if viper.GetBool(key.MetadataComicInfoXMLAlternativeDate) {
 			// get current date
 			t := time.Now()
 			day = t.Day()

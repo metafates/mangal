@@ -14,7 +14,7 @@ import (
 
 var versionCacher = gache.New[string](&gache.Options{
 	Path:       filepath.Join(where.Cache(), "version.json"),
-	Lifetime:   time.Hour * 24,
+	Lifetime:   time.Hour * 24 * 2,
 	FileSystem: &filesystem.GacheFs{},
 })
 

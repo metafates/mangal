@@ -3,6 +3,7 @@ package where
 import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
 	"os"
@@ -63,7 +64,7 @@ func History() string {
 // Downloads path
 // Will create the directory if it doesn't exist
 func Downloads() string {
-	path, err := filepath.Abs(viper.GetString(constant.DownloaderPath))
+	path, err := filepath.Abs(viper.GetString(key.DownloaderPath))
 
 	if err != nil {
 		path, err = os.Getwd()

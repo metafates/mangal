@@ -7,6 +7,7 @@ import (
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/converter"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/log"
 	"github.com/metafates/mangal/provider"
 	"github.com/metafates/mangal/style"
@@ -28,16 +29,16 @@ func init() {
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("format", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return converter.Available(), cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(constant.FormatsUse, rootCmd.PersistentFlags().Lookup("format")))
+	lo.Must0(viper.BindPFlag(key.FormatsUse, rootCmd.PersistentFlags().Lookup("format")))
 
 	rootCmd.PersistentFlags().StringP("icons", "I", "", "icons variant")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("icons", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return icon.AvailableVariants(), cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(constant.IconsVariant, rootCmd.PersistentFlags().Lookup("icons")))
+	lo.Must0(viper.BindPFlag(key.IconsVariant, rootCmd.PersistentFlags().Lookup("icons")))
 
 	rootCmd.PersistentFlags().BoolP("write-history", "H", true, "write history of the read chapters")
-	lo.Must0(viper.BindPFlag(constant.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("write-history")))
+	lo.Must0(viper.BindPFlag(key.HistorySaveOnRead, rootCmd.PersistentFlags().Lookup("write-history")))
 
 	rootCmd.PersistentFlags().StringSliceP("source", "S", []string{}, "default source to use")
 	lo.Must0(rootCmd.RegisterFlagCompletionFunc("source", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -53,7 +54,7 @@ func init() {
 
 		return sources, cobra.ShellCompDirectiveDefault
 	}))
-	lo.Must0(viper.BindPFlag(constant.DownloaderDefaultSources, rootCmd.PersistentFlags().Lookup("source")))
+	lo.Must0(viper.BindPFlag(key.DownloaderDefaultSources, rootCmd.PersistentFlags().Lookup("source")))
 
 	rootCmd.Flags().BoolP("continue", "c", false, "continue reading")
 
@@ -76,7 +77,7 @@ var rootCmd = &cobra.Command{
 	Long: constant.AsciiArtLogo + "\n" +
 		style.New().Italic(true).Foreground(color.HiRed).Render("    - The ultimate cli manga downloader"),
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if _, err := converter.Get(viper.GetString(constant.FormatsUse)); err != nil {
+		if _, err := converter.Get(viper.GetString(key.FormatsUse)); err != nil {
 			handleErr(err)
 		}
 	},
@@ -95,16 +96,18 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
-	// colored cobra injection
-	cc.Init(&cc.Config{
-		RootCmd:       rootCmd,
-		Headings:      cc.HiCyan + cc.Bold + cc.Underline,
-		Commands:      cc.HiYellow + cc.Bold,
-		Example:       cc.Italic,
-		ExecName:      cc.Bold,
-		Flags:         cc.Bold,
-		FlagsDataType: cc.Italic + cc.HiBlue,
-	})
+	if viper.GetBool(key.CliColored) {
+		// colored cobra injection
+		cc.Init(&cc.Config{
+			RootCmd:       rootCmd,
+			Headings:      cc.HiCyan + cc.Bold + cc.Underline,
+			Commands:      cc.HiYellow + cc.Bold,
+			Example:       cc.Italic,
+			ExecName:      cc.Bold,
+			Flags:         cc.Bold,
+			FlagsDataType: cc.Italic + cc.HiBlue,
+		})
+	}
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

@@ -5,6 +5,7 @@ import (
 	"github.com/metafates/mangal/config"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/source"
 	"github.com/samber/lo"
 	. "github.com/smartystreets/goconvey/convey"
@@ -17,7 +18,7 @@ import (
 func init() {
 	filesystem.SetMemMapFs()
 	lo.Must0(config.Setup())
-	viper.Set(constant.FormatsUse, constant.FormatPDF)
+	viper.Set(key.FormatsUse, constant.FormatPDF)
 }
 
 func TestPDF(t *testing.T) {

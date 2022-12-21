@@ -133,7 +133,6 @@ func newStatefulKeymap() *statefulKeymap {
 }
 
 // help returns short and full help for the state
-// TODO: add more information for full help
 func (k *statefulKeymap) help() ([]key.Binding, []key.Binding) {
 	h := func(bindings ...key.Binding) []key.Binding {
 		return bindings
