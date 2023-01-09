@@ -267,7 +267,7 @@ For scrapers examples, check the [mangal-scrapers repository](https://github.com
 
 This command will create `example.lua` file in the `mangal where --sources` directory.
 
-    mangal gen --name example --url https://example.com
+    mangal sources gen --name example --url https://example.com
 
 Open the file and edit it as you wish.
 Take a look at the comments for more information.
