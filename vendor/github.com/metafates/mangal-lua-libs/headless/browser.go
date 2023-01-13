@@ -1,6 +1,9 @@
 package headless
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/go-rod/rod"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -11,6 +14,9 @@ var browserMethods = map[string]lua.LGFunction{
 
 func newBrowser() lua.LGFunction {
 	return func(L *lua.LState) int {
+		temp := os.TempDir()
+		os.RemoveAll(filepath.Join(temp, "rod"))
+
 		browser := rod.New()
 		err := browser.Connect()
 

@@ -183,6 +183,33 @@ type WebAuthnAddVirtualAuthenticatorResult struct {
 	AuthenticatorID WebAuthnAuthenticatorID `json:"authenticatorId"`
 }
 
+// WebAuthnSetResponseOverrideBits Resets parameters isBogusSignature, isBadUV, isBadUP to false if they are not present.
+type WebAuthnSetResponseOverrideBits struct {
+
+	// AuthenticatorID ...
+	AuthenticatorID WebAuthnAuthenticatorID `json:"authenticatorId"`
+
+	// IsBogusSignature (optional) If isBogusSignature is set, overrides the signature in the authenticator response to be zero.
+	// Defaults to false.
+	IsBogusSignature bool `json:"isBogusSignature,omitempty"`
+
+	// IsBadUV (optional) If isBadUV is set, overrides the UV bit in the flags in the authenticator response to
+	// be zero. Defaults to false.
+	IsBadUV bool `json:"isBadUV,omitempty"`
+
+	// IsBadUP (optional) If isBadUP is set, overrides the UP bit in the flags in the authenticator response to
+	// be zero. Defaults to false.
+	IsBadUP bool `json:"isBadUP,omitempty"`
+}
+
+// ProtoReq name
+func (m WebAuthnSetResponseOverrideBits) ProtoReq() string { return "WebAuthn.setResponseOverrideBits" }
+
+// Call sends the request
+func (m WebAuthnSetResponseOverrideBits) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
 // WebAuthnRemoveVirtualAuthenticator Removes the given authenticator.
 type WebAuthnRemoveVirtualAuthenticator struct {
 
@@ -339,4 +366,34 @@ func (m WebAuthnSetAutomaticPresenceSimulation) ProtoReq() string {
 // Call sends the request
 func (m WebAuthnSetAutomaticPresenceSimulation) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
+}
+
+// WebAuthnCredentialAdded Triggered when a credential is added to an authenticator.
+type WebAuthnCredentialAdded struct {
+
+	// AuthenticatorID ...
+	AuthenticatorID WebAuthnAuthenticatorID `json:"authenticatorId"`
+
+	// Credential ...
+	Credential *WebAuthnCredential `json:"credential"`
+}
+
+// ProtoEvent name
+func (evt WebAuthnCredentialAdded) ProtoEvent() string {
+	return "WebAuthn.credentialAdded"
+}
+
+// WebAuthnCredentialAsserted Triggered when a credential is used in a webauthn assertion.
+type WebAuthnCredentialAsserted struct {
+
+	// AuthenticatorID ...
+	AuthenticatorID WebAuthnAuthenticatorID `json:"authenticatorId"`
+
+	// Credential ...
+	Credential *WebAuthnCredential `json:"credential"`
+}
+
+// ProtoEvent name
+func (evt WebAuthnCredentialAsserted) ProtoEvent() string {
+	return "WebAuthn.credentialAsserted"
 }

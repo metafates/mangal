@@ -311,6 +311,9 @@ const (
 	// PagePermissionsPolicyFeatureSharedStorage enum const
 	PagePermissionsPolicyFeatureSharedStorage PagePermissionsPolicyFeature = "shared-storage"
 
+	// PagePermissionsPolicyFeatureSmartCard enum const
+	PagePermissionsPolicyFeatureSmartCard PagePermissionsPolicyFeature = "smart-card"
+
 	// PagePermissionsPolicyFeatureStorageAccess enum const
 	PagePermissionsPolicyFeatureStorageAccess PagePermissionsPolicyFeature = "storage-access"
 
@@ -1243,8 +1246,14 @@ const (
 	// PageBackForwardCacheNotRestoredReasonKeepaliveRequest enum const
 	PageBackForwardCacheNotRestoredReasonKeepaliveRequest PageBackForwardCacheNotRestoredReason = "KeepaliveRequest"
 
+	// PageBackForwardCacheNotRestoredReasonIndexedDBEvent enum const
+	PageBackForwardCacheNotRestoredReasonIndexedDBEvent PageBackForwardCacheNotRestoredReason = "IndexedDBEvent"
+
 	// PageBackForwardCacheNotRestoredReasonDummy enum const
 	PageBackForwardCacheNotRestoredReasonDummy PageBackForwardCacheNotRestoredReason = "Dummy"
+
+	// PageBackForwardCacheNotRestoredReasonAuthorizationHeader enum const
+	PageBackForwardCacheNotRestoredReasonAuthorizationHeader PageBackForwardCacheNotRestoredReason = "AuthorizationHeader"
 
 	// PageBackForwardCacheNotRestoredReasonContentSecurityHandler enum const
 	PageBackForwardCacheNotRestoredReasonContentSecurityHandler PageBackForwardCacheNotRestoredReason = "ContentSecurityHandler"
@@ -1499,6 +1508,15 @@ const (
 
 	// PagePrerenderFinalStatusActivationNavigationParameterMismatch enum const
 	PagePrerenderFinalStatusActivationNavigationParameterMismatch PagePrerenderFinalStatus = "ActivationNavigationParameterMismatch"
+
+	// PagePrerenderFinalStatusActivatedInBackground enum const
+	PagePrerenderFinalStatusActivatedInBackground PagePrerenderFinalStatus = "ActivatedInBackground"
+
+	// PagePrerenderFinalStatusEmbedderHostDisallowed enum const
+	PagePrerenderFinalStatusEmbedderHostDisallowed PagePrerenderFinalStatus = "EmbedderHostDisallowed"
+
+	// PagePrerenderFinalStatusActivationNavigationDestroyedBeforeSuccess enum const
+	PagePrerenderFinalStatusActivationNavigationDestroyedBeforeSuccess PagePrerenderFinalStatus = "ActivationNavigationDestroyedBeforeSuccess"
 )
 
 // PageAddScriptToEvaluateOnLoad (deprecated) (experimental) Deprecated, please use addScriptToEvaluateOnNewDocument instead.
@@ -2788,11 +2806,14 @@ const (
 	// PageSetSPCTransactionModeModeNone enum const
 	PageSetSPCTransactionModeModeNone PageSetSPCTransactionModeMode = "none"
 
-	// PageSetSPCTransactionModeModeAutoaccept enum const
-	PageSetSPCTransactionModeModeAutoaccept PageSetSPCTransactionModeMode = "autoaccept"
+	// PageSetSPCTransactionModeModeAutoAccept enum const
+	PageSetSPCTransactionModeModeAutoAccept PageSetSPCTransactionModeMode = "autoAccept"
 
-	// PageSetSPCTransactionModeModeAutoreject enum const
-	PageSetSPCTransactionModeModeAutoreject PageSetSPCTransactionModeMode = "autoreject"
+	// PageSetSPCTransactionModeModeAutoReject enum const
+	PageSetSPCTransactionModeModeAutoReject PageSetSPCTransactionModeMode = "autoReject"
+
+	// PageSetSPCTransactionModeModeAutoOptOut enum const
+	PageSetSPCTransactionModeModeAutoOptOut PageSetSPCTransactionModeMode = "autoOptOut"
 )
 
 // PageSetSPCTransactionMode (experimental) Sets the Secure Payment Confirmation transaction mode.

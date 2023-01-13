@@ -1,7 +1,6 @@
 package xmlquery
 
 import (
-	"bytes"
 	"encoding/xml"
 	"fmt"
 	"html"
@@ -83,22 +82,22 @@ func WithoutComments() OutputOption {
 
 // InnerText returns the text between the start and end tags of the object.
 func (n *Node) InnerText() string {
-	var output func(*bytes.Buffer, *Node)
-	output = func(buf *bytes.Buffer, n *Node) {
+	var output func(*strings.Builder, *Node)
+	output = func(b *strings.Builder, n *Node) {
 		switch n.Type {
 		case TextNode, CharDataNode:
-			buf.WriteString(n.Data)
+			b.WriteString(n.Data)
 		case CommentNode:
 		default:
 			for child := n.FirstChild; child != nil; child = child.NextSibling {
-				output(buf, child)
+				output(b, child)
 			}
 		}
 	}
 
-	var buf bytes.Buffer
-	output(&buf, n)
-	return buf.String()
+	var b strings.Builder
+	output(&b, n)
+	return b.String()
 }
 
 func (n *Node) sanitizedData(preserveSpaces bool) string {
@@ -117,62 +116,62 @@ func calculatePreserveSpaces(n *Node, pastValue bool) bool {
 	return pastValue
 }
 
-func outputXML(buf *bytes.Buffer, n *Node, preserveSpaces bool, config *outputConfiguration) {
+func outputXML(b *strings.Builder, n *Node, preserveSpaces bool, config *outputConfiguration) {
 	preserveSpaces = calculatePreserveSpaces(n, preserveSpaces)
 	switch n.Type {
 	case TextNode:
-		buf.WriteString(html.EscapeString(n.sanitizedData(preserveSpaces)))
+		b.WriteString(html.EscapeString(n.sanitizedData(preserveSpaces)))
 		return
 	case CharDataNode:
-		buf.WriteString("<![CDATA[")
-		buf.WriteString(n.Data)
-		buf.WriteString("]]>")
+		b.WriteString("<![CDATA[")
+		b.WriteString(n.Data)
+		b.WriteString("]]>")
 		return
 	case CommentNode:
 		if !config.skipComments {
-			buf.WriteString("<!--")
-			buf.WriteString(n.Data)
-			buf.WriteString("-->")
+			b.WriteString("<!--")
+			b.WriteString(n.Data)
+			b.WriteString("-->")
 		}
 		return
 	case DeclarationNode:
-		buf.WriteString("<?" + n.Data)
+		b.WriteString("<?" + n.Data)
 	default:
 		if n.Prefix == "" {
-			buf.WriteString("<" + n.Data)
+			b.WriteString("<" + n.Data)
 		} else {
-			buf.WriteString("<" + n.Prefix + ":" + n.Data)
+			b.WriteString("<" + n.Prefix + ":" + n.Data)
 		}
 	}
 
 	for _, attr := range n.Attr {
 		if attr.Name.Space != "" {
-			buf.WriteString(fmt.Sprintf(` %s:%s=`, attr.Name.Space, attr.Name.Local))
+			b.WriteString(fmt.Sprintf(` %s:%s=`, attr.Name.Space, attr.Name.Local))
 		} else {
-			buf.WriteString(fmt.Sprintf(` %s=`, attr.Name.Local))
+			b.WriteString(fmt.Sprintf(` %s=`, attr.Name.Local))
 		}
-		buf.WriteByte('"')
-		buf.WriteString(html.EscapeString(attr.Value))
-		buf.WriteByte('"')
+		b.WriteByte('"')
+		b.WriteString(html.EscapeString(attr.Value))
+		b.WriteByte('"')
 	}
 	if n.Type == DeclarationNode {
-		buf.WriteString("?>")
+		b.WriteString("?>")
 	} else {
 		if n.FirstChild != nil || !config.emptyElementTagSupport {
-			buf.WriteString(">")
+			b.WriteString(">")
 		} else {
-			buf.WriteString("/>")
+			b.WriteString("/>")
 			return
 		}
 	}
 	for child := n.FirstChild; child != nil; child = child.NextSibling {
-		outputXML(buf, child, preserveSpaces, config)
+		outputXML(b, child, preserveSpaces, config)
 	}
 	if n.Type != DeclarationNode {
 		if n.Prefix == "" {
-			buf.WriteString(fmt.Sprintf("</%s>", n.Data))
+			b.WriteString(fmt.Sprintf("</%s>", n.Data))
 		} else {
-			buf.WriteString(fmt.Sprintf("</%s:%s>", n.Prefix, n.Data))
+			b.WriteString(fmt.Sprintf("</%s:%s>", n.Prefix, n.Data))
 		}
 	}
 }
@@ -185,16 +184,16 @@ func (n *Node) OutputXML(self bool) string {
 		emptyElementTagSupport: false,
 	}
 	preserveSpaces := calculatePreserveSpaces(n, false)
-	var buf bytes.Buffer
+	var b strings.Builder
 	if self && n.Type != DocumentNode {
-		outputXML(&buf, n, preserveSpaces, config)
+		outputXML(&b, n, preserveSpaces, config)
 	} else {
 		for n := n.FirstChild; n != nil; n = n.NextSibling {
-			outputXML(&buf, n, preserveSpaces, config)
+			outputXML(&b, n, preserveSpaces, config)
 		}
 	}
 
-	return buf.String()
+	return b.String()
 }
 
 // OutputXMLWithOptions returns the text that including tags name.
@@ -207,16 +206,16 @@ func (n *Node) OutputXMLWithOptions(opts ...OutputOption) string {
 	}
 
 	preserveSpaces := calculatePreserveSpaces(n, false)
-	var buf bytes.Buffer
+	var b strings.Builder
 	if config.printSelf && n.Type != DocumentNode {
-		outputXML(&buf, n, preserveSpaces, config)
+		outputXML(&b, n, preserveSpaces, config)
 	} else {
 		for n := n.FirstChild; n != nil; n = n.NextSibling {
-			outputXML(&buf, n, preserveSpaces, config)
+			outputXML(&b, n, preserveSpaces, config)
 		}
 	}
 
-	return buf.String()
+	return b.String()
 }
 
 // AddAttr adds a new attribute specified by 'key' and 'val' to a node 'n'.

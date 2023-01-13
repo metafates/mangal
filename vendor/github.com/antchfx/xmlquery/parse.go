@@ -105,9 +105,11 @@ func (p *parser) parse() (*Node, error) {
 				p.prev = node
 			}
 			// https://www.w3.org/TR/xml-names/#scoping-defaulting
+			var defaultNameSpace string
 			for _, att := range tok.Attr {
 				if att.Name.Local == "xmlns" {
 					p.space2prefix[att.Value] = ""
+					defaultNameSpace = att.Value
 				} else if att.Name.Space == "xmlns" {
 					p.space2prefix[att.Value] = att.Name.Local
 				}
@@ -133,14 +135,17 @@ func (p *parser) parse() (*Node, error) {
 			}
 
 			node := &Node{
-				Type:         ElementNode,
-				Data:         tok.Name.Local,
-				Prefix:       p.space2prefix[tok.Name.Space],
+				Type: ElementNode,
+				Data: tok.Name.Local,
+				//Prefix:       p.space2prefix[tok.Name.Space],
 				NamespaceURI: tok.Name.Space,
 				Attr:         attributes,
 				level:        p.level,
 			}
-
+			// https://github.com/antchfx/xmlquery/issues/96
+			if !(tok.Name.Space == defaultNameSpace) {
+				node.Prefix = p.space2prefix[tok.Name.Space]
+			}
 			if p.level == p.prev.level {
 				AddSibling(p.prev, node)
 			} else if p.level > p.prev.level {
