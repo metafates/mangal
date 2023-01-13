@@ -248,7 +248,7 @@ Use env variable `MANGAL_CONFIG_PATH` to set custom config path.
 | `mangal config set`   | Set config value for specific key                |
 | `mangal config reset` | Reset config value for specific key              |
 | `mangal config info`  | List all config fields with description for each |
-| `mangal config init`  | Write current config to a file                   |
+| `mangal config write` | Write current config to a file                   |
 
 ## Custom scrapers
 
@@ -267,7 +267,7 @@ For scrapers examples, check the [mangal-scrapers repository](https://github.com
 
 This command will create `example.lua` file in the `mangal where --sources` directory.
 
-    mangal gen --name example --url https://example.com
+    mangal sources gen --name example --url https://example.com
 
 Open the file and edit it as you wish.
 Take a look at the comments for more information.
