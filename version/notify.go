@@ -5,11 +5,17 @@ import (
 	"github.com/metafates/mangal/color"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/icon"
+	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/style"
 	"github.com/metafates/mangal/util"
+	"github.com/spf13/viper"
 )
 
 func Notify() {
+	if !viper.GetBool(key.CliVersionCheck) {
+		return
+	}
+
 	erase := util.PrintErasable(fmt.Sprintf("%s Checking if new version is available...", icon.Get(icon.Progress)))
 	version, err := Latest()
 	erase()

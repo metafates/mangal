@@ -3,7 +3,7 @@ package key
 // DefinedFieldsCount is the number of fields defined in this package.
 // You have to manually update this number when you add a new field
 // to check later if every field has a defined default value
-const DefinedFieldsCount = 52
+const DefinedFieldsCount = 53
 
 const (
 	DownloaderPath                = "downloader.path"
@@ -99,5 +99,6 @@ const (
 )
 
 const (
-	CliColored = "cli.colored"
+	CliColored      = "cli.colored"
+	CliVersionCheck = "cli.version_check"
 )

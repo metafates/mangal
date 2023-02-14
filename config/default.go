@@ -409,6 +409,11 @@ panic, fatal, error, warn, info, debug, trace`,
 		true,
 		"Use colors in CLI help page",
 	},
+	{
+		key.CliVersionCheck,
+		true,
+		"Check for a new version of the CLI occasionally",
+	},
 }
 
 func init() {
