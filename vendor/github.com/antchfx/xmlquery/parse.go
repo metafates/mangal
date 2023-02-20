@@ -105,13 +105,15 @@ func (p *parser) parse() (*Node, error) {
 				p.prev = node
 			}
 			// https://www.w3.org/TR/xml-names/#scoping-defaulting
-			var defaultNameSpace string
+			var defaultNamespaceURL string
 			for _, att := range tok.Attr {
 				if att.Name.Local == "xmlns" {
-					p.space2prefix[att.Value] = ""
-					defaultNameSpace = att.Value
+					p.space2prefix[att.Value] = "" // reset empty if exist the default namespace
+					defaultNamespaceURL = att.Value
 				} else if att.Name.Space == "xmlns" {
-					p.space2prefix[att.Value] = att.Name.Local
+					if _, ok := p.space2prefix[att.Value]; !ok {
+						p.space2prefix[att.Value] = att.Name.Local
+					}
 				}
 			}
 
@@ -135,17 +137,13 @@ func (p *parser) parse() (*Node, error) {
 			}
 
 			node := &Node{
-				Type: ElementNode,
-				Data: tok.Name.Local,
-				//Prefix:       p.space2prefix[tok.Name.Space],
+				Type:         ElementNode,
+				Data:         tok.Name.Local,
 				NamespaceURI: tok.Name.Space,
 				Attr:         attributes,
 				level:        p.level,
 			}
-			// https://github.com/antchfx/xmlquery/issues/96
-			if !(tok.Name.Space == defaultNameSpace) {
-				node.Prefix = p.space2prefix[tok.Name.Space]
-			}
+
 			if p.level == p.prev.level {
 				AddSibling(p.prev, node)
 			} else if p.level > p.prev.level {
@@ -155,6 +153,14 @@ func (p *parser) parse() (*Node, error) {
 					p.prev = p.prev.Parent
 				}
 				AddSibling(p.prev.Parent, node)
+			}
+			if node.NamespaceURI != "" {
+				node.Prefix = p.space2prefix[node.NamespaceURI]
+				if defaultNamespaceURL != "" && node.NamespaceURI == defaultNamespaceURL {
+					node.Prefix = ""
+				} else if n := node.Parent; n != nil && node.NamespaceURI == n.NamespaceURI {
+					node.Prefix = n.Prefix
+				}
 			}
 			// If we're in the streaming mode, we need to remember the node if it is the target node
 			// so that when we finish processing the node's EndElement, we know how/what to return to

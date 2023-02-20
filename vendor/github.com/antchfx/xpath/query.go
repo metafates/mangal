@@ -19,7 +19,7 @@ type query interface {
 	// Evaluate evaluates query and returns values of the current query.
 	Evaluate(iterator) interface{}
 
-	Reset()
+	Clone() query
 }
 
 // nopQuery is an empty query that always return nil for any query.
@@ -31,7 +31,7 @@ func (nopQuery) Select(iterator) NodeNavigator { return nil }
 
 func (nopQuery) Evaluate(iterator) interface{} { return nil }
 
-func (nopQuery) Reset() {}
+func (nopQuery) Clone() query { return nopQuery{} }
 
 // contextQuery is returns current node on the iterator object query.
 type contextQuery struct {
@@ -55,8 +55,8 @@ func (c *contextQuery) Evaluate(iterator) interface{} {
 	return c
 }
 
-func (c *contextQuery) Reset() {
-	c.count = 0
+func (c *contextQuery) Clone() query {
+	return &contextQuery{Root: c.Root}
 }
 
 // ancestorQuery is an XPath ancestor node query.(ancestor::*|ancestor-self::*)
@@ -111,9 +111,8 @@ func (a *ancestorQuery) Test(n NodeNavigator) bool {
 	return a.Predicate(n)
 }
 
-func (a *ancestorQuery) Reset() {
-	a.iterator = nil
-	a.Input.Reset()
+func (a *ancestorQuery) Clone() query {
+	return &ancestorQuery{Self: a.Self, Input: a.Input.Clone(), Predicate: a.Predicate}
 }
 
 // attributeQuery is an XPath attribute node query.(@*)
@@ -162,9 +161,8 @@ func (a *attributeQuery) Test(n NodeNavigator) bool {
 	return a.Predicate(n)
 }
 
-func (a *attributeQuery) Reset() {
-	a.Input.Reset()
-	a.iterator = nil
+func (a *attributeQuery) Clone() query {
+	return &attributeQuery{Input: a.Input.Clone(), Predicate: a.Predicate}
 }
 
 // childQuery is an XPath child node query.(child::*)
@@ -217,10 +215,8 @@ func (c *childQuery) Test(n NodeNavigator) bool {
 	return c.Predicate(n)
 }
 
-func (c *childQuery) Reset() {
-	c.posit = 0
-	c.iterator = nil
-	c.Input.Reset()
+func (c *childQuery) Clone() query {
+	return &childQuery{Input: c.Input.Clone(), Predicate: c.Predicate}
 }
 
 // position returns a position of current NodeNavigator.
@@ -312,11 +308,8 @@ func (d *descendantQuery) depth() int {
 	return d.level
 }
 
-func (d *descendantQuery) Reset() {
-	d.posit = 0
-	d.iterator = nil
-	d.level = 0
-	d.Input.Reset()
+func (d *descendantQuery) Clone() query {
+	return &descendantQuery{Self: d.Self, Input: d.Input.Clone(), Predicate: d.Predicate}
 }
 
 // followingQuery is an XPath following node query.(following::*|following-sibling::*)
@@ -393,10 +386,8 @@ func (f *followingQuery) Test(n NodeNavigator) bool {
 	return f.Predicate(n)
 }
 
-func (f *followingQuery) Reset() {
-	f.posit = 0
-	f.iterator = nil
-	f.Input.Reset()
+func (f *followingQuery) Clone() query {
+	return &followingQuery{Input: f.Input.Clone(), Sibling: f.Sibling, Predicate: f.Predicate}
 }
 
 func (f *followingQuery) position() int {
@@ -476,10 +467,8 @@ func (p *precedingQuery) Test(n NodeNavigator) bool {
 	return p.Predicate(n)
 }
 
-func (p *precedingQuery) Reset() {
-	p.posit = 0
-	p.iterator = nil
-	p.Input.Reset()
+func (p *precedingQuery) Clone() query {
+	return &precedingQuery{Input: p.Input.Clone(), Sibling: p.Sibling, Predicate: p.Predicate}
 }
 
 func (p *precedingQuery) position() int {
@@ -510,8 +499,8 @@ func (p *parentQuery) Evaluate(t iterator) interface{} {
 	return p
 }
 
-func (p *parentQuery) Reset() {
-	p.Input.Reset()
+func (p *parentQuery) Clone() query {
+	return &parentQuery{Input: p.Input.Clone(), Predicate: p.Predicate}
 }
 
 func (p *parentQuery) Test(n NodeNavigator) bool {
@@ -546,8 +535,8 @@ func (s *selfQuery) Test(n NodeNavigator) bool {
 	return s.Predicate(n)
 }
 
-func (s *selfQuery) Reset() {
-	s.Input.Reset()
+func (s *selfQuery) Clone() query {
+	return &selfQuery{Input: s.Input.Clone(), Predicate: s.Predicate}
 }
 
 // filterQuery is an XPath query for predicate filter.
@@ -609,11 +598,8 @@ func (f *filterQuery) Evaluate(t iterator) interface{} {
 	return f
 }
 
-func (f *filterQuery) Reset() {
-	f.posit = 0
-	f.positmap = nil
-	f.Input.Reset()
-	f.Predicate.Reset()
+func (f *filterQuery) Clone() query {
+	return &filterQuery{Input: f.Input.Clone(), Predicate: f.Predicate.Clone()}
 }
 
 // functionQuery is an XPath function that returns a computed value for
@@ -634,8 +620,8 @@ func (f *functionQuery) Evaluate(t iterator) interface{} {
 	return f.Func(f.Input, t)
 }
 
-func (f *functionQuery) Reset() {
-	f.Input.Reset()
+func (f *functionQuery) Clone() query {
+	return &functionQuery{Input: f.Input.Clone(), Func: f.Func}
 }
 
 // transformFunctionQuery diffs from functionQuery where the latter computes a scalar
@@ -662,9 +648,8 @@ func (f *transformFunctionQuery) Evaluate(t iterator) interface{} {
 	return f
 }
 
-func (f *transformFunctionQuery) Reset() {
-	f.Input.Reset()
-	f.iterator = nil
+func (f *transformFunctionQuery) Clone() query {
+	return &transformFunctionQuery{Input: f.Input.Clone(), Func: f.Func}
 }
 
 // constantQuery is an XPath constant operand.
@@ -680,7 +665,8 @@ func (c *constantQuery) Evaluate(t iterator) interface{} {
 	return c.Val
 }
 
-func (c *constantQuery) Reset() {
+func (c *constantQuery) Clone() query {
+	return c
 }
 
 type groupQuery struct {
@@ -702,9 +688,8 @@ func (g *groupQuery) Evaluate(t iterator) interface{} {
 	return g.Input.Evaluate(t)
 }
 
-func (g *groupQuery) Reset() {
-	g.posit = 0
-	g.Input.Reset()
+func (g *groupQuery) Clone() query {
+	return &groupQuery{Input: g.Input.Clone()}
 }
 
 func (g *groupQuery) position() int {
@@ -737,9 +722,8 @@ func (l *logicalQuery) Evaluate(t iterator) interface{} {
 	return l.Do(t, m, n)
 }
 
-func (l *logicalQuery) Reset() {
-	l.Left.Reset()
-	l.Right.Reset()
+func (l *logicalQuery) Clone() query {
+	return &logicalQuery{Left: l.Left.Clone(), Right: l.Right.Clone(), Do: l.Do}
 }
 
 // numericQuery is an XPath numeric operator expression.
@@ -759,9 +743,8 @@ func (n *numericQuery) Evaluate(t iterator) interface{} {
 	return n.Do(m, k)
 }
 
-func (n *numericQuery) Reset() {
-	n.Left.Reset()
-	n.Right.Reset()
+func (n *numericQuery) Clone() query {
+	return &numericQuery{Left: n.Left.Clone(), Right: n.Right.Clone(), Do: n.Do}
 }
 
 type booleanQuery struct {
@@ -850,10 +833,8 @@ func (b *booleanQuery) Evaluate(t iterator) interface{} {
 	return asBool(t, m)
 }
 
-func (b *booleanQuery) Reset() {
-	b.iterator = nil
-	b.Left.Reset()
-	b.Right.Reset()
+func (b *booleanQuery) Clone() query {
+	return &booleanQuery{IsOr: b.IsOr, Left: b.Left.Clone(), Right: b.Right.Clone()}
 }
 
 type unionQuery struct {
@@ -909,60 +890,37 @@ func (u *unionQuery) Evaluate(t iterator) interface{} {
 	return u
 }
 
-func (u *unionQuery) Reset() {
-	u.Left.Reset()
-	u.Right.Reset()
-	u.iterator = nil
+func (u *unionQuery) Clone() query {
+	return &unionQuery{Left: u.Left.Clone(), Right: u.Right.Clone()}
 }
 
-type cacheQuery struct {
-	posit    int
-	buffer   []NodeNavigator
-	iterator func() NodeNavigator
+type lastQuery struct {
+	buffer  []NodeNavigator
+	counted bool
 
 	Input query
 }
 
-func (c *cacheQuery) Select(t iterator) NodeNavigator {
-	if c.iterator == nil {
+func (q *lastQuery) Select(t iterator) NodeNavigator {
+	return nil
+}
+
+func (q *lastQuery) Evaluate(t iterator) interface{} {
+	if !q.counted {
 		for {
-			node := c.Input.Select(t)
+			node := q.Input.Select(t)
 			if node == nil {
 				break
 			}
-			c.buffer = append(c.buffer, node.Copy())
+			q.buffer = append(q.buffer, node.Copy())
 		}
-		c.iterator = func() NodeNavigator {
-			if c.posit >= len(c.buffer) {
-				return nil
-			}
-			node := c.buffer[c.posit]
-			c.posit++
-			return node
-		}
+		q.counted = true
 	}
-	return c.iterator()
+	return float64(len(q.buffer))
 }
 
-func (c *cacheQuery) Evaluate(t iterator) interface{} {
-	c.posit = 0
-	c.buffer = nil
-	return c.Input.Evaluate(t)
-}
-
-func (c *cacheQuery) Reset() {
-	c.buffer = nil
-	c.posit = 0
-	c.iterator = nil
-	c.Input.Reset()
-}
-
-func (c *cacheQuery) position() int {
-	return c.posit
-}
-
-func (c *cacheQuery) count() int {
-	return len(c.buffer)
+func (q *lastQuery) Clone() query {
+	return &lastQuery{Input: q.Input.Clone()}
 }
 
 func getHashCode(n NodeNavigator) uint64 {

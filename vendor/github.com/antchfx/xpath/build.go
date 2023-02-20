@@ -44,6 +44,12 @@ func axisPredicate(root *axisNode) func(NodeNavigator) bool {
 	predicate := func(n NodeNavigator) bool {
 		if typ == n.NodeType() || typ == allNode {
 			if nametest {
+				type namespaceURL interface {
+					NamespaceURL() string
+				}
+				if ns, ok := n.(namespaceURL); ok && root.hasNamespaceURI {
+					return root.LocalName == n.LocalName() && root.namespaceURI == ns.NamespaceURL()
+				}
 				if root.LocalName == n.LocalName() && root.Prefix == n.Prefix() {
 					return true
 				}
@@ -350,7 +356,15 @@ func (b *builder) processFunctionNode(root *functionNode) (query, error) {
 			},
 		}
 	case "last":
-		qyOutput = &functionQuery{Input: b.firstInput, Func: lastFunc}
+		switch typ := b.firstInput.(type) {
+		case *groupQuery, *filterQuery:
+			// https://github.com/antchfx/xpath/issues/76
+			// https://github.com/antchfx/xpath/issues/78
+			qyOutput = &lastQuery{Input: typ}
+		default:
+			qyOutput = &functionQuery{Input: b.firstInput, Func: lastFunc}
+		}
+
 	case "position":
 		qyOutput = &functionQuery{Input: b.firstInput, Func: positionFunc}
 	case "boolean", "number", "string":
@@ -514,6 +528,7 @@ func (b *builder) processNode(root node) (q query, err error) {
 		b.firstInput = q
 	case nodeFilter:
 		q, err = b.processFilterNode(root.(*filterNode))
+		b.firstInput = q
 	case nodeFunction:
 		q, err = b.processFunctionNode(root.(*functionNode))
 	case nodeOperator:
@@ -524,15 +539,13 @@ func (b *builder) processNode(root node) (q query, err error) {
 			return
 		}
 		q = &groupQuery{Input: q}
-		// fix https://github.com/antchfx/xpath/issues/76
-		q = &cacheQuery{Input: q}
 		b.firstInput = q
 	}
 	return
 }
 
 // build builds a specified XPath expressions expr.
-func build(expr string) (q query, err error) {
+func build(expr string, namespaces map[string]string) (q query, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			switch x := e.(type) {
@@ -545,7 +558,7 @@ func build(expr string) (q query, err error) {
 			}
 		}
 	}()
-	root := parse(expr)
+	root := parse(expr, namespaces)
 	b := &builder{}
 	return b.processNode(root)
 }

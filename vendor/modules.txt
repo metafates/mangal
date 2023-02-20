@@ -3,7 +3,7 @@
 github.com/AlecAivazis/survey/v2
 github.com/AlecAivazis/survey/v2/core
 github.com/AlecAivazis/survey/v2/terminal
-# github.com/PuerkitoBio/goquery v1.8.0
+# github.com/PuerkitoBio/goquery v1.8.1
 ## explicit; go 1.13
 github.com/PuerkitoBio/goquery
 # github.com/alessio/shellescape v1.4.1
@@ -12,13 +12,13 @@ github.com/alessio/shellescape
 # github.com/andybalholm/cascadia v1.3.1
 ## explicit; go 1.16
 github.com/andybalholm/cascadia
-# github.com/antchfx/htmlquery v1.2.6
+# github.com/antchfx/htmlquery v1.3.0
 ## explicit; go 1.14
 github.com/antchfx/htmlquery
-# github.com/antchfx/xmlquery v1.3.14
+# github.com/antchfx/xmlquery v1.3.15
 ## explicit; go 1.14
 github.com/antchfx/xmlquery
-# github.com/antchfx/xpath v1.2.2
+# github.com/antchfx/xpath v1.2.4
 ## explicit; go 1.14
 github.com/antchfx/xpath
 # github.com/atotto/clipboard v0.1.4
@@ -30,16 +30,18 @@ github.com/aymanbagabas/go-osc52
 # github.com/cbroglie/mustache v1.4.0
 ## explicit; go 1.17
 github.com/cbroglie/mustache
-# github.com/charmbracelet/bubbles v0.14.0
+# github.com/charmbracelet/bubbles v0.15.0
 ## explicit; go 1.13
+github.com/charmbracelet/bubbles/cursor
 github.com/charmbracelet/bubbles/help
 github.com/charmbracelet/bubbles/key
 github.com/charmbracelet/bubbles/list
 github.com/charmbracelet/bubbles/paginator
 github.com/charmbracelet/bubbles/progress
+github.com/charmbracelet/bubbles/runeutil
 github.com/charmbracelet/bubbles/spinner
 github.com/charmbracelet/bubbles/textinput
-# github.com/charmbracelet/bubbletea v0.23.1
+# github.com/charmbracelet/bubbletea v0.23.2
 ## explicit; go 1.16
 github.com/charmbracelet/bubbletea
 # github.com/charmbracelet/harmonica v0.2.0
@@ -57,13 +59,13 @@ github.com/darylhjd/mangodex
 # github.com/dustin/go-humanize v1.0.1
 ## explicit; go 1.16
 github.com/dustin/go-humanize
-# github.com/fatih/color v1.13.0
-## explicit; go 1.13
+# github.com/fatih/color v1.14.1
+## explicit; go 1.17
 github.com/fatih/color
 # github.com/fsnotify/fsnotify v1.6.0
 ## explicit; go 1.16
 github.com/fsnotify/fsnotify
-# github.com/go-rod/rod v0.112.3
+# github.com/go-rod/rod v0.112.6
 ## explicit; go 1.16
 github.com/go-rod/rod
 github.com/go-rod/rod/lib/assets
@@ -219,7 +221,7 @@ github.com/muesli/reflow/ansi
 github.com/muesli/reflow/truncate
 github.com/muesli/reflow/wordwrap
 github.com/muesli/reflow/wrap
-# github.com/muesli/termenv v0.13.0
+# github.com/muesli/termenv v0.14.0
 ## explicit; go 1.13
 github.com/muesli/termenv
 # github.com/pdfcpu/pdfcpu v0.3.13
@@ -236,7 +238,6 @@ github.com/pdfcpu/pdfcpu/pkg/pdfcpu/validate
 github.com/pdfcpu/pdfcpu/pkg/types
 # github.com/pelletier/go-toml v1.9.5
 ## explicit; go 1.12
-github.com/pelletier/go-toml
 # github.com/pelletier/go-toml/v2 v2.0.6
 ## explicit; go 1.16
 github.com/pelletier/go-toml/v2
@@ -259,7 +260,7 @@ github.com/saintfish/chardet
 # github.com/samber/lo v1.37.0
 ## explicit; go 1.18
 github.com/samber/lo
-# github.com/samber/mo v1.7.0
+# github.com/samber/mo v1.8.0
 ## explicit; go 1.18
 github.com/samber/mo
 # github.com/sirupsen/logrus v1.9.0
@@ -293,7 +294,7 @@ github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.5
 ## explicit; go 1.12
 github.com/spf13/pflag
-# github.com/spf13/viper v1.14.0
+# github.com/spf13/viper v1.15.0
 ## explicit; go 1.17
 github.com/spf13/viper
 github.com/spf13/viper/internal/encoding
@@ -324,39 +325,42 @@ github.com/ysmood/leakless/pkg/utils
 # github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
 ## explicit
 github.com/yuin/gluamapper
-# github.com/yuin/gopher-lua v1.0.0
+# github.com/yuin/gopher-lua v1.1.0
 ## explicit; go 1.17
 github.com/yuin/gopher-lua
 github.com/yuin/gopher-lua/ast
 github.com/yuin/gopher-lua/parse
 github.com/yuin/gopher-lua/pm
-# golang.org/x/exp v0.0.0-20230113213754-f9f960f08ad4
+# golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
 ## explicit; go 1.18
 golang.org/x/exp/constraints
 golang.org/x/exp/slices
-# golang.org/x/image v0.3.0
+# golang.org/x/image v0.5.0
 ## explicit; go 1.12
 golang.org/x/image/ccitt
 golang.org/x/image/riff
 golang.org/x/image/vp8
 golang.org/x/image/vp8l
 golang.org/x/image/webp
-# golang.org/x/net v0.5.0
+# golang.org/x/net v0.7.0
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
-# golang.org/x/sys v0.4.0
+# golang.org/x/sync v0.1.0
+## explicit
+golang.org/x/sync/errgroup
+# golang.org/x/sys v0.5.0
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.4.0
+# golang.org/x/term v0.5.0
 ## explicit; go 1.17
 golang.org/x/term
-# golang.org/x/text v0.6.0
+# golang.org/x/text v0.7.0
 ## explicit; go 1.17
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap

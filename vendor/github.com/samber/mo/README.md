@@ -3,7 +3,7 @@
 [![tag](https://img.shields.io/github/tag/samber/mo.svg)](https://github.com/samber/mo/releases)
 ![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.18-%23007d9c)
 [![GoDoc](https://godoc.org/github.com/samber/mo?status.svg)](https://pkg.go.dev/github.com/samber/mo)
-![Build Status](https://github.com/samber/mo/actions/workflows/go.yml/badge.svg)
+![Build Status](https://github.com/samber/mo/actions/workflows/test.yml/badge.svg)
 [![Go report](https://goreportcard.com/badge/github.com/samber/mo)](https://goreportcard.com/report/github.com/samber/mo)
 [![Coverage](https://img.shields.io/codecov/c/github/samber/do)](https://codecov.io/gh/samber/mo)
 [![License](https://img.shields.io/github/license/samber/mo)](./LICENSE)
@@ -49,6 +49,8 @@ go get github.com/samber/mo@v1
 This library is v1 and follows SemVer strictly.
 
 No breaking changes will be made to exported APIs before v2.0.0.
+
+This library has no dependencies except the Go std lib.
 
 ## 💡 Quick start
 
@@ -126,6 +128,7 @@ Constructors:
 - `mo.None()` [doc](https://pkg.go.dev/github.com/samber/mo#None) - [play](https://go.dev/play/p/yYQPsYCSYlD)
 - `mo.TupleToOption()` [doc](https://pkg.go.dev/github.com/samber/mo#TupleToOption) - [play](https://go.dev/play/p/gkrg2pZwOty)
 - `mo.EmptyableToOption()` [doc](https://pkg.go.dev/github.com/samber/mo#EmptyableToOption) - [play](https://go.dev/play/p/GSpQQ-q-UES)
+- `mo.PointerToOption()` [doc](https://pkg.go.dev/github.com/samber/mo#PointerToOption) - [play](https://go.dev/play/p/yPVMj4DUb-I)
 
 Methods:
 

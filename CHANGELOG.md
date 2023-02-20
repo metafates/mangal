@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 - Added option to disable whitespace escaping `mangal config info -k downloader.escape_whitespace` #159
 - Fixed bug when setting config value to empty string with `config set` command would cause mangal to crash #147
 - When `tui.read_on_enter` is set to false, mangal will prompt user to download a chapter instead #156
+- Update lua vm to support `goto` statements
 
 ## 4.0.6
 - Update dependencies

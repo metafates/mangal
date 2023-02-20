@@ -8,7 +8,7 @@ import (
 
 var (
 	// output is the default global output.
-	output = NewOutput(os.Stdout)
+	output = NewOutput(nil)
 )
 
 // File represents a file descriptor.
@@ -17,12 +17,16 @@ type File interface {
 	Fd() uintptr
 }
 
+// OutputOption sets an option on Output.
+type OutputOption = func(*Output)
+
 // Output is a terminal output.
 type Output struct {
 	Profile
 	tty     io.Writer
 	environ Environ
 
+	unsafe  bool
 	cache   bool
 	fgSync  *sync.Once
 	fgColor Color
@@ -52,7 +56,7 @@ func DefaultOutput() *Output {
 }
 
 // NewOutput returns a new Output for the given file descriptor.
-func NewOutput(tty io.Writer, opts ...func(*Output)) *Output {
+func NewOutput(tty io.Writer, opts ...OutputOption) *Output {
 	o := &Output{
 		tty:     tty,
 		environ: &osEnviron{},
@@ -69,19 +73,22 @@ func NewOutput(tty io.Writer, opts ...func(*Output)) *Output {
 	if o.Profile < 0 {
 		o.Profile = o.EnvColorProfile()
 	}
+	if o.tty == nil {
+		o.tty = os.Stdout
+	}
 
 	return o
 }
 
 // WithEnvironment returns a new Output for the given environment.
-func WithEnvironment(environ Environ) func(*Output) {
+func WithEnvironment(environ Environ) OutputOption {
 	return func(o *Output) {
 		o.environ = environ
 	}
 }
 
 // WithProfile returns a new Output for the given profile.
-func WithProfile(profile Profile) func(*Output) {
+func WithProfile(profile Profile) OutputOption {
 	return func(o *Output) {
 		o.Profile = profile
 	}
@@ -89,13 +96,24 @@ func WithProfile(profile Profile) func(*Output) {
 
 // WithColorCache returns a new Output with fore- and background color values
 // pre-fetched and cached.
-func WithColorCache(v bool) func(*Output) {
+func WithColorCache(v bool) OutputOption {
 	return func(o *Output) {
 		o.cache = v
 
 		// cache the values now
 		_ = o.ForegroundColor()
 		_ = o.BackgroundColor()
+	}
+}
+
+// WithUnsafe returns a new Output with unsafe mode enabled. Unsafe mode doesn't
+// check whether or not the terminal is a TTY.
+//
+// This is useful when mocking console output and enforcing ANSI escape output
+// e.g. on SSH sessions.
+func WithUnsafe() OutputOption {
+	return func(o *Output) {
+		o.unsafe = true
 	}
 }
 

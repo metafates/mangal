@@ -12,13 +12,22 @@ var (
 )
 
 const (
+	// Escape character
+	ESC = '\x1b'
+	// Bell
+	BEL = '\a'
 	// Control Sequence Introducer
-	CSI = "\x1b["
+	CSI = string(ESC) + "["
 	// Operating System Command
-	OSC = "\x1b]"
+	OSC = string(ESC) + "]"
+	// String Terminator
+	ST = string(ESC) + `\`
 )
 
 func (o *Output) isTTY() bool {
+	if o.unsafe {
+		return true
+	}
 	if len(o.environ.Getenv("CI")) > 0 {
 		return false
 	}

@@ -121,16 +121,14 @@ func (expr *Expr) Evaluate(root NodeNavigator) interface{} {
 	val := expr.q.Evaluate(iteratorFunc(func() NodeNavigator { return root }))
 	switch val.(type) {
 	case query:
-		expr.q.Reset()
-		return &NodeIterator{query: expr.q, node: root}
+		return &NodeIterator{query: expr.q.Clone(), node: root}
 	}
 	return val
 }
 
 // Select selects a node set using the specified XPath expression.
 func (expr *Expr) Select(root NodeNavigator) *NodeIterator {
-	expr.q.Reset()
-	return &NodeIterator{query: expr.q, node: root}
+	return &NodeIterator{query: expr.q.Clone(), node: root}
 }
 
 // String returns XPath expression string.
@@ -143,7 +141,7 @@ func Compile(expr string) (*Expr, error) {
 	if expr == "" {
 		return nil, errors.New("expr expression is nil")
 	}
-	qy, err := build(expr)
+	qy, err := build(expr, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -160,4 +158,19 @@ func MustCompile(expr string) *Expr {
 		return &Expr{s: expr, q: nopQuery{}}
 	}
 	return exp
+}
+
+// CompileWithNS compiles an XPath expression string, using given namespaces map.
+func CompileWithNS(expr string, namespaces map[string]string) (*Expr, error) {
+	if expr == "" {
+		return nil, errors.New("expr expression is nil")
+	}
+	qy, err := build(expr, namespaces)
+	if err != nil {
+		return nil, err
+	}
+	if qy == nil {
+		return nil, fmt.Errorf(fmt.Sprintf("undeclared variable in XPath expression: %s", expr))
+	}
+	return &Expr{s: expr, q: qy}, nil
 }

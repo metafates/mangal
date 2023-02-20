@@ -53,14 +53,6 @@ func positionFunc(q query, t iterator) interface{} {
 
 // lastFunc is a XPath Node Set functions last().
 func lastFunc(q query, t iterator) interface{} {
-	//
-	type Counter interface {
-		count() int
-	}
-	if p, ok := q.(Counter); ok {
-		return float64(p.count())
-	}
-
 	var (
 		count = 0
 		node  = t.Current().Copy()
@@ -166,8 +158,7 @@ func nameFunc(arg query) func(query, iterator) interface{} {
 		if arg == nil {
 			v = t.Current()
 		} else {
-			arg.Reset()
-			v = arg.Select(t)
+			v = arg.Clone().Select(t)
 			if v == nil {
 				return ""
 			}
@@ -187,8 +178,7 @@ func localNameFunc(arg query) func(query, iterator) interface{} {
 		if arg == nil {
 			v = t.Current()
 		} else {
-			arg.Reset()
-			v = arg.Select(t)
+			v = arg.Clone().Select(t)
 			if v == nil {
 				return ""
 			}
@@ -205,8 +195,7 @@ func namespaceFunc(arg query) func(query, iterator) interface{} {
 			v = t.Current()
 		} else {
 			// Get the first node in the node-set if specified.
-			arg.Reset()
-			v = arg.Select(t)
+			v = arg.Clone().Select(t)
 			if v == nil {
 				return ""
 			}
@@ -603,8 +592,7 @@ func functionArgs(q query) query {
 	if _, ok := q.(*functionQuery); ok {
 		return q
 	}
-	q.Reset()
-	return q
+	return q.Clone()
 }
 
 func reverseFunc(q query, t iterator) func() NodeNavigator {
