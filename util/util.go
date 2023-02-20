@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/metafates/mangal/constant"
 	"github.com/metafates/mangal/filesystem"
+	"github.com/metafates/mangal/key"
 	"github.com/samber/lo"
+	"github.com/spf13/viper"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/term"
 	"os"
@@ -22,13 +24,16 @@ func PadZero(s string, l int) string {
 
 // replacers is a list of regexp.Regexp pairs that will be used to sanitize filenames.
 var replacers = []lo.Tuple2[*regexp.Regexp, string]{
-	{regexp.MustCompile(`[\\/<>:;"'|?!*{}#%&^+,~\s]`), "_"},
+	{regexp.MustCompile(`[\\/<>:;"'|?!*{}#%&^+,~]`), "_"},
 	{regexp.MustCompile(`__+`), "_"},
 	{regexp.MustCompile(`^[_\-.]+|[_\-.]+$`), ""},
 }
 
 // SanitizeFilename will remove all invalid characters from a path.
 func SanitizeFilename(filename string) string {
+	if viper.GetBool(key.DownloaderEscapeWhitespace) {
+		filename = regexp.MustCompile(`\s`).ReplaceAllString(filename, "_")
+	}
 	for _, re := range replacers {
 		filename = re.A.ReplaceAllString(filename, re.B)
 	}
