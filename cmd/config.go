@@ -130,7 +130,11 @@ var configSetCmd = &cobra.Command{
 		var v any
 		switch config.Default[key].Value.(type) {
 		case string:
-			v = value[0]
+			if len(value) == 0 {
+				v = ""
+			} else {
+				v = value[0]
+			}
 		case int:
 			parsedInt, err := strconv.ParseInt(value[0], 10, 64)
 			if err != nil {
