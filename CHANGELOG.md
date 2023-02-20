@@ -7,7 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## 4.0.7
 
-- Add option to disable whitespace escaping `mangal config info -k downloader.escape_whitespace` #159
+- Added option to disable whitespace escaping `mangal config info -k downloader.escape_whitespace` #159
+- Fixed bug when setting config value to empty string with `config set` command would cause mangal to crash #147
+- When `tui.read_on_enter` is set to false, mangal will prompt user to download a chapter instead #156
 
 ## 4.0.6
 - Update dependencies
