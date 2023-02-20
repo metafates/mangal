@@ -62,17 +62,11 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 				continue
 			}
 
-			num, err := strconv.ParseUint(chapter.GetChapterNum(), 10, 16)
-			n := uint16(num)
-			if err != nil {
-				n = uint16(i)
-			}
-
 			name := chapter.GetTitle()
 			if name == "" {
-				name = fmt.Sprintf("Chapter %d", n)
+				name = fmt.Sprintf("Chapter %s", chapter.GetChapterNum())
 			} else {
-				name = fmt.Sprintf("Chapter %d - %s", n, name)
+				name = fmt.Sprintf("Chapter %s - %s", chapter.GetChapterNum(), name)
 			}
 
 			var volume string
@@ -81,7 +75,7 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 			}
 			chapters = append(chapters, &source.Chapter{
 				Name:   name,
-				Index:  n,
+				Index:  uint16(i),
 				ID:     chapter.ID,
 				URL:    fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
 				Manga:  manga,
