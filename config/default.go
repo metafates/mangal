@@ -387,7 +387,7 @@ panic, fatal, error, warn, info, debug, trace`,
 	{
 		key.TUIReadOnEnter,
 		true,
-		"Read chapter on enter if other chapters aren't selected",
+		"Read chapter on enter if other chapters aren't selected. Download otherwise",
 	},
 	{
 		key.TUISearchPromptString,
