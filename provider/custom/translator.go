@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type mapping lo.Tuple4[lua.LValueType, bool, func(string) error, string]
@@ -93,6 +94,17 @@ func chapterFromTable(table *lua.LTable, manga *source.Manga, index uint16) (cha
 		"url":           {A: lua.LTString, B: true, C: func(v string) error { chapter.URL = v; return nil }},
 		"volume":        {A: lua.LTString, B: false, C: func(v string) error { chapter.Volume = v; return nil }},
 		"manga_summary": {A: lua.LTString, B: false, C: func(v string) error { manga.Metadata.Summary = v; return nil }},
+		"chapter_date": {A: lua.LTString, B: false, C: func(v string) error {
+			if v == "" {
+				return nil
+			}
+			parsedTime, err := time.Parse("2006-01-02", v)
+			if err != nil {
+				return nil
+			}
+			chapter.ChapterDate = &parsedTime
+			return nil
+		}},
 		"manga_genres": {A: lua.LTString, B: false, C: func(v string) error {
 			manga.Metadata.Genres = lo.Map(strings.Split(v, ","), func(genre string, _ int) string {
 				return strings.TrimSpace(genre)
