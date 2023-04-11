@@ -57,6 +57,10 @@ func mangaFromTable(table *lua.LTable, index uint16) (manga *source.Manga, err e
 		"name":    {A: lua.LTString, B: true, C: func(v string) error { manga.Name = v; return nil }},
 		"url":     {A: lua.LTString, B: true, C: func(v string) error { manga.URL = v; return nil }},
 		"summary": {A: lua.LTString, B: false, C: func(v string) error { manga.Metadata.Summary = v; return nil }},
+		"translator": {A: lua.LTString, B: false, C: func(v string) error {
+			manga.Metadata.Staff.Translation = append(manga.Metadata.Staff.Translation, v)
+			return nil
+		}},
 		"cover": {A: lua.LTString, B: false, C: func(v string) error {
 			if v == "" {
 				return nil
