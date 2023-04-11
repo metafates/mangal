@@ -45,6 +45,10 @@ func (t *listItem) Title() (title string) {
 			sb.WriteString(style.Faint(e.Volume))
 		}
 
+		if e.ChapterDate != nil {
+			sb.WriteString(style.Faint(fmt.Sprintf(" [%s]", e.ChapterDate.Format("2006-01-02"))))
+		}
+
 		if e.IsDownloaded() {
 			sb.WriteString(" ")
 			sb.WriteString(icon.Get(icon.Downloaded))
