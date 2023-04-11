@@ -33,6 +33,8 @@ type Chapter struct {
 	Manga *Manga `json:"-"`
 	// Pages of the chapter.
 	Pages []*Page `json:"pages" jsonschema:"description=Pages of the chapter"`
+	// Date when the chapter was released.
+	ChapterDate *time.Time `json:"chapter_date" jsonschema:"description=Date when the chapter was released"`
 
 	isDownloaded mo.Option[bool]
 	size         uint64
@@ -174,23 +176,7 @@ func (c *Chapter) Source() Source {
 }
 
 func (c *Chapter) ComicInfo() *ComicInfo {
-	var (
-		day, month, year int
-	)
-
-	if viper.GetBool(key.MetadataComicInfoXMLAddDate) {
-		if viper.GetBool(key.MetadataComicInfoXMLAlternativeDate) {
-			// get current date
-			t := time.Now()
-			day = t.Day()
-			month = int(t.Month())
-			year = t.Year()
-		} else {
-			day = c.Manga.Metadata.StartDate.Day
-			month = c.Manga.Metadata.StartDate.Month
-			year = c.Manga.Metadata.StartDate.Year
-		}
-	} // empty dates will be omitted
+	var day, month, year = getChapterDate(c)
 
 	return &ComicInfo{
 		XmlnsXsd: "http://www.w3.org/2001/XMLSchema",
@@ -216,4 +202,34 @@ func (c *Chapter) ComicInfo() *ComicInfo {
 		Notes:      "Downloaded with Mangal. https://github.com/metafates/mangal",
 		Manga:      "YesAndRightToLeft",
 	}
+}
+
+func getChapterDate(c *Chapter) (int, int, int) {
+	var (
+		day, month, year int
+	)
+	if !viper.GetBool(key.MetadataComicInfoXMLAddDate) {
+		return day, month, year
+
+	}
+	if c.ChapterDate != nil {
+		day = c.ChapterDate.Day()
+		month = int(c.ChapterDate.Month())
+		year = c.ChapterDate.Year()
+		return day, month, year
+	}
+
+	if viper.GetBool(key.MetadataComicInfoXMLAlternativeDate) {
+		// get current date
+		t := time.Now()
+		day = t.Day()
+		month = int(t.Month())
+		year = t.Year()
+	} else {
+		day = c.Manga.Metadata.StartDate.Day
+		month = c.Manga.Metadata.StartDate.Month
+		year = c.Manga.Metadata.StartDate.Year
+	}
+
+	return day, month, year
 }
