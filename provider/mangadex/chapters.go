@@ -9,6 +9,7 @@ import (
 	"golang.org/x/exp/slices"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
@@ -69,17 +70,20 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 				name = fmt.Sprintf("Chapter %s - %s", chapter.GetChapterNum(), name)
 			}
 
+			parsedCreatedDate, _ := time.Parse("2006-01-02T15:04:05-07:00", chapter.Attributes.CreatedAt)
+
 			var volume string
 			if chapter.Attributes.Volume != nil {
 				volume = fmt.Sprintf("Vol.%s", *chapter.Attributes.Volume)
 			}
 			chapters = append(chapters, &source.Chapter{
-				Name:   name,
-				Index:  uint16(i),
-				ID:     chapter.ID,
-				URL:    fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
-				Manga:  manga,
-				Volume: volume,
+				Name:        name,
+				Index:       uint16(i),
+				ID:          chapter.ID,
+				URL:         fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
+				Manga:       manga,
+				Volume:      volume,
+				ChapterDate: &parsedCreatedDate,
 			})
 		}
 		currOffset += 500
