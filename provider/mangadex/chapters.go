@@ -2,13 +2,14 @@ package mangadex
 
 import (
 	"fmt"
+	"net/url"
+	"strconv"
+
 	"github.com/darylhjd/mangodex"
 	"github.com/metafates/mangal/key"
 	"github.com/metafates/mangal/source"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
-	"net/url"
-	"strconv"
 )
 
 func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
@@ -19,9 +20,10 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 
 		return cached, nil
 	}
+	chunkSize := 500
 
 	params := url.Values{}
-	params.Set("limit", strconv.Itoa(500))
+	params.Set("limit", strconv.Itoa(chunkSize))
 	ratings := []string{mangodex.Safe, mangodex.Suggestive}
 	for _, rating := range ratings {
 		params.Add("contentRating[]", rating)
@@ -51,6 +53,8 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 		}
 
 		for i, chapter := range list.Data {
+			// actual index is the current offset + the current i
+			var index = currOffset + i
 			// Skip external chapters. Their pages cannot be downloaded.
 			if chapter.Attributes.ExternalURL != nil && !viper.GetBool(key.MangadexShowUnavailableChapters) {
 				continue
@@ -58,7 +62,6 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 
 			// skip chapters that are not in the current language
 			if language != "any" && chapter.Attributes.TranslatedLanguage != language {
-				currOffset += 500
 				continue
 			}
 
@@ -75,21 +78,18 @@ func (m *Mangadex) ChaptersOf(manga *source.Manga) ([]*source.Chapter, error) {
 			}
 			chapters = append(chapters, &source.Chapter{
 				Name:   name,
-				Index:  uint16(i),
+				Index:  uint16(index),
 				ID:     chapter.ID,
 				URL:    fmt.Sprintf("https://mangadex.org/chapter/%s", chapter.ID),
 				Manga:  manga,
 				Volume: volume,
 			})
 		}
-		currOffset += 500
+		// the offset check has to be done before adding the next batch
 		if currOffset >= list.Total {
 			break
 		}
-
-		if currOffset >= list.Total {
-			break
-		}
+		currOffset += chunkSize
 	}
 
 	slices.SortFunc(chapters, func(a, b *source.Chapter) bool {
