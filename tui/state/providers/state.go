@@ -7,6 +7,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
+	"github.com/mangalorg/mangal/tui/state/errorstate"
+	"github.com/mangalorg/mangal/tui/state/loading"
+	"github.com/mangalorg/mangal/tui/state/search"
 	"github.com/pkg/errors"
 )
 
@@ -19,8 +22,8 @@ type State struct {
 }
 
 // Backable implements base.State.
-func (*State) Backable() bool {
-	return true
+func (s *State) Backable() bool {
+	return s.list.FilterState() == list.Unfiltered
 }
 
 // Init implements base.State.
@@ -61,16 +64,26 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			goto end
 		}
 
-		//item, ok := s.list.SelectedItem().(Item)
-		//if !ok {
-		//	return nil
-		//}
+		item, ok := s.list.SelectedItem().(Item)
+		if !ok {
+			return nil
+		}
 
 		switch {
 		case key.Matches(msg, s.keyMap.confirm):
-			return func() tea.Msg {
-				return errors.New("not implemented")
-			}
+			return tea.Sequence(
+				func() tea.Msg {
+					return loading.New("Loading...")
+				},
+				func() tea.Msg {
+					client, err := libmangal.NewClient(model.Context(), item, libmangal.DefaultClientOptions())
+					if err != nil {
+						return errorstate.New(err)
+					}
+
+					return search.New(&client)
+				},
+			)
 		case key.Matches(msg, s.keyMap.info):
 			return func() tea.Msg {
 				return errors.New("not implemented")

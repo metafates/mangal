@@ -9,36 +9,36 @@ import (
 
 func HomeDir() string {
 	dir := xdg.Home
-	createIfAbsent(dir)
+	createDirIfAbsent(dir)
 	return dir
 }
 
 func CacheDir() string {
 	dir := filepath.Join(xdg.CacheHome, meta.AppName)
-	createIfAbsent(dir)
+	createDirIfAbsent(dir)
 	return dir
 }
 
 func ConfigDir() string {
 	dir := filepath.Join(xdg.ConfigHome, meta.AppName)
-	createIfAbsent(dir)
+	createDirIfAbsent(dir)
 	return dir
 }
 
 func DownloadsDir() string {
 	dir := xdg.UserDirs.Download
-	createIfAbsent(dir)
+	createDirIfAbsent(dir)
 	return dir
 }
 
 func ProvidersDir() string {
 	dir := filepath.Join(ConfigDir(), "providers")
-	createIfAbsent(dir)
+	createDirIfAbsent(dir)
 	return dir
 }
 
 func LuaProvidersDir() string {
 	dir := filepath.Join(ProvidersDir(), "lua")
-	createIfAbsent(dir)
+	createDirIfAbsent(dir)
 	return dir
 }

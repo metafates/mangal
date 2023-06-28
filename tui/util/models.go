@@ -19,15 +19,15 @@ func NewList[T any](
 
 	delegate := list.NewDefaultDelegate()
 
-	// delegate.Styles.NormalTitle.Foreground(color.HiWhite).Bold(true)
-	// delegate.Styles.SelectedTitle.Foreground(color.Accent).Bold(true)
+	delegate.Styles.NormalTitle.Bold(true)
+	delegate.Styles.SelectedTitle.Bold(true)
 	delegate.Styles.SelectedTitle.Border(border, false, false, false, true)
 	delegate.Styles.SelectedDesc.
 		Border(border, false, false, false, true).
 		Foreground(delegate.Styles.NormalDesc.GetForeground())
 
-	// delegate.Styles.SelectedTitle.BorderLeftForeground(color.Accent)
-	// delegate.Styles.SelectedDesc.BorderLeftForeground(color.Accent)
+	//delegate.Styles.SelectedTitle.BorderLeftForeground(color.Accent)
+	//delegate.Styles.SelectedDesc.BorderLeftForeground(color.Accent)
 	delegate.SetHeight(delegateHeight)
 
 	l := list.New(listItems, delegate, 0, 0)

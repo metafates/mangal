@@ -1,7 +1,13 @@
 package main
 
-import "github.com/mangalorg/mangal/cmd"
+import (
+	"github.com/charmbracelet/log"
+	"github.com/mangalorg/mangal/cmd"
+	"io"
+)
 
 func main() {
-    cmd.Run()
+	// TODO: change this
+	log.Default().SetOutput(io.Discard)
+	cmd.Run()
 }
