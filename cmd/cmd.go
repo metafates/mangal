@@ -1,13 +1,18 @@
 package cmd
 
-import "github.com/alecthomas/kong"
+import (
+	"github.com/alecthomas/kong"
+)
 
-var cli struct {
-    Version versionCmd `cmd:"" help:"Print version"`    
+type rootCmd struct {
+	Run     runCmd     `cmd:"" help:"Run mangal"`
+	Version versionCmd `cmd:"" help:"Print version"`
 }
 
+var cli rootCmd
+
 func Run() {
-    ctx := kong.Parse(&cli)
-    err := ctx.Run()
-    ctx.FatalIfErrorf(err)
+	ctx := kong.Parse(&cli, kong.ShortUsageOnError())
+	err := ctx.Run()
+	ctx.FatalIfErrorf(err)
 }

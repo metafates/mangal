@@ -5,16 +5,12 @@ import (
 
 	"github.com/mangalorg/mangal/tui/base"
 
-	// "github.com/mangalorg/mangal/tui/state"
-	"os"
-
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/zyedidia/generic/stack"
-	"golang.org/x/term"
 )
 
 type Model struct {
@@ -40,31 +36,6 @@ func (m *Model) ShortHelp() []key.Binding {
 func (m *Model) FullHelp() [][]key.Binding {
 	keys := [][]key.Binding{{m.keyMap.Back, m.keyMap.Help}}
 	return append(keys, m.state.KeyMap().FullHelp()...)
-}
-
-func New(initialState base.State) *Model {
-	width, height, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		width, height = 80, 40
-	}
-
-	model := &Model{
-		state:   initialState,
-		history: stack.New[base.State](),
-		size: base.Size{
-			Width:  width,
-			Height: height,
-		},
-		keyMap: newKeyMap(),
-		help:   help.New(),
-		styles: base.DefaultStyles(),
-	}
-
-	defer model.resize(model.StateSize())
-
-	model.context, model.contextCancelFunc = context.WithCancel(context.Background())
-
-	return model
 }
 
 func (m *Model) StateSize() base.Size {

@@ -2,11 +2,11 @@ package model
 
 import (
 	"context"
-	"github.com/Inno-Gang/goodle-cli/tui/base"
-	"github.com/Inno-Gang/goodle-cli/tui/state"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
+	"github.com/mangalorg/mangal/tui/base"
+	"github.com/mangalorg/mangal/tui/state/errorstate"
 	"github.com/pkg/errors"
 )
 
@@ -42,7 +42,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		log.Error(msg)
 
-		return m, m.pushState(state.NewError(msg))
+		return m, m.pushState(errorstate.New(msg))
 	}
 
 	cmd := m.state.Update(m, msg)

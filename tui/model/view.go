@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/Inno-Gang/goodle-cli/stringutil"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mangalorg/mangal/stringutil"
 	"github.com/muesli/reflow/wordwrap"
 	"strings"
 )
