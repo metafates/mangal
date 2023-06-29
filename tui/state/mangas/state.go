@@ -8,7 +8,6 @@ import (
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/chapters"
-	"github.com/mangalorg/mangal/tui/state/errorstate"
 	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/mangalorg/mangal/tui/state/volumes"
 )
@@ -67,7 +66,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				func() tea.Msg {
 					v, err := s.client.MangaVolumes(model.Context(), item.Manga)
 					if err != nil {
-						return errorstate.New(err)
+						return err
 					}
 
 					if len(v) > 1 {
@@ -76,7 +75,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 
 					c, err := s.client.VolumeChapters(model.Context(), v[0])
 					if err != nil {
-						return errorstate.New(err)
+						return err
 					}
 
 					return chapters.New(s.client, c)

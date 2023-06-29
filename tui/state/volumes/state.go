@@ -8,7 +8,6 @@ import (
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/chapters"
-	"github.com/mangalorg/mangal/tui/state/errorstate"
 	"github.com/mangalorg/mangal/tui/state/loading"
 )
 
@@ -66,7 +65,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				func() tea.Msg {
 					c, err := s.client.VolumeChapters(model.Context(), item.Volume)
 					if err != nil {
-						return errorstate.New(err)
+						return err
 					}
 
 					return chapters.New(s.client, c)

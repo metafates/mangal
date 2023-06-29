@@ -55,7 +55,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				func() tea.Msg {
 					m, err := s.client.SearchMangas(model.Context(), s.textinput.Value())
 					if err != nil {
-						return nil
+						return err
 					}
 
 					return mangas.New(s.client, m)

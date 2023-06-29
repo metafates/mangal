@@ -52,6 +52,10 @@ func (s *State) Backable() bool {
 func (s *State) Resize(size base.Size) {
 }
 
+func (s *State) SetMessage(message string) {
+	s.message = message
+}
+
 func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	s.spinner, cmd = s.spinner.Update(msg)
 	return cmd

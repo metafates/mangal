@@ -7,7 +7,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
-	"github.com/mangalorg/mangal/tui/state/errorstate"
 	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/mangalorg/mangal/tui/state/search"
 	"github.com/pkg/errors"
@@ -78,10 +77,10 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				func() tea.Msg {
 					client, err := libmangal.NewClient(model.Context(), item, libmangal.DefaultClientOptions())
 					if err != nil {
-						return errorstate.New(err)
+						return err
 					}
 
-					return search.New(&client)
+					return search.New(client)
 				},
 			)
 		case key.Matches(msg, s.keyMap.info):

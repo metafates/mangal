@@ -1,6 +1,7 @@
 package path
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/adrg/xdg"
@@ -27,6 +28,12 @@ func ConfigDir() string {
 
 func DownloadsDir() string {
 	dir := xdg.UserDirs.Download
+	createDirIfAbsent(dir)
+	return dir
+}
+
+func TempDir() string {
+	dir := filepath.Join(os.TempDir(), meta.AppName)
 	createDirIfAbsent(dir)
 	return dir
 }
