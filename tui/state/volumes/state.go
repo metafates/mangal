@@ -33,7 +33,7 @@ func (s *State) Title() base.Title {
 }
 
 func (s *State) Status() string {
-	return ""
+	return s.list.Paginator.View()
 }
 
 func (s *State) Backable() bool {

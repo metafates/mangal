@@ -24,6 +24,7 @@ func New(client *libmangal.Client, chapters []libmangal.Chapter) *State {
 			SelectAll:   util.Bind("select all", "a"),
 			Toggle:      util.Bind("toggle", " "),
 			Read:        util.Bind("read", "r"),
+			Anilist:     util.Bind("anilist", "A"),
 			Download:    util.Bind("download", "d"),
 			Confirm:     util.Bind("confirm", "enter"),
 		},

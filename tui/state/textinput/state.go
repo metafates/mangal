@@ -1,26 +1,27 @@
-package search
+package textinput
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
-	"github.com/mangalorg/mangal/tui/state/loading"
-	"github.com/mangalorg/mangal/tui/state/mangas"
 )
 
 var _ base.State = (*State)(nil)
 
+type OnResponseFunc func(response string) tea.Cmd
+
 type State struct {
-	client    *libmangal.Client
-	keyMap    KeyMap
+	options Options
+
 	textinput textinput.Model
+	keyMap    KeyMap
 }
 
 func (s *State) Intermediate() bool {
-	return false
+	return s.options.Intermediate
 }
 
 func (s *State) KeyMap() help.KeyMap {
@@ -48,19 +49,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, s.keyMap.Confirm):
-			return tea.Sequence(
-				func() tea.Msg {
-					return loading.New("Searching")
-				},
-				func() tea.Msg {
-					m, err := s.client.SearchMangas(model.Context(), s.textinput.Value())
-					if err != nil {
-						return err
-					}
-
-					return mangas.New(s.client, m)
-				},
-			)
+			return s.options.OnResponse(s.textinput.Value())
 		}
 	}
 
@@ -69,7 +58,12 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 }
 
 func (s *State) View(model base.Model) string {
-	return s.textinput.View()
+	return fmt.Sprintf(`%s
+
+%s`,
+		s.options.Prompt,
+		s.textinput.View(),
+	)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {

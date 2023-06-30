@@ -6,10 +6,19 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/fs"
+	"github.com/mangalorg/mangal/path"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/loading"
-	"github.com/mangalorg/mangal/tui/state/search"
+	"github.com/mangalorg/mangal/tui/state/mangas"
+	"github.com/mangalorg/mangal/tui/state/textinput"
+	"github.com/philippgille/gokv"
+	"github.com/philippgille/gokv/bbolt"
+	"github.com/philippgille/gokv/encoding"
 	"github.com/pkg/errors"
+	"net/http"
+	"path/filepath"
+	"time"
 )
 
 var _ base.State = (*State)(nil)
@@ -46,8 +55,8 @@ func (s *State) Resize(size base.Size) {
 }
 
 // Status implements base.State.
-func (*State) Status() string {
-	return ""
+func (s *State) Status() string {
+	return s.list.Paginator.View()
 }
 
 // Title implements base.State.
@@ -75,12 +84,78 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					return loading.New("Loading...")
 				},
 				func() tea.Msg {
-					client, err := libmangal.NewClient(model.Context(), item, libmangal.DefaultClientOptions())
+					newPersistentStore := func(name string) (gokv.Store, error) {
+						dir := filepath.Join(path.CacheDir(), "anilist")
+						if err := fs.FS.MkdirAll(dir, 0755); err != nil {
+							return nil, err
+						}
+
+						return bbolt.NewStore(bbolt.Options{
+							BucketName: name,
+							Path:       filepath.Join(dir, name+".db"),
+							Codec:      encoding.Gob,
+						})
+					}
+
+					httpClient := &http.Client{
+						Timeout: time.Minute,
+					}
+
+					anilistOptions := libmangal.DefaultAnilistOptions()
+
+					var err error
+					anilistOptions.QueryToIDsStore, err = newPersistentStore("query-to-id")
 					if err != nil {
 						return err
 					}
 
-					return search.New(client)
+					anilistOptions.IDToMangaStore, err = newPersistentStore("id-to-manga")
+					if err != nil {
+						return err
+					}
+
+					anilistOptions.TitleToIDStore, err = newPersistentStore("title-to-id")
+					if err != nil {
+						return err
+					}
+
+					anilistOptions.AccessTokenStore, err = newPersistentStore("access-token")
+					if err != nil {
+						return err
+					}
+
+					anilist := libmangal.NewAnilist(anilistOptions)
+
+					options := libmangal.DefaultClientOptions()
+					options.FS = fs.FS
+					options.Anilist = &anilist
+					options.HTTPClient = httpClient
+
+					client, err := libmangal.NewClient(model.Context(), item, options)
+					if err != nil {
+						return err
+					}
+
+					return textinput.New(textinput.Options{
+						Title:       "Search",
+						Prompt:      "Search for a manga",
+						Placeholder: "",
+						OnResponse: func(response string) tea.Cmd {
+							return tea.Sequence(
+								func() tea.Msg {
+									return loading.New("Searching")
+								},
+								func() tea.Msg {
+									m, err := client.SearchMangas(model.Context(), response)
+									if err != nil {
+										return err
+									}
+
+									return mangas.New(client, m)
+								},
+							)
+						},
+					})
 				},
 			)
 		case key.Matches(msg, s.keyMap.info):

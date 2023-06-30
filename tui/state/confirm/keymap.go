@@ -1,4 +1,4 @@
-package chapters
+package confirm
 
 import (
 	"github.com/charmbracelet/bubbles/help"
@@ -8,27 +8,18 @@ import (
 var _ help.KeyMap = (*KeyMap)(nil)
 
 type KeyMap struct {
-	UnselectAll,
-	SelectAll,
-	Toggle,
-	Read,
-	Download,
-	Anilist,
-	Confirm key.Binding
+	Yes, No key.Binding
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
 	return []key.Binding{
-		k.Toggle,
-		k.Read,
-		k.Download,
+		k.Yes,
+		k.No,
 	}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		k.ShortHelp(),
-		{k.SelectAll, k.UnselectAll},
-		{k.Anilist},
 	}
 }

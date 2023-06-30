@@ -5,7 +5,11 @@ import (
 	"github.com/mangalorg/luaprovider"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
+	"github.com/philippgille/gokv/bbolt"
+	"github.com/philippgille/gokv/encoding"
+	"net/http"
 	"path/filepath"
+	"time"
 )
 
 func InstalledProviders() ([]libmangal.ProviderLoader, error) {
@@ -43,7 +47,28 @@ func installeLuaProviders() ([]libmangal.ProviderLoader, error) {
 			return nil, err
 		}
 
-		loader, err := luaprovider.NewLoader(file, luaprovider.DefaultOptions())
+		info, err := luaprovider.ExtractInfo(file)
+		if err != nil {
+			continue
+		}
+
+		store, err := bbolt.NewStore(bbolt.Options{
+			BucketName: info.Name,
+			Path:       filepath.Join(path.CacheDir(), info.Name+".db"),
+			Codec:      encoding.Gob,
+		})
+		if err != nil {
+			continue
+		}
+
+		options := luaprovider.Options{
+			HTTPClient: &http.Client{
+				Timeout: time.Minute,
+			},
+			HTTPStore: store,
+		}
+
+		loader, err := luaprovider.NewLoader(file, options)
 		if err != nil {
 			return nil, err
 		}

@@ -1,5 +1,7 @@
 package stringutil
 
+import "fmt"
+
 func Trim(s string, max int) string {
 	const ellipsis = "…"
 
@@ -9,4 +11,11 @@ func Trim(s string, max int) string {
 	}
 
 	return s
+}
+
+func Quantify(n int, noun string) string {
+	if n == 1 {
+		return fmt.Sprint(n, " ", noun)
+	}
+	return fmt.Sprint(n, " ", noun+"s")
 }

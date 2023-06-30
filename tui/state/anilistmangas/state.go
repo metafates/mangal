@@ -1,4 +1,4 @@
-package mangas
+package anilistmangas
 
 import (
 	"github.com/charmbracelet/bubbles/help"
@@ -7,22 +7,25 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
-	"github.com/mangalorg/mangal/tui/state/chapters"
 	"github.com/mangalorg/mangal/tui/state/loading"
-	"github.com/mangalorg/mangal/tui/state/volumes"
+	"github.com/mangalorg/mangal/tui/state/textinput"
 )
 
 var _ base.State = (*State)(nil)
 
+type OnResponseFunc func(response *libmangal.AnilistManga) tea.Cmd
+
 type State struct {
-	client *libmangal.Client
-	mangas []libmangal.Manga
-	list   list.Model
+	anilist *libmangal.Anilist
+	list    list.Model
+
+	onResponse OnResponseFunc
+
 	keyMap KeyMap
 }
 
 func (s *State) Intermediate() bool {
-	return false
+	return true
 }
 
 func (s *State) KeyMap() help.KeyMap {
@@ -30,11 +33,11 @@ func (s *State) KeyMap() help.KeyMap {
 }
 
 func (s *State) Title() base.Title {
-	return base.Title{Text: "Mangas"}
+	return base.Title{Text: "Anilist Mangas"}
 }
 
 func (s *State) Status() string {
-	return s.list.Paginator.View()
+	return ""
 }
 
 func (s *State) Backable() bool {
@@ -52,37 +55,41 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			goto end
 		}
 
-		item, ok := s.list.SelectedItem().(Item)
-		if !ok {
-			return nil
-		}
-
 		switch {
 		case key.Matches(msg, s.keyMap.Confirm):
-			return tea.Sequence(
-				func() tea.Msg {
-					return loading.New("Loading...")
-				},
-				func() tea.Msg {
-					v, err := s.client.MangaVolumes(model.Context(), item.Manga)
-					if err != nil {
-						return err
-					}
+			item, ok := s.list.SelectedItem().(Item)
+			if !ok {
+				return nil
+			}
 
-					if len(v) > 1 {
-						return volumes.New(s.client, v)
-					}
+			return s.onResponse(item.Manga)
+		case key.Matches(msg, s.keyMap.Search):
+			return func() tea.Msg {
+				return textinput.New(textinput.Options{
+					Title:        "Search",
+					Prompt:       "Enter Anilist manga title",
+					Placeholder:  "",
+					Intermediate: true,
+					OnResponse: func(response string) tea.Cmd {
+						return tea.Sequence(
+							func() tea.Msg {
+								return loading.New("Searching...")
+							},
+							func() tea.Msg {
+								mangas, err := s.anilist.SearchMangas(model.Context(), response)
+								if err != nil {
+									return loading.New(err.Error())
+								}
 
-					c, err := s.client.VolumeChapters(model.Context(), v[0])
-					if err != nil {
-						return err
-					}
-
-					return chapters.New(s.client, c)
-				},
-			)
+								return New(s.anilist, mangas, s.onResponse)
+							},
+						)
+					},
+				})
+			}
 		}
 	}
+
 end:
 	s.list, cmd = s.list.Update(msg)
 	return cmd

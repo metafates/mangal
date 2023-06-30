@@ -1,4 +1,4 @@
-package search
+package chapsdownloading
 
 import (
 	"github.com/charmbracelet/bubbles/help"
@@ -7,18 +7,12 @@ import (
 
 var _ help.KeyMap = (*KeyMap)(nil)
 
-type KeyMap struct {
-	Confirm key.Binding
-}
+type KeyMap struct{}
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{
-		k.Confirm,
-	}
+	return nil
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{
-		k.ShortHelp(),
-	}
+	return nil
 }

@@ -1,17 +1,20 @@
-package search
+package textinput
 
 import (
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/util"
 )
 
-func New(client *libmangal.Client) *State {
+func New(options Options) *State {
+	if options.Title == "" {
+		options.Title = "Search"
+	}
+
 	return &State{
-		client: client,
+		options:   options,
+		textinput: textinput.New(),
 		keyMap: KeyMap{
 			Confirm: util.Bind("confirm", "enter"),
 		},
-		textinput: textinput.New(),
 	}
 }

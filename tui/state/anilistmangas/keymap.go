@@ -1,4 +1,4 @@
-package chapters
+package anilistmangas
 
 import (
 	"github.com/charmbracelet/bubbles/help"
@@ -8,27 +8,19 @@ import (
 var _ help.KeyMap = (*KeyMap)(nil)
 
 type KeyMap struct {
-	UnselectAll,
-	SelectAll,
-	Toggle,
-	Read,
-	Download,
-	Anilist,
+	Search,
 	Confirm key.Binding
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
 	return []key.Binding{
-		k.Toggle,
-		k.Read,
-		k.Download,
+		k.Confirm,
+		k.Search,
 	}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		k.ShortHelp(),
-		{k.SelectAll, k.UnselectAll},
-		{k.Anilist},
 	}
 }

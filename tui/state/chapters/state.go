@@ -8,9 +8,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/path"
+	"github.com/mangalorg/mangal/stringutil"
 	"github.com/mangalorg/mangal/tui/base"
-	"github.com/pkg/errors"
+	"github.com/mangalorg/mangal/tui/state/anilistmangas"
+	"github.com/mangalorg/mangal/tui/state/chapsdownloading"
+	"github.com/mangalorg/mangal/tui/state/confirm"
+	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/zyedidia/generic/set"
+	"golang.org/x/exp/slices"
 )
 
 var _ base.State = (*State)(nil)
@@ -43,7 +48,7 @@ func (s *State) Title() base.Title {
 }
 
 func (s *State) Status() string {
-	return ""
+	return s.list.Paginator.View()
 }
 
 func (s *State) Backable() bool {
@@ -107,21 +112,38 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				},
 			}
 
+			var chapters []libmangal.Chapter
+
 			if s.selected.Size() == 0 {
-				return downloadChapterCmd(
-					model.Context(),
-					s.client,
-					item.chapter,
-					options,
-					func(path string) tea.Msg {
-						// TODO: Return to some sort of 'download finished' screen
-						return errors.New("unimplemented")
+				chapters = append(chapters, item.chapter)
+			} else {
+				for _, item := range s.selected.Keys() {
+					chapters = append(chapters, item.chapter)
+				}
+			}
+
+			slices.SortFunc(chapters, func(a, b libmangal.Chapter) bool {
+				return a.Info().Number < b.Info().Number
+			})
+
+			return func() tea.Msg {
+				return confirm.New(
+					fmt.Sprint("Download ", stringutil.Quantify(len(chapters), "chapter")),
+					func(response bool) tea.Cmd {
+						return func() tea.Msg {
+							if !response {
+								return base.MsgBack{}
+							}
+
+							return chapsdownloading.New(
+								s.client,
+								chapters,
+								options,
+							)
+						}
 					},
 				)
 			}
-
-			// unimplemented
-			return nil
 		case key.Matches(msg, s.keyMap.Read) || (s.selected.Size() == 0 && key.Matches(msg, s.keyMap.Confirm)):
 			options := libmangal.DownloadOptions{
 				Format:          libmangal.FormatPDF,
@@ -145,8 +167,50 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					return base.MsgBack{}
 				},
 			)
-		case key.Matches(msg, s.keyMap.Toggle):
+		case key.Matches(msg, s.keyMap.Anilist):
+			return tea.Sequence(
+				func() tea.Msg {
+					return loading.New("Loading...")
+				},
+				func() tea.Msg {
+					var mangas []libmangal.AnilistManga
 
+					mangaTitle := item.chapter.Volume().Manga().Info().Title
+
+					closest, ok, err := s.client.Anilist().FindClosestManga(model.Context(), mangaTitle)
+					if err != nil {
+						return err
+					}
+
+					if ok {
+						mangas = append(mangas, closest)
+					}
+
+					mangaSearchResults, err := s.client.Anilist().SearchMangas(model.Context(), mangaTitle)
+					if err != nil {
+						return nil
+					}
+
+					for _, manga := range mangaSearchResults {
+						if manga.ID == closest.ID {
+							continue
+						}
+
+						mangas = append(mangas, manga)
+					}
+
+					return anilistmangas.New(s.client.Anilist(), mangas, func(response *libmangal.AnilistManga) tea.Cmd {
+						return func() tea.Msg {
+							err := s.client.Anilist().BindTitleWithID(mangaTitle, response.ID)
+							if err != nil {
+								return err
+							}
+
+							return base.MsgBack{}
+						}
+					})
+				},
+			)
 		}
 	}
 
