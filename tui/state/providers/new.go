@@ -10,7 +10,7 @@ func New(loaders []libmangal.ProviderLoader) *State {
 	list_ := util.NewList(
 		2,
 		loaders,
-		func(loader libmangal.ProviderLoader) list.Item {
+		func(loader libmangal.ProviderLoader) list.DefaultItem {
 			return Item{loader}
 		},
 	)

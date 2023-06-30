@@ -13,7 +13,7 @@ func New(client *libmangal.Client, mangas []libmangal.Manga) *State {
 		list: util.NewList(
 			2,
 			mangas,
-			func(manga libmangal.Manga) list.Item {
+			func(manga libmangal.Manga) list.DefaultItem {
 				return Item{manga}
 			},
 		),

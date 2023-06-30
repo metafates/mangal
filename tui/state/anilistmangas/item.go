@@ -28,5 +28,5 @@ func (i Item) Title() string {
 }
 
 func (i Item) Description() string {
-	return fmt.Sprint("ID: ", i.Manga.ID)
+	return fmt.Sprint("https://anilist.co/manga/", i.Manga.ID)
 }

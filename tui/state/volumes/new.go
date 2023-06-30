@@ -13,7 +13,7 @@ func New(client *libmangal.Client, volumes []libmangal.Volume) *State {
 		list: util.NewList(
 			1,
 			volumes,
-			func(volume libmangal.Volume) list.Item {
+			func(volume libmangal.Volume) list.DefaultItem {
 				return Item{volume}
 			},
 		),

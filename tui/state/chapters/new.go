@@ -15,7 +15,7 @@ func New(client *libmangal.Client, chapters []libmangal.Chapter) *State {
 		list: util.NewList(
 			2,
 			chapters,
-			func(chapter libmangal.Chapter) list.Item {
+			func(chapter libmangal.Chapter) list.DefaultItem {
 				return &Item{chapter: chapter, selectedItems: &selectedSet}
 			},
 		),

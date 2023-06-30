@@ -46,13 +46,9 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, s.keyMap.Yes):
-			return func() tea.Msg {
-				return s.onResponse(true)
-			}
+			return s.onResponse(true)
 		case key.Matches(msg, s.keyMap.No):
-			return func() tea.Msg {
-				return s.onResponse(false)
-			}
+			return s.onResponse(false)
 		}
 	}
 

@@ -16,12 +16,14 @@ import (
 	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/zyedidia/generic/set"
 	"golang.org/x/exp/slices"
+	"time"
 )
 
 var _ base.State = (*State)(nil)
 
 type State struct {
 	client   *libmangal.Client
+	status   string
 	selected set.Set[*Item]
 	list     list.Model
 	keyMap   KeyMap
@@ -48,7 +50,7 @@ func (s *State) Title() base.Title {
 }
 
 func (s *State) Status() string {
-	return s.list.Paginator.View()
+	return fmt.Sprint(s.list.Paginator.View(), " ", s.status)
 }
 
 func (s *State) Backable() bool {
@@ -61,6 +63,9 @@ func (s *State) Resize(size base.Size) {
 
 func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	switch msg := msg.(type) {
+	case StatusMsg:
+		s.status = string(msg)
+		return nil
 	case tea.KeyMsg:
 		if s.list.FilterState() == list.Filtering {
 			goto end
@@ -199,16 +204,33 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 						mangas = append(mangas, manga)
 					}
 
-					return anilistmangas.New(s.client.Anilist(), mangas, func(response *libmangal.AnilistManga) tea.Cmd {
-						return func() tea.Msg {
-							err := s.client.Anilist().BindTitleWithID(mangaTitle, response.ID)
-							if err != nil {
-								return err
-							}
+					return anilistmangas.New(
+						s.client.Anilist(),
+						mangas,
+						func(response *libmangal.AnilistManga) tea.Cmd {
+							return tea.Sequence(
+								func() tea.Msg {
+									err := s.client.Anilist().BindTitleWithID(mangaTitle, response.ID)
+									if err != nil {
+										return err
+									}
 
-							return base.MsgBack{}
-						}
-					})
+									return base.MsgBack{}
+								},
+								func() tea.Msg {
+									return StatusMsg(fmt.Sprint("Binded to ", response.Title.English))
+								},
+								func() tea.Msg {
+									select {
+									case <-model.Context().Done():
+										return nil
+									case <-time.After(time.Second * 3):
+										return StatusMsg("")
+									}
+								},
+							)
+						},
+					)
 				},
 			)
 		}

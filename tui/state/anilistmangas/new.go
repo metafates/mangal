@@ -9,7 +9,7 @@ import (
 func New(anilist *libmangal.Anilist, chapters []libmangal.AnilistManga, onResponse OnResponseFunc) *State {
 	return &State{
 		anilist: anilist,
-		list: util.NewList(2, chapters, func(manga libmangal.AnilistManga) list.Item {
+		list: util.NewList(2, chapters, func(manga libmangal.AnilistManga) list.DefaultItem {
 			return Item{Manga: &manga}
 		}),
 		onResponse: onResponse,
