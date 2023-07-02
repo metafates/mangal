@@ -14,6 +14,8 @@ var instance = koanf.NewWithConf(koanf.Conf{
 	StrictMerge: true,
 })
 
+const configFilename = "mangal.yaml"
+
 func Load() error {
 	for _, f := range Fields {
 		if err := instance.Set(f.Key(), f.Default()); err != nil {
@@ -21,7 +23,6 @@ func Load() error {
 		}
 	}
 
-	const configFilename = "mangal.yaml"
 	configFilepath := filepath.Join(path.ConfigDir(), configFilename)
 	exists, err := fs.Afero.Exists(configFilepath)
 	if err != nil {

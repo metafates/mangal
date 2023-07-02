@@ -8,21 +8,20 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
-	"github.com/mangalorg/mangal/tui/state/chapsdownloaded"
 )
 
 var _ base.State = (*State)(nil)
 
 type State struct {
-	client   *libmangal.Client
+	options  Options
 	chapters []libmangal.Chapter
-	options  libmangal.DownloadOptions
 	message  string
 
 	progress progress.Model
 	spinner  spinner.Model
 
-	succeed, failed []*libmangal.Chapter
+	succeedPaths    []string
+	succeed, failed []libmangal.Chapter
 	currentIdx      int
 
 	keyMap KeyMap
@@ -70,12 +69,13 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 		return tea.Sequence(
 			func() tea.Msg {
 				chapter := s.chapters[msg]
-				_, err := s.client.DownloadChapter(model.Context(), chapter, s.options)
+				path, err := s.options.DownloadChapter(model.Context(), chapter)
 
 				if err != nil {
-					s.failed = append(s.failed, &chapter)
+					s.failed = append(s.failed, chapter)
 				} else {
-					s.succeed = append(s.succeed, &chapter)
+					s.succeedPaths = append(s.succeedPaths, path)
+					s.succeed = append(s.succeed, chapter)
 				}
 
 				nextIndex := msg + 1
@@ -88,20 +88,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			},
 		)
 	case downloadCompletedMsg:
-		return func() tea.Msg {
-			// FIXME: this is bad, I don't like it, but at least it solves cyclic import
-			f := func(client *libmangal.Client, chapters []libmangal.Chapter, options libmangal.DownloadOptions) base.State {
-				return New(client, chapters, options)
-			}
-			return chapsdownloaded.New(
-				s.client,
-				s.options,
-				".", // TODO: implement this
-				s.succeed,
-				s.failed,
-				f,
-			)
-		}
+		return s.options.OnDownloadFinished(s.succeedPaths, s.succeed, s.failed)
 	default:
 		return nil
 	}
@@ -122,10 +109,6 @@ func (s *State) View(model base.Model) string {
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {
-	s.client.SetLogFunc(func(msg string) {
-		s.message = msg
-	})
-
 	return tea.Batch(
 		func() tea.Msg {
 			return nextChapterIdxMsg(0)
@@ -135,4 +118,8 @@ func (s *State) Init(model base.Model) tea.Cmd {
 		},
 		s.progress.Init(),
 	)
+}
+
+func (s *State) SetMessage(message string) {
+	s.message = message
 }

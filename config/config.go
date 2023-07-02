@@ -12,8 +12,9 @@ type config struct {
 }
 
 type configRead struct {
-	Format    field[string]
-	Incognito field[bool]
+	Format         field[string]
+	Incognito      field[bool]
+	DownloadOnRead field[bool]
 }
 
 type configDownload struct {
@@ -27,12 +28,12 @@ type configDownload struct {
 }
 
 type configDownloadManga struct {
-	Dir           field[bool]
+	CreateDir     field[bool]
 	Cover, Banner field[bool]
 }
 
 type configDownloadVolume struct {
-	Dir field[bool]
+	CreateDir field[bool]
 }
 
 type configDownloadMetadata struct {
@@ -42,7 +43,7 @@ type configDownloadMetadata struct {
 
 var Config = config{
 	Icons: register(field[string]{
-		key:          "icon.type",
+		key:          "icons",
 		defaultValue: icon.TypeASCII.String(),
 		description:  "Icon format to use",
 		init: func(s string) error {
@@ -65,6 +66,11 @@ var Config = config{
 			key:          "read.incognito",
 			defaultValue: false,
 			description:  "Won't sync to Anilist reading history if logged in.",
+		}),
+		DownloadOnRead: register(field[bool]{
+			key:          "read.download_on_read",
+			defaultValue: false,
+			description:  "Download chapter to the default directory when opening for reading",
 		}),
 	},
 	Download: configDownload{
@@ -90,8 +96,8 @@ var Config = config{
 			description:  "Skip downloading chapter if its already downloaded (exists at path). Metadata will still be created if needed.",
 		}),
 		Manga: configDownloadManga{
-			Dir: register(field[bool]{
-				key:          "download.manga.dir",
+			CreateDir: register(field[bool]{
+				key:          "download.manga.create_dir",
 				defaultValue: true,
 				description:  "Create manga directory",
 			}),
@@ -107,8 +113,8 @@ var Config = config{
 			}),
 		},
 		Volume: configDownloadVolume{
-			Dir: register(field[bool]{
-				key:          "download.volume.dir",
+			CreateDir: register(field[bool]{
+				key:          "download.volume.create_dir",
 				defaultValue: false,
 				description:  "Create volume directory",
 			}),

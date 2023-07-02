@@ -6,11 +6,10 @@ import (
 	"github.com/mangalorg/libmangal"
 )
 
-func New(client *libmangal.Client, chapters []libmangal.Chapter, options libmangal.DownloadOptions) *State {
+func New(chapters []libmangal.Chapter, options Options) *State {
 	return &State{
-		client:   client,
-		chapters: chapters,
 		options:  options,
+		chapters: chapters,
 		message:  "Preparing...",
 		progress: progress.New(),
 		spinner:  spinner.New(),

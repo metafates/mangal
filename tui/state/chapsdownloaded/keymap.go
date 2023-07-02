@@ -20,7 +20,7 @@ func (k KeyMap) ShortHelp() []key.Binding {
 		k.Quit,
 	}
 
-	if len(k.state.failed) > 0 {
+	if len(k.state.options.Failed) > 0 {
 		bindings = append(bindings, k.Retry)
 	}
 

@@ -1,26 +1,12 @@
 package chapsdownloaded
 
 import (
-	"github.com/mangalorg/libmangal"
-	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/util"
 )
 
-func New(
-	client *libmangal.Client,
-	options libmangal.DownloadOptions,
-	dir string,
-	succeed,
-	failed []*libmangal.Chapter,
-	createChapsDownloadingState func(*libmangal.Client, []libmangal.Chapter, libmangal.DownloadOptions) base.State,
-) *State {
+func New(options Options) *State {
 	state := &State{
-		dir:                         dir,
-		client:                      client,
-		options:                     options,
-		succeed:                     succeed,
-		failed:                      failed,
-		createChapsDownloadingState: createChapsDownloadingState,
+		options: options,
 	}
 
 	state.keyMap = KeyMap{

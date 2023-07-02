@@ -8,7 +8,8 @@ import (
 )
 
 type configCmd struct {
-	Info configInfoCmd `cmd:""`
+	Info  configInfoCmd  `cmd:""`
+	Write configWriteCmd `cmd:""`
 }
 
 type configInfoCmd struct{}
@@ -33,4 +34,10 @@ Default: {{.Default}}
 	}
 
 	return nil
+}
+
+type configWriteCmd struct{}
+
+func (c *configWriteCmd) Run() error {
+	return config.Write()
 }

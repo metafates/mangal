@@ -12,7 +12,6 @@ import (
 	"github.com/mangalorg/mangal/stringutil"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/anilistmangas"
-	"github.com/mangalorg/mangal/tui/state/chapsdownloading"
 	"github.com/mangalorg/mangal/tui/state/confirm"
 	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
@@ -98,7 +97,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			}
 
 			return nil
-		case key.Matches(msg, s.keyMap.Download):
+		case key.Matches(msg, s.keyMap.Download) || (s.selected.Size() > 0 && key.Matches(msg, s.keyMap.Confirm)):
 			format, err := libmangal.FormatString(config.Config.Download.Format.Get())
 			if err != nil {
 				return func() tea.Msg {
@@ -109,8 +108,8 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			options := libmangal.DownloadOptions{
 				Format:              format,
 				Directory:           config.Config.Download.Path.Get(),
-				CreateVolumeDir:     config.Config.Download.Volume.Dir.Get(),
-				CreateMangaDir:      config.Config.Download.Manga.Dir.Get(),
+				CreateVolumeDir:     config.Config.Download.Volume.CreateDir.Get(),
+				CreateMangaDir:      config.Config.Download.Manga.CreateDir.Get(),
 				Strict:              config.Config.Download.Strict.Get(),
 				SkipIfExists:        config.Config.Download.SkipIfExists.Get(),
 				DownloadMangaCover:  config.Config.Download.Manga.Cover.Get(),
@@ -141,17 +140,13 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				return confirm.New(
 					fmt.Sprint("Download ", stringutil.Quantify(len(chapters), "chapter", "chapters")),
 					func(response bool) tea.Cmd {
-						return func() tea.Msg {
-							if !response {
+						if !response {
+							return func() tea.Msg {
 								return base.MsgBack{}
 							}
-
-							return chapsdownloading.New(
-								s.client,
-								chapters,
-								options,
-							)
 						}
+
+						return s.downloadChaptersCmd(chapters, options)
 					},
 				)
 			}
@@ -163,9 +158,16 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				}
 			}
 
+			var directory string
+			if config.Config.Read.DownloadOnRead.Get() {
+				directory = config.Config.Download.Path.Get()
+			} else {
+				directory = path.TempDir()
+			}
+
 			options := libmangal.DownloadOptions{
 				Format:          format,
-				Directory:       path.TempDir(),
+				Directory:       directory,
 				SkipIfExists:    true,
 				ReadAfter:       true,
 				ReadIncognito:   config.Config.Read.Incognito.Get(),
@@ -176,14 +178,10 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				},
 			}
 
-			return downloadChapterCmd(
+			return s.downloadChapterCmd(
 				model.Context(),
-				s.client,
 				item.chapter,
 				options,
-				func(string) tea.Msg {
-					return base.MsgBack{}
-				},
 			)
 		case key.Matches(msg, s.keyMap.Anilist):
 			return tea.Sequence(
