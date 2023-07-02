@@ -23,30 +23,34 @@ type State struct {
 	keyMap KeyMap
 }
 
-func (s State) Intermediate() bool {
+func (s *State) Intermediate() bool {
 	return true
 }
 
-func (s State) KeyMap() help.KeyMap {
+func (s *State) KeyMap() help.KeyMap {
 	return s.keyMap
 }
 
-func (s State) Title() base.Title {
+func (s *State) Title() base.Title {
 	return base.Title{Text: "Done"}
 }
 
-func (s State) Status() string {
+func (s *State) Subtitle() string {
 	return ""
 }
 
-func (s State) Backable() bool {
+func (s *State) Status() string {
+	return ""
+}
+
+func (s *State) Backable() bool {
 	return true
 }
 
-func (s State) Resize(size base.Size) {
+func (s *State) Resize(size base.Size) {
 }
 
-func (s State) Update(model base.Model, msg tea.Msg) tea.Cmd {
+func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -75,10 +79,10 @@ func (s State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 	return nil
 }
 
-func (s State) View(model base.Model) string {
+func (s *State) View(model base.Model) string {
 	return fmt.Sprintf("%d succeed, %d failed", len(s.succeed), len(s.failed))
 }
 
-func (s State) Init(model base.Model) tea.Cmd {
+func (s *State) Init(model base.Model) tea.Cmd {
 	return nil
 }

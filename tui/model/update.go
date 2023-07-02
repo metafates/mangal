@@ -8,6 +8,7 @@ import (
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/errorstate"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -36,7 +37,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case base.State:
 		return m, m.pushState(msg)
 	case error:
-		if errors.Is(msg, context.Canceled) {
+		if errors.Is(msg, context.Canceled) || strings.Contains(msg.Error(), context.Canceled.Error()) {
 			return m, nil
 		}
 

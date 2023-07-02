@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
+	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/mangalorg/mangal/tui/state/textinput"
 )
@@ -17,7 +18,7 @@ type OnResponseFunc func(response *libmangal.AnilistManga) tea.Cmd
 
 type State struct {
 	anilist *libmangal.Anilist
-	list    list.Model
+	list    *listwrapper.State
 
 	onResponse OnResponseFunc
 
@@ -36,16 +37,20 @@ func (s *State) Title() base.Title {
 	return base.Title{Text: "Anilist Mangas"}
 }
 
+func (s *State) Subtitle() string {
+	return s.list.Subtitle()
+}
+
 func (s *State) Status() string {
-	return ""
+	return s.list.Status()
 }
 
 func (s *State) Backable() bool {
-	return s.list.FilterState() == list.Unfiltered
+	return s.list.Backable()
 }
 
 func (s *State) Resize(size base.Size) {
-	s.list.SetSize(size.Width, size.Height)
+	s.list.Resize(size)
 }
 
 func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
@@ -66,7 +71,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 		case key.Matches(msg, s.keyMap.Search):
 			return func() tea.Msg {
 				return textinput.New(textinput.Options{
-					Title:        "Search",
+					Title:        base.Title{Text: "Search Mangas"},
 					Prompt:       "Enter Anilist manga title",
 					Placeholder:  "",
 					Intermediate: true,
@@ -91,14 +96,13 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	}
 
 end:
-	s.list, cmd = s.list.Update(msg)
-	return cmd
+	return s.list.Update(model, msg)
 }
 
 func (s *State) View(model base.Model) string {
-	return s.list.View()
+	return s.list.View(model)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {
-	return nil
+	return s.list.Init(model)
 }

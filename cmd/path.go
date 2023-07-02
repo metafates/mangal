@@ -6,10 +6,11 @@ import (
 )
 
 type pathCmd struct {
-	Cache     bool `help:"Path to cache directory"`
-	Temp      bool `help:"Path to temporary directory"`
-	Downloads bool `help:"Path to downloads directory"`
-	Header    bool `help:"Print header" negatable:"" default:"true"`
+	Cache        bool `help:"Path to cache directory"`
+	Temp         bool `help:"Path to temporary directory"`
+	Downloads    bool `help:"Path to downloads directory"`
+	LuaProviders bool `help:"Path to lua providers directory"`
+	Header       bool `help:"Print header" negatable:"" default:"true"`
 }
 
 func (p *pathCmd) Run() error {
@@ -21,6 +22,7 @@ func (p *pathCmd) Run() error {
 		{"Cache", path.CacheDir, p.Cache},
 		{"Temp", path.TempDir, p.Temp},
 		{"Downloads", path.DownloadsDir, p.Downloads},
+		{"Lua Providers", path.LuaProvidersDir, p.LuaProviders},
 	}
 
 	var anyPrinted bool

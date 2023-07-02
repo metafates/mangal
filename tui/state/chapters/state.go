@@ -7,12 +7,14 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/config"
 	"github.com/mangalorg/mangal/path"
 	"github.com/mangalorg/mangal/stringutil"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/anilistmangas"
 	"github.com/mangalorg/mangal/tui/state/chapsdownloading"
 	"github.com/mangalorg/mangal/tui/state/confirm"
+	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/zyedidia/generic/set"
 	"golang.org/x/exp/slices"
@@ -23,9 +25,9 @@ var _ base.State = (*State)(nil)
 
 type State struct {
 	client   *libmangal.Client
-	status   string
+	volume   libmangal.Volume
 	selected set.Set[*Item]
-	list     list.Model
+	list     *listwrapper.State
 	keyMap   KeyMap
 }
 
@@ -38,34 +40,30 @@ func (s *State) KeyMap() help.KeyMap {
 }
 
 func (s *State) Title() base.Title {
-	item, ok := s.list.SelectedItem().(*Item)
-	if !ok {
-		return base.Title{Text: "Chapters"}
-	}
-
-	volume := item.chapter.Volume()
+	volume := s.volume
 	manga := volume.Manga()
 
 	return base.Title{Text: fmt.Sprintf("%s / Vol. %d", manga.Info().Title, volume.Info().Number)}
 }
 
+func (s *State) Subtitle() string {
+	return s.list.Subtitle()
+}
+
 func (s *State) Status() string {
-	return fmt.Sprint(s.list.Paginator.View(), " ", s.status)
+	return s.list.Status()
 }
 
 func (s *State) Backable() bool {
-	return s.list.FilterState() == list.Unfiltered
+	return s.list.Backable()
 }
 
 func (s *State) Resize(size base.Size) {
-	s.list.SetSize(size.Width, size.Height)
+	s.list.Resize(size)
 }
 
 func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	switch msg := msg.(type) {
-	case StatusMsg:
-		s.status = string(msg)
-		return nil
 	case tea.KeyMsg:
 		if s.list.FilterState() == list.Filtering {
 			goto end
@@ -101,9 +99,16 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 
 			return nil
 		case key.Matches(msg, s.keyMap.Download):
+			format, err := libmangal.FormatString(config.ReadFormat.Get())
+			if err != nil {
+				return func() tea.Msg {
+					return err
+				}
+			}
+
 			options := libmangal.DownloadOptions{
-				Format:              libmangal.FormatPDF,
-				Directory:           ".",
+				Format:              format,
+				Directory:           config.DownloadPath.Get(),
 				CreateMangaDir:      true,
 				Strict:              false,
 				SkipIfExists:        true,
@@ -133,7 +138,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 
 			return func() tea.Msg {
 				return confirm.New(
-					fmt.Sprint("Download ", stringutil.Quantify(len(chapters), "chapter")),
+					fmt.Sprint("Download ", stringutil.Quantify(len(chapters), "chapter", "chapters")),
 					func(response bool) tea.Cmd {
 						return func() tea.Msg {
 							if !response {
@@ -150,8 +155,15 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				)
 			}
 		case key.Matches(msg, s.keyMap.Read) || (s.selected.Size() == 0 && key.Matches(msg, s.keyMap.Confirm)):
+			format, err := libmangal.FormatString(config.ReadFormat.Get())
+			if err != nil {
+				return func() tea.Msg {
+					return err
+				}
+			}
+
 			options := libmangal.DownloadOptions{
-				Format:          libmangal.FormatPDF,
+				Format:          format,
 				Directory:       path.TempDir(),
 				SkipIfExists:    true,
 				ReadAfter:       true,
@@ -217,17 +229,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 
 									return base.MsgBack{}
 								},
-								func() tea.Msg {
-									return StatusMsg(fmt.Sprint("Binded to ", response.Title.English))
-								},
-								func() tea.Msg {
-									select {
-									case <-model.Context().Done():
-										return nil
-									case <-time.After(time.Second * 3):
-										return StatusMsg("")
-									}
-								},
+								s.list.Notify("Binded to "+response.Title.English, time.Second*3),
 							)
 						},
 					)
@@ -237,14 +239,13 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	}
 
 end:
-	s.list, cmd = s.list.Update(msg)
-	return cmd
+	return s.list.Update(model, msg)
 }
 
 func (s *State) View(model base.Model) string {
-	return s.list.View()
+	return s.list.View(model)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {
-	return nil
+	return s.list.Init(model)
 }

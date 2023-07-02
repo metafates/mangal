@@ -8,6 +8,7 @@ import (
 
 func NewList[T any](
 	delegateHeight int,
+	singular, plural string,
 	items []T,
 	transform func(T) list.DefaultItem,
 ) list.Model {
@@ -38,12 +39,16 @@ func NewList[T any](
 
 	l := list.New(listItems, delegate, 0, 0)
 	l.SetShowHelp(false)
+	l.SetShowFilter(false)
 	l.SetShowStatusBar(false)
 	l.SetShowTitle(false)
 	l.SetShowPagination(false)
 	l.InfiniteScrolling = true
 	l.KeyMap.CancelWhileFiltering = Bind("cancel", "esc")
+
 	l.Paginator.Type = paginator.Arabic
+
+	l.SetStatusBarItemName(singular, plural)
 
 	return l
 }

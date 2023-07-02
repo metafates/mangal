@@ -47,6 +47,10 @@ func (m *Model) StateSize() base.Size {
 		height = m.size.Height - 3
 	}
 
+	if m.state.Subtitle() != "" {
+		height -= 2
+	}
+
 	return base.Size{
 		Width:  m.size.Width,
 		Height: height,

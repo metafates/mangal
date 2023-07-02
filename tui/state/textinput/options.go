@@ -1,7 +1,9 @@
 package textinput
 
+import "github.com/mangalorg/mangal/tui/base"
+
 type Options struct {
-	Title        string
+	Title        base.Title
 	Prompt       string
 	Placeholder  string
 	Intermediate bool

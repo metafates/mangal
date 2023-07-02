@@ -13,9 +13,13 @@ func Trim(s string, max int) string {
 	return s
 }
 
-func Quantify(n int, noun string) string {
+func Quantify(n int, singular, plural string) string {
+	var form string
 	if n == 1 {
-		return fmt.Sprint(n, " ", noun)
+		form = singular
+	} else {
+		form = plural
 	}
-	return fmt.Sprint(n, " ", noun+"s")
+
+	return fmt.Sprint(n, " ", form)
 }

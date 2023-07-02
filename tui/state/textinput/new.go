@@ -6,13 +6,16 @@ import (
 )
 
 func New(options Options) *State {
-	if options.Title == "" {
-		options.Title = "Search"
+	if options.Title.Text == "" {
+		options.Title.Text = "Search"
 	}
+
+	input := textinput.New()
+	input.Placeholder = options.Placeholder
 
 	return &State{
 		options:   options,
-		textinput: textinput.New(),
+		textinput: input,
 		keyMap: KeyMap{
 			Confirm: util.Bind("confirm", "enter"),
 		},

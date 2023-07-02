@@ -3,22 +3,27 @@ package chapters
 import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/util"
 	"github.com/zyedidia/generic/set"
 )
 
-func New(client *libmangal.Client, chapters []libmangal.Chapter) *State {
+func New(client *libmangal.Client, volume libmangal.Volume, chapters []libmangal.Chapter) *State {
 	selectedSet := set.NewMapset[*Item]()
+	listWrapper := listwrapper.New(util.NewList(
+		2,
+		"chapter", "chapters",
+		chapters,
+		func(chapter libmangal.Chapter) list.DefaultItem {
+			return &Item{chapter: chapter, selectedItems: &selectedSet}
+		},
+	))
+
 	return &State{
 		client:   client,
+		volume:   volume,
 		selected: selectedSet,
-		list: util.NewList(
-			2,
-			chapters,
-			func(chapter libmangal.Chapter) list.DefaultItem {
-				return &Item{chapter: chapter, selectedItems: &selectedSet}
-			},
-		),
+		list:     listWrapper,
 		keyMap: KeyMap{
 			UnselectAll: util.Bind("unselect all", "backspace"),
 			SelectAll:   util.Bind("select all", "a"),

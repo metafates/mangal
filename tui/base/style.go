@@ -7,6 +7,7 @@ import (
 type Styles struct {
 	Title,
 	TitleBar,
+	Subtitle,
 	HelpBar lipgloss.Style
 }
 
@@ -21,6 +22,9 @@ func DefaultStyles() Styles {
 		TitleBar: lipgloss.
 			NewStyle().
 			Padding(0, 0, 1, 2),
+		Subtitle: lipgloss.
+			NewStyle().
+			Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}),
 		HelpBar: lipgloss.
 			NewStyle().
 			Padding(0, 1),

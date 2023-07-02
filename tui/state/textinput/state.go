@@ -1,7 +1,6 @@
 package textinput
 
 import (
-	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -29,7 +28,11 @@ func (s *State) KeyMap() help.KeyMap {
 }
 
 func (s *State) Title() base.Title {
-	return base.Title{Text: "Search"}
+	return s.options.Title
+}
+
+func (s *State) Subtitle() string {
+	return s.options.Prompt
 }
 
 func (s *State) Status() string {
@@ -48,7 +51,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, s.keyMap.Confirm):
+		case key.Matches(msg, s.keyMap.Confirm) && s.textinput.Value() != "":
 			return s.options.OnResponse(s.textinput.Value())
 		}
 	}
@@ -58,12 +61,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 }
 
 func (s *State) View(model base.Model) string {
-	return fmt.Sprintf(`%s
-
-%s`,
-		s.options.Prompt,
-		s.textinput.View(),
-	)
+	return s.textinput.View()
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {

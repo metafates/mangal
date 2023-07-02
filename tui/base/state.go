@@ -7,10 +7,13 @@ import (
 
 type State interface {
 	Intermediate() bool
-	KeyMap() help.KeyMap
-	Title() Title
-	Status() string
 	Backable() bool
+
+	KeyMap() help.KeyMap
+
+	Title() Title
+	Subtitle() string
+	Status() string
 
 	Resize(size Size)
 

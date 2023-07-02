@@ -1,23 +1,21 @@
 package providers
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/anilist"
 	"github.com/mangalorg/mangal/fs"
-	"github.com/mangalorg/mangal/path"
 	"github.com/mangalorg/mangal/tui/base"
+	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/mangalorg/mangal/tui/state/mangas"
 	"github.com/mangalorg/mangal/tui/state/textinput"
-	"github.com/philippgille/gokv"
-	"github.com/philippgille/gokv/bbolt"
-	"github.com/philippgille/gokv/encoding"
 	"github.com/pkg/errors"
 	"net/http"
-	"path/filepath"
 	"time"
 )
 
@@ -25,23 +23,23 @@ var _ base.State = (*State)(nil)
 
 type State struct {
 	providersLoaders []libmangal.ProviderLoader
-	list             list.Model
+	list             *listwrapper.State
 	keyMap           KeyMap
 }
 
 // Backable implements base.State.
 func (s *State) Backable() bool {
-	return s.list.FilterState() == list.Unfiltered
+	return s.list.Backable()
 }
 
 // Init implements base.State.
-func (*State) Init(model base.Model) tea.Cmd {
-	return nil
+func (s *State) Init(model base.Model) tea.Cmd {
+	return s.list.Init(model)
 }
 
 // Intermediate implements base.State.
-func (*State) Intermediate() bool {
-	return false
+func (s *State) Intermediate() bool {
+	return s.list.Intermediate()
 }
 
 // KeyMap implements base.State.
@@ -51,17 +49,21 @@ func (s *State) KeyMap() help.KeyMap {
 
 // Resize implements base.State.
 func (s *State) Resize(size base.Size) {
-	s.list.SetSize(size.Width, size.Height)
+	s.list.Resize(size)
 }
 
 // Status implements base.State.
 func (s *State) Status() string {
-	return s.list.Paginator.View()
+	return s.list.Status()
 }
 
 // Title implements base.State.
-func (*State) Title() base.Title {
-	return base.Title{Text: "Providers"}
+func (s *State) Title() base.Title {
+	return s.list.Title()
+}
+
+func (s *State) Subtitle() string {
+	return s.list.Subtitle()
 }
 
 // Update implements base.State.
@@ -84,51 +86,13 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					return loading.New("Loading...")
 				},
 				func() tea.Msg {
-					newPersistentStore := func(name string) (gokv.Store, error) {
-						dir := filepath.Join(path.CacheDir(), "anilist")
-						if err := fs.FS.MkdirAll(dir, 0755); err != nil {
-							return nil, err
-						}
-
-						return bbolt.NewStore(bbolt.Options{
-							BucketName: name,
-							Path:       filepath.Join(dir, name+".db"),
-							Codec:      encoding.Gob,
-						})
-					}
-
 					httpClient := &http.Client{
 						Timeout: time.Minute,
 					}
 
-					anilistOptions := libmangal.DefaultAnilistOptions()
-
-					var err error
-					anilistOptions.QueryToIDsStore, err = newPersistentStore("query-to-id")
-					if err != nil {
-						return err
-					}
-
-					anilistOptions.IDToMangaStore, err = newPersistentStore("id-to-manga")
-					if err != nil {
-						return err
-					}
-
-					anilistOptions.TitleToIDStore, err = newPersistentStore("title-to-id")
-					if err != nil {
-						return err
-					}
-
-					anilistOptions.AccessTokenStore, err = newPersistentStore("access-token")
-					if err != nil {
-						return err
-					}
-
-					anilist := libmangal.NewAnilist(anilistOptions)
-
 					options := libmangal.DefaultClientOptions()
 					options.FS = fs.FS
-					options.Anilist = &anilist
+					options.Anilist = anilist.Client
 					options.HTTPClient = httpClient
 
 					client, err := libmangal.NewClient(model.Context(), item, options)
@@ -137,9 +101,9 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					}
 
 					return textinput.New(textinput.Options{
-						Title:       "Search",
-						Prompt:      "Search for a manga",
-						Placeholder: "",
+						Title:       base.Title{Text: "Search Mangas"},
+						Prompt:      fmt.Sprintf("Using %s provider", client),
+						Placeholder: "Search",
 						OnResponse: func(response string) tea.Cmd {
 							return tea.Sequence(
 								func() tea.Msg {
@@ -165,11 +129,10 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 		}
 	}
 end:
-	s.list, cmd = s.list.Update(msg)
-	return cmd
+	return s.list.Update(model, msg)
 }
 
 // View implements base.State.
 func (s *State) View(model base.Model) string {
-	return s.list.View()
+	return s.list.View(model)
 }

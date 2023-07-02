@@ -24,6 +24,13 @@ func (m *Model) View() string {
 	titleText := stringutil.Trim(title.Text, m.size.Width/2)
 
 	header := m.styles.TitleBar.Render(titleStyle.Render(titleText) + " " + m.state.Status())
+
+	subtitle := m.state.Subtitle()
+	if subtitle != "" {
+		header = lipgloss.JoinVertical(lipgloss.Left, header, m.styles.TitleBar.Render(m.styles.Subtitle.Render(m.state.Subtitle())))
+		//header += m.styles.TitleBar.Render(m.styles.Subtitle.Render(m.state.Subtitle()))
+	}
+
 	view := wordwrap.String(m.state.View(m), m.size.Width)
 
 	keyMapHelp := m.styles.HelpBar.Render(m.help.View(m))
@@ -38,6 +45,8 @@ func (m *Model) View() string {
 	if diff > 0 {
 		filler = strings.Repeat(newline, diff)
 	}
+
+	//return lipgloss.JoinVertical(lipgloss.Left, header, view, filler, keyMapHelp)
 
 	return header + newline + view + filler + newline + keyMapHelp
 }

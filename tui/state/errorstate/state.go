@@ -26,6 +26,10 @@ func (s *State) Title() base.Title {
 	return base.Title{Text: "Error"}
 }
 
+func (s *State) Subtitle() string {
+	return ""
+}
+
 func (s *State) Status() string {
 	return ""
 }

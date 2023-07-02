@@ -30,6 +30,10 @@ func (s *State) Title() base.Title {
 	return base.Title{Text: "Confirm"}
 }
 
+func (s *State) Subtitle() string {
+	return ""
+}
+
 func (s *State) Status() string {
 	return ""
 }
@@ -56,14 +60,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 }
 
 func (s *State) View(model base.Model) string {
-	yes, no := s.keyMap.Yes.Help(), s.keyMap.No.Help()
-	return fmt.Sprintf(`%s
-
-%s · %s  %s · %s`,
-		s.message,
-		yes.Key, yes.Desc,
-		no.Key, no.Desc,
-	)
+	return fmt.Sprintf("? %s", s.message)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {

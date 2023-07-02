@@ -8,6 +8,7 @@ import (
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/chapters"
+	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
 )
 
@@ -16,7 +17,7 @@ var _ base.State = (*State)(nil)
 type State struct {
 	client  *libmangal.Client
 	volumes []libmangal.Volume
-	list    list.Model
+	list    *listwrapper.State
 	keyMap  KeyMap
 }
 
@@ -32,8 +33,12 @@ func (s *State) Title() base.Title {
 	return base.Title{Text: "Volumes"}
 }
 
+func (s *State) Subtitle() string {
+	return s.list.Subtitle()
+}
+
 func (s *State) Status() string {
-	return s.list.Paginator.View()
+	return s.list.Status()
 }
 
 func (s *State) Backable() bool {
@@ -41,7 +46,7 @@ func (s *State) Backable() bool {
 }
 
 func (s *State) Resize(size base.Size) {
-	s.list.SetSize(size.Width, size.Height)
+	s.list.Resize(size)
 }
 
 func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
@@ -68,20 +73,19 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 						return err
 					}
 
-					return chapters.New(s.client, c)
+					return chapters.New(s.client, item.Volume, c)
 				},
 			)
 		}
 	}
 end:
-	s.list, cmd = s.list.Update(msg)
-	return cmd
+	return s.list.Update(model, msg)
 }
 
 func (s *State) View(model base.Model) string {
-	return s.list.View()
+	return s.list.View(model)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {
-	return nil
+	return s.list.Init(model)
 }
