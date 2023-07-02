@@ -11,7 +11,7 @@ const (
 )
 
 func createDirIfAbsent(path string) {
-	exists, err := fs.FS.Exists(path)
+	exists, err := fs.Afero.Exists(path)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -21,7 +21,7 @@ func createDirIfAbsent(path string) {
 		return
 	}
 
-	if err := fs.FS.MkdirAll(path, permDir); err != nil {
+	if err := fs.Afero.MkdirAll(path, permDir); err != nil {
 		log.Fatal(err)
 	}
 

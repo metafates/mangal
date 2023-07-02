@@ -9,6 +9,7 @@ var _ help.KeyMap = (*KeyMap)(nil)
 
 type KeyMap struct {
 	Quit,
+	Open,
 	Retry key.Binding
 
 	state *State

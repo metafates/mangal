@@ -7,6 +7,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
+	"github.com/mangalorg/mangal/tui/state/loading"
+	"github.com/skratchdot/open-golang/open"
 )
 
 var _ base.State = (*State)(nil)
@@ -15,6 +17,7 @@ type State struct {
 	client          *libmangal.Client
 	options         libmangal.DownloadOptions
 	succeed, failed []*libmangal.Chapter
+	dir             string
 
 	// FIXME: come up with a better solution
 	// This is ugly, but avoids cyclic imports
@@ -56,6 +59,20 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 		switch {
 		case key.Matches(msg, s.keyMap.Quit):
 			return tea.Quit
+		case key.Matches(msg, s.keyMap.Open):
+			return tea.Sequence(
+				func() tea.Msg {
+					return loading.New("Opening")
+				},
+				func() tea.Msg {
+					err := open.Run(s.dir)
+					if err != nil {
+						return err
+					}
+
+					return base.MsgBack{}
+				},
+			)
 		case key.Matches(msg, s.keyMap.Retry):
 			if len(s.failed) == 0 {
 				return nil

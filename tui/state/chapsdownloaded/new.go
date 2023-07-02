@@ -9,11 +9,13 @@ import (
 func New(
 	client *libmangal.Client,
 	options libmangal.DownloadOptions,
+	dir string,
 	succeed,
 	failed []*libmangal.Chapter,
 	createChapsDownloadingState func(*libmangal.Client, []libmangal.Chapter, libmangal.DownloadOptions) base.State,
 ) *State {
 	state := &State{
+		dir:                         dir,
 		client:                      client,
 		options:                     options,
 		succeed:                     succeed,
@@ -22,6 +24,7 @@ func New(
 	}
 
 	state.keyMap = KeyMap{
+		Open:  util.Bind("open directory", "o"),
 		Quit:  util.Bind("quit", "q"),
 		Retry: util.Bind("retry", "r"),
 		state: state,

@@ -91,7 +91,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					}
 
 					options := libmangal.DefaultClientOptions()
-					options.FS = fs.FS
+					options.FS = fs.Afero
 					options.Anilist = anilist.Client
 					options.HTTPClient = httpClient
 

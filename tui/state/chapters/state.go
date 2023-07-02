@@ -99,7 +99,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 
 			return nil
 		case key.Matches(msg, s.keyMap.Download):
-			format, err := libmangal.FormatString(config.ReadFormat.Get())
+			format, err := libmangal.FormatString(config.Config.Download.Format.Get())
 			if err != nil {
 				return func() tea.Msg {
 					return err
@@ -108,14 +108,15 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 
 			options := libmangal.DownloadOptions{
 				Format:              format,
-				Directory:           config.DownloadPath.Get(),
-				CreateMangaDir:      true,
-				Strict:              false,
-				SkipIfExists:        true,
-				DownloadMangaCover:  false,
-				DownloadMangaBanner: false,
-				WriteSeriesJson:     false,
-				WriteComicInfoXml:   false,
+				Directory:           config.Config.Download.Path.Get(),
+				CreateVolumeDir:     config.Config.Download.Volume.Dir.Get(),
+				CreateMangaDir:      config.Config.Download.Manga.Dir.Get(),
+				Strict:              config.Config.Download.Strict.Get(),
+				SkipIfExists:        config.Config.Download.SkipIfExists.Get(),
+				DownloadMangaCover:  config.Config.Download.Manga.Cover.Get(),
+				DownloadMangaBanner: config.Config.Download.Manga.Banner.Get(),
+				WriteSeriesJson:     config.Config.Download.Metadata.SeriesJSON.Get(),
+				WriteComicInfoXml:   config.Config.Download.Metadata.ComicInfoXML.Get(),
 				ComicInfoXMLOptions: libmangal.DefaultComicInfoOptions(),
 				ImageTransformer: func(bytes []byte) ([]byte, error) {
 					return bytes, nil
@@ -155,7 +156,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				)
 			}
 		case key.Matches(msg, s.keyMap.Read) || (s.selected.Size() == 0 && key.Matches(msg, s.keyMap.Confirm)):
-			format, err := libmangal.FormatString(config.ReadFormat.Get())
+			format, err := libmangal.FormatString(config.Config.Read.Format.Get())
 			if err != nil {
 				return func() tea.Msg {
 					return err
@@ -167,7 +168,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				Directory:       path.TempDir(),
 				SkipIfExists:    true,
 				ReadAfter:       true,
-				ReadIncognito:   true,
+				ReadIncognito:   config.Config.Read.Incognito.Get(),
 				CreateMangaDir:  true,
 				CreateVolumeDir: true,
 				ImageTransformer: func(bytes []byte) ([]byte, error) {

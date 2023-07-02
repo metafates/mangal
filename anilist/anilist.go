@@ -16,7 +16,7 @@ var Client = newAnilist()
 func newAnilist() *libmangal.Anilist {
 	newPersistentStore := func(name string) (gokv.Store, error) {
 		dir := filepath.Join(path.CacheDir(), "anilist")
-		if err := fs.FS.MkdirAll(dir, 0755); err != nil {
+		if err := fs.Afero.MkdirAll(dir, 0755); err != nil {
 			return nil, err
 		}
 

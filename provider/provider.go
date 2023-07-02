@@ -31,7 +31,7 @@ func InstalledProviders() ([]libmangal.ProviderLoader, error) {
 
 func installeLuaProviders() ([]libmangal.ProviderLoader, error) {
 	dir := path.LuaProvidersDir()
-	dirEntries, err := fs.FS.ReadDir(dir)
+	dirEntries, err := fs.Afero.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func installeLuaProviders() ([]libmangal.ProviderLoader, error) {
 			continue
 		}
 
-		file, err := fs.FS.ReadFile(filepath.Join(dir, dirEntry.Name()))
+		file, err := fs.Afero.ReadFile(filepath.Join(dir, dirEntry.Name()))
 		if err != nil {
 			return nil, err
 		}

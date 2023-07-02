@@ -2,6 +2,6 @@ package fs
 
 import "github.com/spf13/afero"
 
-var FS = afero.Afero{
+var Afero = afero.Afero{
     Fs: afero.NewOsFs(),
 }

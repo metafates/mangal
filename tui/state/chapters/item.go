@@ -1,7 +1,9 @@
 package chapters
 
 import (
+	"fmt"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/icon"
 	"github.com/zyedidia/generic/set"
 )
 
@@ -16,7 +18,7 @@ func (i *Item) FilterValue() string {
 
 func (i *Item) Title() string {
 	if i.IsSelected() {
-		return i.FilterValue() + " ✔︎ "
+		return fmt.Sprint(i.FilterValue(), " ", icon.Mark)
 	}
 
 	return i.FilterValue()

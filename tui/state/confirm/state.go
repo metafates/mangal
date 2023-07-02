@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/tui/base"
 )
 
@@ -60,7 +61,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 }
 
 func (s *State) View(model base.Model) string {
-	return fmt.Sprintf("? %s", s.message)
+	return fmt.Sprintf("%s %s", icon.Question, s.message)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {

@@ -96,6 +96,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			return chapsdownloaded.New(
 				s.client,
 				s.options,
+				".", // TODO: implement this
 				s.succeed,
 				s.failed,
 				f,

@@ -3,6 +3,7 @@ package path
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/adrg/xdg"
 	"github.com/mangalorg/mangal/meta"
@@ -21,7 +22,14 @@ func CacheDir() string {
 }
 
 func ConfigDir() string {
-	dir := filepath.Join(xdg.ConfigHome, meta.AppName)
+	var dir string
+
+	if runtime.GOOS == "darwin" {
+		dir = filepath.Join(xdg.Home, ".config", meta.AppName)
+	} else {
+		dir = filepath.Join(xdg.ConfigHome, meta.AppName)
+	}
+
 	createDirIfAbsent(dir)
 	return dir
 }
