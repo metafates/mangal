@@ -6,7 +6,11 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/color"
+	"github.com/mangalorg/mangal/icon"
+	"github.com/mangalorg/mangal/stringutil"
 	"github.com/mangalorg/mangal/tui/base"
 )
 
@@ -23,6 +27,8 @@ type State struct {
 	succeedPaths    []string
 	succeed, failed []libmangal.Chapter
 	currentIdx      int
+
+	size base.Size
 
 	keyMap KeyMap
 }
@@ -52,6 +58,7 @@ func (s *State) Backable() bool {
 }
 
 func (s *State) Resize(size base.Size) {
+	s.size = size
 	s.progress.Width = size.Width
 }
 
@@ -95,16 +102,18 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 }
 
 func (s *State) View(model base.Model) string {
-	return fmt.Sprintf(`Downloading %s - %d/%d
+	spinnerView := s.spinner.View()
+	return fmt.Sprintf(`%s Downloading %s - %d/%d
 
 %s
 
 %s %s`,
+		icon.Progress,
 		s.chapters[s.currentIdx].String(),
 		s.currentIdx+1, len(s.chapters),
 		s.progress.ViewAs(float64(s.currentIdx)/float64(len(s.chapters))),
-		s.spinner.View(),
-		s.message,
+		spinnerView,
+		lipgloss.NewStyle().Foreground(color.Secondary).Render(stringutil.Trim(s.message, s.size.Width-lipgloss.Width(spinnerView)-1)),
 	)
 }
 

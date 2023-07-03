@@ -2,11 +2,14 @@ package config
 
 import (
 	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
 	"github.com/mangalorg/mangal/fs"
+	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/path"
 	"path/filepath"
+	"strings"
 )
 
 var instance = koanf.NewWithConf(koanf.Conf{
@@ -38,6 +41,14 @@ func Load() error {
 		if err := instance.Load(rawbytes.Provider(file), yaml.Parser()); err != nil {
 			return err
 		}
+	}
+
+	// TODO: fix this
+	prefix := strings.ToUpper(meta.AppName)
+	if err := instance.Load(env.Provider(prefix, ".", func(s string) string {
+		return strings.ToLower(strings.TrimPrefix(s, prefix))
+	}), nil); err != nil {
+		return err
 	}
 
 	for _, f := range Fields {

@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-
 	"github.com/mangalorg/mangal/tui/base"
 
 	"github.com/charmbracelet/bubbles/help"

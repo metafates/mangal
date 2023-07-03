@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/config"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/chapters"
 	"github.com/mangalorg/mangal/tui/state/listwrapper"
@@ -74,7 +75,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 						return err
 					}
 
-					if len(v) != 1 {
+					if len(v) != 1 || !config.Config.TUI.ExpandSingleVolume.Get() {
 						return volumes.New(s.client, v)
 					}
 

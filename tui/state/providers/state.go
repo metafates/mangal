@@ -59,7 +59,7 @@ func (s *State) Status() string {
 
 // Title implements base.State.
 func (s *State) Title() base.Title {
-	return s.list.Title()
+	return base.Title{Text: "Providers"}
 }
 
 func (s *State) Subtitle() string {
@@ -101,13 +101,12 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					}
 
 					return textinput.New(textinput.Options{
-						Title:       base.Title{Text: "Search Mangas"},
-						Prompt:      fmt.Sprintf("Using %s provider", client),
-						Placeholder: "Search",
+						Title:  base.Title{Text: "Search"},
+						Prompt: fmt.Sprintf("Using %s provider", client),
 						OnResponse: func(response string) tea.Cmd {
 							return tea.Sequence(
 								func() tea.Msg {
-									return loading.New("Searching")
+									return loading.New("Searching...jkjkоло")
 								},
 								func() tea.Msg {
 									m, err := client.SearchMangas(model.Context(), response)

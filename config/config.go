@@ -9,6 +9,7 @@ type config struct {
 	Icons    field[string]
 	Read     configRead
 	Download configDownload
+	TUI      configTUI
 }
 
 type configRead struct {
@@ -39,6 +40,10 @@ type configDownloadVolume struct {
 type configDownloadMetadata struct {
 	ComicInfoXML field[bool]
 	SeriesJSON   field[bool]
+}
+
+type configTUI struct {
+	ExpandSingleVolume field[bool]
 }
 
 var Config = config{
@@ -131,5 +136,12 @@ var Config = config{
 				description:  "Generate `series.json` file",
 			}),
 		},
+	},
+	TUI: configTUI{
+		ExpandSingleVolume: register(field[bool]{
+			key:          "tui.expand_single_volume",
+			defaultValue: true,
+			description:  "Skip selecting volume if there's only one",
+		}),
 	},
 }

@@ -1,6 +1,9 @@
 package icon
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"github.com/charmbracelet/lipgloss"
+	"github.com/mangalorg/mangal/color"
+)
 
 type icon struct {
 	color   lipgloss.Color
@@ -12,13 +15,14 @@ type symbols map[Type]string
 func (i icon) String() string {
 	return lipgloss.
 		NewStyle().
+		Bold(true).
 		Foreground(i.color).
 		Render(i.symbols[currentType])
 }
 
 var (
 	Question = icon{
-		color: "#FC440F",
+		color: color.Accent,
 		symbols: symbols{
 			TypeASCII: "?",
 			TypeNerd:  "\uEB32",
@@ -26,7 +30,7 @@ var (
 	}
 
 	Progress = icon{
-		color: "#8A4FFF",
+		color: color.Accent,
 		symbols: symbols{
 			TypeASCII: "@",
 			TypeNerd:  "\U000F0997",
@@ -34,10 +38,18 @@ var (
 	}
 
 	Mark = icon{
-		color: "",
+		color: color.Accent,
 		symbols: symbols{
 			TypeASCII: "*",
-			TypeNerd:  "",
+			TypeNerd:  "\uF019",
+		},
+	}
+
+	Search = icon{
+		color: color.Accent,
+		symbols: symbols{
+			TypeASCII: ">",
+			TypeNerd:  "\uF002",
 		},
 	}
 )

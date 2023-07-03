@@ -8,7 +8,8 @@ type Styles struct {
 	Title,
 	TitleBar,
 	Subtitle,
-	HelpBar lipgloss.Style
+	HelpBar,
+	Selection lipgloss.Style
 }
 
 func DefaultStyles() Styles {
@@ -16,8 +17,8 @@ func DefaultStyles() Styles {
 		Title: lipgloss.
 			NewStyle().
 			Bold(true).
-			Background(lipgloss.Color("62")).
-			Foreground(lipgloss.Color("230")).
+			Background(lipgloss.Color("#EB5E28")).
+			Foreground(lipgloss.Color("#252422")).
 			Padding(0, 1),
 		TitleBar: lipgloss.
 			NewStyle().

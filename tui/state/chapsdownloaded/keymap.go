@@ -18,6 +18,7 @@ type KeyMap struct {
 func (k KeyMap) ShortHelp() []key.Binding {
 	bindings := []key.Binding{
 		k.Quit,
+		k.Open,
 	}
 
 	if len(k.state.options.Failed) > 0 {

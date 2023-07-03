@@ -1,7 +1,9 @@
 package textinput
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/tui/util"
 )
 
@@ -11,7 +13,14 @@ func New(options Options) *State {
 	}
 
 	input := textinput.New()
-	input.Placeholder = options.Placeholder
+
+	if options.Placeholder == "" {
+		input.Placeholder = "Search..."
+	} else {
+		input.Placeholder = options.Placeholder
+	}
+
+	input.Prompt = fmt.Sprint(icon.Search, " ")
 
 	return &State{
 		options:   options,

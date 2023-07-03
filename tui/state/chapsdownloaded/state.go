@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/mangal/tui/base"
-	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/skratchdot/open-golang/open"
 	"path/filepath"
 )
@@ -52,19 +51,14 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 		case key.Matches(msg, s.keyMap.Quit):
 			return tea.Quit
 		case key.Matches(msg, s.keyMap.Open) && len(s.options.SucceedPaths) > 0:
-			return tea.Sequence(
-				func() tea.Msg {
-					return loading.New("Opening")
-				},
-				func() tea.Msg {
-					err := open.Run(filepath.Dir(s.options.SucceedPaths[0]))
-					if err != nil {
-						return err
-					}
+			err := open.Start(filepath.Dir(s.options.SucceedPaths[0]))
+			if err != nil {
+				return func() tea.Msg {
+					return err
+				}
+			}
 
-					return base.MsgBack{}
-				},
-			)
+			return nil
 		case key.Matches(msg, s.keyMap.Retry) && len(s.options.Failed) > 0:
 			return s.options.DownloadChapters(s.options.Failed)
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/mangal/tui/base"
+	"strings"
 )
 
 var _ base.State = (*State)(nil)
@@ -51,8 +52,8 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, s.keyMap.Confirm) && s.textinput.Value() != "":
-			return s.options.OnResponse(s.textinput.Value())
+		case key.Matches(msg, s.keyMap.Confirm) && strings.TrimSpace(s.textinput.Value()) != "":
+			return s.options.OnResponse(strings.TrimSpace(s.textinput.Value()))
 		}
 	}
 

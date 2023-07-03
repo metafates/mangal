@@ -46,6 +46,10 @@ func (s *State) Title() base.Title {
 }
 
 func (s *State) Subtitle() string {
+	if s.selected.Size() > 0 {
+		return fmt.Sprint(s.list.Subtitle(), " ", s.selected.Size(), " selected")
+	}
+
 	return s.list.Subtitle()
 }
 
@@ -141,9 +145,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					fmt.Sprint("Download ", stringutil.Quantify(len(chapters), "chapter", "chapters")),
 					func(response bool) tea.Cmd {
 						if !response {
-							return func() tea.Msg {
-								return base.MsgBack{}
-							}
+							return base.Back
 						}
 
 						return s.downloadChaptersCmd(chapters, options)
