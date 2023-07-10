@@ -102,11 +102,11 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 
 					return textinput.New(textinput.Options{
 						Title:  base.Title{Text: "Search"},
-						Prompt: fmt.Sprintf("Using %s provider", client),
+						Prompt: fmt.Sprintf("Using %q provider", client),
 						OnResponse: func(response string) tea.Cmd {
 							return tea.Sequence(
 								func() tea.Msg {
-									return loading.New("Searching...jkjkоло")
+									return loading.New(fmt.Sprintf("Searching for %q", response))
 								},
 								func() tea.Msg {
 									m, err := client.SearchMangas(model.Context(), response)

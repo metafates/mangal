@@ -3,13 +3,17 @@ package errorstate
 import (
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/mangalorg/mangal/color"
 	"github.com/mangalorg/mangal/tui/base"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 var _ base.State = (*State)(nil)
 
 type State struct {
 	error  error
+	size   base.Size
 	keyMap KeyMap
 }
 
@@ -23,7 +27,7 @@ func (s *State) KeyMap() help.KeyMap {
 
 func (s *State) Title() base.Title {
 	// TODO: red bg
-	return base.Title{Text: "Error"}
+	return base.Title{Text: "Error", Background: color.Error}
 }
 
 func (s *State) Subtitle() string {
@@ -39,6 +43,7 @@ func (s *State) Backable() bool {
 }
 
 func (s *State) Resize(size base.Size) {
+	s.size = size
 }
 
 func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
@@ -46,7 +51,9 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 }
 
 func (s *State) View(model base.Model) string {
-	return s.error.Error()
+	wrapped := wordwrap.String(s.error.Error(), int(float64(s.size.Width)/1.2))
+
+	return lipgloss.NewStyle().Foreground(color.Error).Render(wrapped)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {

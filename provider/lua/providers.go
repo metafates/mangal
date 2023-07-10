@@ -1,35 +1,20 @@
-package provider
+package lua
 
 import (
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/luaprovider"
+	"github.com/mangalorg/mangal/cache/bbolt"
+	"github.com/mangalorg/mangal/config"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
-	"github.com/philippgille/gokv/bbolt"
 	"github.com/philippgille/gokv/encoding"
+	"log"
 	"net/http"
 	"path/filepath"
 	"time"
 )
 
 func InstalledProviders() ([]libmangal.ProviderLoader, error) {
-	var loaders []libmangal.ProviderLoader
-
-	for _, getLoaders := range []func() ([]libmangal.ProviderLoader, error){
-		installeLuaProviders,
-	} {
-		l, err := getLoaders()
-		if err != nil {
-			return nil, err
-		}
-
-		loaders = append(loaders, l...)
-	}
-
-	return loaders, nil
-}
-
-func installeLuaProviders() ([]libmangal.ProviderLoader, error) {
 	dir := path.LuaProvidersDir()
 	dirEntries, err := fs.Afero.ReadDir(dir)
 	if err != nil {
@@ -52,7 +37,13 @@ func installeLuaProviders() ([]libmangal.ProviderLoader, error) {
 			continue
 		}
 
+		ttl, err := time.ParseDuration(config.Config.Cache.Providers.Lua.TTL.Get())
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		store, err := bbolt.NewStore(bbolt.Options{
+			TTL:        ttl,
 			BucketName: info.Name,
 			Path:       filepath.Join(path.CacheDir(), info.Name+".db"),
 			Codec:      encoding.Gob,

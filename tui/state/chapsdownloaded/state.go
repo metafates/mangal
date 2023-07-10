@@ -5,9 +5,13 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/mangalorg/mangal/color"
+	"github.com/mangalorg/mangal/stringutil"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/skratchdot/open-golang/open"
 	"path/filepath"
+	"strings"
 )
 
 var _ base.State = (*State)(nil)
@@ -68,7 +72,45 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 }
 
 func (s *State) View(model base.Model) string {
-	return fmt.Sprintf("%d succeed, %d failed", len(s.options.Succeed), len(s.options.Failed))
+	var (
+		succeed = len(s.options.Succeed)
+		failed  = len(s.options.Failed)
+	)
+
+	if len(s.options.Failed) == 0 {
+		return lipgloss.
+			NewStyle().
+			Foreground(color.Success).
+			Render(fmt.Sprintf(
+				"%s downloaded successfully!",
+				stringutil.Quantify(succeed, "Chapter", "Chapters"),
+			))
+	}
+
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf(
+		"%s downloaded successfully, %d failed.",
+		stringutil.Quantify(succeed, "chapter", "chapters"),
+		failed,
+	))
+
+	sb.WriteString("\n\nFailed:\n")
+
+	if failed <= 3 {
+		for _, chapter := range s.options.Failed {
+			sb.WriteString(fmt.Sprintf("\n%s", chapter))
+		}
+	} else {
+		var indices = make([]float32, failed)
+		for i, c := range s.options.Failed {
+			indices[i] = c.Info().Number
+		}
+
+		sb.WriteString(stringutil.FormatRanges(indices))
+	}
+
+	return sb.String()
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {

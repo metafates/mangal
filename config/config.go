@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/icon"
+	"time"
 )
 
 type config struct {
@@ -10,6 +11,7 @@ type config struct {
 	Read     configRead
 	Download configDownload
 	TUI      configTUI
+	Cache    configCache
 }
 
 type configRead struct {
@@ -44,6 +46,18 @@ type configDownloadMetadata struct {
 
 type configTUI struct {
 	ExpandSingleVolume field[bool]
+}
+
+type configCache struct {
+	Providers configCacheProviders
+}
+
+type configCacheProviders struct {
+	Lua configCacheProvidersLua
+}
+
+type configCacheProvidersLua struct {
+	TTL field[string]
 }
 
 var Config = config{
@@ -143,5 +157,20 @@ var Config = config{
 			defaultValue: true,
 			description:  "Skip selecting volume if there's only one",
 		}),
+	},
+	Cache: configCache{
+		Providers: configCacheProviders{
+			Lua: configCacheProvidersLua{
+				TTL: register(field[string]{
+					key:          "cache.providers.lua.ttl",
+					defaultValue: "24h",
+					description:  "Time to live. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
+					init: func(s string) error {
+						_, err := time.ParseDuration(s)
+						return err
+					},
+				}),
+			},
+		},
 	},
 }

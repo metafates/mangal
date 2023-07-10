@@ -1,10 +1,13 @@
 package loading
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/mangalorg/mangal/color"
 	"github.com/mangalorg/mangal/tui/base"
 )
 
@@ -46,7 +49,8 @@ func (s *State) Subtitle() string {
 }
 
 func (s *State) Status() string {
-	return s.spinner.View()
+	//return s.spinner.View()
+	return ""
 }
 
 func (s *State) Backable() bool {
@@ -66,7 +70,10 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 }
 
 func (s *State) View(model base.Model) string {
-	return s.message
+	return fmt.Sprint(
+		lipgloss.NewStyle().Foreground(color.Accent).Render(s.spinner.View()),
+		lipgloss.NewStyle().Foreground(color.Secondary).Render(s.message),
+	)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {
