@@ -3,6 +3,7 @@ package listwrapper
 import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/mangal/stringutil"
@@ -65,8 +66,27 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 	case NotificationMsg:
 		s.notification = string(msg)
 		return nil
+	case tea.KeyMsg:
+		if s.list.FilterState() == list.Filtering {
+			goto end
+		}
+
+		switch {
+		case key.Matches(msg, s.keyMap.reverse):
+			items := s.list.Items()
+
+			for i, j := 0, len(items)-1; i < j; i, j = i+1, j-1 {
+				items[i], items[j] = items[j], items[i]
+			}
+
+			return tea.Sequence(
+				s.list.SetItems(items),
+				s.Notify("Reversed", time.Second),
+			)
+		}
 	}
 
+end:
 	s.list, cmd = s.list.Update(msg)
 	return cmd
 }

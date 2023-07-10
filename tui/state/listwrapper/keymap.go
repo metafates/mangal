@@ -9,12 +9,14 @@ import (
 var _ help.KeyMap = (*KeyMap)(nil)
 
 type KeyMap struct {
-	list *list.KeyMap
+	reverse key.Binding
+	list    *list.KeyMap
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
 	return []key.Binding{
 		k.list.Filter,
+		k.reverse,
 	}
 }
 

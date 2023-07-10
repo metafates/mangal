@@ -23,6 +23,7 @@ func New(loaders []libmangal.ProviderLoader) *State {
 		keyMap: KeyMap{
 			info:    util.Bind("info", "i"),
 			confirm: util.Bind("confirm", "enter"),
+			list:    listWrapper.GetKeyMap(),
 		},
 	}
 }

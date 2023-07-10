@@ -17,12 +17,13 @@ require (
 	github.com/mangalorg/luaprovider v0.5.0
 	github.com/muesli/reflow v0.3.0
 	github.com/philippgille/gokv v0.6.0
-	github.com/philippgille/gokv/bbolt v0.6.0
 	github.com/philippgille/gokv/encoding v0.6.0
+	github.com/philippgille/gokv/util v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/afero v1.9.5
 	github.com/zyedidia/generic v1.2.1
+	go.etcd.io/bbolt v1.3.7
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 	golang.org/x/term v0.10.0
 )
@@ -55,7 +56,6 @@ require (
 	github.com/mvdan/xurls v1.1.0 // indirect
 	github.com/pdfcpu/pdfcpu v0.4.1 // indirect
 	github.com/philippgille/gokv/syncmap v0.6.0 // indirect
-	github.com/philippgille/gokv/util v0.6.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/robertkrimen/otto v0.2.1 // indirect
 	github.com/sahilm/fuzzy v0.1.0 // indirect
@@ -68,7 +68,6 @@ require (
 	github.com/ysmood/leakless v0.8.0 // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7 // indirect
 	github.com/yuin/gopher-lua v1.1.0 // indirect
-	go.etcd.io/bbolt v1.3.7 // indirect
 	golang.org/x/image v0.9.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.12.0 // indirect

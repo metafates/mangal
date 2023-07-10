@@ -8,4 +8,5 @@ var (
 	Success   = lipgloss.Color("#7EC699")
 	Warning   = lipgloss.Color("#EBCA89")
 	Error     = lipgloss.Color("#E05252")
+	Loading   = lipgloss.Color("#A49FA5")
 )

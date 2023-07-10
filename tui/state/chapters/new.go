@@ -32,6 +32,7 @@ func New(client *libmangal.Client, volume libmangal.Volume, chapters []libmangal
 			Anilist:     util.Bind("anilist", "A"),
 			Download:    util.Bind("download", "d"),
 			Confirm:     util.Bind("confirm", "enter"),
+			list:        listWrapper.GetKeyMap(),
 		},
 	}
 }
