@@ -1,20 +1,43 @@
 package cmd
 
 import (
-	"github.com/alecthomas/kong"
+	"github.com/mangalorg/mangal/meta"
+	"github.com/mangalorg/mangal/provider"
+	"github.com/mangalorg/mangal/tui"
+	"github.com/mangalorg/mangal/tui/state/providers"
+	"github.com/spf13/cobra"
+	"log"
 )
 
-type rootCmd struct {
-	Run     runCmd     `cmd:"" help:"Run mangal" default:"1"`
-	Version versionCmd `cmd:"" help:"Print version"`
-	Path    pathCmd    `cmd:"" help:"Print paths"`
-	Config  configCmd  `cmd:"" help:"Config related commands"`
+var rootArgs = struct {
+	Version bool
+}{}
+
+func init() {
+	rootCmd.Flags().BoolVarP(&rootArgs.Version, "version", "v", false, "show version information")
 }
 
-var cli rootCmd
+var rootCmd = &cobra.Command{
+	Use:   meta.AppName,
+	Short: "The ultimate CLI manga downloader",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if rootArgs.Version {
+			versionCmd.Run(versionCmd, nil)
+			return nil
+		}
 
-func Run() {
-	ctx := kong.Parse(&cli, kong.ShortUsageOnError())
-	err := ctx.Run()
-	ctx.FatalIfErrorf(err)
+		loaders, err := provider.InstalledProviders()
+		if err != nil {
+			return err
+		}
+
+		return tui.Run(providers.New(loaders))
+	},
+}
+
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }

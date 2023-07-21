@@ -3,49 +3,66 @@ package cmd
 import (
 	"fmt"
 	"github.com/mangalorg/mangal/path"
+	"github.com/spf13/cobra"
 )
 
-type pathCmd struct {
+var pathArgs = struct {
 	Config       bool `help:"Path to the config directory"`
 	Cache        bool `help:"Path to the cache directory"`
 	Temp         bool `help:"Path to a temporary directory"`
 	Downloads    bool `help:"Path to the downloads directory"`
 	LuaProviders bool `help:"Path to the lua providers directory"`
 	Header       bool `help:"Print header" negatable:"" default:"true"`
+}{}
+
+func init() {
+	rootCmd.AddCommand(pathCmd)
+
+	pathCmd.Flags().BoolVar(&pathArgs.Config, "config", false, "Path to the config directory")
+	pathCmd.Flags().BoolVar(&pathArgs.Cache, "cache", false, "Path to the cache directory")
+	pathCmd.Flags().BoolVar(&pathArgs.Temp, "temp", false, "Path to a temporary directory")
+	pathCmd.Flags().BoolVar(&pathArgs.Downloads, "downloads", false, "Path to the downloads directory")
+	pathCmd.Flags().BoolVar(&pathArgs.LuaProviders, "lua-providers", false, "Path to the lua providers directory")
+	pathCmd.Flags().BoolVar(&pathArgs.Header, "header", true, "Print header")
 }
 
-func (p *pathCmd) Run() error {
-	paths := []struct {
-		Name  string
-		Func  func() string
-		Print bool
-	}{
-		{"Config", path.ConfigDir, p.Config},
-		{"Cache", path.CacheDir, p.Cache},
-		{"Temp", path.TempDir, p.Temp},
-		{"Downloads", path.DownloadsDir, p.Downloads},
-		{"Lua Providers", path.LuaProvidersDir, p.LuaProviders},
-	}
-
-	var anyPrinted bool
-	for _, t := range paths {
-		if t.Print {
-			anyPrinted = true
-			if p.Header {
-				fmt.Println(t.Name)
-			}
-			fmt.Println(t.Func())
+var pathCmd = &cobra.Command{
+	Use:   "path",
+	Short: "Show paths",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		paths := []struct {
+			Name  string
+			Func  func() string
+			Print bool
+		}{
+			{"Config", path.ConfigDir, pathArgs.Config},
+			{"Cache", path.CacheDir, pathArgs.Cache},
+			{"Temp", path.TempDir, pathArgs.Temp},
+			{"Downloads", path.DownloadsDir, pathArgs.Downloads},
+			{"Lua Providers", path.LuaProvidersDir, pathArgs.LuaProviders},
 		}
-	}
 
-	if !anyPrinted {
+		var anyPrinted bool
 		for _, t := range paths {
-			if p.Header {
-				fmt.Println(t.Name)
+			if t.Print {
+				anyPrinted = true
+				if pathArgs.Header {
+					fmt.Println(t.Name)
+				}
+				fmt.Println(t.Func())
 			}
-			fmt.Println(t.Func())
 		}
-	}
 
-	return nil
+		if !anyPrinted {
+			for _, t := range paths {
+				if pathArgs.Header {
+					fmt.Println(t.Name)
+				}
+				fmt.Println(t.Func())
+			}
+		}
+
+		return nil
+	},
 }

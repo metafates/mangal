@@ -3,18 +3,28 @@ package cmd
 import (
 	"fmt"
 	"github.com/mangalorg/mangal/meta"
+	"github.com/spf13/cobra"
 )
 
-type versionCmd struct {
-	Short bool `help:"just show the version number"`
+var versionArgs = struct {
+	Short bool
+}{}
+
+func init() {
+	versionCmd.Flags().BoolVarP(&versionArgs.Short, "short", "s", false, "just show the version number")
+	rootCmd.AddCommand(versionCmd)
 }
 
-func (v *versionCmd) Run() error {
-	if v.Short {
-		fmt.Println(meta.Version)
-		return nil
-	}
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Show version information",
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		if versionArgs.Short {
+			fmt.Println(meta.Version)
+			return
+		}
 
-	fmt.Println(meta.PrettyVersion())
-	return nil
+		fmt.Println(meta.PrettyVersion())
+	},
 }

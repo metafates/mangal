@@ -3,19 +3,29 @@ package cmd
 import (
 	"fmt"
 	"github.com/mangalorg/mangal/config"
+	"github.com/spf13/cobra"
 	"strings"
 	"text/template"
 )
 
-type configCmd struct {
-	Info  configInfoCmd  `cmd:""`
-	Write configWriteCmd `cmd:""`
+func init() {
+	rootCmd.AddCommand(configCmd)
 }
 
-type configInfoCmd struct{}
+var configCmd = &cobra.Command{
+	Use:   "config",
+	Short: "Manage configuration",
+}
 
-func (c *configInfoCmd) Run() error {
-	fieldTemplate := template.Must(template.New("field").Parse(`
+func init() {
+	configCmd.AddCommand(configInfoCmd)
+}
+
+var configInfoCmd = &cobra.Command{
+	Use:   "info",
+	Short: "Show configuration information",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fieldTemplate := template.Must(template.New("field").Parse(`
 {{.Description}}
 
 Key: {{.Key}}
@@ -23,21 +33,29 @@ Value: {{.Value}}
 Default: {{.Default}}
 `))
 
-	var sb strings.Builder
-	for _, field := range config.Fields {
-		if err := fieldTemplate.Execute(&sb, field); err != nil {
-			return err
+		var sb strings.Builder
+		for _, field := range config.Fields {
+			if err := fieldTemplate.Execute(&sb, field); err != nil {
+				return err
+			}
+
+			fmt.Print(sb.String())
+			sb.Reset()
 		}
 
-		fmt.Print(sb.String())
-		sb.Reset()
-	}
-
-	return nil
+		return nil
+	},
 }
 
-type configWriteCmd struct{}
+func init() {
+	configCmd.AddCommand(configWriteCmd)
+}
 
-func (c *configWriteCmd) Run() error {
-	return config.Write()
+var configWriteCmd = &cobra.Command{
+	Use:   "write",
+	Short: "Write configuration to disk",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return config.Write()
+	},
 }

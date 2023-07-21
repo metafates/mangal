@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/adrg/xdg v0.4.0
-	github.com/alecthomas/kong v0.8.0
 	github.com/charmbracelet/bubbles v0.16.1
 	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/charmbracelet/lipgloss v0.7.1
@@ -22,6 +21,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/afero v1.9.5
+	github.com/spf13/cobra v1.7.0
 	github.com/zyedidia/generic v1.2.1
 	go.etcd.io/bbolt v1.3.7
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
@@ -41,6 +41,7 @@ require (
 	github.com/go-rod/rod v0.113.4 // indirect
 	github.com/hhrutter/lzw v1.0.0 // indirect
 	github.com/hhrutter/tiff v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ka-weihe/fast-levenshtein v0.0.0-20201227151214-4c99ee36a1ba // indirect
 	github.com/knadh/koanf/maps v0.1.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
@@ -61,6 +62,7 @@ require (
 	github.com/sahilm/fuzzy v0.1.0 // indirect
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/segmentio/fasthash v1.0.3 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ysmood/fetchup v0.2.3 // indirect
 	github.com/ysmood/goob v0.4.0 // indirect
 	github.com/ysmood/got v0.34.2 // indirect

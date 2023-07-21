@@ -14,5 +14,5 @@ func main() {
 
 	// TODO: change this
 	log.Default().SetOutput(io.Discard)
-	cmd.Run()
+	cmd.Execute()
 }
