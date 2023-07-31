@@ -12,7 +12,7 @@ require (
 	github.com/knadh/koanf/providers/env v0.1.0
 	github.com/knadh/koanf/providers/rawbytes v0.1.0
 	github.com/knadh/koanf/v2 v2.0.1
-	github.com/mangalorg/libmangal v0.5.0
+	github.com/mangalorg/libmangal v0.6.1
 	github.com/mangalorg/luaprovider v0.5.0
 	github.com/muesli/reflow v0.3.0
 	github.com/philippgille/gokv v0.6.0
@@ -24,7 +24,7 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/zyedidia/generic v1.2.1
 	go.etcd.io/bbolt v1.3.7
-	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
+	golang.org/x/exp v0.0.0-20230728194245-b0cb94b80691
 	golang.org/x/term v0.10.0
 )
 
@@ -38,7 +38,7 @@ require (
 	github.com/cixtor/readability v1.0.0 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/go-rod/rod v0.113.4 // indirect
+	github.com/go-rod/rod v0.114.1 // indirect
 	github.com/hhrutter/lzw v1.0.0 // indirect
 	github.com/hhrutter/tiff v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -47,7 +47,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
-	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
@@ -55,7 +55,7 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/mvdan/xurls v1.1.0 // indirect
-	github.com/pdfcpu/pdfcpu v0.4.1 // indirect
+	github.com/pdfcpu/pdfcpu v0.4.2 // indirect
 	github.com/philippgille/gokv/syncmap v0.6.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/robertkrimen/otto v0.2.1 // indirect

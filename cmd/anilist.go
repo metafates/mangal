@@ -59,7 +59,7 @@ var anilistAuthCmd = &cobra.Command{
 		}
 		code = strings.TrimSpace(code)
 
-		return anilist.Client.Login(context.Background(), libmangal.AnilistLoginCredentials{
+		return anilist.Client.Authorize(context.Background(), libmangal.AnilistLoginCredentials{
 			ID:     id,
 			Secret: secret,
 			Code:   code,

@@ -136,8 +136,12 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				}
 			}
 
-			slices.SortFunc(chapters, func(a, b libmangal.Chapter) bool {
-				return a.Info().Number < b.Info().Number
+			slices.SortFunc(chapters, func(a, b libmangal.Chapter) int {
+				if a.Info().Number < b.Info().Number {
+					return -1
+				}
+
+				return 1
 			})
 
 			return func() tea.Msg {
