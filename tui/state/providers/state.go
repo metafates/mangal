@@ -83,7 +83,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 		case key.Matches(msg, s.keyMap.confirm):
 			return tea.Sequence(
 				func() tea.Msg {
-					return loading.New("Loading...")
+					return loading.New("Loading...", "")
 				},
 				func() tea.Msg {
 					httpClient := &http.Client{
@@ -106,7 +106,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 						OnResponse: func(response string) tea.Cmd {
 							return tea.Sequence(
 								func() tea.Msg {
-									return loading.New(fmt.Sprintf("Searching for %q", response))
+									return loading.New("Loading", fmt.Sprintf("Searching for %q", response))
 								},
 								func() tea.Msg {
 									m, err := client.SearchMangas(model.Context(), response)
@@ -114,7 +114,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 										return err
 									}
 
-									return mangas.New(client, m)
+									return mangas.New(client, response, m)
 								},
 							)
 						},

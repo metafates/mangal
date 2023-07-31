@@ -1,6 +1,7 @@
 package mangas
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -17,6 +18,7 @@ import (
 var _ base.State = (*State)(nil)
 
 type State struct {
+	query  string
 	client *libmangal.Client
 	mangas []libmangal.Manga
 	list   *listwrapper.State
@@ -32,7 +34,7 @@ func (s *State) KeyMap() help.KeyMap {
 }
 
 func (s *State) Title() base.Title {
-	return base.Title{Text: "Mangas"}
+	return base.Title{Text: fmt.Sprintf("%q", s.query)}
 }
 
 func (s *State) Subtitle() string {
@@ -67,7 +69,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 		case key.Matches(msg, s.keyMap.Confirm):
 			return tea.Sequence(
 				func() tea.Msg {
-					return loading.New("Loading...")
+					return loading.New("Loading...", fmt.Sprintf("Getting volumes for %q", item.Manga))
 				},
 				func() tea.Msg {
 					v, err := s.client.MangaVolumes(model.Context(), item.Manga)
@@ -76,7 +78,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					}
 
 					if len(v) != 1 || !config.Config.TUI.ExpandSingleVolume.Get() {
-						return volumes.New(s.client, v)
+						return volumes.New(s.client, item.Manga, v)
 					}
 
 					volume := v[0]

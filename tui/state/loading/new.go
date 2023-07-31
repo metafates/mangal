@@ -4,10 +4,11 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 )
 
-func New(message string) *State {
+func New(message, subtitle string) *State {
 	return &State{
-		message: message,
-		spinner: spinner.New(spinner.WithSpinner(spinner.Dot)),
-		keyMap:  KeyMap{},
+		message:  message,
+		subtitle: subtitle,
+		spinner:  spinner.New(spinner.WithSpinner(spinner.Dot)),
+		keyMap:   KeyMap{},
 	}
 }

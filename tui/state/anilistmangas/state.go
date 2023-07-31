@@ -1,6 +1,7 @@
 package anilistmangas
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -78,12 +79,12 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					OnResponse: func(response string) tea.Cmd {
 						return tea.Sequence(
 							func() tea.Msg {
-								return loading.New("Searching...")
+								return loading.New("Loading", fmt.Sprintf("Searching for %q on Anilist", response))
 							},
 							func() tea.Msg {
 								mangas, err := s.anilist.SearchMangas(model.Context(), response)
 								if err != nil {
-									return loading.New(err.Error())
+									return err
 								}
 
 								return New(s.anilist, mangas, s.onResponse)

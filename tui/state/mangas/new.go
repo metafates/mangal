@@ -7,7 +7,7 @@ import (
 	"github.com/mangalorg/mangal/tui/util"
 )
 
-func New(client *libmangal.Client, mangas []libmangal.Manga) *State {
+func New(client *libmangal.Client, query string, mangas []libmangal.Manga) *State {
 	listWrapper := listwrapper.New(util.NewList(
 		2,
 		"manga", "mangas",
@@ -18,6 +18,7 @@ func New(client *libmangal.Client, mangas []libmangal.Manga) *State {
 	))
 
 	return &State{
+		query:  query,
 		client: client,
 		mangas: mangas,
 		list:   listWrapper,

@@ -2,6 +2,7 @@ package chapters
 
 import (
 	"context"
+	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
@@ -42,7 +43,10 @@ func (s *State) downloadChaptersCmd(chapters []libmangal.Chapter, options libman
 }
 
 func (s *State) downloadChapterCmd(ctx context.Context, chapter libmangal.Chapter, options libmangal.DownloadOptions) tea.Cmd {
-	loadingState := loading.New("Preparing...")
+	volume := chapter.Volume()
+	manga := volume.Manga()
+
+	loadingState := loading.New("Preparing...", fmt.Sprintf("%s / Vol. %s / %s", manga, volume, chapter))
 	return tea.Sequence(
 		func() tea.Msg {
 			return loadingState

@@ -7,7 +7,7 @@ import (
 	"github.com/mangalorg/mangal/tui/util"
 )
 
-func New(client *libmangal.Client, volumes []libmangal.Volume) *State {
+func New(client *libmangal.Client, manga libmangal.Manga, volumes []libmangal.Volume) *State {
 	listWrapper := listwrapper.New(util.NewList(
 		1,
 		"volume", "volumes",
@@ -18,6 +18,7 @@ func New(client *libmangal.Client, volumes []libmangal.Volume) *State {
 	))
 
 	return &State{
+		manga:   manga,
 		client:  client,
 		volumes: volumes,
 		list:    listWrapper,

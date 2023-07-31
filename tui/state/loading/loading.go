@@ -27,9 +27,10 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 }
 
 type State struct {
-	message string
-	spinner spinner.Model
-	keyMap  KeyMap
+	message  string
+	subtitle string
+	spinner  spinner.Model
+	keyMap   KeyMap
 }
 
 func (s *State) Intermediate() bool {
@@ -45,7 +46,7 @@ func (s *State) Title() base.Title {
 }
 
 func (s *State) Subtitle() string {
-	return ""
+	return s.subtitle
 }
 
 func (s *State) Status() string {

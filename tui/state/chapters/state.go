@@ -42,7 +42,7 @@ func (s *State) Title() base.Title {
 	volume := s.volume
 	manga := volume.Manga()
 
-	return base.Title{Text: fmt.Sprintf("%s / Vol. %d", manga.Info().Title, volume.Info().Number)}
+	return base.Title{Text: fmt.Sprintf("%s / Vol. %d", manga, volume.Info().Number)}
 }
 
 func (s *State) Subtitle() string {
@@ -192,7 +192,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 		case key.Matches(msg, s.keyMap.Anilist):
 			return tea.Sequence(
 				func() tea.Msg {
-					return loading.New("Loading...")
+					return loading.New("Loading...", "Getting Anilist Mangas")
 				},
 				func() tea.Msg {
 					var mangas []libmangal.AnilistManga
