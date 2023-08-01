@@ -2,8 +2,8 @@ package providers
 
 import (
 	"fmt"
+
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/mangalorg/libmangal"
 )
 
@@ -18,9 +18,13 @@ func (i Item) FilterValue() string {
 }
 
 func (i Item) Title() string {
-	return fmt.Sprint(i.FilterValue(), " ", lipgloss.NewStyle().Italic(true).Render("v"+i.Info().Version))
+	return i.FilterValue()
 }
 
 func (i Item) Description() string {
-	return i.Info().Website
+	return fmt.Sprintf(`Version %s
+%s`,
+		i.Info().Version,
+		i.Info().Website,
+	)
 }

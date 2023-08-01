@@ -9,7 +9,7 @@ import (
 
 func New(loaders []libmangal.ProviderLoader) *State {
 	listWrapper := listwrapper.New(util.NewList(
-		2,
+		3,
 		"provider", "providers",
 		loaders,
 		func(loader libmangal.ProviderLoader) list.DefaultItem {

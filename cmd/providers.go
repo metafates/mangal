@@ -14,9 +14,10 @@ func init() {
 }
 
 var providersCmd = &cobra.Command{
-	Use:   "providers",
-	Short: "Providers management",
-	Args:  cobra.NoArgs,
+	Use:     "providers",
+	Aliases: []string{"p"},
+	Short:   "Providers management",
+	Args:    cobra.NoArgs,
 }
 
 func init() {
