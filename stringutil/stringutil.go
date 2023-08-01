@@ -2,9 +2,11 @@ package stringutil
 
 import (
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
-	"golang.org/x/exp/constraints"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/fatih/camelcase"
+	"golang.org/x/exp/constraints"
 )
 
 // Trim trims a string to a maximum length, appending an ellipsis if necessary.
@@ -95,4 +97,13 @@ func FormatRanges[T constraints.Integer | constraints.Float](ranges []T) string 
 	}
 
 	return strings.Join(rangesStr, ", ")
+}
+
+func CaseCamelToSnake(s string) string {
+	words := camelcase.Split(s)
+	for i, word := range words {
+		words[i] = strings.ToLower(word)
+	}
+
+	return strings.Join(words, "_")
 }
