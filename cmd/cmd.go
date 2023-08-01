@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/mangalorg/mangal/meta"
-	"github.com/mangalorg/mangal/provider"
+	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/mangalorg/mangal/tui"
 	"github.com/mangalorg/mangal/tui/state/providers"
 	"github.com/spf13/cobra"
@@ -27,7 +27,7 @@ var rootCmd = &cobra.Command{
 			return nil
 		}
 
-		loaders, err := provider.InstalledProviders()
+		loaders, err := manager.InstalledProviders()
 		if err != nil {
 			return err
 		}

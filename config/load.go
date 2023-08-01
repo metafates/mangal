@@ -1,15 +1,16 @@
 package config
 
 import (
-	"github.com/knadh/koanf/parsers/yaml"
+	"path/filepath"
+	"strings"
+
+	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/path"
-	"path/filepath"
-	"strings"
 )
 
 var instance = koanf.NewWithConf(koanf.Conf{
@@ -17,7 +18,7 @@ var instance = koanf.NewWithConf(koanf.Conf{
 	StrictMerge: true,
 })
 
-const configFilename = "mangal.yaml"
+const configFilename = "mangal.toml"
 
 func Load() error {
 	for _, f := range Fields {
@@ -38,7 +39,7 @@ func Load() error {
 			return err
 		}
 
-		if err := instance.Load(rawbytes.Provider(file), yaml.Parser()); err != nil {
+		if err := instance.Load(rawbytes.Provider(file), toml.Parser()); err != nil {
 			return err
 		}
 	}

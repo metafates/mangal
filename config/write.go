@@ -1,21 +1,17 @@
 package config
 
 import (
-	"bytes"
-	"github.com/knadh/koanf/parsers/yaml"
+	"path/filepath"
+
+	"github.com/knadh/koanf/parsers/toml"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
-	"path/filepath"
 )
 
 func Write() error {
-	marshalled, err := instance.Marshal(yaml.Parser())
+	marshalled, err := instance.Marshal(toml.Parser())
 	if err != nil {
 		return err
-	}
-
-	if !bytes.HasPrefix(marshalled, []byte("---\n")) {
-		marshalled = append([]byte("---\n"), marshalled...)
 	}
 
 	return fs.Afero.WriteFile(
