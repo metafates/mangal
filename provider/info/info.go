@@ -7,6 +7,7 @@ type Type uint8
 
 const (
 	TypeLua Type = iota + 1
+	TypeBundle
 )
 
 const Filename = "mangal.toml"

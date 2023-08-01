@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-const _TypeName = "Lua"
+const _TypeName = "LuaBundle"
 
-var _TypeIndex = [...]uint8{0, 3}
+var _TypeIndex = [...]uint8{0, 3, 9}
 
-const _TypeLowerName = "lua"
+const _TypeLowerName = "luabundle"
 
 func (i Type) String() string {
 	i -= 1
@@ -27,17 +27,21 @@ func (i Type) String() string {
 func _TypeNoOp() {
 	var x [1]struct{}
 	_ = x[TypeLua-(1)]
+	_ = x[TypeBundle-(2)]
 }
 
-var _TypeValues = []Type{TypeLua}
+var _TypeValues = []Type{TypeLua, TypeBundle}
 
 var _TypeNameToValueMap = map[string]Type{
 	_TypeName[0:3]:      TypeLua,
 	_TypeLowerName[0:3]: TypeLua,
+	_TypeName[3:9]:      TypeBundle,
+	_TypeLowerName[3:9]: TypeBundle,
 }
 
 var _TypeNames = []string{
 	_TypeName[0:3],
+	_TypeName[3:9],
 }
 
 // TypeString retrieves an enum value from the enum constants string name.

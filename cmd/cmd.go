@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/mangalorg/mangal/tui"
 	"github.com/mangalorg/mangal/tui/state/providers"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 var rootArgs = struct {
@@ -27,7 +28,7 @@ var rootCmd = &cobra.Command{
 			return nil
 		}
 
-		loaders, err := manager.InstalledProviders()
+		loaders, err := manager.Loaders()
 		if err != nil {
 			return err
 		}

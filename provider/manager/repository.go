@@ -10,10 +10,22 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
+	"github.com/pkg/errors"
 )
 
-func Add(ctx context.Context, tag string, URL *url.URL) error {
-	providerPath := filepath.Join(path.ProvidersDir(), tag)
+type (
+	AddOptions struct {
+		Tag string
+		URL *url.URL
+	}
+
+	UpdateOptions struct {
+		Tag string
+	}
+)
+
+func Add(ctx context.Context, options AddOptions) error {
+	providerPath := filepath.Join(path.ProvidersDir(), options.Tag)
 
 	exists, err := fs.Afero.Exists(providerPath)
 	if err != nil {
@@ -21,11 +33,11 @@ func Add(ctx context.Context, tag string, URL *url.URL) error {
 	}
 
 	if exists {
-		return fmt.Errorf("provider with tag %q already exists", tag)
+		return fmt.Errorf("provider with tag %q already exists", options.Tag)
 	}
 
 	_, err = git.PlainCloneContext(ctx, providerPath, false, &git.CloneOptions{
-		URL:      URL.String(),
+		URL:      options.URL.String(),
 		Progress: os.Stdout, // TODO: change this
 	})
 
@@ -34,29 +46,48 @@ func Add(ctx context.Context, tag string, URL *url.URL) error {
 	}
 
 	return nil
+}
 
-	//worktree, err := repo.Worktree()
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//pullOptions := &git.PullOptions{
-	//	Progress: os.Stdout,
-	//	Force:    true,
-	//}
-	//
-	//err = worktree.PullContext(ctx, pullOptions)
-	//
-	//if !errors.Is(err, git.NoErrAlreadyUpToDate) {
-	//	return err
-	//}
-	//
-	//if provider.Rev == "" {
-	//	return nil
-	//}
-	//
-	//return worktree.Checkout(&git.CheckoutOptions{
-	//	Hash:  plumbing.Hash([]byte(provider.Rev)),
-	//	Force: true,
-	//})
+func Update(ctx context.Context, options UpdateOptions) error {
+	providersDir := path.ProvidersDir()
+	dirEntries, err := fs.Afero.ReadDir(providersDir)
+	if err != nil {
+		return err
+	}
+
+	for _, dirEntry := range dirEntries {
+		if options.Tag != "" && dirEntry.Name() != options.Tag {
+			continue
+		}
+
+		repo, err := git.PlainOpen(filepath.Join(providersDir, dirEntry.Name()))
+
+		if errors.Is(err, git.ErrRepositoryNotExists) {
+			continue
+		}
+
+		if err != nil {
+			return err
+		}
+
+		worktree, err := repo.Worktree()
+		if err != nil {
+			return err
+		}
+
+		err = worktree.PullContext(ctx, &git.PullOptions{
+			Progress: os.Stdout,
+			Force:    true,
+		})
+
+		if !(errors.Is(err, git.NoErrAlreadyUpToDate) || errors.Is(err, git.ErrRemoteNotFound)) {
+			return err
+		}
+
+		if options.Tag != "" {
+			break
+		}
+	}
+
+	return nil
 }

@@ -19,8 +19,9 @@ var providersCmd = &cobra.Command{
 }
 
 func init() {
-	providersAddCmd.Flags().StringP("tag", "t", "", "Tag to use for the provider")
 	providersCmd.AddCommand(providersAddCmd)
+
+	providersAddCmd.Flags().StringP("tag", "t", "", "Tag to use for the provider")
 }
 
 var providersAddCmd = &cobra.Command{
@@ -34,6 +35,28 @@ var providersAddCmd = &cobra.Command{
 			return err
 		}
 
-		return manager.Add(context.Background(), tag, URL)
+		return manager.Add(context.Background(), manager.AddOptions{
+			Tag: tag,
+			URL: URL,
+		})
+	},
+}
+
+func init() {
+	providersCmd.AddCommand(providersUpdateCmd)
+
+	providersUpdateCmd.Flags().StringP("tag", "t", "", "Update specific provider by tag")
+}
+
+var providersUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update providers",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		tag, _ := cmd.Flags().GetString("tag")
+
+		return manager.Update(context.Background(), manager.UpdateOptions{
+			Tag: tag,
+		})
 	},
 }
