@@ -91,3 +91,7 @@ func Update(ctx context.Context, options UpdateOptions) error {
 
 	return nil
 }
+
+func Remove(tag string) error {
+	return fs.Afero.RemoveAll(filepath.Join(path.ProvidersDir(), tag))
+}

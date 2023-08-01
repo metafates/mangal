@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
 	"github.com/mangalorg/mangal/provider/manager"
@@ -25,7 +26,7 @@ func init() {
 }
 
 var providersAddCmd = &cobra.Command{
-	Use:   "add",
+	Use:   "add <url>",
 	Short: "Install provider",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -43,13 +44,13 @@ var providersAddCmd = &cobra.Command{
 }
 
 func init() {
-	providersCmd.AddCommand(providersUpdateCmd)
+	providersCmd.AddCommand(providersUpCmd)
 
-	providersUpdateCmd.Flags().StringP("tag", "t", "", "Update specific provider by tag")
+	providersUpCmd.Flags().StringP("tag", "t", "", "Update specific provider by tag")
 }
 
-var providersUpdateCmd = &cobra.Command{
-	Use:   "update",
+var providersUpCmd = &cobra.Command{
+	Use:   "up",
 	Short: "Update providers",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -58,5 +59,46 @@ var providersUpdateCmd = &cobra.Command{
 		return manager.Update(context.Background(), manager.UpdateOptions{
 			Tag: tag,
 		})
+	},
+}
+
+func init() {
+	providersCmd.AddCommand(providersLsCmd)
+}
+
+var providersLsCmd = &cobra.Command{
+	Use:   "ls",
+	Short: "List installed providers",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		tags, err := manager.Tags()
+		if err != nil {
+			return err
+		}
+
+		for _, tag := range tags {
+			fmt.Println(tag)
+		}
+
+		return nil
+	},
+}
+
+func init() {
+	providersCmd.AddCommand(providersRmCmd)
+}
+
+var providersRmCmd = &cobra.Command{
+	Use:   "rm [tags]",
+	Short: "Remove provider",
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		for _, tag := range args {
+			if err := manager.Remove(tag); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	},
 }

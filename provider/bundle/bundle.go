@@ -25,7 +25,18 @@ func Loaders(dir string) ([]libmangal.ProviderLoader, error) {
 			continue
 		}
 
-		loaders, err := getLoaders(filepath.Join(dir, dirEntry.Name()))
+		dirEntryPath := filepath.Join(dir, dirEntry.Name())
+
+		isProvider, err := fs.Afero.Exists(filepath.Join(dirEntryPath, info.Filename))
+		if err != nil {
+			return nil, err
+		}
+
+		if !isProvider {
+			continue
+		}
+
+		loaders, err := getLoaders(dirEntryPath)
 		if err != nil {
 			return nil, err
 		}
