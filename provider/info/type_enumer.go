@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-const _TypeName = "LuaBundle"
+const _TypeName = "BundleLua"
 
-var _TypeIndex = [...]uint8{0, 3, 9}
+var _TypeIndex = [...]uint8{0, 6, 9}
 
-const _TypeLowerName = "luabundle"
+const _TypeLowerName = "bundlelua"
 
 func (i Type) String() string {
 	i -= 1
@@ -26,22 +26,22 @@ func (i Type) String() string {
 // Re-run the stringer command to generate them again.
 func _TypeNoOp() {
 	var x [1]struct{}
-	_ = x[TypeLua-(1)]
-	_ = x[TypeBundle-(2)]
+	_ = x[TypeBundle-(1)]
+	_ = x[TypeLua-(2)]
 }
 
-var _TypeValues = []Type{TypeLua, TypeBundle}
+var _TypeValues = []Type{TypeBundle, TypeLua}
 
 var _TypeNameToValueMap = map[string]Type{
-	_TypeName[0:3]:      TypeLua,
-	_TypeLowerName[0:3]: TypeLua,
-	_TypeName[3:9]:      TypeBundle,
-	_TypeLowerName[3:9]: TypeBundle,
+	_TypeName[0:6]:      TypeBundle,
+	_TypeLowerName[0:6]: TypeBundle,
+	_TypeName[6:9]:      TypeLua,
+	_TypeLowerName[6:9]: TypeLua,
 }
 
 var _TypeNames = []string{
-	_TypeName[0:3],
-	_TypeName[3:9],
+	_TypeName[0:6],
+	_TypeName[6:9],
 }
 
 // TypeString retrieves an enum value from the enum constants string name.

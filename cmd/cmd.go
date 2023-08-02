@@ -3,10 +3,12 @@ package cmd
 import (
 	"log"
 
+	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/mangalorg/mangal/tui"
 	"github.com/mangalorg/mangal/tui/state/providers"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 )
 
@@ -35,6 +37,20 @@ var rootCmd = &cobra.Command{
 
 		return tui.Run(providers.New(loaders))
 	},
+}
+
+func completionProviderIDs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	loaders, err := manager.Loaders()
+
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveError
+	}
+
+	IDs := lo.Map(loaders, func(loader libmangal.ProviderLoader, _ int) string {
+		return loader.Info().ID
+	})
+
+	return IDs, cobra.ShellCompDirectiveDefault
 }
 
 func Execute() {

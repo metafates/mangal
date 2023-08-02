@@ -7,12 +7,12 @@ import (
 )
 
 var pathArgs = struct {
-	Config       bool `help:"Path to the config directory"`
-	Cache        bool `help:"Path to the cache directory"`
-	Temp         bool `help:"Path to a temporary directory"`
-	Downloads    bool `help:"Path to the downloads directory"`
-	LuaProviders bool `help:"Path to the lua providers directory"`
-	Header       bool `help:"Print header" negatable:"" default:"true"`
+	Config    bool `help:"Path to the config directory"`
+	Cache     bool `help:"Path to the cache directory"`
+	Temp      bool `help:"Path to a temporary directory"`
+	Downloads bool `help:"Path to the downloads directory"`
+	Providers bool `help:"Path to the providers directory"`
+	Header    bool `help:"Print header" negatable:"" default:"true"`
 }{}
 
 func init() {
@@ -22,7 +22,7 @@ func init() {
 	pathCmd.Flags().BoolVar(&pathArgs.Cache, "cache", false, "Path to the cache directory")
 	pathCmd.Flags().BoolVar(&pathArgs.Temp, "temp", false, "Path to a temporary directory")
 	pathCmd.Flags().BoolVar(&pathArgs.Downloads, "downloads", false, "Path to the downloads directory")
-	pathCmd.Flags().BoolVar(&pathArgs.LuaProviders, "lua-providers", false, "Path to the lua providers directory")
+	pathCmd.Flags().BoolVar(&pathArgs.Providers, "providers", false, "Path to the lua providers directory")
 	pathCmd.Flags().BoolVar(&pathArgs.Header, "header", true, "Print header")
 }
 
@@ -40,7 +40,7 @@ var pathCmd = &cobra.Command{
 			{"Cache", path.CacheDir, pathArgs.Cache},
 			{"Temp", path.TempDir, pathArgs.Temp},
 			{"Downloads", path.DownloadsDir, pathArgs.Downloads},
-			{"Lua Providers", path.LuaProvidersDir, pathArgs.LuaProviders},
+			{"Providers", path.ProvidersDir, pathArgs.Providers},
 		}
 
 		var anyPrinted bool

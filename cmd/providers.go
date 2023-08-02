@@ -22,8 +22,6 @@ var providersCmd = &cobra.Command{
 
 func init() {
 	providersCmd.AddCommand(providersAddCmd)
-
-	providersAddCmd.Flags().StringP("tag", "t", "", "Tag to use for the provider")
 }
 
 var providersAddCmd = &cobra.Command{
@@ -31,14 +29,12 @@ var providersAddCmd = &cobra.Command{
 	Short: "Install provider",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		tag, _ := cmd.Flags().GetString("tag")
 		URL, err := url.Parse(args[0])
 		if err != nil {
 			return err
 		}
 
 		return manager.Add(context.Background(), manager.AddOptions{
-			Tag: tag,
 			URL: URL,
 		})
 	},
@@ -46,8 +42,6 @@ var providersAddCmd = &cobra.Command{
 
 func init() {
 	providersCmd.AddCommand(providersUpCmd)
-
-	providersUpCmd.Flags().StringP("tag", "t", "", "Update specific provider by tag")
 }
 
 var providersUpCmd = &cobra.Command{
@@ -55,11 +49,7 @@ var providersUpCmd = &cobra.Command{
 	Short: "Update providers",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		tag, _ := cmd.Flags().GetString("tag")
-
-		return manager.Update(context.Background(), manager.UpdateOptions{
-			Tag: tag,
-		})
+		return manager.Update(context.Background(), manager.UpdateOptions{})
 	},
 }
 
@@ -72,13 +62,13 @@ var providersLsCmd = &cobra.Command{
 	Short: "List installed providers",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		tags, err := manager.Tags()
+		loaders, err := manager.Loaders()
 		if err != nil {
 			return err
 		}
 
-		for _, tag := range tags {
-			fmt.Println(tag)
+		for _, loader := range loaders {
+			fmt.Println(loader.Info().ID)
 		}
 
 		return nil

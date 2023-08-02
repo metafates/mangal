@@ -51,9 +51,3 @@ func ProvidersDir() string {
 	createDirIfAbsent(dir)
 	return dir
 }
-
-func LuaProvidersDir() string {
-	dir := filepath.Join(ProvidersDir(), "lua")
-	createDirIfAbsent(dir)
-	return dir
-}

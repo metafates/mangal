@@ -2,43 +2,54 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"strings"
-	"syscall"
 
+	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/fs"
+	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/mangalorg/mangal/script"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 )
+
+var scriptArgs = struct {
+	File      string
+	String    string
+	Stdin     bool
+	Provider  string
+	Variables map[string]string
+}{}
 
 func init() {
 	rootCmd.AddCommand(scriptCmd)
 
-	scriptCmd.Flags().StringP("file", "f", "", "Read script from file")
-	scriptCmd.Flags().StringP("string", "s", "", "Read script from script")
-	scriptCmd.Flags().BoolP("stdin", "i", !terminal.IsTerminal(syscall.Stdin), "Read script from stdin")
+	scriptCmd.Flags().StringVarP(&scriptArgs.File, "file", "f", "", "Read script from file")
+	scriptCmd.Flags().StringVarP(&scriptArgs.String, "string", "s", "", "Read script from script")
+	scriptCmd.Flags().BoolVarP(&scriptArgs.Stdin, "stdin", "i", false, "Read script from stdin")
 
 	scriptCmd.MarkFlagsMutuallyExclusive("file", "string", "stdin")
 
-	scriptCmd.Flags().StringToStringP("vars", "v", nil, "Variables to set in the `Vars` table")
+	scriptCmd.Flags().StringVarP(&scriptArgs.Provider, "provider", "p", "", "Load provider by tag")
+
+	scriptCmd.Flags().StringToStringVarP(&scriptArgs.Variables, "vars", "v", nil, "Variables to set in the `Vars` table")
+
+	scriptCmd.RegisterFlagCompletionFunc("provider", completionProviderIDs)
 }
 
 var scriptCmd = &cobra.Command{
 	Use:   "script",
-	Short: "Run mangal in script mode",
+	Short: "Run mangal in scripting mode",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var reader io.Reader
 
-		// TODO: this does not work as intended
 		switch {
 		case cmd.Flag("file").Changed:
-			value := lo.Must(cmd.Flags().GetString("file"))
 			file, err := fs.Afero.OpenFile(
-				value,
+				scriptArgs.File,
 				os.O_RDONLY,
 				0755,
 			)
@@ -50,17 +61,46 @@ var scriptCmd = &cobra.Command{
 
 			reader = file
 		case cmd.Flag("string").Changed:
-			value := lo.Must(cmd.Flags().GetString("string"))
-			reader = strings.NewReader(value)
+			reader = strings.NewReader(scriptArgs.String)
 		case cmd.Flag("stdin").Changed:
 			reader = os.Stdin
 		default:
 			panic("unreachable")
 		}
 
-		// TODO: fill other options
-		return script.Run(context.Background(), reader, script.Options{
-			Variables: lo.Must(cmd.Flags().GetStringToString("vars")),
-		})
+		var options script.Options
+
+		options.Variables = scriptArgs.Variables
+
+		anilist := libmangal.NewAnilist(libmangal.DefaultAnilistOptions())
+
+		options.Anilist = &anilist
+
+		if scriptArgs.Provider != "" {
+			loaders, err := manager.Loaders()
+			if err != nil {
+				return err
+			}
+
+			loader, ok := lo.Find(loaders, func(loader libmangal.ProviderLoader) bool {
+				return loader.Info().ID == scriptArgs.Provider
+			})
+
+			if !ok {
+				return fmt.Errorf("provider with ID %q not found", scriptArgs.Provider)
+			}
+
+			clientOptions := libmangal.DefaultClientOptions()
+
+			client, err := libmangal.NewClient(context.Background(), loader, clientOptions)
+			if err != nil {
+				return err
+			}
+
+			options.Client = client
+			options.Anilist = client.Anilist()
+		}
+
+		return script.Run(context.Background(), reader, options)
 	},
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/provider/info"
 	"github.com/mangalorg/mangal/provider/lua"
-	"github.com/pelletier/go-toml"
 )
 
 func Loaders(dir string) ([]libmangal.ProviderLoader, error) {
@@ -64,12 +63,9 @@ func getLoaders(dir string) ([]libmangal.ProviderLoader, error) {
 
 	defer infoFile.Close()
 
-	decoder := toml.NewDecoder(infoFile)
-	decoder.Strict(true)
+	providerInfo, err := info.Parse(infoFile)
 
-	var providerInfo info.Info
-
-	if err := decoder.Decode(&providerInfo); err != nil {
+	if err != nil {
 		return nil, err
 	}
 

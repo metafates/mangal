@@ -26,7 +26,10 @@ func addVarsTable(state *lua.LState, variables Variables) {
 	}
 
 	state.SetGlobal("Vars", table)
+}
 
+func addLibraries(state *lua.LState) {
+	// TODO: implement
 }
 
 func Run(ctx context.Context, script io.Reader, options Options) error {
@@ -41,8 +44,7 @@ func Run(ctx context.Context, script io.Reader, options Options) error {
 	}
 
 	addVarsTable(state, options.Variables)
-
-	// TODO: do the rest...
+	addLibraries(state)
 
 	lFunction, err := state.Load(script, "script")
 	if err != nil {

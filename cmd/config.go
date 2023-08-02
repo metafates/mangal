@@ -24,6 +24,7 @@ func init() {
 var configInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Show configuration information",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fieldTemplate := template.Must(template.New("field").Parse(`
 {{.Description}}
