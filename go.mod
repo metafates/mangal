@@ -49,6 +49,8 @@ require (
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
+	github.com/gdamore/encoding v1.0.0 // indirect
+	github.com/gdamore/tcell/v2 v2.5.3 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.4.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
@@ -61,6 +63,8 @@ require (
 	github.com/ka-weihe/fast-levenshtein v0.0.0-20201227151214-4c99ee36a1ba // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/knadh/koanf/maps v0.1.1 // indirect
+	github.com/ktr0731/go-ansisgr v0.1.0 // indirect
+	github.com/ktr0731/go-fuzzyfinder v0.7.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mangalorg/gopher-luadoc v0.2.2 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -73,6 +77,7 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/mvdan/xurls v1.1.0 // indirect
+	github.com/nsf/termbox-go v1.1.1 // indirect
 	github.com/pdfcpu/pdfcpu v0.4.2 // indirect
 	github.com/philippgille/gokv/syncmap v0.6.0 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect

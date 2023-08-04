@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/script/lib"
 	"github.com/mangalorg/mangal/stringutil"
 	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
@@ -28,8 +29,8 @@ func addVarsTable(state *lua.LState, variables Variables) {
 	state.SetGlobal("Vars", table)
 }
 
-func addLibraries(state *lua.LState) {
-	// TODO: implement
+func addLibraries(state *lua.LState, options lib.Options) {
+	lib.Preload(state, options)
 }
 
 func Run(ctx context.Context, script io.Reader, options Options) error {
@@ -44,7 +45,10 @@ func Run(ctx context.Context, script io.Reader, options Options) error {
 	}
 
 	addVarsTable(state, options.Variables)
-	addLibraries(state)
+	addLibraries(state, lib.Options{
+		Client:  options.Client,
+		Anilist: options.Anilist,
+	})
 
 	lFunction, err := state.Load(script, "script")
 	if err != nil {

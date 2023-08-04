@@ -11,8 +11,10 @@ import (
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/mangalorg/mangal/script"
+	"github.com/mangalorg/mangal/script/lib"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	lua "github.com/yuin/gopher-lua"
 )
 
 var scriptArgs = struct {
@@ -102,5 +104,20 @@ var scriptCmd = &cobra.Command{
 		}
 
 		return script.Run(context.Background(), reader, options)
+	},
+}
+
+func init() {
+	scriptCmd.AddCommand(scriptDocCmd)
+}
+
+var scriptDocCmd = &cobra.Command{
+	Use:   "doc",
+	Short: "Generate documentation for the `mangal` lua library",
+	Args:  cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		l := lib.Lib(lua.NewState(), lib.Options{})
+
+		return fs.Afero.WriteFile(fmt.Sprintf("%s.lua", l.Name), []byte(l.LuaDoc()), 0755)
 	},
 }
