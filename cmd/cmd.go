@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 
+	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/provider/manager"
@@ -54,6 +55,18 @@ func completionProviderIDs(cmd *cobra.Command, args []string, toComplete string)
 }
 
 func Execute() {
+	cc.Init(&cc.Config{
+		RootCmd:         rootCmd,
+		Headings:        cc.HiCyan + cc.Bold + cc.Underline,
+		Commands:        cc.HiYellow + cc.Bold,
+		Example:         cc.Italic,
+		ExecName:        cc.Bold,
+		Flags:           cc.Bold,
+		FlagsDataType:   cc.Italic + cc.HiBlue,
+		NoExtraNewlines: true,
+		NoBottomNewline: true,
+	})
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}

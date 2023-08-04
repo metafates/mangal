@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/fs"
+	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/mangalorg/mangal/script"
 	"github.com/mangalorg/mangal/script/lib"
@@ -67,7 +69,7 @@ var scriptCmd = &cobra.Command{
 		case cmd.Flag("stdin").Changed:
 			reader = os.Stdin
 		default:
-			panic("unreachable")
+			return errors.New("either `file`, `string` or `stdin`")
 		}
 
 		var options script.Options
@@ -118,6 +120,16 @@ var scriptDocCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		l := lib.Lib(lua.NewState(), lib.Options{})
 
-		return fs.Afero.WriteFile(fmt.Sprintf("%s.lua", l.Name), []byte(l.LuaDoc()), 0755)
+		filename := fmt.Sprint(l.Name, ".lua")
+
+		err := fs.Afero.WriteFile(filename, []byte(l.LuaDoc()), 0755)
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintf(os.Stderr, "%s Library specs written to %s\n", icon.Mark, filename)
+
+		return nil
 	},
 }

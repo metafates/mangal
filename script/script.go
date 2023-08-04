@@ -3,13 +3,10 @@ package script
 import (
 	"context"
 	"io"
-	"reflect"
 
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/script/lib"
-	"github.com/mangalorg/mangal/stringutil"
 	lua "github.com/yuin/gopher-lua"
-	luar "layeh.com/gopher-luar"
 )
 
 type Variables = map[string]string
@@ -36,13 +33,6 @@ func addLibraries(state *lua.LState, options lib.Options) {
 func Run(ctx context.Context, script io.Reader, options Options) error {
 	state := lua.NewState()
 	state.SetContext(ctx)
-	config := luar.GetConfig(state)
-	config.FieldNames = func(s reflect.Type, f reflect.StructField) []string {
-		return []string{stringutil.CaseCamelToSnake(f.Name)}
-	}
-	config.MethodNames = func(t reflect.Type, m reflect.Method) []string {
-		return []string{stringutil.CaseCamelToSnake(m.Name)}
-	}
 
 	addVarsTable(state, options.Variables)
 	addLibraries(state, lib.Options{
