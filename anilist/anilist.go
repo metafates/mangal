@@ -1,15 +1,16 @@
 package anilist
 
 import (
+	"log"
+	"path/filepath"
+	"time"
+
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/cache/bbolt"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
 	"github.com/philippgille/gokv"
 	"github.com/philippgille/gokv/encoding"
-	"log"
-	"path/filepath"
-	"time"
 )
 
 var Client = newAnilist()

@@ -2,6 +2,9 @@ package chapters
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -17,7 +20,6 @@ import (
 	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/zyedidia/generic/set"
 	"golang.org/x/exp/slices"
-	"time"
 )
 
 var _ base.State = (*State)(nil)
@@ -46,11 +48,22 @@ func (s *State) Title() base.Title {
 }
 
 func (s *State) Subtitle() string {
+	var subtitle strings.Builder
+
+	subtitle.WriteString(s.list.Subtitle())
+
 	if s.selected.Size() > 0 {
-		return fmt.Sprint(s.list.Subtitle(), " ", s.selected.Size(), " selected")
+		subtitle.WriteString(" ")
+		subtitle.WriteString(fmt.Sprint(s.selected.Size()))
+		subtitle.WriteString(" selected")
 	}
 
-	return s.list.Subtitle()
+	subtitle.WriteString(". Download ")
+	subtitle.WriteString(config.Config.Download.Format.Get())
+	subtitle.WriteString(", read ")
+	subtitle.WriteString(config.Config.Read.Format.Get())
+
+	return subtitle.String()
 }
 
 func (s *State) Status() string {
@@ -165,6 +178,18 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			}
 
 			var directory string
+
+			if item.DownloadedFormats().Has(format) {
+				return func() tea.Msg {
+					return s.client.ReadChapter(
+						model.Context(),
+						item.Path(format),
+						item.chapter,
+						config.Config.Read.Incognito.Get(),
+					)
+				}
+			}
+
 			if config.Config.Read.DownloadOnRead.Get() {
 				directory = config.Config.Download.Path.Get()
 			} else {

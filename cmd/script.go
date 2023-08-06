@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/anilist"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/provider/manager"
@@ -69,16 +70,13 @@ var scriptCmd = &cobra.Command{
 		case cmd.Flag("stdin").Changed:
 			reader = os.Stdin
 		default:
-			return errors.New("either `file`, `string` or `stdin`")
+			return errors.New("either `file`, `string` or `stdin` is required")
 		}
 
 		var options script.Options
 
 		options.Variables = scriptArgs.Variables
-
-		anilist := libmangal.NewAnilist(libmangal.DefaultAnilistOptions())
-
-		options.Anilist = &anilist
+		options.Anilist = anilist.Client
 
 		if scriptArgs.Provider != "" {
 			loaders, err := manager.Loaders()
@@ -95,6 +93,7 @@ var scriptCmd = &cobra.Command{
 			}
 
 			clientOptions := libmangal.DefaultClientOptions()
+			clientOptions.Anilist = options.Anilist
 
 			client, err := libmangal.NewClient(context.Background(), loader, clientOptions)
 			if err != nil {
@@ -102,7 +101,6 @@ var scriptCmd = &cobra.Command{
 			}
 
 			options.Client = client
-			options.Anilist = client.Anilist()
 		}
 
 		return script.Run(context.Background(), reader, options)

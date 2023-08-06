@@ -57,10 +57,27 @@ func Lib(anilist *libmangal.Anilist) *luadoc.Lib {
 						Type:        mangaTypeName,
 					},
 					{
-						Name: "found",
+						Name:        "found",
 						Description: "Whether the closest manga was found",
-						Type: luadoc.Boolean,
-					}
+						Type:        luadoc.Boolean,
+					},
+				},
+			},
+			{
+				Name:        "bind_title_with_id",
+				Description: "Binds manga title to anilist manga id",
+				Value:       newBindTitleWithID(anilist),
+				Params: []*luadoc.Param{
+					{
+						Name:        "title",
+						Description: "Manga title to use for binding",
+						Type:        luadoc.String,
+					},
+					{
+						Name:        "id",
+						Description: "Anilist manga ID to bind to",
+						Type:        luadoc.String,
+					},
 				},
 			},
 		},

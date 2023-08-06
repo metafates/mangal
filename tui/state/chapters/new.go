@@ -15,7 +15,11 @@ func New(client *libmangal.Client, volume libmangal.Volume, chapters []libmangal
 		"chapter", "chapters",
 		chapters,
 		func(chapter libmangal.Chapter) list.DefaultItem {
-			return &Item{chapter: chapter, selectedItems: &selectedSet}
+			return &Item{
+				chapter:       chapter,
+				selectedItems: &selectedSet,
+				client:        client,
+			}
 		},
 	))
 

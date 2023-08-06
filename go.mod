@@ -36,7 +36,6 @@ require (
 	go.etcd.io/bbolt v1.3.7
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 	golang.org/x/term v0.11.0
-	layeh.com/gopher-luar v1.0.11
 )
 
 require (

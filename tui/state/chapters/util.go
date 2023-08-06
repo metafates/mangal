@@ -3,6 +3,7 @@ package chapters
 import (
 	"context"
 	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/tui/base"
@@ -34,7 +35,7 @@ func (s *State) downloadChaptersCmd(chapters []libmangal.Chapter, options libman
 			},
 		)
 
-		s.client.SetLogFunc(func(msg string) {
+		s.client.Logger().SetOnLog(func(msg string) {
 			state.SetMessage(msg)
 		})
 
@@ -52,7 +53,7 @@ func (s *State) downloadChapterCmd(ctx context.Context, chapter libmangal.Chapte
 			return loadingState
 		},
 		func() tea.Msg {
-			s.client.SetLogFunc(func(msg string) {
+			s.client.Logger().SetOnLog(func(msg string) {
 				loadingState.SetMessage(msg)
 			})
 
