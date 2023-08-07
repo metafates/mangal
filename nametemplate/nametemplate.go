@@ -1,18 +1,20 @@
 package nametemplate
 
 import (
+	"log"
 	"strings"
 	"text/template"
 
-	"github.com/charmbracelet/log"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/config"
+	"github.com/mangalorg/mangal/nametemplate/util"
 )
 
 func Chapter(_ string, chapter libmangal.Chapter) string {
 	var sb strings.Builder
 
 	err := template.Must(template.New("chapter").
+		Funcs(util.FuncMap).
 		Parse(config.Config.Download.Chapter.NameTemplate.Get())).
 		Execute(&sb, chapter.Info())
 
@@ -27,6 +29,7 @@ func Manga(_ string, manga libmangal.Manga) string {
 	var sb strings.Builder
 
 	err := template.Must(template.New("manga").
+		Funcs(util.FuncMap).
 		Parse(config.Config.Download.Manga.NameTemplate.Get())).
 		Execute(&sb, manga.Info())
 
@@ -41,7 +44,8 @@ func Volume(_ string, manga libmangal.Volume) string {
 	var sb strings.Builder
 
 	err := template.Must(template.New("volume").
-		Parse(config.Config.Download.Manga.NameTemplate.Get())).
+		Funcs(util.FuncMap).
+		Parse(config.Config.Download.Volume.NameTemplate.Get())).
 		Execute(&sb, manga.Info())
 
 	if err != nil {

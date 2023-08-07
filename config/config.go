@@ -6,6 +6,7 @@ import (
 
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/icon"
+	"github.com/mangalorg/mangal/nametemplate/util"
 )
 
 type config struct {
@@ -157,10 +158,14 @@ var Config = config{
 			}),
 			NameTemplate: register(field[string]{
 				key:          "download.manga.name_template",
-				defaultValue: "{{ .Title }}",
+				defaultValue: `{{ .Title | sanitize }}`,
 				description:  "Template to use for naming downloaded mangas",
 				init: func(s string) error {
-					_, err := template.New("").Parse(s)
+					_, err := template.
+						New("").
+						Funcs(util.FuncMap).
+						Parse(s)
+
 					return err
 				},
 			}),
@@ -173,10 +178,14 @@ var Config = config{
 			}),
 			NameTemplate: register(field[string]{
 				key:          "download.volume.name_template",
-				defaultValue: "Vol. {{ .Number }}",
+				defaultValue: `{{ printf "Vol. %d" .Number | sanitize }}`,
 				description:  "Template to use for naming downloaded volumes",
 				init: func(s string) error {
-					_, err := template.New("").Parse(s)
+					_, err := template.
+						New("").
+						Funcs(util.FuncMap).
+						Parse(s)
+
 					return err
 				},
 			}),
@@ -184,10 +193,14 @@ var Config = config{
 		Chapter: configDownloadChapter{
 			NameTemplate: register(field[string]{
 				key:          "download.chapter.name_template",
-				defaultValue: `[{{ .Number | printf "%06.1f" }}] {{ .Title }}`,
+				defaultValue: `{{ printf "[%06.1f] %s" .Number .Title | sanitize }}`,
 				description:  "Template to use for naming downloaded chapters",
 				init: func(s string) error {
-					_, err := template.New("").Parse(s)
+					_, err := template.
+						New("").
+						Funcs(util.FuncMap).
+						Parse(s)
+
 					return err
 				},
 			}),
