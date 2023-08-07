@@ -29,14 +29,15 @@ func New(client *libmangal.Client, volume libmangal.Volume, chapters []libmangal
 		selected: selectedSet,
 		list:     listWrapper,
 		keyMap: KeyMap{
-			UnselectAll: util.Bind("unselect all", "backspace"),
-			SelectAll:   util.Bind("select all", "a"),
-			Toggle:      util.Bind("toggle", " "),
-			Read:        util.Bind("read", "r"),
-			Anilist:     util.Bind("anilist", "A"),
-			Download:    util.Bind("download", "d"),
-			Confirm:     util.Bind("confirm", "enter"),
-			list:        listWrapper.GetKeyMap(),
+			UnselectAll:  util.Bind("unselect all", "backspace"),
+			SelectAll:    util.Bind("select all", "a"),
+			Toggle:       util.Bind("toggle", " "),
+			Read:         util.Bind("read", "r"),
+			Anilist:      util.Bind("anilist", "A"),
+			Download:     util.Bind("download", "d"),
+			Confirm:      util.Bind("confirm", "enter"),
+			ChangeFormat: util.Bind("change format", "f"),
+			list:         listWrapper.GetKeyMap(),
 		},
 	}
 }

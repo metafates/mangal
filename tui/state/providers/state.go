@@ -2,21 +2,19 @@ package providers
 
 import (
 	"fmt"
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mangalorg/libmangal"
-	"github.com/mangalorg/mangal/anilist"
-	"github.com/mangalorg/mangal/fs"
+	"github.com/mangalorg/mangal/client"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
 	"github.com/mangalorg/mangal/tui/state/mangas"
 	"github.com/mangalorg/mangal/tui/state/textinput"
 	"github.com/pkg/errors"
-	"net/http"
-	"time"
 )
 
 var _ base.State = (*State)(nil)
@@ -86,16 +84,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 					return loading.New("Loading...", "")
 				},
 				func() tea.Msg {
-					httpClient := &http.Client{
-						Timeout: time.Minute,
-					}
-
-					options := libmangal.DefaultClientOptions()
-					options.FS = fs.Afero
-					options.Anilist = anilist.Client
-					options.HTTPClient = httpClient
-
-					client, err := libmangal.NewClient(model.Context(), item, options)
+					client, err := client.NewClient(model.Context(), item)
 					if err != nil {
 						return err
 					}

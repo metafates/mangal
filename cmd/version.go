@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/spf13/cobra"
 )
@@ -21,10 +20,10 @@ var versionCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if versionArgs.Short {
-			fmt.Println(meta.Version)
+			cmd.Println(meta.Version)
 			return
 		}
 
-		fmt.Println(meta.PrettyVersion())
+		cmd.Println(meta.PrettyVersion())
 	},
 }

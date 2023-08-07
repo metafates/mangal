@@ -21,7 +21,7 @@ func (i icon) String() string {
 }
 
 var (
-	Question = icon{
+	Confirm = icon{
 		color: color.Accent,
 		symbols: symbols{
 			TypeASCII: "?",
@@ -42,6 +42,30 @@ var (
 		symbols: symbols{
 			TypeASCII: "*",
 			TypeNerd:  "\uF019",
+		},
+	}
+
+	Download = icon{
+		color: color.Accent,
+		symbols: symbols{
+			TypeASCII: "#",
+			TypeNerd:  "\uF019",
+		},
+	}
+
+	Check = icon{
+		color: color.Success,
+		symbols: symbols{
+			TypeASCII: "~",
+			TypeNerd:  "\uF00C",
+		},
+	}
+
+	Cross = icon{
+		color: color.Error,
+		symbols: symbols{
+			TypeASCII: "x",
+			TypeNerd:  "\uEA87",
 		},
 	}
 

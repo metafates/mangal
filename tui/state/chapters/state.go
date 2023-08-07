@@ -16,8 +16,10 @@ import (
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/anilistmangas"
 	"github.com/mangalorg/mangal/tui/state/confirm"
+	"github.com/mangalorg/mangal/tui/state/formats"
 	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
+	"github.com/samber/lo"
 	"github.com/zyedidia/generic/set"
 	"golang.org/x/exp/slices"
 )
@@ -58,10 +60,20 @@ func (s *State) Subtitle() string {
 		subtitle.WriteString(" selected")
 	}
 
+	downloadFormat, err := libmangal.FormatString(config.Config.Download.Format.Get())
+	if err != nil {
+		return subtitle.String()
+	}
+
+	readFormat, err := libmangal.FormatString(config.Config.Read.Format.Get())
+	if err != nil {
+		return subtitle.String()
+	}
+
 	subtitle.WriteString(". Download ")
-	subtitle.WriteString(config.Config.Download.Format.Get())
-	subtitle.WriteString(", read ")
-	subtitle.WriteString(config.Config.Read.Format.Get())
+	subtitle.WriteString(downloadFormat.String())
+	subtitle.WriteString(" & Read ")
+	subtitle.WriteString(readFormat.String())
 
 	return subtitle.String()
 }
@@ -114,13 +126,12 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			}
 
 			return nil
-		case key.Matches(msg, s.keyMap.Download) || (s.selected.Size() > 0 && key.Matches(msg, s.keyMap.Confirm)):
-			format, err := libmangal.FormatString(config.Config.Download.Format.Get())
-			if err != nil {
-				return func() tea.Msg {
-					return err
-				}
+		case key.Matches(msg, s.keyMap.ChangeFormat):
+			return func() tea.Msg {
+				return formats.New()
 			}
+		case key.Matches(msg, s.keyMap.Download) || (s.selected.Size() > 0 && key.Matches(msg, s.keyMap.Confirm)):
+			format := lo.Must(libmangal.FormatString(config.Config.Download.Format.Get()))
 
 			options := libmangal.DownloadOptions{
 				Format:              format,
@@ -170,25 +181,37 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				)
 			}
 		case key.Matches(msg, s.keyMap.Read) || (s.selected.Size() == 0 && key.Matches(msg, s.keyMap.Confirm)):
-			format, err := libmangal.FormatString(config.Config.Read.Format.Get())
-			if err != nil {
-				return func() tea.Msg {
-					return err
-				}
+			format := lo.Must(libmangal.FormatString(config.Config.Read.Format.Get()))
+
+			// TODO change this
+			readOptions := libmangal.ReadOptions{
+				SaveHistory: config.Config.Read.History.Local.Get(),
+				SaveAnilist: config.Config.Read.History.Anilist.Get(),
+			}
+
+			if item.DownloadedFormats().Has(format) {
+				return tea.Sequence(
+					func() tea.Msg {
+						return loading.New("Opening for reading", item.chapter.String())
+					},
+					func() tea.Msg {
+						err := s.client.ReadChapter(
+							model.Context(),
+							item.Path(format),
+							item.chapter,
+							readOptions,
+						)
+
+						if err != nil {
+							return err
+						}
+
+						return base.MsgBack{}
+					},
+				)
 			}
 
 			var directory string
-
-			if item.DownloadedFormats().Has(format) {
-				return func() tea.Msg {
-					return s.client.ReadChapter(
-						model.Context(),
-						item.Path(format),
-						item.chapter,
-						config.Config.Read.Incognito.Get(),
-					)
-				}
-			}
 
 			if config.Config.Read.DownloadOnRead.Get() {
 				directory = config.Config.Download.Path.Get()
@@ -201,7 +224,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				Directory:       directory,
 				SkipIfExists:    true,
 				ReadAfter:       true,
-				ReadIncognito:   config.Config.Read.Incognito.Get(),
+				ReadOptions:     readOptions,
 				CreateMangaDir:  true,
 				CreateVolumeDir: true,
 				ImageTransformer: func(bytes []byte) ([]byte, error) {

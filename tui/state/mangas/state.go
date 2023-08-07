@@ -34,7 +34,7 @@ func (s *State) KeyMap() help.KeyMap {
 }
 
 func (s *State) Title() base.Title {
-	return base.Title{Text: fmt.Sprintf("%q", s.query)}
+	return base.Title{Text: fmt.Sprintf("Search %q", s.query)}
 }
 
 func (s *State) Subtitle() string {

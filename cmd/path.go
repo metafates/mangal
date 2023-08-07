@@ -30,7 +30,7 @@ var pathCmd = &cobra.Command{
 	Use:   "path",
 	Short: "Show paths",
 	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		paths := []struct {
 			Name  string
 			Func  func() string
@@ -62,7 +62,5 @@ var pathCmd = &cobra.Command{
 				fmt.Println(t.Func())
 			}
 		}
-
-		return nil
 	},
 }

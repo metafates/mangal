@@ -22,9 +22,12 @@ func (i Item) Title() string {
 }
 
 func (i Item) Description() string {
-	return fmt.Sprintf(`Version %s
+	info := i.Info()
+	return fmt.Sprintf(`%s
+Version %s
 %s`,
-		i.Info().Version,
-		i.Info().Website,
+		info.ID,
+		info.Version,
+		info.Website,
 	)
 }

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"text/template"
 	"time"
 
 	"github.com/mangalorg/libmangal"
@@ -17,8 +18,13 @@ type config struct {
 
 type configRead struct {
 	Format         field[string]
-	Incognito      field[bool]
+	History        configReadHistory
 	DownloadOnRead field[bool]
+}
+
+type configReadHistory struct {
+	Anilist field[bool]
+	Local   field[bool]
 }
 
 type configDownload struct {
@@ -28,16 +34,23 @@ type configDownload struct {
 	SkipIfExists field[bool]
 	Manga        configDownloadManga
 	Volume       configDownloadVolume
+	Chapter      configDownloadChapter
 	Metadata     configDownloadMetadata
 }
 
 type configDownloadManga struct {
 	CreateDir     field[bool]
 	Cover, Banner field[bool]
+	NameTemplate  field[string]
 }
 
 type configDownloadVolume struct {
-	CreateDir field[bool]
+	CreateDir    field[bool]
+	NameTemplate field[string]
+}
+
+type configDownloadChapter struct {
+	NameTemplate field[string]
 }
 
 type configDownloadMetadata struct {
@@ -77,12 +90,23 @@ var Config = config{
 			key:          "read.format",
 			defaultValue: libmangal.FormatPDF.String(),
 			description:  "Format to read chapters in",
+			init: func(s string) error {
+				_, err := libmangal.FormatString(s)
+				return err
+			},
 		}),
-		Incognito: register(field[bool]{
-			key:          "read.incognito",
-			defaultValue: false,
-			description:  "Won't sync to Anilist reading history if logged in.",
-		}),
+		History: configReadHistory{
+			Anilist: register(field[bool]{
+				key:          "read.history.anilist",
+				defaultValue: true,
+				description:  "Sync to Anilist reading history if logged in.",
+			}),
+			Local: register(field[bool]{
+				key:          "read.history.local",
+				defaultValue: true,
+				description:  "Save to local history",
+			}),
+		},
 		DownloadOnRead: register(field[bool]{
 			key:          "read.download_on_read",
 			defaultValue: false,
@@ -100,6 +124,10 @@ var Config = config{
 			key:          "download.format",
 			defaultValue: libmangal.FormatPDF.String(),
 			description:  "Format to download chapters in",
+			init: func(s string) error {
+				_, err := libmangal.FormatString(s)
+				return err
+			},
 		}),
 		Strict: register(field[bool]{
 			key:          "download.strict",
@@ -127,12 +155,41 @@ var Config = config{
 				defaultValue: false,
 				description:  "Download manga banner",
 			}),
+			NameTemplate: register(field[string]{
+				key:          "download.manga.name_template",
+				defaultValue: "{{ .Title }}",
+				description:  "Template to use for naming downloaded mangas",
+				init: func(s string) error {
+					_, err := template.New("").Parse(s)
+					return err
+				},
+			}),
 		},
 		Volume: configDownloadVolume{
 			CreateDir: register(field[bool]{
 				key:          "download.volume.create_dir",
 				defaultValue: false,
 				description:  "Create volume directory",
+			}),
+			NameTemplate: register(field[string]{
+				key:          "download.volume.name_template",
+				defaultValue: "Vol. {{ .Number }}",
+				description:  "Template to use for naming downloaded volumes",
+				init: func(s string) error {
+					_, err := template.New("").Parse(s)
+					return err
+				},
+			}),
+		},
+		Chapter: configDownloadChapter{
+			NameTemplate: register(field[string]{
+				key:          "download.chapter.name_template",
+				defaultValue: `[{{ .Number | printf "%06.1f" }}] {{ .Title }}`,
+				description:  "Template to use for naming downloaded chapters",
+				init: func(s string) error {
+					_, err := template.New("").Parse(s)
+					return err
+				},
 			}),
 		},
 		Metadata: configDownloadMetadata{

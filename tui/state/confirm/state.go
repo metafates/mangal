@@ -61,7 +61,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 }
 
 func (s *State) View(model base.Model) string {
-	return fmt.Sprintf("%s %s", icon.Question, s.message)
+	return fmt.Sprintf("%s %s", icon.Confirm, s.message)
 }
 
 func (s *State) Init(model base.Model) tea.Cmd {

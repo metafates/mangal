@@ -10,6 +10,7 @@ import (
 
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/anilist"
+	"github.com/mangalorg/mangal/client"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/provider/manager"
@@ -92,10 +93,7 @@ var scriptCmd = &cobra.Command{
 				return fmt.Errorf("provider with ID %q not found", scriptArgs.Provider)
 			}
 
-			clientOptions := libmangal.DefaultClientOptions()
-			clientOptions.Anilist = options.Anilist
-
-			client, err := libmangal.NewClient(context.Background(), loader, clientOptions)
+			client, err := client.NewClient(context.Background(), loader)
 			if err != nil {
 				return err
 			}

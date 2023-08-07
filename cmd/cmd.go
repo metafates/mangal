@@ -1,10 +1,12 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
+	"os"
 
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/mangalorg/mangal/tui"
@@ -54,6 +56,15 @@ func completionProviderIDs(cmd *cobra.Command, args []string, toComplete string)
 	return IDs, cobra.ShellCompDirectiveDefault
 }
 
+func successf(cmd *cobra.Command, format string, a ...any) {
+	cmd.Printf(fmt.Sprintf("%s %s\n", icon.Check, format), a...)
+}
+
+func errorf(cmd *cobra.Command, format string, a ...any) {
+	cmd.PrintErrf(fmt.Sprintf("%s %s\n", icon.Cross, format), a...)
+	os.Exit(1)
+}
+
 func Execute() {
 	cc.Init(&cc.Config{
 		RootCmd:         rootCmd,
@@ -68,6 +79,6 @@ func Execute() {
 	})
 
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
+		errorf(rootCmd, err.Error())
 	}
 }

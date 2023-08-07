@@ -4,7 +4,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/color"
 	"github.com/mangalorg/mangal/config"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/icon"
@@ -33,10 +35,11 @@ func (i *Item) Title() string {
 
 	if formats := i.DownloadedFormats(); formats.Size() > 0 {
 		title.WriteString(" ")
-		title.WriteString(icon.Progress.String())
+		title.WriteString(icon.Download.String())
 		formats.Each(func(format libmangal.Format) {
 			title.WriteString(" ")
-			title.WriteString(format.String())
+			formatStyle := lipgloss.NewStyle().Bold(true).Foreground(color.Warning)
+			title.WriteString(formatStyle.Render(format.String()))
 		})
 	}
 

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"text/template"
@@ -28,7 +27,7 @@ var configInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Show configuration information",
 	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		fieldTemplate := template.Must(template.New("field").Parse(`
 {{.Description}}
 
@@ -40,14 +39,12 @@ Default: {{.Default}}
 		var sb strings.Builder
 		for _, field := range config.Fields {
 			if err := fieldTemplate.Execute(&sb, field); err != nil {
-				return err
+				errorf(cmd, err.Error())
 			}
 
-			fmt.Print(sb.String())
+			cmd.Print(sb.String())
 			sb.Reset()
 		}
-
-		return nil
 	},
 }
 
@@ -59,8 +56,12 @@ var configWriteCmd = &cobra.Command{
 	Use:   "write",
 	Short: "Write configuration to disk",
 	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return config.Write()
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := config.Write(); err != nil {
+			errorf(cmd, err.Error())
+		}
+
+		successf(cmd, "Wrote config to the file")
 	},
 }
 
@@ -69,9 +70,10 @@ func init() {
 }
 
 var configGetCmd = &cobra.Command{
-	Use:   "get key",
-	Short: "Get config value by key",
-	Args:  cobra.ExactArgs(1),
+	Use:           "get key",
+	Short:         "Get config value by key",
+	Args:          cobra.ExactArgs(1),
+	SilenceErrors: true,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		keys := config.Keys()
 
@@ -81,14 +83,13 @@ var configGetCmd = &cobra.Command{
 
 		return filtered, cobra.ShellCompDirectiveDefault
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		key := args[0]
 		if !config.Exists(key) {
-			return fmt.Errorf("config key %q doesn't exist", key)
+			errorf(cmd, "config key %q doesn't exist", key)
 		}
 
-		fmt.Println(config.Get(key))
-		return nil
+		cmd.Println(config.Get(key))
 	},
 }
 
@@ -97,9 +98,10 @@ func init() {
 }
 
 var configSetCmd = &cobra.Command{
-	Use:   "set key value",
-	Short: "Sets value to the config key",
-	Args:  cobra.ExactArgs(2),
+	Use:           "set key value",
+	Short:         "Sets value to the config key",
+	Args:          cobra.ExactArgs(2),
+	SilenceErrors: true,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		keys := config.Keys()
 
@@ -109,20 +111,20 @@ var configSetCmd = &cobra.Command{
 
 		return filtered, cobra.ShellCompDirectiveDefault
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		key, value := args[0], args[1]
 
 		var converted any
 
 		switch config.Get(key).(type) {
 		case nil:
-			return fmt.Errorf("unknown config key %q", key)
+			errorf(cmd, "unknown config key %q", key)
 		case string:
 			converted = value
 		case int:
 			parsedInt, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				return err
+				errorf(cmd, err.Error())
 			}
 
 			converted = int(parsedInt)
@@ -130,18 +132,22 @@ var configSetCmd = &cobra.Command{
 			parsedBool, err := strconv.ParseBool(value)
 
 			if err != nil {
-				return err
+				errorf(cmd, err.Error())
 			}
 
 			converted = parsedBool
 		default:
-			return fmt.Errorf("unknown value type")
+			errorf(cmd, "unknown value type")
 		}
 
 		if err := config.Set(key, converted); err != nil {
-			return err
+			errorf(cmd, err.Error())
 		}
 
-		return config.Write()
+		if err := config.Write(); err != nil {
+			errorf(cmd, err.Error())
+		}
+
+		successf(cmd, "Successfully set %q to %v", key, converted)
 	},
 }
