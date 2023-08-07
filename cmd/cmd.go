@@ -74,6 +74,7 @@ func Execute() {
 		ExecName:        cc.Bold,
 		Flags:           cc.Bold,
 		FlagsDataType:   cc.Italic + cc.HiBlue,
+		Aliases:         cc.Italic,
 		NoExtraNewlines: true,
 		NoBottomNewline: true,
 	})

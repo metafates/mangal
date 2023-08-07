@@ -76,4 +76,12 @@ var (
 			TypeNerd:  "\uF002",
 		},
 	}
+
+	Recent = icon{
+		color: color.Accent,
+		symbols: symbols{
+			TypeASCII: "~",
+			TypeNerd:  "\uE641",
+		},
+	}
 )

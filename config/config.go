@@ -230,7 +230,7 @@ var Config = config{
 			TTL: register(field[string]{
 				key:          "providers.cache.ttl",
 				defaultValue: "24h",
-				description:  "Time to live. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
+				description:  `Time to live. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".`,
 				init: func(s string) error {
 					_, err := time.ParseDuration(s)
 					return err

@@ -35,7 +35,9 @@ func sanitizePath(path string, isInvalid func(rune) bool) string {
 		prev = toWrite
 	}
 
-	return sanitized.String()
+	return strings.TrimFunc(sanitized.String(), func(r rune) bool {
+		return r == underscore || unicode.IsSpace(r)
+	})
 }
 
 func sanitizeWhitespace(path string) string {

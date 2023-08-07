@@ -10,6 +10,8 @@ import (
 	"github.com/mangalorg/mangal/config"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/icon"
+	"github.com/mangalorg/mangal/path"
+	"github.com/samber/lo"
 	"github.com/zyedidia/generic/set"
 )
 
@@ -31,6 +33,11 @@ func (i *Item) Title() string {
 	if i.IsSelected() {
 		title.WriteString(" ")
 		title.WriteString(icon.Mark.String())
+	}
+
+	if i.IsRecent() {
+		title.WriteString(" ")
+		title.WriteString(icon.Recent.String())
 	}
 
 	if formats := i.DownloadedFormats(); formats.Size() > 0 {
@@ -78,6 +85,27 @@ func (i *Item) Path(format libmangal.Format) string {
 	}
 
 	return filepath.Join(path, i.client.ComputeChapterFilename(chapter, format))
+}
+
+func (i *Item) IsRecent() bool {
+	format := lo.Must(libmangal.FormatString(config.Config.Read.Format.Get()))
+	chapter := i.chapter
+	volume := chapter.Volume()
+	manga := volume.Manga()
+
+	tempPath := filepath.Join(
+		path.TempDir(),
+		i.client.ComputeMangaFilename(manga),
+		i.client.ComputeVolumeFilename(volume),
+		i.client.ComputeChapterFilename(chapter, format),
+	)
+
+	exists, err := fs.Afero.Exists(tempPath)
+	if err != nil {
+		return false
+	}
+
+	return exists
 }
 
 func (i *Item) DownloadedFormats() set.Set[libmangal.Format] {

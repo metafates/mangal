@@ -1,10 +1,11 @@
 package main
 
 import (
+	"io"
+
 	"github.com/charmbracelet/log"
 	"github.com/mangalorg/mangal/cmd"
 	"github.com/mangalorg/mangal/config"
-	"io"
 )
 
 func main() {
