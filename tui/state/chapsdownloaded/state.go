@@ -83,7 +83,7 @@ func (s *State) View(model base.Model) string {
 			Foreground(color.Success).
 			Render(fmt.Sprintf(
 				"%s downloaded successfully!",
-				stringutil.Quantify(succeed, "Chapter", "Chapters"),
+				stringutil.Quantify(succeed, "chapter", "chapters"),
 			))
 	}
 

@@ -78,6 +78,15 @@ func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
 			return func() tea.Msg {
 				return item.SelectForReading()
 			}
+		case key.Matches(msg, s.keyMap.SetAll):
+			return tea.Batch(
+				func() tea.Msg {
+					return item.SelectForReading()
+				},
+				func() tea.Msg {
+					return item.SelectForDownloading()
+				},
+			)
 		}
 	}
 end:

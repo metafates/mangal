@@ -25,12 +25,12 @@ func (i Item) Title() string {
 
 	if i.IsSelectedForDownloading() {
 		sb.WriteString(" ")
-		sb.WriteString(lipgloss.NewStyle().Foreground(color.Accent).Render("D"))
+		sb.WriteString(lipgloss.NewStyle().Foreground(color.Accent).Render("Download"))
 	}
 
 	if i.IsSelectedForReading() {
 		sb.WriteString(" ")
-		sb.WriteString(lipgloss.NewStyle().Foreground(color.Accent).Render("R"))
+		sb.WriteString(lipgloss.NewStyle().Foreground(color.Accent).Render("Read"))
 	}
 
 	return sb.String()

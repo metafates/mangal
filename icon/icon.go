@@ -6,7 +6,7 @@ import (
 )
 
 type icon struct {
-	color   lipgloss.Color
+	color   lipgloss.TerminalColor
 	symbols symbols
 }
 
@@ -78,7 +78,7 @@ var (
 	}
 
 	Recent = icon{
-		color: color.Accent,
+		color: color.Secondary,
 		symbols: symbols{
 			TypeASCII: "~",
 			TypeNerd:  "\uE641",

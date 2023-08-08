@@ -43,11 +43,17 @@ func (i *Item) Title() string {
 	if formats := i.DownloadedFormats(); formats.Size() > 0 {
 		title.WriteString(" ")
 		title.WriteString(icon.Download.String())
-		formats.Each(func(format libmangal.Format) {
+
+		// So that formats will be displayed in the same order
+		for _, format := range libmangal.FormatValues() {
+			if !formats.Has(format) {
+				continue
+			}
+
 			title.WriteString(" ")
 			formatStyle := lipgloss.NewStyle().Bold(true).Foreground(color.Warning)
 			title.WriteString(formatStyle.Render(format.String()))
-		})
+		}
 	}
 
 	return title.String()

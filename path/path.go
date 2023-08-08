@@ -51,3 +51,9 @@ func ProvidersDir() string {
 	createDirIfAbsent(dir)
 	return dir
 }
+
+func LogDir() string {
+	dir := filepath.Join(TempDir(), "logs")
+	createDirIfAbsent(dir)
+	return dir
+}

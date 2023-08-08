@@ -9,7 +9,7 @@ import (
 var _ help.KeyMap = (*KeyMap)(nil)
 
 type KeyMap struct {
-	SetRead, SetDownload key.Binding
+	SetRead, SetDownload, SetAll key.Binding
 
 	list listwrapper.KeyMap
 }

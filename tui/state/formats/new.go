@@ -22,6 +22,7 @@ func New() *State {
 		keyMap: KeyMap{
 			SetRead:     util.Bind("set for reading", "r"),
 			SetDownload: util.Bind("set for downloading", "d"),
+			SetAll:      util.Bind("set for all", "enter"),
 			list:        listWrapper.GetKeyMap(),
 		},
 	}
