@@ -26,17 +26,18 @@ func (s *Server) GetProviders(ctx context.Context, _ api.GetProvidersRequestObje
 		return nil, err
 	}
 
-	return api.GetProviders200JSONResponse(lo.Map(loaders, func(l libmangal.ProviderLoader, _ int) api.Provider {
-		info := l.Info()
+	providers := lo.Map(loaders, func(loader libmangal.ProviderLoader, _ int) api.Provider {
+		info := loader.Info()
 		return api.Provider{
 			Id:   info.ID,
 			Name: &info.Name,
 		}
-	})), nil
+	})
+
+	return api.GetProviders200JSONResponse(providers), nil
 }
 
 func NewServer() (*echo.Echo, error) {
-
 	sub, err := fs.Sub(frontend, filepath.Join("ui", "build"))
 	if err != nil {
 		return nil, err

@@ -1,28 +1,34 @@
 <script lang="ts">
-	import { type paths, type components } from '$lib/mangal.d.ts';
+	import { Badge, Button, Card, Group, Image, Text } from '@svelteuidev/core';
+
+	import { type paths, type components } from '$lib/mangal';
 	import createClient from 'openapi-fetch';
 
 	const client = createClient<paths>({ baseUrl: '/api' });
 
-	const providers: components['schemas']['Provider'][] = [];
-
 	async function getProviders() {
 		const { data, error } = await client.GET('/providers', {});
 		if (error) {
-			alert(error.message);
+			throw error;
 		}
 
-		for (const d of data!) {
-			providers.push(d);
-		}
+		return data;
 	}
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
-
-<button on:click={getProviders}>Providers</button>
-
-{#each providers as provider}
-	<p>{provider.name}</p>
-{/each}
+{#await getProviders()}
+	<p>Loading providers...</p>
+{:then providers}
+	{#each providers as provider}
+		<Card shadow="sm" padding="lg">
+			<Group position="apart">
+				<Text weight={500}>{provider.name}</Text>
+				<Badge color="pink" variant="light">
+					{provider.id}
+				</Badge>
+			</Group>
+		</Card>
+	{/each}
+{:catch error}
+	<p>{error.message}</p>
+{/await}

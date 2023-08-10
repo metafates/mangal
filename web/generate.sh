@@ -12,4 +12,4 @@ oapi-codegen --config server.cfg.yaml "$OPENAPI_SCHEMA"
 oapi-codegen --config types.cfg.yaml "$OPENAPI_SCHEMA"
 popd
 
-npx openapi-typescript "$OPENAPI_SCHEMA" -o "$DIR"/ui/src/lib/mangal.d.ts
+npx openapi-typescript "$OPENAPI_SCHEMA" -o "$DIR"/ui/src/lib/mangal.ts

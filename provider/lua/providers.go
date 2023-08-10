@@ -2,17 +2,19 @@ package lua
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"path/filepath"
+	"time"
+
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/luaprovider"
 	"github.com/mangalorg/mangal/cache/bbolt"
 	"github.com/mangalorg/mangal/config"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
+	"github.com/philippgille/gokv"
 	"github.com/philippgille/gokv/encoding"
-	"log"
-	"net/http"
-	"path/filepath"
-	"time"
 )
 
 const (
@@ -40,22 +42,19 @@ func NewLoader(info libmangal.ProviderInfo, dir string) (libmangal.ProviderLoade
 		log.Fatal(err)
 	}
 
-	store, err := bbolt.NewStore(bbolt.Options{
-		TTL:        ttl,
-		BucketName: info.Name,
-		Path:       filepath.Join(path.CacheDir(), info.Name+".db"),
-		Codec:      encoding.Gob,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	options := luaprovider.Options{
 		PackagePaths: []string{dir},
 		HTTPClient: &http.Client{
 			Timeout: time.Minute,
 		},
-		HTTPStore: store,
+		HTTPStoreProvider: func() (gokv.Store, error) {
+			return bbolt.NewStore(bbolt.Options{
+				TTL:        ttl,
+				BucketName: info.Name,
+				Path:       filepath.Join(path.CacheDir(), info.Name+".db"),
+				Codec:      encoding.Gob,
+			})
+		},
 	}
 
 	return luaprovider.NewLoader(providerMainFileContents, info, options)
