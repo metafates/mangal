@@ -1,0 +1,48 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Mangal WEB UI
+paths:
+  /providers:
+    get:
+      description: |
+        Get avaiable providers
+      operationId: getProviders
+      responses:
+        '200':
+          description: providers response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Provider'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Provider:
+      type: object
+      required:
+        - id
+      properties:
+        name:
+          type: string
+        id:
+          type: string    
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -24,8 +25,9 @@ func newLogger() (logger *log.Logger, err error) {
 		return nil, err
 	}
 
-	logger = log.New(file)
+	logger = log.New(io.MultiWriter(os.Stdout, file))
 
+	logger.SetLevel(log.InfoLevel)
 	logger.SetOutput(file)
 	logger.SetFormatter(log.TextFormatter)
 
