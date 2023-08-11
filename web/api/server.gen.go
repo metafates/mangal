@@ -23,13 +23,28 @@ import (
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
+	// (GET /mangalInfo)
+	GetMangalInfo(ctx echo.Context) error
+
 	// (GET /providers)
 	GetProviders(ctx echo.Context) error
+
+	// (GET /searchMangas)
+	SearchMangas(ctx echo.Context, params SearchMangasParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// GetMangalInfo converts echo context to params.
+func (w *ServerInterfaceWrapper) GetMangalInfo(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetMangalInfo(ctx)
+	return err
 }
 
 // GetProviders converts echo context to params.
@@ -38,6 +53,31 @@ func (w *ServerInterfaceWrapper) GetProviders(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetProviders(ctx)
+	return err
+}
+
+// SearchMangas converts echo context to params.
+func (w *ServerInterfaceWrapper) SearchMangas(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SearchMangasParams
+	// ------------- Required query parameter "provider-id" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "provider-id", ctx.QueryParams(), &params.ProviderId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter provider-id: %s", err))
+	}
+
+	// ------------- Required query parameter "query" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "query", ctx.QueryParams(), &params.Query)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter query: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SearchMangas(ctx, params)
 	return err
 }
 
@@ -69,8 +109,38 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/mangalInfo", wrapper.GetMangalInfo)
 	router.GET(baseURL+"/providers", wrapper.GetProviders)
+	router.GET(baseURL+"/searchMangas", wrapper.SearchMangas)
 
+}
+
+type GetMangalInfoRequestObject struct {
+}
+
+type GetMangalInfoResponseObject interface {
+	VisitGetMangalInfoResponse(w http.ResponseWriter) error
+}
+
+type GetMangalInfo200JSONResponse MangalInfo
+
+func (response GetMangalInfo200JSONResponse) VisitGetMangalInfoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMangalInfodefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response GetMangalInfodefaultJSONResponse) VisitGetMangalInfoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type GetProvidersRequestObject struct {
@@ -101,11 +171,46 @@ func (response GetProvidersdefaultJSONResponse) VisitGetProvidersResponse(w http
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
+type SearchMangasRequestObject struct {
+	Params SearchMangasParams
+}
+
+type SearchMangasResponseObject interface {
+	VisitSearchMangasResponse(w http.ResponseWriter) error
+}
+
+type SearchMangas200JSONResponse []Manga
+
+func (response SearchMangas200JSONResponse) VisitSearchMangasResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SearchMangasdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response SearchMangasdefaultJSONResponse) VisitSearchMangasResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
+	// (GET /mangalInfo)
+	GetMangalInfo(ctx context.Context, request GetMangalInfoRequestObject) (GetMangalInfoResponseObject, error)
+
 	// (GET /providers)
 	GetProviders(ctx context.Context, request GetProvidersRequestObject) (GetProvidersResponseObject, error)
+
+	// (GET /searchMangas)
+	SearchMangas(ctx context.Context, request SearchMangasRequestObject) (SearchMangasResponseObject, error)
 }
 
 type StrictHandlerFunc = runtime.StrictEchoHandlerFunc
@@ -118,6 +223,29 @@ func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareF
 type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
+}
+
+// GetMangalInfo operation middleware
+func (sh *strictHandler) GetMangalInfo(ctx echo.Context) error {
+	var request GetMangalInfoRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMangalInfo(ctx.Request().Context(), request.(GetMangalInfoRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMangalInfo")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetMangalInfoResponseObject); ok {
+		return validResponse.VisitGetMangalInfoResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
 }
 
 // GetProviders operation middleware
@@ -143,15 +271,43 @@ func (sh *strictHandler) GetProviders(ctx echo.Context) error {
 	return nil
 }
 
+// SearchMangas operation middleware
+func (sh *strictHandler) SearchMangas(ctx echo.Context, params SearchMangasParams) error {
+	var request SearchMangasRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.SearchMangas(ctx.Request().Context(), request.(SearchMangasRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SearchMangas")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(SearchMangasResponseObject); ok {
+		return validResponse.VisitSearchMangasResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/5RSTWvrMBD8K2bfO5rYL7n5+CCUHAq5lB7aHjbW2lGwJXW1CQ1B/71IShwKprQnfc3O",
-	"jGb3Aq0dnTVkxENzAd/uacS0XTNbjhvH1hGLpnTdWkVx7SyPKNCANrJaQglydpSP1BNDKGEk77FP6Ouj",
-	"F9amhxBKYHo/aiYFzUvmvOPfJjK7O1ArkWvL9qQVzRjSakagBIPjD5S1mlGLIG06m8q1DPHtEU2PQ/G8",
-	"/l88baCEE7HX1kAD/xb1oo6K1pFBp6GBVboqwaHsk8fKXe2nU08SF0W+Ze0k0zyQFHhCjbuBign+aiAR",
-	"M0bYRmXgdmKLv/HOGp+zWNZ17pERMkkEnRt0m6qrg49Ktyan7ITGVPiXqYMG/lT3caius1BN0YcpKWTG",
-	"cw7q6y8m48XNFyRMh8dBfmXtO0d5NGfkj4Y+HLVCqqAbJoTwGQAA///lrGcV5gIAAA==",
+	"H4sIAAAAAAAC/8xVQW7bMBD8CrHtUY3c5OZjgaDwoUCAoOghzWEtrm0GEsksV0YNQ38vSEqyU8uNgRZt",
+	"TpLo0czOcETvoXKNd5asBJjvIVQbajDd3jI7jjeenScWQ2m5cprideW4QYE5GCs311CA7DzlR1oTQ1dA",
+	"QyHgOqH7H4OwsWvougKYnlvDpGH+kDkP+MeRzC2fqJLI9QXtGk+nESP1BQIZdpa3XtiVOyXfEgfj7Ov0",
+	"A3BK4I7d1miaSNLoCeYCLDYXODJ6Qi2CTG+lT6Y3qL7dflJfF1AcTMHHq9nVLCo6Txa9gTncpKUCPMom",
+	"zVg2L/JZk8SLplCx8ZJ5PpOoqBr7YJxVuHRtXAmCdU1a9ROg95C0OMEWOr96tAHRYfDOhpzP9WyWC2eF",
+	"bNJF72tTpdfLp5B3Jjc23r1nWsEc3pWHSpd9n8sjlZTSSwfZZDKhhhEgoVbY1vLXpsif1MQAraUfnioh",
+	"rWjAdAWUvi9P+G34uEWDy5rUCP9up6K+G9n+MGkj1ITXzI7F78aeIjPupvyPg7+t+AMhV5vUnfM7cJ9A",
+	"auVYNRn5a/T3xzTx42JsSNKuPuzPJKHEqTbEU9HE5eeWeAfD4TCiPhgNx+eCcEvFURonZ8h+qvkq+1SD",
+	"yJTi8Hi51uO/KFn+W7igYb1FptDWEv5/u7ruZwAAAP//kYKQfXsHAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

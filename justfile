@@ -13,6 +13,7 @@ test:
 
 generate:
 	go generate ./...
+	./web/generate.sh
 
 update:
 	go get -u

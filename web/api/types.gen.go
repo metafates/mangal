@@ -9,8 +9,27 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// Manga defines model for Manga.
+type Manga struct {
+	Title string `json:"title"`
+}
+
+// MangalInfo defines model for MangalInfo.
+type MangalInfo struct {
+	Version string `json:"version"`
+}
+
 // Provider defines model for Provider.
 type Provider struct {
 	Id   string  `json:"id"`
 	Name *string `json:"name,omitempty"`
+}
+
+// SearchMangasParams defines parameters for SearchMangas.
+type SearchMangasParams struct {
+	// ProviderId provider to use
+	ProviderId string `form:"provider-id" json:"provider-id"`
+
+	// Query manga search query
+	Query string `form:"query" json:"query"`
 }

@@ -3,6 +3,23 @@ info:
   version: 1.0.0
   title: Mangal WEB UI
 paths:
+  /mangalInfo:
+    get:
+      description: Get information about installed Mangal app
+      operationId: getMangalInfo
+      responses:
+        '200':
+          description: mangal info response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MangalInfo'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /providers:
     get:
       description: |
@@ -23,6 +40,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /searchMangas:
+    get:
+      description: Search for mangas
+      operationId: searchMangas
+      parameters:
+        - name: provider-id
+          in: query
+          description: provider to use
+          required: true
+          schema:
+            type: string
+        - name: query
+          in: query
+          description: manga search query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Manga'
+
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Provider:
@@ -34,6 +84,22 @@ components:
           type: string
         id:
           type: string    
+
+    Manga:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+
+    MangalInfo:
+      type: object
+      required:
+        - version
+      properties:
+        version:
+          type: string
 
     Error:
       type: object
