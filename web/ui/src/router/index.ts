@@ -15,9 +15,14 @@ const router = createRouter({
       component: () => import('@/views/AboutView.vue')
     },
     {
-      path: '/search/:provider',
+      path: '/search/:provider/:query?',
       name: 'search',
       component: () => import('@/views/SearchView.vue'),
+    },
+    {
+      path: '/search/:provider/:query/:manga',
+      name: 'manga',
+      component: () => import('@/views/MangaView.vue')
     }
   ]
 })

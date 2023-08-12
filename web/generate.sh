@@ -4,8 +4,9 @@ set -exo pipefail
 
 DIR="$(dirname -- "${BASH_SOURCE[0]}")"
 DIR="$(realpath "$DIR")"
+UI_DIR="$DIR/ui"
 
-OPENAPI_SCHEMA="$DIR/mangal.yaml"
+OPENAPI_SCHEMA="$DIR/openapi.yaml"
 
 main() {
 	pushd "$DIR"
@@ -14,7 +15,7 @@ main() {
 	oapi-codegen --config types.cfg.yaml "$OPENAPI_SCHEMA"
 	popd
 
-	npx openapi-typescript "$OPENAPI_SCHEMA" -o "$DIR"/ui/src/api/mangal.ts
+	"$UI_DIR/node_modules/.bin/openapi-typescript" "$OPENAPI_SCHEMA" -o "$UI_DIR/src/api/mangal.ts"
 
 	pushd ui
 	npm run build

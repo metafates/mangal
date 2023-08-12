@@ -1,0 +1,325 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Mangal WEB UI
+paths:
+  /image:
+    get:
+      description: Get image from URL bypassing CORS policy
+      operationId: getImage
+      parameters:
+        - name: url
+          in: query
+          description: image url to download
+          required: true
+          schema:
+            type: string
+        - name: referer
+          in: query
+          description: referer to use to get the image
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: image response
+          content:
+            image/png:
+              schema:
+                $ref: '#/components/schemas/Image'
+  /mangalInfo:
+    get:
+      description: Get information about installed Mangal app
+      operationId: getMangalInfo
+      responses:
+        '200':
+          description: mangal info response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MangalInfo'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /providers:
+    get:
+      description: |
+        Get avaiable providers
+      operationId: getProviders
+      responses:
+        '200':
+          description: providers response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Provider'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /searchMangas:
+    get:
+      description: search for mangas
+      operationId: searchMangas
+      parameters: 
+        - &providerParam
+          name: provider
+          in: query
+          description: provider id to use
+          required: true
+          schema:
+            type: string
+        - &queryParam
+          name: query
+          in: query
+          description: manga search query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Manga'
+
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /mangaVolumes:
+    get:
+      description: get manga volumes
+      operationId: getMangaVolumes
+      parameters:
+        - *providerParam
+        - *queryParam
+        - &mangaParam
+          name: manga
+          in: query
+          description: manga id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: manga volumes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Volume'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /volumeChapters:
+    get:
+      description: get volume chapters
+      operationId: getVolumeChapters
+      parameters:
+        - *providerParam
+        - *queryParam
+        - *mangaParam
+        - &volumeParam
+          name: volume
+          in: query
+          description: volume number
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: volume chapters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chapter'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /manga:
+    get:
+      description: Get manga
+      operationId: getManga
+      parameters:
+        - *providerParam
+        - *queryParam
+        - *mangaParam
+      responses:
+        '200':
+          description: manga response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manga'
+        '404':
+          description: manga not found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /chapter:
+    get:
+      description: Get chapter
+      operationId: getChapter
+      parameters:
+        - *providerParam
+        - *queryParam
+        - *mangaParam
+        - *volumeParam
+      responses:
+        '200':
+          description: chapter response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chapter'
+
+  /provider:
+    get:
+      description: Get provider
+      operationId: getProvider
+      parameters: 
+        - name: id
+          in: query
+          description: provider id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: provider response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '404':
+            description: provider not found
+  /formats:
+    get:
+      description: Get avaiable formats
+      operationId: getFormats
+      responses:
+        '200':
+          description: formats response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Format'
+components:
+  schemas:
+    Image:
+      type: string
+      format: binary
+
+    Provider:
+      type: object
+      required:
+        - id
+        - version
+        - name
+      properties:
+        name:
+          type: string
+        id:
+          type: string    
+        description:
+          type: string
+        version:
+          type: string
+
+    Manga:
+      type: object
+      required:
+        - title
+        - id
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        banner:
+          type: string
+        cover:
+          type: string
+
+    Volume:
+      type: object
+      required:
+        - number
+      properties:
+        number:
+          type: integer
+
+    Chapter:
+      type: object
+      required:
+        - title
+        - number
+      properties:
+        title:
+          type: string
+        number:
+          type: number
+          format: float
+          minimum: 0
+        url:
+          type: string
+
+    MangalInfo:
+      type: object
+      required:
+        - version
+      properties:
+        version:
+          type: string
+
+    Format:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        extension:
+          type: string
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

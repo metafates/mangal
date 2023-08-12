@@ -27,7 +27,7 @@ function handleClick(provider: components['schemas']['Provider']) {
   <main>
     <h2 class="text-center">Providers</h2>
     <div class="row">
-      <div v-for="provider in providers" class="col-4">
+      <div v-for="provider in providers" class="col-12 col-sm-6 col-md-4 mb-4">
         <ProviderCard :provider="provider" @click="() => handleClick(provider)" />
       </div>
     </div>

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"time"
-
 	"github.com/mangalorg/mangal/web"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -26,11 +24,10 @@ var webCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if webArgs.Open {
-			time.AfterFunc(time.Second, func() {
-				open.Run("http://localhost:" + webArgs.Port)
-			})
+			open.Start("http://localhost:" + webArgs.Port)
 		}
-		if err := web.Run(); err != nil {
+
+		if err := web.Run(webArgs.Port); err != nil {
 			errorf(cmd, err.Error())
 		}
 	},

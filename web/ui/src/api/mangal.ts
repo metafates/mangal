@@ -18,8 +18,32 @@ export interface paths {
     get: operations["getProviders"];
   };
   "/searchMangas": {
-    /** @description Search for mangas */
+    /** @description search for mangas */
     get: operations["searchMangas"];
+  };
+  "/mangaVolumes": {
+    /** @description get manga volumes */
+    get: operations["getMangaVolumes"];
+  };
+  "/volumeChapters": {
+    /** @description get volume chapters */
+    get: operations["getVolumeChapters"];
+  };
+  "/manga": {
+    /** @description Get manga */
+    get: operations["getManga"];
+  };
+  "/chapter": {
+    /** @description Get chapter */
+    get: operations["getChapter"];
+  };
+  "/provider": {
+    /** @description Get provider */
+    get: operations["getProvider"];
+  };
+  "/formats": {
+    /** @description Get avaiable formats */
+    get: operations["getFormats"];
   };
 }
 
@@ -42,8 +66,21 @@ export interface components {
       banner?: string;
       cover?: string;
     };
+    Volume: {
+      number: number;
+    };
+    Chapter: {
+      title: string;
+      /** Format: float */
+      number: number;
+      url?: string;
+    };
     MangalInfo: {
       version: string;
+    };
+    Format: {
+      name: string;
+      extension?: string;
     };
     Error: {
       /** Format: int32 */
@@ -115,7 +152,7 @@ export interface operations {
       };
     };
   };
-  /** @description Search for mangas */
+  /** @description search for mangas */
   searchMangas: {
     parameters: {
       query: {
@@ -136,6 +173,148 @@ export interface operations {
       default: {
         content: {
           "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /** @description get manga volumes */
+  getMangaVolumes: {
+    parameters: {
+      query: {
+        /** @description provider id to use */
+        provider: string;
+        /** @description manga search query */
+        query: string;
+        /** @description manga id */
+        manga: string;
+      };
+    };
+    responses: {
+      /** @description manga volumes */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Volume"][];
+        };
+      };
+      /** @description unexpected error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /** @description get volume chapters */
+  getVolumeChapters: {
+    parameters: {
+      query: {
+        /** @description provider id to use */
+        provider: string;
+        /** @description manga search query */
+        query: string;
+        /** @description manga id */
+        manga: string;
+        /** @description volume number */
+        volume: number;
+      };
+    };
+    responses: {
+      /** @description volume chapters */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Chapter"][];
+        };
+      };
+      /** @description unexpected error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /** @description Get manga */
+  getManga: {
+    parameters: {
+      query: {
+        /** @description provider id to use */
+        provider: string;
+        /** @description manga search query */
+        query: string;
+        /** @description manga id */
+        manga: string;
+      };
+    };
+    responses: {
+      /** @description manga response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Manga"];
+        };
+      };
+      /** @description manga not found */
+      404: {
+        content: never;
+      };
+      /** @description unexpected error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /** @description Get chapter */
+  getChapter: {
+    parameters: {
+      query: {
+        /** @description provider id to use */
+        provider: string;
+        /** @description manga search query */
+        query: string;
+        /** @description manga id */
+        manga: string;
+        /** @description volume number */
+        volume: number;
+      };
+    };
+    responses: {
+      /** @description chapter response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Chapter"];
+        };
+      };
+    };
+  };
+  /** @description Get provider */
+  getProvider: {
+    parameters: {
+      query: {
+        /** @description provider id */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description provider response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Provider"];
+        };
+      };
+      /** @description provider not found */
+      404: {
+        content: never;
+      };
+    };
+  };
+  /** @description Get avaiable formats */
+  getFormats: {
+    responses: {
+      /** @description formats response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Format"][];
         };
       };
     };
