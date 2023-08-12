@@ -5,6 +5,10 @@
 
 
 export interface paths {
+  "/image": {
+    /** @description Get image from URL bypassing CORS policy */
+    get: operations["getImage"];
+  };
   "/mangalInfo": {
     /** @description Get information about installed Mangal app */
     get: operations["getMangalInfo"];
@@ -23,12 +27,20 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    /** Format: binary */
+    Image: string;
     Provider: {
-      name?: string;
+      name: string;
       id: string;
+      description?: string;
+      version: string;
     };
     Manga: {
+      id: string;
       title: string;
+      url?: string;
+      banner?: string;
+      cover?: string;
     };
     MangalInfo: {
       version: string;
@@ -50,6 +62,25 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  /** @description Get image from URL bypassing CORS policy */
+  getImage: {
+    parameters: {
+      query: {
+        /** @description image url to download */
+        url: string;
+        /** @description referer to use to get the image */
+        referer?: string;
+      };
+    };
+    responses: {
+      /** @description image response */
+      200: {
+        content: {
+          "image/png": components["schemas"]["Image"];
+        };
+      };
+    };
+  };
   /** @description Get information about installed Mangal app */
   getMangalInfo: {
     responses: {
@@ -88,8 +119,8 @@ export interface operations {
   searchMangas: {
     parameters: {
       query: {
-        /** @description provider to use */
-        "provider-id": string;
+        /** @description provider id to use */
+        provider: string;
         /** @description manga search query */
         query: string;
       };

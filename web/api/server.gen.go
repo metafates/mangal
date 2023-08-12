@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -22,6 +23,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+
+	// (GET /image)
+	GetImage(ctx echo.Context, params GetImageParams) error
 
 	// (GET /mangalInfo)
 	GetMangalInfo(ctx echo.Context) error
@@ -36,6 +40,31 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// GetImage converts echo context to params.
+func (w *ServerInterfaceWrapper) GetImage(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetImageParams
+	// ------------- Required query parameter "url" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "url", ctx.QueryParams(), &params.Url)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter url: %s", err))
+	}
+
+	// ------------- Optional query parameter "referer" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "referer", ctx.QueryParams(), &params.Referer)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter referer: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetImage(ctx, params)
+	return err
 }
 
 // GetMangalInfo converts echo context to params.
@@ -62,11 +91,11 @@ func (w *ServerInterfaceWrapper) SearchMangas(ctx echo.Context) error {
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params SearchMangasParams
-	// ------------- Required query parameter "provider-id" -------------
+	// ------------- Required query parameter "provider" -------------
 
-	err = runtime.BindQueryParameter("form", true, true, "provider-id", ctx.QueryParams(), &params.ProviderId)
+	err = runtime.BindQueryParameter("form", true, true, "provider", ctx.QueryParams(), &params.Provider)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter provider-id: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter provider: %s", err))
 	}
 
 	// ------------- Required query parameter "query" -------------
@@ -109,10 +138,38 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/image", wrapper.GetImage)
 	router.GET(baseURL+"/mangalInfo", wrapper.GetMangalInfo)
 	router.GET(baseURL+"/providers", wrapper.GetProviders)
 	router.GET(baseURL+"/searchMangas", wrapper.SearchMangas)
 
+}
+
+type GetImageRequestObject struct {
+	Params GetImageParams
+}
+
+type GetImageResponseObject interface {
+	VisitGetImageResponse(w http.ResponseWriter) error
+}
+
+type GetImage200ImagepngResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response GetImage200ImagepngResponse) VisitGetImageResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "image/png")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
 type GetMangalInfoRequestObject struct {
@@ -203,6 +260,9 @@ func (response SearchMangasdefaultJSONResponse) VisitSearchMangasResponse(w http
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
+	// (GET /image)
+	GetImage(ctx context.Context, request GetImageRequestObject) (GetImageResponseObject, error)
+
 	// (GET /mangalInfo)
 	GetMangalInfo(ctx context.Context, request GetMangalInfoRequestObject) (GetMangalInfoResponseObject, error)
 
@@ -223,6 +283,31 @@ func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareF
 type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
+}
+
+// GetImage operation middleware
+func (sh *strictHandler) GetImage(ctx echo.Context, params GetImageParams) error {
+	var request GetImageRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetImage(ctx.Request().Context(), request.(GetImageRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetImage")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetImageResponseObject); ok {
+		return validResponse.VisitGetImageResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
 }
 
 // GetMangalInfo operation middleware
@@ -299,15 +384,18 @@ func (sh *strictHandler) SearchMangas(ctx echo.Context, params SearchMangasParam
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8xVQW7bMBD8CrHtUY3c5OZjgaDwoUCAoOghzWEtrm0GEsksV0YNQ38vSEqyU8uNgRZt",
-	"TpLo0czOcETvoXKNd5asBJjvIVQbajDd3jI7jjeenScWQ2m5cprideW4QYE5GCs311CA7DzlR1oTQ1dA",
-	"QyHgOqH7H4OwsWvougKYnlvDpGH+kDkP+MeRzC2fqJLI9QXtGk+nESP1BQIZdpa3XtiVOyXfEgfj7Ov0",
-	"A3BK4I7d1miaSNLoCeYCLDYXODJ6Qi2CTG+lT6Y3qL7dflJfF1AcTMHHq9nVLCo6Txa9gTncpKUCPMom",
-	"zVg2L/JZk8SLplCx8ZJ5PpOoqBr7YJxVuHRtXAmCdU1a9ROg95C0OMEWOr96tAHRYfDOhpzP9WyWC2eF",
-	"bNJF72tTpdfLp5B3Jjc23r1nWsEc3pWHSpd9n8sjlZTSSwfZZDKhhhEgoVbY1vLXpsif1MQAraUfnioh",
-	"rWjAdAWUvi9P+G34uEWDy5rUCP9up6K+G9n+MGkj1ITXzI7F78aeIjPupvyPg7+t+AMhV5vUnfM7cJ9A",
-	"auVYNRn5a/T3xzTx42JsSNKuPuzPJKHEqTbEU9HE5eeWeAfD4TCiPhgNx+eCcEvFURonZ8h+qvkq+1SD",
-	"yJTi8Hi51uO/KFn+W7igYb1FptDWEv5/u7ruZwAAAP//kYKQfXsHAAA=",
+	"H4sIAAAAAAAC/8xWzW7bPBB8FYLfdxQiN7np2CIoDLRokCDoIc1hLa1kBhLJLCm3RqB3L/gj2bWp2ECK",
+	"tidT5HJnZ3Y58AsvVaeVRGkNL164KdfYgV9eEylyC01KI1mBfrtUFbrfWlEHlhdcSHt1yTNutxrDJzZI",
+	"fMh4h8ZA46PjobEkZMOHIeOEz70grHjxEHLu4h+nZGr1hKV1uZZdzDThroQE2u6Ax9wZ/wyygePKVyAl",
+	"UqKajJdqM3MiquS2FbbF5ElP7WnC4brPniLrCbRLWatjFhskI5Q8jTEGpgBuSG1EhYn2VmhKEtqmIWb1",
+	"kNCl5Ti7XFHxXXRMeFy6uyWiLrEHUS329fo9u1/uJSn4u4vFxcJVoTRK0IIX/MpvZVyDXXvCuRgnq0F7",
+	"pAD/iJb5CFaT6tj97Se22mowRsiGffhye8e0akXp5tDJCO7asgoXw8w6LIIOLZLhxcMhQEjeU8usYpX6",
+	"LlsFTgrhDp979CMe5PWzta+apR6z+GaTCh+CEdZISA6qN+h+GrTMrjFwnIGNt/hrUI+uLqOVNGGOLheL",
+	"4BbSovS6eoRcy2bnM271P2HNC/5fvjOiPLpQHgT0TU+JNgK6iCHjeffLs5lvpwweIpRksFK92zEW2hYr",
+	"FmcJtE41dO9dnqQLWrei9NfzJxNewHms91AS1ANJT2JPABdVQ9/a31ZFsP9EAb3EHxpLixXDMcapr6On",
+	"mFfFhw0IWLXIpvBvMiX1zZTtjUoLi505RXbyw2FyHCCCbYr/VPi/Jb9BoHLtZ2e+A3c+iNWKWBciD6W/",
+	"209zwrpGJZiooqPMGMgY+Dbz8hWzwJONCCm48fN8rMc/MWThb8kZExYpEpq+tebvT9cw/AwAAP//mFdQ",
+	"WycKAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

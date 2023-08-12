@@ -3,6 +3,30 @@ info:
   version: 1.0.0
   title: Mangal WEB UI
 paths:
+  /image:
+    get:
+      description: Get image from URL bypassing CORS policy
+      operationId: getImage
+      parameters:
+        - name: url
+          in: query
+          description: image url to download
+          required: true
+          schema:
+            type: string
+        - name: referer
+          in: query
+          description: referer to use to get the image
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: image response
+          content:
+            image/png:
+              schema:
+                $ref: '#/components/schemas/Image'
   /mangalInfo:
     get:
       description: Get information about installed Mangal app
@@ -45,9 +69,9 @@ paths:
       description: Search for mangas
       operationId: searchMangas
       parameters:
-        - name: provider-id
+        - name: provider
           in: query
-          description: provider to use
+          description: provider id to use
           required: true
           schema:
             type: string
@@ -75,22 +99,41 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    Image:
+      type: string
+      format: binary
+
     Provider:
       type: object
       required:
         - id
+        - version
+        - name
       properties:
         name:
           type: string
         id:
           type: string    
+        description:
+          type: string
+        version:
+          type: string
 
     Manga:
       type: object
       required:
         - title
+        - id
       properties:
+        id:
+          type: string
         title:
+          type: string
+        url:
+          type: string
+        banner:
+          type: string
+        cover:
           type: string
 
     MangalInfo:

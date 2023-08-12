@@ -15,9 +15,12 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.1",
+    "masonry-layout": "^4.2.2",
+    "mitt": "^3.0.1",
     "openapi-fetch": "^0.7.2",
     "pinia": "^2.1.4",
     "vue": "^3.3.4",
+    "vue-masonry": "^0.16.0",
     "vue-router": "^4.2.4"
   },
   "devDependencies": {
