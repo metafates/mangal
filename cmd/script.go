@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -46,10 +45,11 @@ func init() {
 }
 
 var scriptCmd = &cobra.Command{
-	Use:   "script",
-	Short: "Run mangal in scripting mode",
-	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Use:     "script",
+	Short:   "Run mangal in scripting mode",
+	GroupID: groupMode,
+	Args:    cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
 		var reader io.Reader
 
 		switch {
@@ -60,7 +60,7 @@ var scriptCmd = &cobra.Command{
 				0755,
 			)
 			if err != nil {
-				return err
+				errorf(cmd, err.Error())
 			}
 
 			defer file.Close()
@@ -71,7 +71,7 @@ var scriptCmd = &cobra.Command{
 		case cmd.Flag("stdin").Changed:
 			reader = os.Stdin
 		default:
-			return errors.New("either `file`, `string` or `stdin` is required")
+			errorf(cmd, "either `file`, `string` or `stdin` is required")
 		}
 
 		var options script.Options
@@ -82,7 +82,7 @@ var scriptCmd = &cobra.Command{
 		if scriptArgs.Provider != "" {
 			loaders, err := manager.Loaders()
 			if err != nil {
-				return err
+				errorf(cmd, err.Error())
 			}
 
 			loader, ok := lo.Find(loaders, func(loader libmangal.ProviderLoader) bool {
@@ -90,18 +90,20 @@ var scriptCmd = &cobra.Command{
 			})
 
 			if !ok {
-				return fmt.Errorf("provider with ID %q not found", scriptArgs.Provider)
+				errorf(cmd, "provider with ID %q not found", scriptArgs.Provider)
 			}
 
 			client, err := client.NewClient(context.Background(), loader)
 			if err != nil {
-				return err
+				errorf(cmd, err.Error())
 			}
 
 			options.Client = client
 		}
 
-		return script.Run(context.Background(), reader, options)
+		if err := script.Run(context.Background(), reader, options); err != nil {
+			errorf(cmd, err.Error())
+		}
 	},
 }
 

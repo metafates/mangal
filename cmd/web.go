@@ -19,9 +19,11 @@ var webArgs = struct {
 }{}
 
 var webCmd = &cobra.Command{
-	Use:   "web",
-	Short: "Run web UI",
-	Args:  cobra.NoArgs,
+	Use:        "web",
+	Short:      "Run mangal with Web UI",
+	GroupID:    groupMode,
+	SuggestFor: []string{"tui", "script"},
+	Args:       cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if webArgs.Open {
 			open.Start("http://localhost:" + webArgs.Port)

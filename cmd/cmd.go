@@ -6,7 +6,6 @@ import (
 
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mangalorg/libmangal"
-	"github.com/mangalorg/mangal/config"
 	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/provider/manager"
@@ -14,51 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootArgs = struct {
-	Version bool
-}{}
-
-func init() {
-	rootCmd.Flags().BoolVarP(&rootArgs.Version, "version", "v", false, "show version information")
-}
+const groupMode = "run"
 
 var rootCmd = &cobra.Command{
 	Use:   meta.AppName,
 	Short: "The ultimate CLI manga downloader",
 	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
-		if rootArgs.Version {
-			versionCmd.Run(versionCmd, nil)
-			return
-		}
-
-		mode := lo.Must(config.ModeString(config.Config.CLI.DefaultMode.Get()))
-
-		var cmdToExecute *cobra.Command
-		switch mode {
-		case config.ModeTUI:
-			cmdToExecute = tuiCmd
-		case config.ModeScript:
-			cmdToExecute = scriptCmd
-		case config.ModeWeb:
-			cmdToExecute = webCmd
-		default:
-			panic("unreachable")
-		}
-
-		if len(args) == 0 {
-			if args := config.Config.CLI.DefaultModeArgs.Get(); len(args) != 0 {
-				cmdToExecute.SetArgs(args)
-			}
-		} else {
-			cmdToExecute.SetArgs(args)
-		}
-
-		_, err := cmdToExecute.ExecuteC()
-		if err != nil {
-			errorf(cmdToExecute, err.Error())
-		}
-	},
 }
 
 func completionProviderIDs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -96,6 +56,11 @@ func Execute() {
 		Aliases:         cc.Italic,
 		NoExtraNewlines: true,
 		NoBottomNewline: true,
+	})
+
+	rootCmd.AddGroup(&cobra.Group{
+		ID:    groupMode,
+		Title: "Mode",
 	})
 
 	if err := rootCmd.Execute(); err != nil {

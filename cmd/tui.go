@@ -7,10 +7,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	rootCmd.AddCommand(tuiCmd)
+}
+
 var tuiCmd = &cobra.Command{
-	Use:   "tui",
-	Short: "Run mangal in TUI mode",
-	Args:  cobra.NoArgs,
+	Use:     "tui",
+	Short:   "Run mangal in TUI mode",
+	GroupID: groupMode,
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		loaders, err := manager.Loaders()
 		if err != nil {
