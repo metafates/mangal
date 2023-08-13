@@ -32,7 +32,12 @@ func (s *State) Backable() bool {
 
 // Init implements base.State.
 func (s *State) Init(model base.Model) tea.Cmd {
-	return s.list.Init(model)
+	return tea.Sequence(
+		func() tea.Msg {
+			return client.CloseAll()
+		},
+		s.list.Init(model),
+	)
 }
 
 // Intermediate implements base.State.

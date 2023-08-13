@@ -1,5 +1,7 @@
 package config
 
+import "github.com/spf13/viper"
+
 var Fields []Field
 
 func register[T any](f field[T]) field[T] {
@@ -38,7 +40,7 @@ func (f field[T]) Key() string {
 }
 
 func (f field[T]) Value() any {
-	return instance.Get(f.key)
+	return viper.Get(f.key)
 }
 
 func (f field[T]) Get() T {

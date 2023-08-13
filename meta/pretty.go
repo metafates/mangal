@@ -1,13 +1,13 @@
 package meta
 
 import (
-	"github.com/charmbracelet/lipgloss"
-	"github.com/mangalorg/libmangal"
-	"github.com/mangalorg/luaprovider"
-	"github.com/mangalorg/mangal/color"
 	"log"
+	"runtime/debug"
 	"strings"
 	"text/template"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/mangalorg/mangal/color"
 )
 
 type versioned struct {
@@ -19,26 +19,40 @@ type providers struct {
 }
 
 type versionInfo struct {
-	Version   string
-	Providers providers
+	Mangal    versioned
 	Libmangal versioned
+	Providers providers
+}
+
+func getVersionInfo() (info versionInfo) {
+	info.Mangal.Version = Version
+
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return
+	}
+
+	for _, dep := range bi.Deps {
+		switch dep.Path {
+		case "github.com/mangalorg/libmangal":
+			info.Libmangal.Version = dep.Version
+		case "github.com/mangalorg/luaprovider":
+			info.Providers.Lua.Version = dep.Version
+		}
+	}
+
+	return info
 }
 
 func PrettyVersion() string {
 	var info strings.Builder
 	err := template.Must(template.New("version").Parse(`
-mangal {{ .Version }}
+mangal {{ .Mangal.Version }}
 libmangal {{ .Libmangal.Version }}
 luaprovider {{ .Providers.Lua.Version }}
 
 https://github.com/mangalorg/mangal
-`)).Execute(&info, versionInfo{
-		Version:   Version,
-		Libmangal: versioned{Version: libmangal.Version},
-		Providers: providers{
-			Lua: versioned{Version: luaprovider.Version},
-		},
-	})
+`)).Execute(&info, getVersionInfo())
 
 	if err != nil {
 		log.Fatal(err)

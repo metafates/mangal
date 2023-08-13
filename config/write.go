@@ -1,38 +1,33 @@
 package config
 
 import (
-	"path/filepath"
-
-	"github.com/knadh/koanf/parsers/toml"
-	"github.com/mangalorg/mangal/fs"
-	"github.com/mangalorg/mangal/path"
+	"github.com/spf13/viper"
 )
 
 func Set(key string, value any) error {
-	return instance.Set(key, value)
+	viper.Set(key, value)
+	return nil
 }
 
 func Get(key string) any {
-	return instance.Get(key)
+	return viper.Get(key)
 }
 
 func Exists(key string) bool {
-	return instance.Exists(key)
+	return viper.IsSet(key)
 }
 
 func Keys() []string {
-	return instance.Keys()
+	return viper.AllKeys()
 }
 
 func Write() error {
-	marshalled, err := instance.Marshal(toml.Parser())
-	if err != nil {
+	err := viper.WriteConfig()
+
+	switch err.(type) {
+	case viper.ConfigFileNotFoundError:
+		return viper.SafeWriteConfig()
+	default:
 		return err
 	}
-
-	return fs.Afero.WriteFile(
-		filepath.Join(path.ConfigDir(), configFilename),
-		marshalled,
-		0655,
-	)
 }

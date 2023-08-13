@@ -11,10 +11,16 @@ import (
 
 type config struct {
 	Icons     field[string]
+	CLI       configCLI
 	Read      configRead
 	Download  configDownload
 	TUI       configTUI
 	Providers configProviders
+}
+
+type configCLI struct {
+	DefaultMode     field[string]
+	DefaultModeArgs field[[]string]
 }
 
 type configRead struct {
@@ -86,6 +92,22 @@ var Config = config{
 			return nil
 		},
 	}),
+	CLI: configCLI{
+		DefaultMode: register(field[string]{
+			key:          "cli.default_mode",
+			defaultValue: ModeTUI.String(),
+			description:  "Default mode to use when no subcommand is given",
+			init: func(s string) error {
+				_, err := ModeString(s)
+				return err
+			},
+		}),
+		DefaultModeArgs: register(field[[]string]{
+			key:          "cli.default_mode_args",
+			defaultValue: []string{},
+			description:  "Default arguments to provide when no subcommand nor args are given",
+		}),
+	},
 	Read: configRead{
 		Format: register(field[string]{
 			key:          "read.format",

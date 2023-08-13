@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if err := config.Load(); err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to load config", "err", err)
 	}
 
 	// TODO: change this
