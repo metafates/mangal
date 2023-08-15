@@ -1,18 +1,20 @@
 package cmd
 
 import (
-	"fmt"
+	"encoding/json"
+
 	"github.com/mangalorg/mangal/path"
+	"github.com/mangalorg/mangal/tui/misc/pathtable"
 	"github.com/spf13/cobra"
 )
 
 var pathArgs = struct {
-	Config    bool `help:"Path to the config directory"`
-	Cache     bool `help:"Path to the cache directory"`
-	Temp      bool `help:"Path to a temporary directory"`
-	Downloads bool `help:"Path to the downloads directory"`
-	Providers bool `help:"Path to the providers directory"`
-	Header    bool `help:"Print header" negatable:"" default:"true"`
+	Config    bool
+	Cache     bool
+	Temp      bool
+	Downloads bool
+	Providers bool
+	JSON      bool
 }{}
 
 func init() {
@@ -23,7 +25,15 @@ func init() {
 	pathCmd.Flags().BoolVar(&pathArgs.Temp, "temp", false, "Path to a temporary directory")
 	pathCmd.Flags().BoolVar(&pathArgs.Downloads, "downloads", false, "Path to the downloads directory")
 	pathCmd.Flags().BoolVar(&pathArgs.Providers, "providers", false, "Path to the lua providers directory")
-	pathCmd.Flags().BoolVar(&pathArgs.Header, "header", true, "Print header")
+	pathCmd.Flags().BoolVarP(&pathArgs.JSON, "json", "j", false, "Output in JSON format for parsing")
+
+	pathCmd.MarkFlagsMutuallyExclusive(
+		"config",
+		"cache",
+		"temp",
+		"downloads",
+		"providers",
+	)
 }
 
 var pathCmd = &cobra.Command{
@@ -31,36 +41,84 @@ var pathCmd = &cobra.Command{
 	Short: "Show paths",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		paths := []struct {
-			Name  string
-			Func  func() string
-			Print bool
-		}{
-			{"Config", path.ConfigDir, pathArgs.Config},
-			{"Cache", path.CacheDir, pathArgs.Cache},
-			{"Temp", path.TempDir, pathArgs.Temp},
-			{"Downloads", path.DownloadsDir, pathArgs.Downloads},
-			{"Providers", path.ProvidersDir, pathArgs.Providers},
+		type pathEntry struct {
+			Name string `json:"name"`
+			Path string `json:"path"`
 		}
 
-		var anyPrinted bool
-		for _, t := range paths {
-			if t.Print {
-				anyPrinted = true
-				if pathArgs.Header {
-					fmt.Println(t.Name)
+		var (
+			pathToShow     string
+			pathToShowName string
+		)
+
+		switch {
+		case pathArgs.Config:
+			pathToShow = path.ConfigDir()
+			pathToShowName = "config"
+		case pathArgs.Providers:
+			pathToShow = path.ProvidersDir()
+			pathToShowName = "providers"
+		case pathArgs.Downloads:
+			pathToShow = path.DownloadsDir()
+			pathToShowName = "downloads"
+		case pathArgs.Cache:
+			pathToShow = path.CacheDir()
+			pathToShowName = "cache"
+		case pathArgs.Temp:
+			pathToShow = path.TempDir()
+			pathToShowName = "temp"
+		default:
+			if pathArgs.JSON {
+				err := json.NewEncoder(cmd.OutOrStdout()).Encode([]pathEntry{
+					{
+						Name: "config",
+						Path: path.ConfigDir(),
+					},
+					{
+						Name: "providers",
+						Path: path.ProvidersDir(),
+					},
+					{
+						Name: "downloads",
+						Path: path.DownloadsDir(),
+					},
+					{
+						Name: "cache",
+						Path: path.CacheDir(),
+					},
+					{
+						Name: "temp",
+						Path: path.TempDir(),
+					},
+				})
+
+				if err != nil {
+					errorf(cmd, err.Error())
 				}
-				fmt.Println(t.Func())
+
+				return
 			}
+
+			if err := pathtable.Run(); err != nil {
+				errorf(cmd, err.Error())
+			}
+
+			return
 		}
 
-		if !anyPrinted {
-			for _, t := range paths {
-				if pathArgs.Header {
-					fmt.Println(t.Name)
-				}
-				fmt.Println(t.Func())
+		if pathArgs.JSON {
+			err := json.NewEncoder(cmd.OutOrStdout()).Encode(pathEntry{
+				Name: pathToShowName,
+				Path: pathToShow,
+			})
+
+			if err != nil {
+				errorf(cmd, err.Error())
 			}
+
+			return
 		}
+
+		cmd.Println(pathToShow)
 	},
 }
