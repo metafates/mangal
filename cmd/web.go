@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(webCmd)
+	subcommands = append(subcommands, webCmd)
 
 	webCmd.Flags().BoolVarP(&webArgs.Open, "open", "o", false, "Open served page in the default browser")
 	webCmd.Flags().StringVarP(&webArgs.Port, "port", "p", "6969", "Port to use")

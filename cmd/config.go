@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(configCmd)
+	subcommands = append(subcommands, configCmd)
 }
 
 var configCmd = &cobra.Command{

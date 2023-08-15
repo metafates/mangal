@@ -219,6 +219,29 @@ paths:
                 $ref: '#/components/schemas/Provider'
         '404':
             description: provider not found
+
+  /mangaPage:
+    get:
+      description: Get manga page with volumes and chapters
+      operationId: getMangaPage
+      parameters:
+        - *providerParam
+        - *queryParam
+        - *mangaParam
+      responses:
+        '200':
+          description: manga page response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MangaPage'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /formats:
     get:
       description: Get avaiable formats
@@ -271,6 +294,35 @@ components:
         cover:
           type: string
 
+    CoverImage:
+      type: object
+      required:
+        - extraLarge
+        - large
+        - medium
+        - color
+      properties:
+        extraLarge:
+          type: string
+        large:
+          type: string
+        medium:
+          type: string
+        color:
+          type: string
+
+    AnilistManga:
+      type: object
+      required:
+        - coverImage
+      properties:
+       coverImage:
+         $ref: '#/components/schemas/CoverImage'
+       bannerImage:
+         type: string
+       description:
+         type: string
+
     Volume:
       type: object
       required:
@@ -293,6 +345,34 @@ components:
           minimum: 0
         url:
           type: string
+
+    VolumeWithChapters:
+      type: object
+      required:
+        - volume
+        - chapters
+      properties:
+        volume:
+          $ref: '#/components/schemas/Volume'
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chapter'
+
+    MangaPage:
+      type: object
+      required:
+        - manga
+        - volumes
+      properties:
+        manga:
+          $ref: '#/components/schemas/Manga'
+        anilistManga:
+          $ref: '#/components/schemas/AnilistManga'
+        volumes:
+          type: array
+          items:
+            $ref: '#/components/schemas/VolumeWithChapters'
 
     MangalInfo:
       type: object

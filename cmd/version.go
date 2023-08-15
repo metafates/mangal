@@ -10,8 +10,9 @@ var versionArgs = struct {
 }{}
 
 func init() {
+	subcommands = append(subcommands, versionCmd)
+
 	versionCmd.Flags().BoolVarP(&versionArgs.Short, "short", "s", false, "just show the version number")
-	rootCmd.AddCommand(versionCmd)
 }
 
 var versionCmd = &cobra.Command{

@@ -12,6 +12,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/anilist"
 	"github.com/mangalorg/mangal/client"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/provider/manager"
@@ -33,6 +34,95 @@ type Server struct {
 	loadersByID map[string]libmangal.ProviderLoader
 }
 
+func (s *Server) GetMangaPage(ctx context.Context, request api.GetMangaPageRequestObject) (api.GetMangaPageResponseObject, error) {
+	loader, ok := s.loadersByID[request.Params.Provider]
+	if !ok {
+		return api.GetMangaPagedefaultJSONResponse{
+			StatusCode: 404,
+			Body: api.Error{
+				Code:    404,
+				Message: fmt.Sprintf("Provider %q not found", request.Params.Provider),
+			},
+		}, nil
+	}
+
+	c, err := client.NewClient(ctx, loader)
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+
+	mangas, err := searchMangas(ctx, c, request.Params.Query)
+	if err != nil {
+		return nil, err
+	}
+
+	manga, ok := lo.Find(mangas, func(manga libmangal.Manga) bool {
+		return manga.Info().ID == request.Params.Manga
+	})
+	if !ok {
+		return nil, fmt.Errorf("manga with id %s not found", request.Params.Manga)
+	}
+
+	volumes, err := c.MangaVolumes(ctx, manga)
+	if err != nil {
+		return nil, err
+	}
+
+	v := make([]api.VolumeWithChapters, len(volumes))
+	for i, volume := range volumes {
+		chapters, err := c.VolumeChapters(ctx, volume)
+		if err != nil {
+			return nil, err
+		}
+
+		c := make([]api.Chapter, len(chapters))
+		for j, chapter := range chapters {
+			info := chapter.Info()
+			c[j] = api.Chapter{
+				Number: info.Number,
+				Title:  info.Title,
+				Url:    &info.URL,
+			}
+		}
+
+		v[i] = api.VolumeWithChapters{
+			Chapters: c,
+			Volume: api.Volume{
+				Number: volume.Info().Number,
+			},
+		}
+	}
+
+	info := manga.Info()
+	response := api.GetMangaPage200JSONResponse{
+		Manga: api.Manga{
+			Banner: &info.Banner,
+			Cover:  &info.Cover,
+			Id:     info.ID,
+			Title:  info.Title,
+			Url:    &info.URL,
+		},
+		Volumes: v,
+	}
+
+	anilistManga, found, _ := anilist.Client.FindClosestManga(ctx, info.Title)
+	if found {
+		response.AnilistManga = &api.AnilistManga{
+			BannerImage: &anilistManga.BannerImage,
+			CoverImage: api.CoverImage{
+				Color:      anilistManga.CoverImage.Color,
+				ExtraLarge: anilistManga.CoverImage.ExtraLarge,
+				Large:      anilistManga.CoverImage.Large,
+				Medium:     anilistManga.CoverImage.Medium,
+			},
+			Description: &anilistManga.Description,
+		}
+	}
+
+	return response, nil
+}
+
 // GetChapter implements api.StrictServerInterface.
 func (*Server) GetChapter(ctx context.Context, request api.GetChapterRequestObject) (api.GetChapterResponseObject, error) {
 	panic("unimplemented")
@@ -40,7 +130,7 @@ func (*Server) GetChapter(ctx context.Context, request api.GetChapterRequestObje
 
 // GetManga implements api.StrictServerInterface.
 func (*Server) GetManga(ctx context.Context, request api.GetMangaRequestObject) (api.GetMangaResponseObject, error) {
-	panic("")
+	panic("unimplemented")
 }
 
 // GetFormats implements api.StrictServerInterface.

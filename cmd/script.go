@@ -29,7 +29,7 @@ var scriptArgs = struct {
 }{}
 
 func init() {
-	rootCmd.AddCommand(scriptCmd)
+	subcommands = append(subcommands, scriptCmd)
 
 	scriptCmd.Flags().StringVarP(&scriptArgs.File, "file", "f", "", "Read script from file")
 	scriptCmd.Flags().StringVarP(&scriptArgs.String, "string", "s", "", "Read script from script")

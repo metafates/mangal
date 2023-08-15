@@ -46,6 +46,10 @@ func newModel() *Model {
 			path.CacheDir(),
 		},
 		{
+			"logs",
+			path.LogDir(),
+		},
+		{
 			"temp",
 			path.TempDir(),
 		},

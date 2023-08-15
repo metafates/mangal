@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(tuiCmd)
+	subcommands = append(subcommands, tuiCmd)
 }
 
 var tuiCmd = &cobra.Command{

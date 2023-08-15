@@ -2,20 +2,19 @@ package log
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
+	"github.com/rs/zerolog"
 	"github.com/samber/lo"
 )
 
 var L = lo.Must(newLogger())
 
-func newLogger() (logger *log.Logger, err error) {
+func newLogger() (*zerolog.Logger, error) {
 	today := time.Now().Format("2006-01-02")
 
 	logPath := filepath.Join(path.LogDir(), fmt.Sprint(today, ".log"))
@@ -25,11 +24,10 @@ func newLogger() (logger *log.Logger, err error) {
 		return nil, err
 	}
 
-	logger = log.New(io.MultiWriter(os.Stdout, file))
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
 
-	logger.SetLevel(log.InfoLevel)
-	logger.SetOutput(file)
-	logger.SetFormatter(log.TextFormatter)
+	logger := zerolog.New(file)
 
-	return
+	return &logger, nil
 }

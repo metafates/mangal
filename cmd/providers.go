@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(providersCmd)
+	subcommands = append(subcommands, providersCmd)
 }
 
 var providersCmd = &cobra.Command{

@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-const _ModeName = "TUIWebScript"
+const _ModeName = "NoneTUIWebScript"
 
-var _ModeIndex = [...]uint8{0, 3, 6, 12}
+var _ModeIndex = [...]uint8{0, 4, 7, 10, 16}
 
-const _ModeLowerName = "tuiwebscript"
+const _ModeLowerName = "nonetuiwebscript"
 
 func (i Mode) String() string {
 	i -= 1
@@ -26,26 +26,30 @@ func (i Mode) String() string {
 // Re-run the stringer command to generate them again.
 func _ModeNoOp() {
 	var x [1]struct{}
-	_ = x[ModeTUI-(1)]
-	_ = x[ModeWeb-(2)]
-	_ = x[ModeScript-(3)]
+	_ = x[ModeNone-(1)]
+	_ = x[ModeTUI-(2)]
+	_ = x[ModeWeb-(3)]
+	_ = x[ModeScript-(4)]
 }
 
-var _ModeValues = []Mode{ModeTUI, ModeWeb, ModeScript}
+var _ModeValues = []Mode{ModeNone, ModeTUI, ModeWeb, ModeScript}
 
 var _ModeNameToValueMap = map[string]Mode{
-	_ModeName[0:3]:       ModeTUI,
-	_ModeLowerName[0:3]:  ModeTUI,
-	_ModeName[3:6]:       ModeWeb,
-	_ModeLowerName[3:6]:  ModeWeb,
-	_ModeName[6:12]:      ModeScript,
-	_ModeLowerName[6:12]: ModeScript,
+	_ModeName[0:4]:        ModeNone,
+	_ModeLowerName[0:4]:   ModeNone,
+	_ModeName[4:7]:        ModeTUI,
+	_ModeLowerName[4:7]:   ModeTUI,
+	_ModeName[7:10]:       ModeWeb,
+	_ModeLowerName[7:10]:  ModeWeb,
+	_ModeName[10:16]:      ModeScript,
+	_ModeLowerName[10:16]: ModeScript,
 }
 
 var _ModeNames = []string{
-	_ModeName[0:3],
-	_ModeName[3:6],
-	_ModeName[6:12],
+	_ModeName[0:4],
+	_ModeName[4:7],
+	_ModeName[7:10],
+	_ModeName[10:16],
 }
 
 // ModeString retrieves an enum value from the enum constants string name.

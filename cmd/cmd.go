@@ -3,9 +3,11 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/config"
 	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/provider/manager"
@@ -13,13 +15,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const groupMode = "run"
+const groupMode = "mode"
 
 var rootCmd = &cobra.Command{
-	Use:   meta.AppName,
-	Short: "The ultimate CLI manga downloader",
-	Args:  cobra.NoArgs,
+	Use:  meta.AppName,
+	Args: cobra.NoArgs,
 }
+
+var subcommands []*cobra.Command
 
 func completionProviderIDs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	loaders, err := manager.Loaders()
@@ -45,8 +48,36 @@ func errorf(cmd *cobra.Command, format string, a ...any) {
 }
 
 func Execute() {
+	var root *cobra.Command
+
+	switch lo.Must(config.ModeString(config.Config.CLI.DefaultMode.Get())) {
+	case config.ModeNone:
+		root = rootCmd
+	case config.ModeTUI:
+		root = tuiCmd
+	case config.ModeScript:
+		root = scriptCmd
+	case config.ModeWeb:
+		root = webCmd
+	}
+
+	for _, subcommand := range subcommands {
+		if subcommand == root {
+			continue
+		}
+
+		root.AddCommand(subcommand)
+	}
+
+	root.Use = strings.Replace(root.Use, root.Name(), rootCmd.Name(), 1)
+	root.Long = "The ultimate CLI manga downloader\n\n" + root.Short + " (configured as default)"
+	root.AddGroup(&cobra.Group{
+		ID:    groupMode,
+		Title: "Mode",
+	})
+
 	cc.Init(&cc.Config{
-		RootCmd:         rootCmd,
+		RootCmd:         root,
 		Headings:        cc.HiCyan + cc.Bold + cc.Underline,
 		Commands:        cc.HiYellow + cc.Bold,
 		Example:         cc.Italic,
@@ -58,12 +89,7 @@ func Execute() {
 		NoBottomNewline: true,
 	})
 
-	rootCmd.AddGroup(&cobra.Group{
-		ID:    groupMode,
-		Title: "Mode",
-	})
-
-	if err := rootCmd.Execute(); err != nil {
-		errorf(rootCmd, err.Error())
+	if err := root.Execute(); err != nil {
+		errorf(root, err.Error())
 	}
 }

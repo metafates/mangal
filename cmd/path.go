@@ -14,17 +14,19 @@ var pathArgs = struct {
 	Temp      bool
 	Downloads bool
 	Providers bool
+	Logs      bool
 	JSON      bool
 }{}
 
 func init() {
-	rootCmd.AddCommand(pathCmd)
+	subcommands = append(subcommands, pathCmd)
 
 	pathCmd.Flags().BoolVar(&pathArgs.Config, "config", false, "Path to the config directory")
 	pathCmd.Flags().BoolVar(&pathArgs.Cache, "cache", false, "Path to the cache directory")
 	pathCmd.Flags().BoolVar(&pathArgs.Temp, "temp", false, "Path to a temporary directory")
 	pathCmd.Flags().BoolVar(&pathArgs.Downloads, "downloads", false, "Path to the downloads directory")
-	pathCmd.Flags().BoolVar(&pathArgs.Providers, "providers", false, "Path to the lua providers directory")
+	pathCmd.Flags().BoolVar(&pathArgs.Providers, "providers", false, "Path to the providers directory")
+	pathCmd.Flags().BoolVar(&pathArgs.Logs, "logs", false, "Path to the logs directory")
 	pathCmd.Flags().BoolVarP(&pathArgs.JSON, "json", "j", false, "Output in JSON format for parsing")
 
 	pathCmd.MarkFlagsMutuallyExclusive(
@@ -33,6 +35,7 @@ func init() {
 		"temp",
 		"downloads",
 		"providers",
+		"logs",
 	)
 }
 
@@ -67,6 +70,9 @@ var pathCmd = &cobra.Command{
 		case pathArgs.Temp:
 			pathToShow = path.TempDir()
 			pathToShowName = "temp"
+		case pathArgs.Logs:
+			pathToShow = path.LogDir()
+			pathToShowName = "logs"
 		default:
 			if pathArgs.JSON {
 				err := json.NewEncoder(cmd.OutOrStdout()).Encode([]pathEntry{
@@ -85,6 +91,10 @@ var pathCmd = &cobra.Command{
 					{
 						Name: "cache",
 						Path: path.CacheDir(),
+					},
+					{
+						Name: "logs",
+						Path: path.LogDir(),
 					},
 					{
 						Name: "temp",

@@ -41,6 +41,10 @@ export interface paths {
     /** @description Get provider */
     get: operations["getProvider"];
   };
+  "/mangaPage": {
+    /** @description Get manga page with volumes and chapters */
+    get: operations["getMangaPage"];
+  };
   "/formats": {
     /** @description Get avaiable formats */
     get: operations["getFormats"];
@@ -66,6 +70,17 @@ export interface components {
       banner?: string;
       cover?: string;
     };
+    CoverImage: {
+      extraLarge: string;
+      large: string;
+      medium: string;
+      color: string;
+    };
+    AnilistManga: {
+      coverImage: components["schemas"]["CoverImage"];
+      bannerImage?: string;
+      description?: string;
+    };
     Volume: {
       number: number;
     };
@@ -74,6 +89,15 @@ export interface components {
       /** Format: float */
       number: number;
       url?: string;
+    };
+    VolumeWithChapters: {
+      volume: components["schemas"]["Volume"];
+      chapters: components["schemas"]["Chapter"][];
+    };
+    MangaPage: {
+      manga: components["schemas"]["Manga"];
+      anilistManga?: components["schemas"]["AnilistManga"];
+      volumes: components["schemas"]["VolumeWithChapters"][];
     };
     MangalInfo: {
       version: string;
@@ -305,6 +329,33 @@ export interface operations {
       /** @description provider not found */
       404: {
         content: never;
+      };
+    };
+  };
+  /** @description Get manga page with volumes and chapters */
+  getMangaPage: {
+    parameters: {
+      query: {
+        /** @description provider id to use */
+        provider: string;
+        /** @description manga search query */
+        query: string;
+        /** @description manga id */
+        manga: string;
+      };
+    };
+    responses: {
+      /** @description manga page response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["MangaPage"];
+        };
+      };
+      /** @description unexpected error */
+      default: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
       };
     };
   };

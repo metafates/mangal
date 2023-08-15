@@ -2,13 +2,14 @@ package model
 
 import (
 	"context"
+
+	"github.com/mangalorg/mangal/log"
 	"github.com/mangalorg/mangal/tui/base"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/log"
 	"github.com/zyedidia/generic/stack"
 )
 
@@ -78,7 +79,7 @@ func (m *Model) back() tea.Cmd {
 		return nil
 	}
 
-	log.Info("going to the previous state", "state", m.history.Peek().Title().Text)
+	log.L.Info().Str("state", m.history.Peek().Title().Text).Msg("going to the previous state")
 
 	m.cancel()
 	m.state = m.history.Pop()
@@ -90,7 +91,7 @@ func (m *Model) back() tea.Cmd {
 }
 
 func (m *Model) pushState(state base.State) tea.Cmd {
-	log.Info("new state", "state", state.Title().Text)
+	log.L.Info().Str("state", state.Title().Text).Msg("new state")
 	if !m.state.Intermediate() {
 		m.history.Push(m.state)
 	}

@@ -4,7 +4,8 @@ package config
 type Mode uint8
 
 const (
-	ModeTUI Mode = iota + 1
+	ModeNone Mode = iota + 1
+	ModeTUI
 	ModeWeb
 	ModeScript
 )

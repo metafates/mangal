@@ -7,11 +7,26 @@ import (
 	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 )
 
+// AnilistManga defines model for AnilistManga.
+type AnilistManga struct {
+	BannerImage *string    `json:"bannerImage,omitempty"`
+	CoverImage  CoverImage `json:"coverImage"`
+	Description *string    `json:"description,omitempty"`
+}
+
 // Chapter defines model for Chapter.
 type Chapter struct {
 	Number float32 `json:"number"`
 	Title  string  `json:"title"`
 	Url    *string `json:"url,omitempty"`
+}
+
+// CoverImage defines model for CoverImage.
+type CoverImage struct {
+	Color      string `json:"color"`
+	ExtraLarge string `json:"extraLarge"`
+	Large      string `json:"large"`
+	Medium     string `json:"medium"`
 }
 
 // Error defines model for Error.
@@ -38,6 +53,13 @@ type Manga struct {
 	Url    *string `json:"url,omitempty"`
 }
 
+// MangaPage defines model for MangaPage.
+type MangaPage struct {
+	AnilistManga *AnilistManga        `json:"anilistManga,omitempty"`
+	Manga        Manga                `json:"manga"`
+	Volumes      []VolumeWithChapters `json:"volumes"`
+}
+
 // MangalInfo defines model for MangalInfo.
 type MangalInfo struct {
 	Version string `json:"version"`
@@ -54,6 +76,12 @@ type Provider struct {
 // Volume defines model for Volume.
 type Volume struct {
 	Number int `json:"number"`
+}
+
+// VolumeWithChapters defines model for VolumeWithChapters.
+type VolumeWithChapters struct {
+	Chapters []Chapter `json:"chapters"`
+	Volume   Volume    `json:"volume"`
 }
 
 // GetChapterParams defines parameters for GetChapter.
@@ -82,6 +110,18 @@ type GetImageParams struct {
 
 // GetMangaParams defines parameters for GetManga.
 type GetMangaParams struct {
+	// Provider provider id to use
+	Provider string `form:"provider" json:"provider"`
+
+	// Query manga search query
+	Query string `form:"query" json:"query"`
+
+	// Manga manga id
+	Manga string `form:"manga" json:"manga"`
+}
+
+// GetMangaPageParams defines parameters for GetMangaPage.
+type GetMangaPageParams struct {
 	// Provider provider id to use
 	Provider string `form:"provider" json:"provider"`
 
