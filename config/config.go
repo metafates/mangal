@@ -19,8 +19,12 @@ type config struct {
 }
 
 type configCLI struct {
-	DefaultMode     field[string]
-	DefaultModeArgs field[[]string]
+	ColoredHelp field[bool]
+	Mode        configCLIMode
+}
+
+type configCLIMode struct {
+	Default field[string]
 }
 
 type configRead struct {
@@ -93,20 +97,22 @@ var Config = config{
 		},
 	}),
 	CLI: configCLI{
-		DefaultMode: register(field[string]{
-			key:          "cli.default_mode",
-			defaultValue: ModeTUI.String(),
-			description:  "Default mode to use when no subcommand is given",
-			init: func(s string) error {
-				_, err := ModeString(s)
-				return err
-			},
+		ColoredHelp: register(field[bool]{
+			key:          "cli.colored_help",
+			defaultValue: true,
+			description:  "Enable colors in cli help",
 		}),
-		DefaultModeArgs: register(field[[]string]{
-			key:          "cli.default_mode_args",
-			defaultValue: []string{},
-			description:  "Default arguments to provide when no subcommand nor args are given",
-		}),
+		Mode: configCLIMode{
+			Default: register(field[string]{
+				key:          "cli.mode.default",
+				defaultValue: ModeTUI.String(),
+				description:  "Default mode to use when no subcommand is given",
+				init: func(s string) error {
+					_, err := ModeString(s)
+					return err
+				},
+			}),
+		},
 	},
 	Read: configRead{
 		Format: register(field[string]{

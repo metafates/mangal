@@ -4,14 +4,14 @@ go-mod := `go list`
 
 # install mangal to the ~/go/bin
 install:
-    go install .
+    go install -ldflags "-s -w" .
 
 # generate and install mangal
 full: generate && install
 
 # build
 build:
-	go build .
+	go build -ldflags "-s -w" .
 
 # run tests
 test:

@@ -1,6 +1,6 @@
 module github.com/mangalorg/mangal
 
-go 1.20
+go 1.21
 
 require (
 	github.com/adrg/xdg v0.4.0
@@ -17,8 +17,8 @@ require (
 	github.com/ktr0731/go-fuzzyfinder v0.7.0
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/mangalorg/gopher-luadoc v0.2.2
-	github.com/mangalorg/libmangal v0.7.0
-	github.com/mangalorg/luaprovider v0.5.2
+	github.com/mangalorg/libmangal v0.8.0
+	github.com/mangalorg/luaprovider v0.6.0
 	github.com/muesli/reflow v0.3.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/philippgille/gokv v0.6.0

@@ -50,7 +50,7 @@ func errorf(cmd *cobra.Command, format string, a ...any) {
 func Execute() {
 	var root *cobra.Command
 
-	switch lo.Must(config.ModeString(config.Config.CLI.DefaultMode.Get())) {
+	switch lo.Must(config.ModeString(config.Config.CLI.Mode.Default.Get())) {
 	case config.ModeNone:
 		root = rootCmd
 	case config.ModeTUI:
@@ -76,18 +76,20 @@ func Execute() {
 		Title: "Mode",
 	})
 
-	cc.Init(&cc.Config{
-		RootCmd:         root,
-		Headings:        cc.HiCyan + cc.Bold + cc.Underline,
-		Commands:        cc.HiYellow + cc.Bold,
-		Example:         cc.Italic,
-		ExecName:        cc.Bold,
-		Flags:           cc.Bold,
-		FlagsDataType:   cc.Italic + cc.HiBlue,
-		Aliases:         cc.Italic,
-		NoExtraNewlines: true,
-		NoBottomNewline: true,
-	})
+	if config.Config.CLI.ColoredHelp.Get() {
+		cc.Init(&cc.Config{
+			RootCmd:         root,
+			Headings:        cc.HiCyan + cc.Bold + cc.Underline,
+			Commands:        cc.HiYellow + cc.Bold,
+			Example:         cc.Italic,
+			ExecName:        cc.Bold,
+			Flags:           cc.Bold,
+			FlagsDataType:   cc.Italic + cc.HiBlue,
+			Aliases:         cc.Italic,
+			NoExtraNewlines: true,
+			NoBottomNewline: true,
+		})
+	}
 
 	if err := root.Execute(); err != nil {
 		errorf(root, err.Error())
