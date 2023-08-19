@@ -6,12 +6,11 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/afs"
 	"github.com/mangalorg/mangal/color"
 	"github.com/mangalorg/mangal/config"
-	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/path"
-	"github.com/samber/lo"
 	"github.com/zyedidia/generic/set"
 )
 
@@ -94,7 +93,7 @@ func (i *Item) Path(format libmangal.Format) string {
 }
 
 func (i *Item) IsRecent() bool {
-	format := lo.Must(libmangal.FormatString(config.Config.Read.Format.Get()))
+	format := config.Config.Read.Format.Get()
 	chapter := i.chapter
 	volume := chapter.Volume()
 	manga := volume.Manga()
@@ -106,7 +105,7 @@ func (i *Item) IsRecent() bool {
 		i.client.ComputeChapterFilename(chapter, format),
 	)
 
-	exists, err := fs.Afero.Exists(tempPath)
+	exists, err := afs.Afero.Exists(tempPath)
 	if err != nil {
 		return false
 	}
@@ -120,7 +119,7 @@ func (i *Item) DownloadedFormats() set.Set[libmangal.Format] {
 	for _, format := range libmangal.FormatValues() {
 		path := i.Path(format)
 
-		exists, err := fs.Afero.Exists(path)
+		exists, err := afs.Afero.Exists(path)
 		if err != nil {
 			continue
 		}

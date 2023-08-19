@@ -7,7 +7,6 @@ import (
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/color"
 	"github.com/mangalorg/mangal/config"
-	"github.com/samber/lo"
 )
 
 type Item struct {
@@ -47,20 +46,19 @@ func (i Item) Description() string {
 }
 
 func (i Item) IsSelectedForDownloading() bool {
-	format := lo.Must(libmangal.FormatString(config.Config.Download.Format.Get()))
+	format := config.Config.Download.Format.Get()
 
 	return i.format == format
 }
 
 func (i Item) IsSelectedForReading() bool {
-	format := lo.Must(libmangal.FormatString(config.Config.Read.Format.Get()))
+	format := config.Config.Read.Format.Get()
 
 	return i.format == format
 }
 
 func (i Item) SelectForDownloading() error {
-	err := config.Set(config.Config.Download.Format.Key(), i.format.String())
-	if err != nil {
+	if err := config.Config.Download.Format.Set(i.format); err != nil {
 		return err
 	}
 
@@ -68,8 +66,7 @@ func (i Item) SelectForDownloading() error {
 }
 
 func (i Item) SelectForReading() error {
-	err := config.Set(config.Config.Read.Format.Key(), i.format.String())
-	if err != nil {
+	if err := config.Config.Read.Format.Set(i.format); err != nil {
 		return err
 	}
 

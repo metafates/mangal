@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/afs"
 	"github.com/mangalorg/mangal/cache/bbolt"
-	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
 	"github.com/philippgille/gokv"
 	"github.com/philippgille/gokv/encoding"
@@ -18,7 +18,7 @@ var Client = newAnilist()
 func newAnilist() *libmangal.Anilist {
 	newPersistentStore := func(name string, ttl time.Duration) (gokv.Store, error) {
 		dir := filepath.Join(path.CacheDir(), "anilist")
-		if err := fs.Afero.MkdirAll(dir, 0755); err != nil {
+		if err := afs.Afero.MkdirAll(dir, 0755); err != nil {
 			return nil, err
 		}
 

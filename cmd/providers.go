@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/path"
+	"github.com/mangalorg/mangal/provider/info"
 	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/spf13/cobra"
 )
@@ -83,13 +86,48 @@ var providersRmCmd = &cobra.Command{
 	Use:   "rm [tags]",
 	Short: "Remove provider",
 	Args:  cobra.MinimumNArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		for _, tag := range args {
 			if err := manager.Remove(tag); err != nil {
-				return err
+				errorf(cmd, err.Error())
 			}
 		}
+	},
+}
 
-		return nil
+var providersNewArgs = struct {
+	Dir string
+}{}
+
+func init() {
+	providersCmd.AddCommand(providersNewCmd)
+
+	providersNewCmd.Flags().StringVarP(&providersNewArgs.Dir, "dir", "d", path.ProvidersDir(), "directory inside which create a new provider")
+
+	providersNewCmd.MarkFlagDirname("dir")
+}
+
+var providersNewCmd = &cobra.Command{
+	Use:   "new",
+	Short: "Create new provider",
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		options := manager.NewOptions{
+			Dir: providersNewArgs.Dir,
+			Info: info.Info{
+				Provider: libmangal.ProviderInfo{
+					ID:          "test",
+					Name:        "test",
+					Version:     "0.1.0",
+					Description: "Lorem ipsum",
+					Website:     "example.com",
+				},
+				Type: info.TypeLua,
+			},
+		}
+
+		if err := manager.New(options); err != nil {
+			errorf(cmd, err.Error())
+		}
 	},
 }

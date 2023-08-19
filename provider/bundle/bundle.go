@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 
 	"github.com/mangalorg/libmangal"
-	"github.com/mangalorg/mangal/fs"
+	"github.com/mangalorg/mangal/afs"
 	"github.com/mangalorg/mangal/provider/info"
 	"github.com/mangalorg/mangal/provider/lua"
 )
 
 func Loaders(dir string) ([]libmangal.ProviderLoader, error) {
-	dirEntries, err := fs.Afero.ReadDir(dir)
+	dirEntries, err := afs.Afero.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func Loaders(dir string) ([]libmangal.ProviderLoader, error) {
 
 		dirEntryPath := filepath.Join(dir, dirEntry.Name())
 
-		isProvider, err := fs.Afero.Exists(filepath.Join(dirEntryPath, info.Filename))
+		isProvider, err := afs.Afero.Exists(filepath.Join(dirEntryPath, info.Filename))
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +51,7 @@ func singletone(loader libmangal.ProviderLoader) []libmangal.ProviderLoader {
 }
 
 func getLoaders(dir string) ([]libmangal.ProviderLoader, error) {
-	infoFile, err := fs.Afero.OpenFile(
+	infoFile, err := afs.Afero.OpenFile(
 		filepath.Join(dir, info.Filename),
 		os.O_RDONLY,
 		0755,
@@ -71,7 +71,7 @@ func getLoaders(dir string) ([]libmangal.ProviderLoader, error) {
 
 	switch providerInfo.Type {
 	case info.TypeLua:
-		loader, err := lua.NewLoader(providerInfo.Info, dir)
+		loader, err := lua.NewLoader(providerInfo.Provider, dir)
 		if err != nil {
 			return nil, err
 		}

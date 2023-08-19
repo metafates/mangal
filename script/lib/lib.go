@@ -4,7 +4,7 @@ import (
 	luadoc "github.com/mangalorg/gopher-luadoc"
 	"github.com/mangalorg/libmangal"
 	luaprovidersdk "github.com/mangalorg/luaprovider/lib"
-	"github.com/mangalorg/mangal/fs"
+	"github.com/mangalorg/mangal/afs"
 	"github.com/mangalorg/mangal/meta"
 	"github.com/mangalorg/mangal/script/lib/client"
 	"github.com/mangalorg/mangal/script/lib/json"
@@ -21,7 +21,7 @@ type Options struct {
 
 func Lib(state *lua.LState, options Options) *luadoc.Lib {
 	SDKOptions := luaprovidersdk.DefaultOptions()
-	SDKOptions.FS = fs.Afero.Fs
+	SDKOptions.FS = afs.Afero.Fs
 
 	lib := &luadoc.Lib{
 		Name:        libName,

@@ -50,7 +50,7 @@ func errorf(cmd *cobra.Command, format string, a ...any) {
 func Execute() {
 	var root *cobra.Command
 
-	switch lo.Must(config.ModeString(config.Config.CLI.Mode.Default.Get())) {
+	switch config.Config.CLI.Mode.Default.Get() {
 	case config.ModeNone:
 		root = rootCmd
 	case config.ModeTUI:

@@ -1,8 +1,9 @@
 package path
 
 import (
-	"github.com/mangalorg/mangal/fs"
 	"log"
+
+	"github.com/mangalorg/mangal/afs"
 )
 
 const (
@@ -11,7 +12,7 @@ const (
 )
 
 func createDirIfAbsent(path string) {
-	exists, err := fs.Afero.Exists(path)
+	exists, err := afs.Afero.Exists(path)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -21,7 +22,7 @@ func createDirIfAbsent(path string) {
 		return
 	}
 
-	if err := fs.Afero.MkdirAll(path, permDir); err != nil {
+	if err := afs.Afero.MkdirAll(path, permDir); err != nil {
 		log.Fatal(err)
 	}
 

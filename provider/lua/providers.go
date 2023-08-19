@@ -9,9 +9,9 @@ import (
 
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/luaprovider"
+	"github.com/mangalorg/mangal/afs"
 	"github.com/mangalorg/mangal/cache/bbolt"
 	"github.com/mangalorg/mangal/config"
-	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/path"
 	"github.com/philippgille/gokv"
 	"github.com/philippgille/gokv/encoding"
@@ -23,7 +23,7 @@ const (
 
 func NewLoader(info libmangal.ProviderInfo, dir string) (libmangal.ProviderLoader, error) {
 	providerMainFilePath := filepath.Join(dir, mainLua)
-	exists, err := fs.Afero.Exists(providerMainFilePath)
+	exists, err := afs.Afero.Exists(providerMainFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func NewLoader(info libmangal.ProviderInfo, dir string) (libmangal.ProviderLoade
 		return nil, fmt.Errorf("%s is missing", providerMainFilePath)
 	}
 
-	providerMainFileContents, err := fs.Afero.ReadFile(providerMainFilePath)
+	providerMainFileContents, err := afs.Afero.ReadFile(providerMainFilePath)
 	if err != nil {
 		return nil, err
 	}

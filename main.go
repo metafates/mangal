@@ -9,6 +9,7 @@ import (
 func main() {
 	if err := config.Load(); err != nil {
 		log.L.Fatal().Err(err).Msg("failed to load config")
+		panic(err)
 	}
 
 	cmd.Execute()

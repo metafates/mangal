@@ -18,9 +18,6 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - -X 'github.com/metafates/mangal/constant.BuiltAt={{ .Date }}'
-      - -X 'github.com/metafates/mangal/constant.BuiltBy={{ .Env.USER }}'
-      - -X 'github.com/metafates/mangal/constant.Revision={{ .ShortCommit }}'
       - -s
       - -w
 

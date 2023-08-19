@@ -4,191 +4,125 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/adrg/xdg"
 	"github.com/mangalorg/libmangal"
 	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/nametemplate/util"
 )
 
-type config struct {
-	Icons     field[string]
-	CLI       configCLI
-	Read      configRead
-	Download  configDownload
-	TUI       configTUI
-	Providers configProviders
-}
-
-type configCLI struct {
-	ColoredHelp field[bool]
-	Mode        configCLIMode
-}
-
-type configCLIMode struct {
-	Default field[string]
-}
-
-type configRead struct {
-	Format         field[string]
-	History        configReadHistory
-	DownloadOnRead field[bool]
-}
-
-type configReadHistory struct {
-	Anilist field[bool]
-	Local   field[bool]
-}
-
-type configDownload struct {
-	Format       field[string]
-	Path         field[string]
-	Strict       field[bool]
-	SkipIfExists field[bool]
-	Manga        configDownloadManga
-	Volume       configDownloadVolume
-	Chapter      configDownloadChapter
-	Metadata     configDownloadMetadata
-}
-
-type configDownloadManga struct {
-	CreateDir     field[bool]
-	Cover, Banner field[bool]
-	NameTemplate  field[string]
-}
-
-type configDownloadVolume struct {
-	CreateDir    field[bool]
-	NameTemplate field[string]
-}
-
-type configDownloadChapter struct {
-	NameTemplate field[string]
-}
-
-type configDownloadMetadata struct {
-	ComicInfoXML field[bool]
-	SeriesJSON   field[bool]
-}
-
-type configTUI struct {
-	ExpandSingleVolume field[bool]
-}
-
-type configProviders struct {
-	Cache configProvidersCache
-}
-
-type configProvidersCache struct {
-	TTL field[string]
-}
-
 var Config = config{
-	Icons: register(field[string]{
-		key:          "icons",
-		defaultValue: icon.TypeASCII.String(),
-		description:  "Icon format to use",
-		init: func(s string) error {
-			t, err := icon.TypeString(s)
-			if err != nil {
-				return err
-			}
-
-			icon.SetType(t)
-			return nil
+	Icons: reg(Field[string, icon.Type]{
+		Key:         "icons",
+		Default:     icon.TypeASCII,
+		Description: "Icon format to use",
+		Unmarshal: func(s string) (icon.Type, error) {
+			return icon.TypeString(s)
+		},
+		Marshal: func(i icon.Type) (string, error) {
+			return i.String(), nil
 		},
 	}),
 	CLI: configCLI{
-		ColoredHelp: register(field[bool]{
-			key:          "cli.colored_help",
-			defaultValue: true,
-			description:  "Enable colors in cli help",
+		ColoredHelp: reg(Field[bool, bool]{
+			Key:         "cli.colored_help",
+			Default:     true,
+			Description: "Enable colors in cli help",
 		}),
 		Mode: configCLIMode{
-			Default: register(field[string]{
-				key:          "cli.mode.default",
-				defaultValue: ModeTUI.String(),
-				description:  "Default mode to use when no subcommand is given",
-				init: func(s string) error {
-					_, err := ModeString(s)
-					return err
+			Default: reg(Field[string, Mode]{
+				Key:         "cli.mode.default",
+				Default:     ModeTUI,
+				Description: "Default mode to use when no subcommand is given",
+				Unmarshal: func(s string) (Mode, error) {
+					return ModeString(s)
+				},
+				Marshal: func(mode Mode) (string, error) {
+					return mode.String(), nil
 				},
 			}),
 		},
 	},
 	Read: configRead{
-		Format: register(field[string]{
-			key:          "read.format",
-			defaultValue: libmangal.FormatPDF.String(),
-			description:  "Format to read chapters in",
-			init: func(s string) error {
-				_, err := libmangal.FormatString(s)
-				return err
+		Format: reg(Field[string, libmangal.Format]{
+			Key:         "read.format",
+			Default:     libmangal.FormatPDF,
+			Description: "Format to read chapters in",
+			Unmarshal: func(s string) (libmangal.Format, error) {
+				return libmangal.FormatString(s)
+			},
+			Marshal: func(format libmangal.Format) (string, error) {
+				return format.String(), nil
 			},
 		}),
 		History: configReadHistory{
-			Anilist: register(field[bool]{
-				key:          "read.history.anilist",
-				defaultValue: true,
-				description:  "Sync to Anilist reading history if logged in.",
+			Anilist: reg(Field[bool, bool]{
+				Key:         "read.history.anilist",
+				Default:     true,
+				Description: "Sync to Anilist reading history if logged in.",
 			}),
-			Local: register(field[bool]{
-				key:          "read.history.local",
-				defaultValue: true,
-				description:  "Save to local history",
+			Local: reg(Field[bool, bool]{
+				Key:         "read.history.local",
+				Default:     true,
+				Description: "Save to local history",
 			}),
 		},
-		DownloadOnRead: register(field[bool]{
-			key:          "read.download_on_read",
-			defaultValue: false,
-			description:  "Download chapter to the default directory when opening for reading",
+		DownloadOnRead: reg(Field[bool, bool]{
+			Key:         "read.download_on_read",
+			Default:     false,
+			Description: "Download chapter to the default directory when opening for reading",
 		}),
 	},
 	Download: configDownload{
-		Path: register(field[string]{
-			key:          "download.path",
-			defaultValue: ".",
-			description:  "Path where chapters will be downloaded",
-			transform:    expandPath,
-		}),
-		Format: register(field[string]{
-			key:          "download.format",
-			defaultValue: libmangal.FormatPDF.String(),
-			description:  "Format to download chapters in",
-			init: func(s string) error {
-				_, err := libmangal.FormatString(s)
-				return err
+		Path: reg(Field[string, string]{
+			Key:         "download.path",
+			Default:     xdg.UserDirs.Download,
+			Description: "Path where chapters will be downloaded",
+			Unmarshal: func(s string) (string, error) {
+				return expandPath(s)
 			},
 		}),
-		Strict: register(field[bool]{
-			key:          "download.strict",
-			defaultValue: false,
-			description:  "If during metadata/banner/cover creation error occurs downloader will return it immediately and chapter won't be downloaded",
+		Format: reg(Field[string, libmangal.Format]{
+			Key:         "download.format",
+			Default:     libmangal.FormatPDF,
+			Description: "Format to download chapters in",
+			Unmarshal: func(s string) (libmangal.Format, error) {
+				return libmangal.FormatString(s)
+			},
+			Marshal: func(format libmangal.Format) (string, error) {
+				return format.String(), nil
+			},
 		}),
-		SkipIfExists: register(field[bool]{
-			key:          "download.skip_if_exists",
-			defaultValue: true,
-			description:  "Skip downloading chapter if its already downloaded (exists at path). Metadata will still be created if needed.",
+		Strict: reg(Field[bool, bool]{
+			Key:         "download.strict",
+			Default:     false,
+			Description: "If during metadata/banner/cover creation error occurs downloader will return it immediately and chapter won't be downloaded",
+		}),
+		SkipIfExists: reg(Field[bool, bool]{
+			Key:         "download.skip_if_exists",
+			Default:     true,
+			Description: "Skip downloading chapter if its already downloaded (exists at path). Metadata will still be created if needed.",
 		}),
 		Manga: configDownloadManga{
-			CreateDir: register(field[bool]{
-				key:          "download.manga.create_dir",
-				defaultValue: true,
-				description:  "Create manga directory",
+			CreateDir: reg(Field[bool, bool]{
+				Key:         "download.manga.create_dir",
+				Default:     true,
+				Description: "Create manga directory",
 			}),
-			Cover: register(field[bool]{
-				key:          "download.manga.cover",
-				defaultValue: false,
-				description:  "Download manga cover",
+			Cover: reg(Field[bool, bool]{
+				Key:         "download.manga.cover",
+				Default:     false,
+				Description: "Download manga cover",
 			}),
-			Banner: register(field[bool]{
-				key:          "download.manga.banner",
-				defaultValue: false,
-				description:  "Download manga banner",
+			Banner: reg(Field[bool, bool]{
+				Key:         "download.manga.banner",
+				Default:     false,
+				Description: "Download manga banner",
 			}),
-			NameTemplate: register(field[string]{
-				key:          "download.manga.name_template",
-				defaultValue: `{{ .Title | sanitize }}`,
-				description:  "Template to use for naming downloaded mangas",
-				init: func(s string) error {
+			NameTemplate: reg(Field[string, string]{
+				Key:         "download.manga.name_template",
+				Default:     `{{ .Title | sanitize }}`,
+				Description: "Template to use for naming downloaded mangas",
+				Validate: func(s string) error {
 					_, err := template.
 						New("").
 						Funcs(util.FuncMap).
@@ -199,16 +133,16 @@ var Config = config{
 			}),
 		},
 		Volume: configDownloadVolume{
-			CreateDir: register(field[bool]{
-				key:          "download.volume.create_dir",
-				defaultValue: false,
-				description:  "Create volume directory",
+			CreateDir: reg(Field[bool, bool]{
+				Key:         "download.volume.create_dir",
+				Default:     false,
+				Description: "Create volume directory",
 			}),
-			NameTemplate: register(field[string]{
-				key:          "download.volume.name_template",
-				defaultValue: `{{ printf "Vol. %d" .Number | sanitize }}`,
-				description:  "Template to use for naming downloaded volumes",
-				init: func(s string) error {
+			NameTemplate: reg(Field[string, string]{
+				Key:         "download.volume.name_template",
+				Default:     `{{ printf "Vol. %d" .Number | sanitize }}`,
+				Description: "Template to use for naming downloaded volumes",
+				Validate: func(s string) error {
 					_, err := template.
 						New("").
 						Funcs(util.FuncMap).
@@ -219,11 +153,11 @@ var Config = config{
 			}),
 		},
 		Chapter: configDownloadChapter{
-			NameTemplate: register(field[string]{
-				key:          "download.chapter.name_template",
-				defaultValue: `{{ printf "[%06.1f] %s" .Number .Title | sanitize }}`,
-				description:  "Template to use for naming downloaded chapters",
-				init: func(s string) error {
+			NameTemplate: reg(Field[string, string]{
+				Key:         "download.chapter.name_template",
+				Default:     `{{ printf "[%06.1f] %s" .Number .Title | sanitize }}`,
+				Description: "Template to use for naming downloaded chapters",
+				Validate: func(s string) error {
 					_, err := template.
 						New("").
 						Funcs(util.FuncMap).
@@ -234,36 +168,43 @@ var Config = config{
 			}),
 		},
 		Metadata: configDownloadMetadata{
-			ComicInfoXML: register(field[bool]{
-				key:          "download.metadata.comicinfo_xml",
-				defaultValue: false,
-				description:  "Generate `ComicInfo.xml` file",
+			ComicInfoXML: reg(Field[bool, bool]{
+				Key:         "download.metadata.comicinfo_xml",
+				Default:     false,
+				Description: "Generate `ComicInfo.xml` file",
 			}),
-			SeriesJSON: register(field[bool]{
-				key:          "download.metadata.series_json",
-				defaultValue: false,
-				description:  "Generate `series.json` file",
+			SeriesJSON: reg(Field[bool, bool]{
+				Key:         "download.metadata.series_json",
+				Default:     false,
+				Description: "Generate `series.json` file",
 			}),
 		},
 	},
 	TUI: configTUI{
-		ExpandSingleVolume: register(field[bool]{
-			key:          "tui.expand_single_volume",
-			defaultValue: true,
-			description:  "Skip selecting volume if there's only one",
+		ExpandSingleVolume: reg(Field[bool, bool]{
+			Key:         "tui.expand_single_volume",
+			Default:     true,
+			Description: "Skip selecting volume if there's only one",
 		}),
 	},
 	Providers: configProviders{
 		Cache: configProvidersCache{
-			TTL: register(field[string]{
-				key:          "providers.cache.ttl",
-				defaultValue: "24h",
-				description:  `Time to live. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".`,
-				init: func(s string) error {
+			TTL: reg(Field[string, string]{
+				Key:         "providers.cache.ttl",
+				Default:     "24h",
+				Description: `Time to live. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".`,
+				Validate: func(s string) error {
 					_, err := time.ParseDuration(s)
 					return err
 				},
 			}),
 		},
+	},
+	Library: configLibrary{
+		Path: reg(Field[string, string]{
+			Key:         "library.path",
+			Default:     "",
+			Description: "Path to the manga library. Empty string will fallback to the download.path",
+		}),
 	},
 }

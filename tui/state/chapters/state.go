@@ -19,7 +19,6 @@ import (
 	"github.com/mangalorg/mangal/tui/state/formats"
 	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
-	"github.com/samber/lo"
 	"github.com/zyedidia/generic/set"
 	"golang.org/x/exp/slices"
 )
@@ -60,20 +59,10 @@ func (s *State) Subtitle() string {
 		subtitle.WriteString(" selected")
 	}
 
-	downloadFormat, err := libmangal.FormatString(config.Config.Download.Format.Get())
-	if err != nil {
-		return subtitle.String()
-	}
-
-	readFormat, err := libmangal.FormatString(config.Config.Read.Format.Get())
-	if err != nil {
-		return subtitle.String()
-	}
-
 	subtitle.WriteString(". Download ")
-	subtitle.WriteString(downloadFormat.String())
+	subtitle.WriteString(config.Config.Download.Format.Get().String())
 	subtitle.WriteString(" & Read ")
-	subtitle.WriteString(readFormat.String())
+	subtitle.WriteString(config.Config.Read.Format.Get().String())
 
 	return subtitle.String()
 }
@@ -131,10 +120,8 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				return formats.New()
 			}
 		case key.Matches(msg, s.keyMap.Download) || (s.selected.Size() > 0 && key.Matches(msg, s.keyMap.Confirm)):
-			format := lo.Must(libmangal.FormatString(config.Config.Download.Format.Get()))
-
 			options := libmangal.DownloadOptions{
-				Format:              format,
+				Format:              config.Config.Download.Format.Get(),
 				Directory:           config.Config.Download.Path.Get(),
 				CreateVolumeDir:     config.Config.Download.Volume.CreateDir.Get(),
 				CreateMangaDir:      config.Config.Download.Manga.CreateDir.Get(),
@@ -181,7 +168,7 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 				)
 			}
 		case key.Matches(msg, s.keyMap.Read) || (s.selected.Size() == 0 && key.Matches(msg, s.keyMap.Confirm)):
-			format := lo.Must(libmangal.FormatString(config.Config.Read.Format.Get()))
+			format := config.Config.Read.Format.Get()
 
 			// TODO change this
 			readOptions := libmangal.ReadOptions{

@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/mangalorg/libmangal"
+	"github.com/mangalorg/mangal/afs"
 	"github.com/mangalorg/mangal/anilist"
 	"github.com/mangalorg/mangal/client"
-	"github.com/mangalorg/mangal/fs"
 	"github.com/mangalorg/mangal/icon"
 	"github.com/mangalorg/mangal/provider/manager"
 	"github.com/mangalorg/mangal/script"
@@ -54,7 +54,7 @@ var scriptCmd = &cobra.Command{
 
 		switch {
 		case cmd.Flag("file").Changed:
-			file, err := fs.Afero.OpenFile(
+			file, err := afs.Afero.OpenFile(
 				scriptArgs.File,
 				os.O_RDONLY,
 				0755,
@@ -120,7 +120,7 @@ var scriptDocCmd = &cobra.Command{
 
 		filename := fmt.Sprint(l.Name, ".lua")
 
-		err := fs.Afero.WriteFile(filename, []byte(l.LuaDoc()), 0755)
+		err := afs.Afero.WriteFile(filename, []byte(l.LuaDoc()), 0755)
 
 		if err != nil {
 			return err

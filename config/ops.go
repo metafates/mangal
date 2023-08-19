@@ -22,12 +22,10 @@ func Keys() []string {
 }
 
 func Write() error {
-	err := viper.WriteConfig()
-
-	switch err.(type) {
-	case viper.ConfigFileNotFoundError:
-		return viper.SafeWriteConfig()
+	switch viper.WriteConfig().(type) {
+	case nil, viper.ConfigFileNotFoundError:
+		return nil
 	default:
-		return err
+		return viper.SafeWriteConfig()
 	}
 }

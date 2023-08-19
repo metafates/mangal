@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mangalorg/mangal/fs"
+	"github.com/mangalorg/mangal/afs"
 	"github.com/mangalorg/mangal/path"
 	"github.com/rs/zerolog"
 	"github.com/samber/lo"
@@ -19,7 +19,7 @@ func newLogger() (*zerolog.Logger, error) {
 
 	logPath := filepath.Join(path.LogDir(), fmt.Sprint(today, ".log"))
 
-	file, err := fs.Afero.OpenFile(logPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+	file, err := afs.Afero.OpenFile(logPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
 		return nil, err
 	}

@@ -1,64 +1,97 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"reflect"
 
-var Fields []Field
+	"github.com/spf13/viper"
+)
 
-func register[T any](f field[T]) field[T] {
-	Fields = append(Fields, &f)
-	return f
+var Fields = make(map[string]entry)
+
+type entry struct {
+	Key         string
+	Description string
+	Default     any
+	Marshal     func(any) (any, error)
+	Unmarshal   func(any) (any, error)
+	Validate    func(any) error
+	SetValue    func(any) error
 }
 
-type Field interface {
-	Key() string
-	Value() any
-	Default() any
-	Description() string
-
-	Transform() (any, error)
-	Init() error
+type registered[Raw, Value any] struct {
+	Field[Raw, Value]
+	value Value
 }
 
-type field[T any] struct {
-	key          string
-	defaultValue T
-	description  string
-	transform    func(T) (T, error)
-	init         func(T) error
+func (r *registered[Raw, Value]) Get() Value {
+	return r.value
 }
 
-func (f field[T]) Default() any {
-	return f.defaultValue
-}
-
-func (f field[T]) Description() string {
-	return f.description
-}
-
-func (f field[T]) Key() string {
-	return f.key
-}
-
-func (f field[T]) Value() any {
-	return viper.Get(f.key)
-}
-
-func (f field[T]) Get() T {
-	return f.Value().(T)
-}
-
-func (f field[T]) Init() error {
-	if f.init == nil {
-		return nil
+func (r *registered[Raw, Value]) Set(value Value) error {
+	marshalled, err := r.Marshal(value)
+	if err != nil {
+		return err
 	}
 
-	return f.init(f.Get())
+	r.value = value
+	viper.Set(r.Key, marshalled)
+	return nil
 }
 
-func (f field[T]) Transform() (any, error) {
-	if f.transform == nil {
-		return f.Get(), nil
+func reg[Raw, Value any](field Field[Raw, Value]) *registered[Raw, Value] {
+	if field.Marshal == nil {
+		field.Marshal = func(value Value) (raw Raw, err error) {
+			return reflect.
+				ValueOf(value).
+				Convert(reflect.ValueOf(raw).Type()).
+				Interface().(Raw), nil
+		}
+	}
+	if field.Unmarshal == nil {
+		field.Unmarshal = func(raw Raw) (value Value, err error) {
+			return reflect.
+				ValueOf(raw).
+				Convert(reflect.ValueOf(value).Type()).
+				Interface().(Value), nil
+		}
+	}
+	if field.Validate == nil {
+		field.Validate = func(Value) error {
+			return nil
+		}
 	}
 
-	return f.transform(f.Get())
+	r := &registered[Raw, Value]{
+		Field: field,
+		value: field.Default,
+	}
+
+	Fields[field.Key] = entry{
+		Key:         field.Key,
+		Description: field.Description,
+		Default:     field.Default,
+		SetValue: func(a any) error {
+			return r.Set(a.(Value))
+		},
+		Marshal: func(a any) (any, error) {
+			return field.Marshal(a.(Value))
+		},
+		Unmarshal: func(a any) (any, error) {
+			return field.Unmarshal(a.(Raw))
+		},
+		Validate: func(a any) error {
+			return field.Validate(a.(Value))
+		},
+	}
+
+	return r
+}
+
+type Field[Raw, Value any] struct {
+	Key         string
+	Description string
+	Default     Value
+	Validate    func(Value) error
+	Unmarshal   func(Raw) (Value, error)
+	Marshal     func(Value) (Raw, error)
 }

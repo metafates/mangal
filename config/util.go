@@ -2,8 +2,9 @@ package config
 
 import (
 	"errors"
-	"github.com/adrg/xdg"
 	"path/filepath"
+
+	"github.com/adrg/xdg"
 )
 
 // expandPath expands the path to include the home directory if the path
