@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"text/template"
 
+	"github.com/kballard/go-shellquote"
 	"github.com/mangalorg/mangal/config"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
@@ -19,8 +22,14 @@ var configCmd = &cobra.Command{
 	Short: "Manage configuration",
 }
 
+var configInfoArgs = struct {
+	JSON bool
+}{}
+
 func init() {
 	configCmd.AddCommand(configInfoCmd)
+
+	configInfoCmd.Flags().BoolVarP(&configInfoArgs.JSON, "json", "j", false, "JSON output")
 }
 
 var configInfoCmd = &cobra.Command{
@@ -28,22 +37,47 @@ var configInfoCmd = &cobra.Command{
 	Short: "Show configuration information",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		fieldTemplate := template.Must(template.New("field").Parse(`
-{{.Description}}
+		if configInfoArgs.JSON {
+			// TODO
+			panic("unimplemented")
+		}
 
-Key: {{.Key}}
-Value: {{.Value}}
-Default: {{.Default}}
+		fieldTemplate := template.Must(template.New("field").Funcs(map[string]any{
+			"get": func(key string) any {
+				return config.Get(key)
+			},
+		}).Parse(`
+{{ .Description }}
+
+Key: {{ .Key }}
+Value: {{ get .Key }}
+Default: {{ .Default }}
 `))
 
-		var sb strings.Builder
+		var out strings.Builder
 		for _, field := range config.Fields {
+			var sb strings.Builder
 			if err := fieldTemplate.Execute(&sb, field); err != nil {
 				errorf(cmd, err.Error())
 			}
 
-			cmd.Print(sb.String())
-			sb.Reset()
+			out.WriteString(sb.String())
+		}
+
+		// TODO: ???
+		if pager := os.Getenv("PAGER"); pager != "" {
+			cmdWithArgs, err := shellquote.Split(pager)
+			if err != nil {
+				return
+			}
+
+			pagerCmd := exec.Command(cmdWithArgs[0], cmdWithArgs[1:]...)
+			pagerCmd.Stdin = strings.NewReader(out.String())
+			if err := pagerCmd.Run(); err != nil {
+				errorf(cmd, err.Error())
+			}
+		} else {
+			cmd.Print(out.String())
 		}
 	},
 }

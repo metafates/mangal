@@ -2,13 +2,14 @@ package model
 
 import (
 	"context"
+	"strings"
+
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/log"
+	"github.com/mangalorg/mangal/log"
 	"github.com/mangalorg/mangal/tui/base"
 	"github.com/mangalorg/mangal/tui/state/errorstate"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -41,7 +42,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		log.Error(msg)
+		log.L.Err(msg).Msg("")
 
 		return m, m.pushState(errorstate.New(msg))
 	}

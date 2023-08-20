@@ -23,12 +23,12 @@ const Filename = "mangal.toml"
 
 // Info contains libmangal info about provider with mangal specific type field
 type Info struct {
-	Provider libmangal.ProviderInfo `json:"provider"`
-	Type     Type                   `json:"type"`
+	libmangal.ProviderInfo
+	Type Type `json:"type"`
 }
 
-// Parse parses info from reader
-func Parse(r io.Reader) (info Info, err error) {
+// New parses info from reader
+func New(r io.Reader) (info Info, err error) {
 	decoder := toml.NewDecoder(r)
 	decoder.Strict(true)
 	decoder.SetTagName("json")

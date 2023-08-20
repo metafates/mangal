@@ -115,7 +115,7 @@ var providersNewCmd = &cobra.Command{
 		options := manager.NewOptions{
 			Dir: providersNewArgs.Dir,
 			Info: info.Info{
-				Provider: libmangal.ProviderInfo{
+				ProviderInfo: libmangal.ProviderInfo{
 					ID:          "test",
 					Name:        "test",
 					Version:     "0.1.0",

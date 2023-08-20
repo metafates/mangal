@@ -36,6 +36,7 @@ func Add(ctx context.Context, options AddOptions) error {
 		return err
 	}
 
+	fmt.Println(tempDir)
 	_, err = git.PlainCloneContext(ctx, tempDir, false, &git.CloneOptions{
 		URL:      options.URL.String(),
 		Progress: os.Stdout, // TODO: change this
@@ -45,20 +46,21 @@ func Add(ctx context.Context, options AddOptions) error {
 		return err
 	}
 
-	infoFilePath := filepath.Join(tempDir, info.Filename)
-
-	infoFile, err := afs.Afero.OpenFile(infoFilePath, os.O_RDONLY, 0755)
+	infoFile, err := afs.Afero.OpenFile(filepath.Join(tempDir, info.Filename), os.O_RDONLY, 0755)
 	if err != nil {
 		return err
 	}
 	defer infoFile.Close()
 
-	providerInfo, err := info.Parse(infoFile)
+	providerInfo, err := info.New(infoFile)
 	if err != nil {
 		return err
 	}
 
-	ID := providerInfo.Provider.ID
+	ID := providerInfo.ID
+	if ID == "" {
+		return fmt.Errorf("ID is empty")
+	}
 
 	loaders, err := Loaders()
 	if err != nil {
@@ -73,7 +75,9 @@ func Add(ctx context.Context, options AddOptions) error {
 		return fmt.Errorf("provider with ID %q already exists", ID)
 	}
 
-	return afs.Afero.Rename(tempDir, filepath.Join(path.ProvidersDir(), ID))
+	target := filepath.Join(path.ProvidersDir(), ID)
+	fmt.Println(target)
+	return afs.Afero.Rename(tempDir, target)
 }
 
 func Update(ctx context.Context, options UpdateOptions) error {
@@ -127,7 +131,7 @@ func New(options NewOptions) error {
 	}
 
 	dir := options.Dir
-	providerPath := filepath.Join(dir, options.Info.Provider.ID)
+	providerPath := filepath.Join(dir, options.Info.ID)
 
 	files := afero.Afero{Fs: afero.NewMemMapFs()}
 	switch options.Type {

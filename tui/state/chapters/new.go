@@ -33,6 +33,7 @@ func New(client *libmangal.Client, volume libmangal.Volume, chapters []libmangal
 			SelectAll:    util.Bind("select all", "a"),
 			Toggle:       util.Bind("toggle", " "),
 			Read:         util.Bind("read", "r"),
+			OpenURL:      util.Bind("open url", "o"),
 			Anilist:      util.Bind("anilist", "A"),
 			Download:     util.Bind("download", "d"),
 			Confirm:      util.Bind("confirm", "enter"),

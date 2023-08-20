@@ -12,6 +12,10 @@ import (
 )
 
 func Loaders(dir string) ([]libmangal.ProviderLoader, error) {
+	return loaders("", dir)
+}
+
+func loaders(parentID, dir string) ([]libmangal.ProviderLoader, error) {
 	dirEntries, err := afs.Afero.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -35,7 +39,7 @@ func Loaders(dir string) ([]libmangal.ProviderLoader, error) {
 			continue
 		}
 
-		loaders, err := getLoaders(dirEntryPath)
+		loaders, err := getLoaders(parentID, dirEntryPath)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +54,8 @@ func singletone(loader libmangal.ProviderLoader) []libmangal.ProviderLoader {
 	return []libmangal.ProviderLoader{loader}
 }
 
-func getLoaders(dir string) ([]libmangal.ProviderLoader, error) {
+// TODO: name is confusing
+func getLoaders(parentID, dir string) ([]libmangal.ProviderLoader, error) {
 	infoFile, err := afs.Afero.OpenFile(
 		filepath.Join(dir, info.Filename),
 		os.O_RDONLY,
@@ -63,22 +68,25 @@ func getLoaders(dir string) ([]libmangal.ProviderLoader, error) {
 
 	defer infoFile.Close()
 
-	providerInfo, err := info.Parse(infoFile)
-
+	providerInfo, err := info.New(infoFile)
 	if err != nil {
 		return nil, err
 	}
 
+	if parentID != "" {
+		providerInfo.ID = fmt.Sprint(parentID, "-", providerInfo.ID)
+	}
+
 	switch providerInfo.Type {
 	case info.TypeLua:
-		loader, err := lua.NewLoader(providerInfo.Provider, dir)
+		loader, err := lua.NewLoader(providerInfo.ProviderInfo, dir)
 		if err != nil {
 			return nil, err
 		}
 
 		return singletone(loader), nil
 	case info.TypeBundle:
-		return Loaders(dir)
+		return loaders(providerInfo.ID, dir)
 	default:
 		return nil, fmt.Errorf("unkown provider type: %#v", providerInfo.Type)
 	}

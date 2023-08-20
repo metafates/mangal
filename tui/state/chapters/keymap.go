@@ -13,6 +13,7 @@ type KeyMap struct {
 	SelectAll,
 	Toggle,
 	Read,
+	OpenURL,
 	Download,
 	Anilist,
 	Confirm,
@@ -35,6 +36,6 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 		k.ShortHelp(),
 		{k.SelectAll, k.UnselectAll},
 		{k.Anilist},
-		{k.ChangeFormat},
+		{k.ChangeFormat, k.OpenURL},
 	}
 }

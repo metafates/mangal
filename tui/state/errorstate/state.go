@@ -1,7 +1,9 @@
 package errorstate
 
 import (
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mangalorg/mangal/color"
@@ -47,6 +49,18 @@ func (s *State) Resize(size base.Size) {
 }
 
 func (s *State) Update(model base.Model, msg tea.Msg) tea.Cmd {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, s.keyMap.Quit):
+			return tea.Quit
+		case key.Matches(msg, s.keyMap.CopyError):
+			return func() tea.Msg {
+				return clipboard.WriteAll(s.error.Error())
+			}
+		}
+	}
+
 	return nil
 }
 

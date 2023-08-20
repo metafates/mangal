@@ -19,6 +19,7 @@ import (
 	"github.com/mangalorg/mangal/tui/state/formats"
 	"github.com/mangalorg/mangal/tui/state/listwrapper"
 	"github.com/mangalorg/mangal/tui/state/loading"
+	"github.com/skratchdot/open-golang/open"
 	"github.com/zyedidia/generic/set"
 	"golang.org/x/exp/slices"
 )
@@ -119,6 +120,20 @@ func (s *State) Update(model base.Model, msg tea.Msg) (cmd tea.Cmd) {
 			return func() tea.Msg {
 				return formats.New()
 			}
+		case key.Matches(msg, s.keyMap.OpenURL):
+			return tea.Sequence(
+				func() tea.Msg {
+					return loading.New("opening", item.chapter.String())
+				},
+				func() tea.Msg {
+					err := open.Run(item.chapter.Info().URL)
+					if err != nil {
+						return err
+					}
+
+					return base.MsgBack{}
+				},
+			)
 		case key.Matches(msg, s.keyMap.Download) || (s.selected.Size() > 0 && key.Matches(msg, s.keyMap.Confirm)):
 			options := libmangal.DownloadOptions{
 				Format:              config.Config.Download.Format.Get(),

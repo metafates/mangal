@@ -7,12 +7,20 @@ import (
 
 var _ help.KeyMap = (*KeyMap)(nil)
 
-type KeyMap struct{}
+type KeyMap struct {
+	Quit,
+	CopyError key.Binding
+}
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return nil
+	return []key.Binding{
+		k.Quit,
+		k.CopyError,
+	}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
-	return nil
+	return [][]key.Binding{
+		k.ShortHelp(),
+	}
 }
