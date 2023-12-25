@@ -2,11 +2,12 @@ package manganato
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/metafates/mangal/provider/generic"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/metafates/mangal/provider/generic"
 )
 
 var Config = &generic.Configuration{
@@ -20,7 +21,7 @@ var Config = &generic.Configuration{
 		query = strings.TrimSpace(query)
 		query = strings.ToLower(query)
 		query = url.QueryEscape(query)
-		template := "https://manganato.com/search/story/%s"
+		template := "https://chapmanganato.to/https://manganato.com/search/story/%s"
 		return fmt.Sprintf(template, query)
 	},
 	MangaExtractor: &generic.Extractor{
