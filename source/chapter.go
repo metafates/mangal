@@ -148,11 +148,13 @@ func (c *Chapter) IsDownloaded() bool {
 
 func (c *Chapter) path(relativeTo string, createVolumeDir bool) (path string, err error) {
 	if createVolumeDir {
-		path = filepath.Join(path, util.SanitizeFilename(c.Volume))
+		path = filepath.Join(relativeTo, util.SanitizeFilename(c.Volume))
 		err = filesystem.Api().MkdirAll(path, os.ModePerm)
 		if err != nil {
 			return
 		}
+		path = filepath.Join(path, c.Filename())
+		return
 	}
 
 	path = filepath.Join(relativeTo, c.Filename())
