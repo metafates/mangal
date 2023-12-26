@@ -147,7 +147,7 @@ func (c *Chapter) IsDownloaded() bool {
 }
 
 func (c *Chapter) path(relativeTo string) (path string, err error) {
-    if c.Volume != "" && viper.GetBool(key.DownloaderCreateVolumeDir) {
+	if c.Volume != "" && viper.GetBool(key.DownloaderCreateVolumeDir) {
 		path = filepath.Join(relativeTo, util.SanitizeFilename(c.Volume))
 		err = filesystem.Api().MkdirAll(path, os.ModePerm)
 		if err != nil {
