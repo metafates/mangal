@@ -2,12 +2,11 @@ package mangapill
 
 import (
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/metafates/mangal/provider/generic"
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/PuerkitoBio/goquery"
-	"github.com/metafates/mangal/provider/generic"
 )
 
 var Config = &generic.Configuration{
