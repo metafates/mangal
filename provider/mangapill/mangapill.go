@@ -2,11 +2,12 @@ package mangapill
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/metafates/mangal/provider/generic"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/metafates/mangal/provider/generic"
 )
 
 var Config = &generic.Configuration{
@@ -16,7 +17,6 @@ var Config = &generic.Configuration{
 	ReverseChapters: true,
 	BaseURL:         "https://mangapill.com",
 	GenerateSearchURL: func(query string) string {
-		query = strings.ReplaceAll(query, " ", "+")
 		query = strings.ToLower(query)
 		query = strings.TrimSpace(query)
 		template := "https://mangapill.com/search?q=%s&type=&status="
