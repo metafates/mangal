@@ -131,6 +131,10 @@ func Run(options *Options) (err error) {
 			if err != nil {
 				log.Warn(err)
 			}
+			// free memory after downloading
+			for _, page := range chapter.Pages {
+				page.Contents = nil
+			}
 		} else {
 			err := downloader.Read(chapter, func(string) {})
 			if err != nil {
