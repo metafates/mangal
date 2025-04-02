@@ -17,6 +17,8 @@
     <img alt="Mangal 4 TUI" src="assets/tui.gif">
 </p>
 
+> [!CAUTION]
+> As of April 2025, Mangal is no longer maintained. I am incredibly grateful to everyone who used it, contributed, or gave feedback along the way - thank you! Unfortunately, I just don't have the time to keep it going right now. That said, it's open source, so you're more than welcome to fork it, build on it, or maintain your own version. I might return to it someday, but for now, I don't recommend using it as-is - running unmaintained software can introduce security risks.
 
 ## Try it!
 
